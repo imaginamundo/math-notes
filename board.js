@@ -49,7 +49,13 @@ const tests = [
   document.createElement('br'),
   document.createTextNode('5% on 100'),
   document.createElement('br'),
-  document.createTextNode('5% off 100')
+  document.createTextNode('5% off 100'),
+  document.createElement('br'),
+  document.createTextNode('50 as a % of 100'),
+  document.createElement('br'),
+  document.createTextNode('70 as a % on 20'),
+  document.createElement('br'),
+  document.createTextNode('20 as a % off 70')
 ];
 
 tests.forEach(test => board.appendChild(test));
