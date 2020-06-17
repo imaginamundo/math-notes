@@ -17,6 +17,7 @@ body {
   box-sizing: border-box;
   font-family: monospace;
   line-height: 1.65em;
+  white-space: pre-wrap;
 }
 .board p,
 .view p {
