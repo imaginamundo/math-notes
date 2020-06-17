@@ -1,4 +1,4 @@
-import parse from './parse.js';
+import parseContent from './parseContent.js';
 
 const board = document.getElementById('board');
 const view = document.getElementById('view');
@@ -6,7 +6,7 @@ board.focus();
 
 // Listener to trigger changes
 board.addEventListener('input', (event) => {
-  const content = parse(board.childNodes);
+  const content = parseContent(board.childNodes);
   view.innerHTML = '';
   content.forEach(node => view.appendChild(node));
 });

@@ -1,6 +1,6 @@
 function createWrapper(type, text) {
   const wrapper = document.createElement('span');
-  wrapper.classList.add('type');
+  wrapper.classList.add(type);
   wrapper.textContent = text;
   return wrapper;
 }
