@@ -1,11 +1,13 @@
 import updateResults from './results.js';
-import updateView from './contentEditable.js';
+import updateView from './input.js';
+import updateTotal from './total.js';
 
 document.execCommand('defaultParagraphSeparator', false, 'br');
 
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode= document.getElementById('view');
 const resultsNode = document.getElementById('results');
+const totalNode = document.getElementById('total');
 
 contentEditableNode.focus();
 
@@ -13,6 +15,7 @@ contentEditableNode.focus();
 contentEditableNode.addEventListener('input', () => {
   updateView(contentEditableNode, viewNode);
   updateResults(resultsNode);
+  updateTotal(totalNode);
 });
 
 // Only paste text

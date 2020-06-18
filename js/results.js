@@ -5,14 +5,8 @@ function updateResults(resultsNode) {
   resultsNode.innerHTML = '';
 
   results.forEach(result => {
-    let response = null;
-    try {
-      const containNumber = /\d/.test(result);
-      response = containNumber && result && mathjs.evaluate(result.trim());
-    } catch (error) {}
-
-    response && resultsNode.appendChild(document.createTextNode(response));
-
+    const isNumber = result === 0 || result;
+    isNumber && resultsNode.appendChild(document.createTextNode(result));
     const addLineBreak = result === null;
     addLineBreak && resultsNode.appendChild(document.createElement('br'));
   });
