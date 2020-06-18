@@ -7,9 +7,9 @@ function updateResults(resultsNode) {
   resultsNode.innerHTML = '';
 
   results.forEach(result => {
-    const response = mathjs.evaluate(result.trim());
+    const response = result && mathjs.evaluate(result.trim());
 
-    if (response) {
+    if (response !== null) {
       return resultsNode.appendChild(document.createTextNode(response));
     } 
     return resultsNode.appendChild(document.createElement('br'));
