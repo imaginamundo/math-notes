@@ -1,7 +1,6 @@
 import { results } from './parseContent.js';
 
 function updateTotal(totalNode) {
-  console.log(results);
   const resultsWithValues = results.filter(result => Number(result) === result);
 
   totalNode.innerHTML = ' ';

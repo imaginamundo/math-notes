@@ -8,7 +8,8 @@ function formatView(text) {
    */
 
   line.textContent = text
-    .replace(/\*/g, '×');
+    .replace(/\*/g, '×')
+    .replace(/\//g, '÷');
 
   return line;
 }
