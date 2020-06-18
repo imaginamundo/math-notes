@@ -4,8 +4,6 @@ import { results } from './parseContent.js';
 function updateResults(resultsNode) {
   resultsNode.innerHTML = '';
 
-  console.log(results);
-
   results.forEach(result => {
     let response = null;
     try {
