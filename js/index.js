@@ -99,7 +99,13 @@ const tests = [
   document.createElement('br'),
   document.createTextNode('70asa%on20'),
   document.createElement('br'),
-  document.createTextNode('20asa%off70')
+  document.createTextNode('20asa%off70'),
+  document.createElement('br'),
+  document.createElement('br'),
+  document.createTextNode('(5 + 5) * 5'),
+  document.createElement('br'),
+  document.createTextNode('20 * ((5 + 5) * 5) / variable '),
+  document.createElement('br')
 ];
 
 tests.forEach(test => contentEditableNode.appendChild(test));
