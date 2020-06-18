@@ -9,19 +9,28 @@ function parseValues(result) {
   // Add variables before each evaluate
   math.import({
     ...variables
-  });
+  }, { override: true, silent: true });
+
+  console.log(variables);
 
   // Try to get response from evaluation
   let response;
   try {
-    const containNumber = /\d/.test(result);
-    response = containNumber && result && math.evaluate(result.trim());
+    response = result && math.evaluate(result.trim());
   } catch (error) {}
 
   // Search for variables
-  const variable = findVariables();
+  const variable = findVariables(math, result);
+
+  // Clear variables
+  const cleanVariables = {};
+  Object.keys(variables).forEach(label => cleanVariables[label] = 0);
+  math.import({
+    ...cleanVariables
+  }, { override: true, silent: true });
 
   return [response, variable];
 }
 
+export { math };
 export default parseValues;

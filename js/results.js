@@ -1,12 +1,11 @@
-import * as mathjs from 'https://cdn.pika.dev/mathjs@^7.0.0';
 import { results } from './parseContent.js';
+import { math } from './parseValues.js';
 
 function updateResults(resultsNode) {
   resultsNode.innerHTML = '';
 
   results.forEach(result => {
-    const isNumber = result === 0 || result;
-    isNumber && resultsNode.appendChild(document.createTextNode(result));
+    math.isNumber(result) && resultsNode.appendChild(document.createTextNode(result));
     const addLineBreak = result === null;
     addLineBreak && resultsNode.appendChild(document.createElement('br'));
   });
