@@ -23,6 +23,7 @@ contentEditableNode.addEventListener('paste', (e) => {
 });
 
 // Add text for test porpuses
+/*
 const tests = [
   document.createTextNode('Tests'),
   document.createElement('br'),
@@ -112,3 +113,4 @@ tests.forEach(test => contentEditableNode.appendChild(test));
 
 updateView(contentEditableNode, viewNode);
 updateResults(resultsNode);
+*/

@@ -1,3 +1,4 @@
+import * as mathjs from 'https://cdn.pika.dev/mathjs@^7.0.0';
 import { results } from './parseContent.js';
 
 function updateResults(resultsNode) {
@@ -6,8 +7,10 @@ function updateResults(resultsNode) {
   resultsNode.innerHTML = '';
 
   results.forEach(result => {
-    if (result) {
-      return resultsNode.appendChild(document.createTextNode(result));
+    const response = mathjs.evaluate(result.trim());
+
+    if (response) {
+      return resultsNode.appendChild(document.createTextNode(response));
     } 
     return resultsNode.appendChild(document.createElement('br'));
   })
