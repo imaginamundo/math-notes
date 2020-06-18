@@ -1,6 +1,7 @@
-import { results } from './parseValues.js';
 import updateResults from './results.js';
 import updateView from './contentEditable.js';
+
+document.execCommand('defaultParagraphSeparator', false, 'br');
 
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode= document.getElementById('view');
@@ -11,7 +12,7 @@ contentEditableNode.focus();
 // Trigger changes
 contentEditableNode.addEventListener('input', () => {
   updateView(contentEditableNode, viewNode);
-  updateResults(resultsNode, results);
+  updateResults(resultsNode);
 });
 
 // Only paste text

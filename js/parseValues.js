@@ -1,15 +1,13 @@
 let variables = {};
-let results = [];
 
 function parseValues() {
   /**
-   * Regex to identify values (results and variables)
+   * Regex to identify variables and maths
    * 
    * Variables are written in on way:
    * variable = value
    */
-  results.push(null);
 }
 
-export { variables, results };
+export { variables };
 export default parseValues;

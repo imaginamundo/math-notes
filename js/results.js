@@ -1,8 +1,17 @@
-import { results } from './parseValues.js';
+import { results } from './parseContent.js';
 
 function updateResults(resultsNode) {
-  console.log(resultsNode);
-  console.log(results);
+  const lastHasResult = false;
+  resultsNode.innerHTML = '';
+
+  results.forEach(result => {
+    const lineBreak = document.createElement('br');
+    if (result) {
+      resultsNode.appendChild(document.createTextNode(result));
+    } else {
+      resultsNode.appendChild(lineBreak);
+    }
+  })
 }
 
 export default updateResults;

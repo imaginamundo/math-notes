@@ -2,6 +2,8 @@ body {
   margin: 0;
   background: #0A3190;
   color: #949B93;
+  font-family: monospace;
+  line-height: 1.65em;
 }
 .content-editable {
   color: transparent;
@@ -20,18 +22,18 @@ body {
   width: 100vw;
   min-height: 100vh;
   box-sizing: border-box;
-  font-family: monospace;
-  line-height: 1.65em;
   outline: none;
 }
 
 .results {
   position: absolute;
   top: 0;
+  padding: 1em;
   right: 0;
   width: 30%;
   min-height: 100vh;
   background: #FFF;
+  box-sizing: border-box;
 }
 
 .variable {
