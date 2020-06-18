@@ -5,7 +5,7 @@ Inline calculator to run on browser.
 [X] Add variables;
 [ ] Save information on browser
 [ ] Syntax highlighting
-[ ] Find a way to overwrite an created constant
-[ ] Clear constants after they are deleted
+[X] Find a way to overwrite an created constant
+[X] Clear constants after they are deleted
 [ ] Create percentage calculus
 [ ] Avoid 3 loops (parse input, print input and print response);
