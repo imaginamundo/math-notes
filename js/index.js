@@ -30,7 +30,7 @@ contentEditableNode.addEventListener('paste', (e) => {
 // Add text for test porpuses
 
 const tests = [
-  document.createTextNode('Tests'),
+  document.createTextNode('Current Features'),
   document.createElement('br'),
   document.createElement('br'),
   document.createTextNode('#Comment'),
@@ -82,6 +82,14 @@ const tests = [
   document.createTextNode('5^5'),
   document.createElement('br'),
   document.createElement('br'),
+  document.createTextNode('(5 + 5) * 5'),
+  document.createElement('br'),
+  document.createTextNode('20 * ((5 + 5) * 5) / variable '),
+  document.createElement('br'),
+  document.createElement('br'),
+  document.createTextNode('# To do'),
+  document.createElement('br'),
+  document.createElement('br'),
   document.createTextNode('5% of 100'),
   document.createElement('br'),
   document.createTextNode('5% on 100'),
@@ -107,11 +115,7 @@ const tests = [
   document.createElement('br'),
   document.createTextNode('20asa%off70'),
   document.createElement('br'),
-  document.createElement('br'),
-  document.createTextNode('(5 + 5) * 5'),
-  document.createElement('br'),
-  document.createTextNode('20 * ((5 + 5) * 5) / variable '),
-  document.createElement('br')
+  
 ];
 
 tests.forEach(test => contentEditableNode.appendChild(test));
