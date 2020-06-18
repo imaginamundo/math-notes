@@ -7,7 +7,7 @@ function findVariables(math, text = '') {
 
   console.log(evaluatedValue);
 
-  if (!evaluatedValue) return null;
+  if (!math.isNumber(evaluatedValue)) return null;
   return {
     label: label.trim(),
     value: evaluatedValue
