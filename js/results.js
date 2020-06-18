@@ -1,16 +1,15 @@
 import { results } from './parseContent.js';
 
 function updateResults(resultsNode) {
-  const lastHasResult = false;
+  console.log(results);
+
   resultsNode.innerHTML = '';
 
   results.forEach(result => {
-    const lineBreak = document.createElement('br');
     if (result) {
-      resultsNode.appendChild(document.createTextNode(result));
-    } else {
-      resultsNode.appendChild(lineBreak);
-    }
+      return resultsNode.appendChild(document.createTextNode(result));
+    } 
+    return resultsNode.appendChild(document.createElement('br'));
   })
 }
 

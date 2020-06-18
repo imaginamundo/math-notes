@@ -1,4 +1,4 @@
-import parseValues from './parseValues.js';
+// import parseValues from './parseValues.js';
 import formatView from './formatView.js';
 
 let results = [];
@@ -8,8 +8,8 @@ function parseContent(childNodes) {
 
   const nodes = [...childNodes].map(node => {
     if (node.nodeName === '#text') {
-      updatedResults.push('5');
-      parseValues(node.textContent);
+      updatedResults.push(node.textContent);
+      // parseValues(node.textContent);
       return formatView(node.textContent);
     }
     updatedResults.push(null);
