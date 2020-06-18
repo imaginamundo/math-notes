@@ -1,23 +1,21 @@
-import parseContent from './parseContent.js';
+import { results } from './parseValues.js';
+import updateResults from './results.js';
+import updateView from './contentEditable.js';
 
-const board = document.getElementById('board');
-const view = document.getElementById('view');
-board.focus();
+const contentEditableNode = document.getElementById('content-editable');
+const viewNode= document.getElementById('view');
+const resultsNode = document.getElementById('results');
 
-function updateView() {
-  const content = parseContent(board.childNodes);
-  view.innerHTML = '';
-  content.forEach(node => view.appendChild(node));
-}
+contentEditableNode.focus();
 
-// Listener to trigger changes
-board.addEventListener('input', () => {
-  updateView();
+// Trigger changes
+contentEditableNode.addEventListener('input', () => {
+  updateView(contentEditableNode, viewNode);
+  updateResults(resultsNode, results);
 });
 
-
-// Listener to paste only text
-board.addEventListener('paste', (e) => {
+// Only paste text
+contentEditableNode.addEventListener('paste', (e) => {
   e.preventDefault();
   const text = (e.originalEvent || e).clipboardData.getData('text/plain');
   document.execCommand('insertText', false, text);
@@ -103,6 +101,7 @@ const tests = [
   document.createTextNode('20asa%off70')
 ];
 
-tests.forEach(test => board.appendChild(test));
+tests.forEach(test => contentEditableNode.appendChild(test));
 
-updateView();
+updateView(contentEditableNode, viewNode);
+updateResults(resultsNode);

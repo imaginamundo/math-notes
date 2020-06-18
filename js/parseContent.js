@@ -1,9 +1,11 @@
-import formatContent from './formatContent.js';
+import parseValues from './parseValues.js';
+import formatView from './formatView.js';
 
 function parseContent(childNodes) {
   return [...childNodes].map(node => {
     if (node.nodeName === '#text') {
-      return formatContent(node.textContent);
+      parseValues(node.textContent);
+      return formatView(node.textContent);
     }
     return document.createElement('br');
   });

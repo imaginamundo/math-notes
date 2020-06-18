@@ -1,4 +1,4 @@
-function formatContent(text) {
+function formatResults(text) {
   const line = document.createElement('span');
   line.classList.add('line');
 
@@ -12,4 +12,4 @@ function formatContent(text) {
   return line;
 }
 
-export default formatContent;
+export default formatResults;
