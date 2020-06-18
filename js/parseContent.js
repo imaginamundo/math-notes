@@ -1,3 +1,4 @@
+import MathControl, { math } from './math.js';
 import parseValues from './parseValues.js';
 import formatView from './formatView.js';
 
@@ -9,14 +10,23 @@ function parseContent(childNodes) {
   const updatedVariables = {};
 
   const nodes = [...childNodes].map(node => {
+    MathControl.variables(variables);
+   
     if (node.nodeName === '#text') {
       const [ response, variable ] = parseValues(node.textContent);
 
       updatedResults.push(response);
 
-      if (variable) updatedVariables[variable.label] = variable.value;
+      if (variable) {
+        updatedVariables[variable.label] = variable.value;
+        variables = updatedVariables;
+      }
 
-      return formatView(node.textContent);
+      const viewNode = formatView(node.textContent);
+
+      MathControl.load();
+
+      return viewNode;
     }
 
     updatedResults.push(null);
@@ -25,7 +35,6 @@ function parseContent(childNodes) {
   });
 
   results = updatedResults;
-  variables = updatedVariables;
 
   return nodes;
 }

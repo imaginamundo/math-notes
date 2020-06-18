@@ -1,5 +1,5 @@
+import { math } from './math.js';
 import { results } from './parseContent.js';
-import { math } from './parseValues.js';
 
 function updateResults(resultsNode) {
   resultsNode.innerHTML = '';

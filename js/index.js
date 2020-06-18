@@ -11,12 +11,14 @@ const totalNode = document.getElementById('total');
 
 contentEditableNode.focus();
 
-// Trigger changes
-contentEditableNode.addEventListener('input', () => {
+function update() {
   updateView(contentEditableNode, viewNode);
   updateResults(resultsNode);
   updateTotal(totalNode);
-});
+}
+
+// Trigger changes
+contentEditableNode.addEventListener('input', () => update());
 
 // Only paste text
 contentEditableNode.addEventListener('paste', (e) => {
@@ -26,7 +28,7 @@ contentEditableNode.addEventListener('paste', (e) => {
 });
 
 // Add text for test porpuses
-/*
+
 const tests = [
   document.createTextNode('Tests'),
   document.createElement('br'),
@@ -114,6 +116,4 @@ const tests = [
 
 tests.forEach(test => contentEditableNode.appendChild(test));
 
-updateView(contentEditableNode, viewNode);
-updateResults(resultsNode);
-*/
+update();
