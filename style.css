@@ -34,8 +34,9 @@ body {
   min-height: 100vh;
   background: #FFF;
   box-sizing: border-box;
+  white-space: nowrap;
+  overflow: auto;
 }
-
 .variable {
   color: #FFA800;
 }
