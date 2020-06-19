@@ -53,4 +53,14 @@ Add color to syntax to differenciate variables and comments.
 
 Performance improvement to avoid multiple loops.
 
+- [ ] Save one function to memory for each function writed
+
+Overwrite any new function to the last one, without changing previous results.
+
+```
+f(x) = x + 1
+
+f(2) (resolve 3);
+```
+
 Project based on [Numi](https://numi.app/) app for MacOS.
