@@ -1,6 +1,9 @@
 # Math Notes
 Inline calculator to run on browser.
 
+## Dependencies
+Created using ECMAScript, and [math.js](https://mathjs.org/).
+
 ## To do:
 [X] Add variables;
 [ ] Save information on browser
