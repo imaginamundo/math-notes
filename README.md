@@ -50,6 +50,7 @@ Add color to syntax to differenciate variables and comments
 ```
 
 - [ ] Avoid 3 loops (parse input, print input and print response);
+
 Performance improvement to avoid multiple loops
 
 Project based on [Numi](https://numi.app/) app for MacOS.
