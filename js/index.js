@@ -10,6 +10,9 @@ const resultsNode = document.getElementById('results');
 const totalNode = document.getElementById('total');
 const helpButtonNode = document.getElementById('help-button');
 const helpModalNode = document.getElementById('help-modal');
+const fontMinusNode = document.getElementById('font-minus');
+const fontPlusNode = document.getElementById('font-plus');
+const fontResetNode = document.getElementById('font-reset');
 
 contentEditableNode.focus();
 
@@ -38,3 +41,35 @@ helpModalNode.addEventListener('click', () => {
   helpModalNode.style.display = 'none';
   contentEditableNode.focus();
 });
+
+// Change font-size
+const fontSize = {
+  min: 10,
+  max: 40,
+  current: 14
+};
+function setFontSize() {
+  window.localStorage.fontSize = fontSize.current;
+  document.body.style.fontSize = `${ fontSize.current }px`;
+}
+fontMinusNode.addEventListener('click', () => {
+  if (fontSize.current <= fontSize.min) return;
+  fontSize.current--;
+  setFontSize();
+});
+
+fontPlusNode.addEventListener('click', () => {
+  if (fontSize.current >= fontSize.max) return;
+  fontSize.current++;
+  setFontSize();
+});
+fontResetNode.addEventListener('click', () => {
+  if (fontSize.current >= fontSize.max) return;
+  fontSize.current = 14;
+  setFontSize();
+});
+
+if (window.localStorage.fontSize) {
+  fontSize.current = window.localStorage.fontSize;
+  setFontSize();
+}

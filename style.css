@@ -72,6 +72,9 @@ body {
   background: #949B93;
   color: #fff;
 }
+button {
+  font-size: 1em;
+}
 .button-wrap {
   width: 100%;
 }
@@ -114,4 +117,7 @@ table td {
 }
 .operator-table tbody tr td:first-child{
   text-align: right;
+}
+.help {
+  margin: 0 .5em;
 }
