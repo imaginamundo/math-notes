@@ -35,5 +35,6 @@ helpButtonNode.addEventListener('click', () => {
 });
 
 helpModalNode.addEventListener('click', () => {
-  helpModalNode.style.display = 'none'; 
+  helpModalNode.style.display = 'none';
+  contentEditableNode.focus();
 });
