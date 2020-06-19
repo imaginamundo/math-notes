@@ -7,9 +7,7 @@ function formatView(text) {
    * Wrapper are on colors.js
    */
 
-  line.textContent = text
-    .replace(/\*/g, '×')
-    .replace(/\//g, '÷');
+  line.textContent = text;
 
   return line;
 }
