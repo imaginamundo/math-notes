@@ -22,7 +22,7 @@ Save inputed information on browser to return the same information after the sit
 
 - [ ] Syntax highlighting;
 
-Add color to syntax to differenciate variables and comments 
+Add color to syntax to differenciate variables and comments.
 
 - [ ] Create percentage calculus;
 ```
@@ -51,6 +51,6 @@ Add color to syntax to differenciate variables and comments
 
 - [ ] Avoid 3 loops (parse input, print input and print response);
 
-Performance improvement to avoid multiple loops
+Performance improvement to avoid multiple loops.
 
 Project based on [Numi](https://numi.app/) app for MacOS.
