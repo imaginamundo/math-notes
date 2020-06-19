@@ -1,4 +1,4 @@
-import MathControl, { math } from './math.js';
+import MathControl from './math.js';
 import parseValues from './parseValues.js';
 import formatView from './formatView.js';
 

@@ -1,5 +1,7 @@
 function identifyContent(text) {
   /**
+   * Problably use this function to identify items for syntax highlight
+   * 
    * Input:
    * variableName = 8
    * 
