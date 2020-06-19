@@ -16,13 +16,15 @@ Created using ECMAScript, and [math.js](https://mathjs.org/).
 If your browser doesn't support these features, the calculator will not work.
 
 ## To do:
-- [ ] Save information on browser
+- [ ] Save information on browser;
+
 Save inputed information on browser to return the same information after the site is reopened.
 
-- [ ] Syntax highlighting
+- [ ] Syntax highlighting;
+
 Add color to syntax to differenciate variables and comments 
 
-- [ ] Create percentage calculus
+- [ ] Create percentage calculus;
 ```
 5% of 100 (resolve 5)
 
@@ -36,13 +38,15 @@ Add color to syntax to differenciate variables and comments
 
 20 as a % off 80 (resolve 75%)
 ```
-- [ ] Currency convertion
+- [ ] Currency convertion;
 ```
-1 USD in EUR
+1 USD to EUR
 
 1 USD + 50 EUR
 
 1 BRL * 2
+
+1 BTC to USD
 ```
 
 - [ ] Avoid 3 loops (parse input, print input and print response);
