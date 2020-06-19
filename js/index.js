@@ -8,6 +8,8 @@ const contentEditableNode = document.getElementById('content-editable');
 const viewNode= document.getElementById('view');
 const resultsNode = document.getElementById('results');
 const totalNode = document.getElementById('total');
+const helpButtonNode = document.getElementById('help-button');
+const helpModalNode = document.getElementById('help-modal');
 
 contentEditableNode.focus();
 
@@ -27,3 +29,11 @@ contentEditableNode.addEventListener('paste', (e) => {
   document.execCommand('insertText', false, text);
 });
 
+// Helper modal toggle
+helpButtonNode.addEventListener('click', () => {
+  helpModalNode.style.display = 'block'; 
+});
+
+helpModalNode.addEventListener('click', () => {
+  helpModalNode.style.display = 'none'; 
+});

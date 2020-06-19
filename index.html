@@ -23,11 +23,61 @@
     </div>
     <div class="footer">
       <div class="button-wrap">
-        <button>How to use it?</button>
+        <button id="help-button">Help</button>
+        <a href="https://github.com/imaginamundo/math-notes" target="_blank">GitHub</a>
       </div>
       <b class="total-label">total:</b>
       <span id="total" class="total">0</span>
     </div>
+  </div>
+  <div id="help-modal" class="modal">
+    <p><small>(click anywhere to close help)</small></p>
+    <p><b>How to use it?</b></p>
+    <p>This is an inline calculator, each calculation will be calculated by line.</p>
+    <p><code>1 + 1</code> will return <code>2</code></p>
+    <table class="operator-table">
+      <thead>
+        <tr>
+          <th>Operator</th>
+          <th>Function</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>+</code></td>
+          <td>Add</td>
+        </tr>
+        <tr>
+          <td><code>-</code></td>
+          <td>Subtract</td>
+        </tr>
+        <tr>
+          <td><code>*</code></td>
+          <td>Multiply</td>
+        </tr>
+        <tr>
+          <td><code>/</code></td>
+          <td>Divide</td>
+        </tr>
+        <tr>
+          <td><code>^</code></td>
+          <td>Power</td>
+        </tr>
+        <tr>
+          <td><code>*</code></td>
+          <td>Multiply</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>To see more possible operations, to go <a href="https://mathjs.org/docs/expressions/syntax.html#operators" target="_blank">mathjs operators documentation</a>.</p>
+    <p><b>Comments</b></p>
+    <p>If you want to create a comment, just use the <code>#</code> sign, everything after the <code>#</code> will be ignored.</p>
+    <p><b>Variables</b></p>
+    <p>You can assign variables to use later.</p>
+    <p><code>pizzas = 2</code></p>
+    <p><code>pizzaPrice = 30</code></p>
+    <p><code>people = 4</code></p>
+    <p><code>(pizzas * pizzaPrice) / people</code> will return <code>15</code></p>
   </div>
 </body>
 </html>

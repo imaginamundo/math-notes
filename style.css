@@ -85,3 +85,33 @@ body {
 .placeholder {
   opacity: .5;
 }
+
+.modal {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: none;
+  padding: 0 1em;
+  background: #fff;
+  width: 100vw;
+  height: 100vh;
+  overflow: auto;
+}
+.modal b {
+  color: #000;
+}
+code {
+  background: #ccc;
+  color: #000;
+  border-radius: 4px;
+  padding: .2em .4em;
+}
+table td {
+  padding: .5em;
+}
+.operator-table tbody tr td:first-child{
+  text-align: right;
+}
