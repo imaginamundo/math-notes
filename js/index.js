@@ -45,7 +45,7 @@ helpModalNode.addEventListener('click', () => {
 // Change font-size
 const fontSize = {
   min: 10,
-  max: 40,
+  max: 80,
   current: 14
 };
 function setFontSize() {
@@ -72,4 +72,14 @@ fontResetNode.addEventListener('click', () => {
 if (window.localStorage.fontSize) {
   fontSize.current = window.localStorage.fontSize;
   setFontSize();
+}
+
+// Fix firefox without height: fill-available
+if (navigator.userAgent.toLowerCase().indexOf('firefox') !== -1) {
+  const inputNode = document.getElementById('input');
+  inputNode.addEventListener('click', (event) => {
+    if (event.currentTarget === inputNode) {
+      contentEditableNode.focus();
+    }
+  })
 }
