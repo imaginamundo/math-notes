@@ -64,9 +64,6 @@ f(2) (resolve 3);
 ```
 
 - [ ] Save variables functions
-
-Overwrite any new function to the last one, without changing previous results.
-
 ```
 variable(x) = x + 1
 
