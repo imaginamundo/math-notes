@@ -63,4 +63,14 @@ f(x) = x + 1
 f(2) (resolve 3);
 ```
 
+- [ ] Save variables functions
+
+Overwrite any new function to the last one, without changing previous results.
+
+```
+variable(x) = x + 1
+
+variable(2) (resolve 3);
+```
+
 Project based on [Numi](https://numi.app/) app for MacOS.
