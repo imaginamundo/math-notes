@@ -1,7 +1,7 @@
 let variables = {};
 
 function addVariable({ label, value }) {
-  variables[label] = value;
+  if (label && value) variables[label] = value;
 }
 
 function clearVariables() {

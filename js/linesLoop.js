@@ -1,4 +1,3 @@
-import { reloadMath } from './store/math.js';
 import { clearNodes, addNode } from './store/view.js';
 import { addResult, clearResults } from './store/results.js';
 import { clearVariables } from './store/variables.js';
@@ -8,7 +7,6 @@ import format from './format.js';
 
 function lineLoop(childNodes) {
   clearNodes();
-  reloadMath();
   clearResults();
   clearVariables();
 
