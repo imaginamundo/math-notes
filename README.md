@@ -53,21 +53,6 @@ Add color to syntax to differenciate variables and comments.
 
 Performance improvement to avoid multiple loops.
 
-- [ ] Save variables functions
-```
-variable(x) = x + 1
-
-variable(2) (resolve 3);
-```
-
-or
-
-```
-variable = (x) = x + 1
-
-variable; f(2) (resolve 3);
-```
-
 ---
 
 Project based on [Numi](https://numi.app/) app for MacOS.
