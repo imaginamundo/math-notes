@@ -1,6 +1,7 @@
 import linesLoop from './linesLoop.js';
 import printInputs from './printInputs.js';
 import printResults from './printResults.js';
+import printTotal from './printTotal.js';
 
 document.execCommand('defaultParagraphSeparator', false, 'br');
 
@@ -20,6 +21,7 @@ function update() {
   linesLoop(contentEditableNode.childNodes);
   printInputs(viewNode);
   printResults(resultsNode);
+  printTotal(totalNode);
 }
 
 // Trigger changes

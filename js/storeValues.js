@@ -15,10 +15,6 @@ function storeValues(input) {
     label = label.trim();
     value = value.map(value => value.trim()).join(' = ');
     
-    console.log(input);
-    console.log(scope);
-    console.log(result);
-
     try {
       result = input && math.evaluate(input.trim(), scope);
       value = value && math.evaluate(value);
