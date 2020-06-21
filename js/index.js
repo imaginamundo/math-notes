@@ -8,6 +8,7 @@ import './dom/help.js';
 
 document.execCommand('defaultParagraphSeparator', false, 'br');
 
+const inputNode = document.getElementById('input');
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode= document.getElementById('view');
 const resultsNode = document.getElementById('results');
@@ -32,7 +33,6 @@ contentEditableNode.addEventListener('paste', (e) => {
   document.execCommand('insertText', false, text);
 });
 
-const inputNode = document.getElementById('input');
 inputNode.addEventListener('click', (event) => {
   if (event.currentTarget === inputNode) {
     contentEditableNode.focus();
