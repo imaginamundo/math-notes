@@ -1,6 +1,6 @@
-import updateResults from './results.js';
-import updateView from './input.js';
-import updateTotal from './total.js';
+import linesLoop from './linesLoop.js';
+import printInputs from './printInputs.js';
+import printResults from './printResults.js';
 
 document.execCommand('defaultParagraphSeparator', false, 'br');
 
@@ -17,9 +17,9 @@ const fontResetNode = document.getElementById('font-reset');
 contentEditableNode.focus();
 
 function update() {
-  updateView(contentEditableNode, viewNode);
-  updateResults(resultsNode);
-  updateTotal(totalNode);
+  linesLoop(contentEditableNode.childNodes);
+  printInputs(viewNode);
+  printResults(resultsNode);
 }
 
 // Trigger changes
@@ -42,7 +42,7 @@ helpModalNode.addEventListener('click', () => {
   contentEditableNode.focus();
 });
 
-// Change font-size
+// Change font size
 const fontSize = {
   min: 10,
   max: 80,

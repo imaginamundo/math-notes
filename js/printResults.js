@@ -1,13 +1,12 @@
-import { results } from './parseContent.js';
+import results from './store/results.js';
 
-function updateResults(resultsNode) {
+function printResults(resultsNode) {
   resultsNode.innerHTML = '';
-
-  results.forEach(result => {
+  results.rows.forEach(result => {
     /\d/.test(result) && resultsNode.appendChild(document.createTextNode(result));
     const addLineBreak = result === null;
     addLineBreak && resultsNode.appendChild(document.createElement('br'));
   });
 }
 
-export default updateResults;
+export default printResults;

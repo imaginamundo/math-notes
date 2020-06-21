@@ -5,6 +5,10 @@ function createWrapper(type, text) {
   return wrapper;
 }
 
+function line(text) {
+  return createWrapper('line', text);
+}
+
 function variable(text) {
   return createWrapper('variable', text);
 }
@@ -13,12 +17,4 @@ function comment(text) {
   return createWrapper('comment', text);
 }
 
-export {
-  variable,
-  comment
-}
-
-export default {
-  variable,
-  comment
-}
+export default { line, variable, comment };
