@@ -1,6 +1,6 @@
 import math from './store/math.js';
 import { addResult } from './store/results.js';
-import variables, { addVariable } from './store/variables.js';
+import { variables, addVariable } from './store/variables.js';
 
 function storeValues(input) {
   let label;

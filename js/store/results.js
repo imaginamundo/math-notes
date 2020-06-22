@@ -1,12 +1,9 @@
 import math from './math.js';
 
-let results = {
-  total: 0,
-  rows: []
-};
+let results = [];
 
 function addResult(value) {
-  results.rows.push(value);
+  results.push(value);
 }
 
 function total() {
@@ -15,8 +12,7 @@ function total() {
 
 function clearResults() {
   delete results.rows;
-  results.rows = [];
+  results = [];
 }
 
-export { addResult, clearResults, total };
-export default results;
+export { results, addResult, clearResults, total };

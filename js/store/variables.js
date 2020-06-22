@@ -8,5 +8,4 @@ function clearVariables() {
   Object.keys(variables).forEach(key => key && delete variables[key]);
 }
 
-export { addVariable, clearVariables };
-export default variables;
+export { variables, addVariable, clearVariables };

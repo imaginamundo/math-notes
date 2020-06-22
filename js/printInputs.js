@@ -1,8 +1,8 @@
-import view from './store/view.js';
+import { view } from './store/view.js';
 
 function printInputs(viewNode) {
   viewNode.innerHTML = '';
-  view.nodes.forEach(node => viewNode.appendChild(node));
+  view.forEach(node => viewNode.appendChild(node));
 }
 
 export default printInputs;

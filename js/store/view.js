@@ -1,15 +1,11 @@
-let view = {
-  nodes: []
-}
+let view = []
 
 function addNode(node) {
-  view.nodes.push(node);
+  view.push(node);
 }
 
 function clearNodes() {
-  delete view.nodes;
-  view.nodes = [];
+  view = [];
 }
 
-export { addNode, clearNodes };
-export default view;
+export { view, addNode, clearNodes };

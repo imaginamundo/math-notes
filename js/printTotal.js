@@ -1,7 +1,7 @@
-import results from './store/results.js';
+import { results } from './store/results.js';
 
 function printTotal(totalNode) {
-  const resultsWithValues = results.rows.filter(result => Number(result) === result);
+  const resultsWithValues = results.filter(result => Number(result) === result);
 
   totalNode.innerHTML = ' ';
   if (resultsWithValues.length) {
