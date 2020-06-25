@@ -3,15 +3,14 @@ import { addResult } from './store/results.js';
 import { variables, addVariable } from './store/variables.js';
 
 function storeValues(input) {
-  let label;
-  let value;
-  let result;
-  let variable = {};
-
   if (input) {
     const scope = { ...variables };
+    const variable = {};
+    let label;
+    let value;
+    let result;
 
-    [label, ...value] = input.split(/=/);
+    [label, ...value] = input.split('=');
     label = label.trim();
     value = value.map(value => value.trim()).join(' = ');
     
