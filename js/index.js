@@ -10,7 +10,7 @@ document.execCommand('defaultParagraphSeparator', false, 'br');
 
 const inputNode = document.getElementById('input');
 const contentEditableNode = document.getElementById('content-editable');
-const viewNode= document.getElementById('view');
+const viewNode = document.getElementById('view');
 const resultsNode = document.getElementById('results');
 const totalNode = document.getElementById('total');
 

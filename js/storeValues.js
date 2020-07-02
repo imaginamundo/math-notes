@@ -5,7 +5,7 @@ import { variables, addVariable } from './store/variables.js';
 function storeValues(input) {
   if (input) {
     const scope = { ...variables };
-    const variable = {};
+    let variable = {};
     let label;
     let value;
     let result;
