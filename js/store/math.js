@@ -1,5 +1,5 @@
-import * as mathjs from 'https://cdn.pika.dev/mathjs@^7.0.0';
+import { create, all } from 'https://cdn.pika.dev/mathjs@^7.0.0';
 
-let math = mathjs.create(mathjs.all);
+const math = create(all);
 
 export default math;
