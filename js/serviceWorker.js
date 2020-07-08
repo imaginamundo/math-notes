@@ -2,12 +2,11 @@ const cacheName = 'v1';
 const urlsToCache = [
   '../index.html',
   '../style.css',
-  './',
   './format.js',
   './index.js',
   './linesLoop.js',
   './printInputs.js',
-  './PrintResults.js',
+  './printResults.js',
   './printTotal.js',
   './storeValues.js',
   './dom/cosmetic.js',
