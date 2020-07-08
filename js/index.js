@@ -2,9 +2,10 @@ import linesLoop from './linesLoop.js';
 import printInputs from './printInputs.js';
 import printResults from './printResults.js';
 import printTotal from './printTotal.js';
+import registerServiceWorker from './registerServiceWorker.js';
+import controlHelpModal from './dom/help.js';
 
 import './dom/cosmetic.js';
-import './dom/help.js';
 
 document.execCommand('defaultParagraphSeparator', false, 'br');
 
@@ -39,4 +40,6 @@ inputNode.addEventListener('click', (event) => {
   }
 });
 
-export { contentEditableNode };
+controlHelpModal();
+
+registerServiceWorker();
