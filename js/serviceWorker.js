@@ -15,7 +15,7 @@ const urlsToCache = [
   './store/results.js',
   './store/variables.js',
   './store/view.js',
-  'https://cdn.pika.dev/mathjs@^7.0.0'
+  './lib/math.bundle.min.js'
 ];
 
 self.addEventListener('install', event => {
