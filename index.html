@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Math Notes</title>
   <meta name="description" content="Inline calculator for modern browsers.">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <script src="./js/index.js" type="module"></script>
   <link rel="stylesheet" href="./style.css">
 
@@ -31,7 +32,7 @@
             Results will appear on sidebar
           </div>
         </div>
-        <div id="content-editable" class="content-editable" spellcheck="false" contenteditable="true"></div>
+        <div id="content-editable" role="textbox" aria-placeholder="5-digit zipcode" class="content-editable" spellcheck="false" contenteditable="true"></div>
       </div>
       <div>
         <div id="results" class="results"></div>
@@ -41,7 +42,7 @@
       <div class="button-wrap">
         <b>Size: <button id="font-minus">-</button><button id="font-plus">+</button><button id="font-reset">reset</button></b>
         <button id="help-button" class="help">Help</button>
-        <a href="https://github.com/imaginamundo/math-notes" target="_blank">GitHub</a>
+        <a href="https://github.com/imaginamundo/math-notes" rel="noopener" target="_blank">GitHub</a>
       </div>
       <b class="total-label">total:</b>
       <span id="total" class="total">0</span>
@@ -88,7 +89,7 @@
         </tr>
       </tbody>
     </table>
-    <p>To see more possible operations, to go <a href="https://mathjs.org/docs/expressions/syntax.html#operators" target="_blank">mathjs operators documentation</a>.</p>
+    <p>To see more possible operations, to go <a href="https://mathjs.org/docs/expressions/syntax.html#operators" rel="noopener" target="_blank">mathjs operators documentation</a>.</p>
     <p><b>Comments</b></p>
     <p>If you want to create a comment, just use the <code>#</code> sign, everything after the <code>#</code> will be ignored.</p>
     <p><b>Variables</b></p>
@@ -188,7 +189,7 @@
         </tr>
       </tbody>
     </table>
-    <p>To see more possible units, to go <a href="https://mathjs.org/docs/datatypes/units.html#reference" target="_blank">mathjs units documentation</a>.</p>
+    <p>To see more possible units, to go <a href="https://mathjs.org/docs/datatypes/units.html#reference" rel="noopener" target="_blank">mathjs units documentation</a>.</p>
   </div>
 </body>
 </html>

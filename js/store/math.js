@@ -1,4 +1,4 @@
-import { create, all } from 'https://cdn.pika.dev/mathjs@^7.0.0';
+import { create, all } from '../lib/math.bundle.min.js';
 
 const math = create(all);
 

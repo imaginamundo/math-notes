@@ -1,7 +1,7 @@
 {
   "name": "Math Notes",
   "short_name": "Math Notes",
-  "start_url": "index.html",
+  "start_url": "https://imaginamundo.github.io/math-notes/",
   "display": "standalone",
   "background_color": "#0A3190",
   "theme_color": "#0A3190",
