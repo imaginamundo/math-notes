@@ -131,3 +131,29 @@ test('evaluateLines chains prev through assignments and errors', () => {
   const { results: ok } = evaluateLines(['x = 20', 'prev / 4']);
   assert.equal(ok[1].value, 5);
 });
+
+test('evaluateLines computes sum and total from the lines above', () => {
+  const { results, total } = evaluateLines(['10', '20', 'sum']);
+  assert.equal(results[2].value, 30);
+  assert.equal(total, 30);
+  assert.equal(evaluateLines(['10', '20', 'total']).results[2].value, 30);
+});
+
+test('evaluateLines computes average and avg from the lines above', () => {
+  assert.equal(evaluateLines(['10', '20', 'average']).results[2].value, 15);
+  assert.equal(evaluateLines(['10', '20', 'avg']).results[2].value, 15);
+});
+
+test('evaluateLines sum stops at an empty line', () => {
+  assert.equal(evaluateLines(['10', '', '20', 'sum']).results[3].value, 20);
+});
+
+test('evaluateLines aggregate excludes assignments and other aggregates', () => {
+  assert.equal(evaluateLines(['x = 5', '10', 'sum']).results[2].value, 10);
+  assert.equal(evaluateLines(['1', 'sum', '1']).results[1].value, 1);
+  assert.equal(evaluateLines(['1', 'sum', '1']).total, 2);
+});
+
+test('evaluateLines sum of nothing is 0', () => {
+  assert.equal(evaluateLines(['', 'sum']).results[1].value, 0);
+});
