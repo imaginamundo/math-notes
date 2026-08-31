@@ -5,31 +5,30 @@ import { variables, addVariable } from './store/variables.js';
 function storeValues(input) {
   if (input) {
     const scope = { ...variables };
-    let variable = {};
     let label;
     let value;
     let result;
 
     [label, ...value] = input.split('=');
     label = label.trim();
-    value = value.map(value => value.trim()).join(' = ');
-    
-    let type = label && value ? 'assignment' : 'value';
+    value = value.map(part => part.trim()).join(' = ');
+
+    const isAssignment = !!(label && value);
+    let type = isAssignment ? 'assignment' : 'value';
 
     try {
-      result = input && math.evaluate(input.trim(), scope);
+      result = math.evaluate(input.trim(), scope);
       value = value && math.evaluate(value, scope);
     } catch (error) {
       result = error;
       value = undefined;
       type = 'error';
-    };
+    }
 
-    if (label && value) variable = { label, value };
     if (typeof(result) === 'function') result = undefined;
 
+    if (isAssignment && value !== undefined) addVariable({ label, value });
     addResult(result instanceof Error ? result.message : result, type);
-    addVariable(variable);
   }
 }
 
