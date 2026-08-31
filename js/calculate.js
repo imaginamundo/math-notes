@@ -3,11 +3,13 @@ import parseLine from './parseLine.js';
 import initCurrency from './currency.js';
 import initAliases from './aliases.js';
 import initCssUnits from './cssUnits.js';
+import initDatetime from './datetime.js';
 import preprocess from './preprocess.js';
 
 const math = create(all);
 initAliases(math);
 initCssUnits(math);
+initDatetime(math);
 
 initCurrency(math, () => {
   if (typeof window !== 'undefined') {
