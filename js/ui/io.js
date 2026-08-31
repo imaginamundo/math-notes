@@ -20,7 +20,14 @@ function initIo(editableNode) {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
-      editableNode.value = String(reader.result).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      const imported = String(reader.result).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      if (
+        editableNode.value &&
+        !window.confirm("Importing will replace the current tab's content. Continue?")
+      ) {
+        return;
+      }
+      editableNode.value = imported;
       editableNode.dispatchEvent(new Event('input', { bubbles: true }));
       editableNode.scrollTop = editableNode.scrollHeight;
     };
