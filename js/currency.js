@@ -49,12 +49,23 @@ function isFresh(data) {
   return new Date(data.fetchedAt).toDateString() === new Date().toDateString();
 }
 
-function initCurrency(math, onChange) {
+function notify(name, detail) {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(name, { detail }));
+  }
+}
+
+function initCurrency(math) {
   if (typeof window === 'undefined') return;
   ensureBaseUnit(math);
   const cached = loadCached();
+
+  if (isFresh(cached)) {
+    registerRates(math, cached);
+    notify('currency:updated', { source: 'cached' });
+    return;
+  }
   if (cached) registerRates(math, cached);
-  if (isFresh(cached)) return;
 
   fetch(API_URL)
     .then(res => {
@@ -64,10 +75,10 @@ function initCurrency(math, onChange) {
     .then(data => {
       save(data);
       registerRates(math, data);
-      if (onChange) onChange();
+      notify('currency:updated', { source: 'live' });
     })
     .catch(() => {
-      // offline: cached rates already applied
+      if (!cached) notify('currency:error');
     });
 }
 

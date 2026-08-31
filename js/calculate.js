@@ -12,11 +12,7 @@ initAliases(math);
 initCssUnits(math);
 initDatetime(math);
 
-initCurrency(math, () => {
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('currency:updated'));
-  }
-});
+initCurrency(math);
 
 function evaluateLine(line, scope) {
   const { code, label, rhs, isAssignment } = parseLine(line);

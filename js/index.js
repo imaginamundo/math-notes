@@ -13,6 +13,7 @@ const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');
 const resultsNode = document.getElementById('results');
 const totalNode = document.getElementById('total');
+const currencyStatusNode = document.getElementById('currency-status');
 
 function update() {
   const lines = contentEditableNode.value.split('\n');
@@ -38,6 +39,22 @@ initFontControls();
 initIo(contentEditableNode);
 initShortcuts(contentEditableNode);
 
-window.addEventListener('currency:updated', update);
+window.addEventListener('currency:updated', event => {
+  update();
+  showCurrencyStatus(event.detail && event.detail.source === 'cached' ? 'rates: cached' : 'rates: live');
+});
+
+window.addEventListener('currency:error', () => {
+  update();
+  showCurrencyStatus('exchange rates unavailable');
+});
+
+let statusTimer = null;
+function showCurrencyStatus(text) {
+  currencyStatusNode.textContent = text;
+  currencyStatusNode.classList.add('visible');
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => currencyStatusNode.classList.remove('visible'), 5000);
+}
 
 registerServiceWorker();

@@ -197,6 +197,16 @@ button {
 .button-wrap .import {
   margin-left: .5em;
 }
+.currency-status {
+  margin-left: .75em;
+  font-size: .85em;
+  color: rgba(255, 255, 255, .8);
+  opacity: 0;
+  transition: opacity .3s;
+}
+.currency-status.visible {
+  opacity: 1;
+}
 .footer button + button {
   margin-left: .5em;
 }
