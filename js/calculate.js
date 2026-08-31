@@ -51,7 +51,7 @@ function aggregateAbove(results, fromIndex, toIndex, mode) {
     .slice(fromIndex, toIndex)
     .filter(({ type, value, aggregate }) => type === 'value' && !aggregate && Number(value) === value)
     .map(({ value }) => value);
-  if (!values.length) return mode === 'sum' ? 0 : undefined;
+  if (!values.length) return 0;
   const sum = values.reduce((acc, cur) => acc + cur);
   return mode === 'sum' ? sum : sum / values.length;
 }

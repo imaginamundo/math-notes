@@ -178,8 +178,9 @@ test('evaluateLines aggregate excludes assignments and other aggregates', () => 
   assert.equal(evaluateLines(['1', 'sum', '1']).total, 2);
 });
 
-test('evaluateLines sum of nothing is 0', () => {
+test('evaluateLines aggregate of nothing is 0', () => {
   assert.equal(evaluateLines(['', 'sum']).results[1].value, 0);
+  assert.equal(evaluateLines(['', 'average']).results[1].value, 0);
 });
 
 test('evaluateLines supports Numi function aliases', () => {
