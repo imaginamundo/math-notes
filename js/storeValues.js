@@ -22,7 +22,7 @@ function storeValues(input) {
     if (label && value) variable = { label, value };
     if (typeof(result) === 'function') result = undefined;
 
-    addResult(result);
+    addResult(result, label && value ? 'assignment' : 'value');
     addVariable(variable);
   }
 }
