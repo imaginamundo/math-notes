@@ -29,8 +29,9 @@ function initFontControls() {
     setFontSize();
   });
 
-  if (window.localStorage.fontSize) {
-    fontSize.current = window.localStorage.fontSize;
+  const saved = parseInt(window.localStorage.fontSize, 10);
+  if (saved) {
+    fontSize.current = Math.min(fontSize.max, Math.max(fontSize.min, saved));
     setFontSize();
   }
 }
