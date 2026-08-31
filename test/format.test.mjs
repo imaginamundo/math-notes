@@ -102,5 +102,13 @@ test('a bare dollar sign is highlighted as currency', () => {
 test('a colon label renders as a title', () => {
   const node = format.line('Price: 1 + 1');
   assert.equal(node.children[0]._classes.has('title'), true);
-  assert.equal(node.children[0].textContent, 'Price');
+  assert.equal(node.children[0].textContent, 'Price:');
+});
+
+test('format.line renders colon labels exactly as typed', () => {
+  for (const line of ['Price: 10 + 5', 'Price : 10 + 5', 'Price:10 + 5', 'Price: 10 + 5 # note']) {
+    const node = format.line(line);
+    const text = node.children.map((child) => child.textContent).join('');
+    assert.equal(text, line);
+  }
 });

@@ -13,6 +13,8 @@ test('parseLine splits a plain expression', () => {
     isAssignment: false,
     equalsIndex: -1,
     title: '',
+    rawCode: '1 + 1',
+    titleIndex: -1,
   });
 });
 

@@ -18,10 +18,14 @@ function createWrapper(type, text) {
 
 function line(text) {
   const wrapper = createWrapper('line', '');
-  const { code, comment: commentText, title } = parseLine(text);
+  const { rawCode, comment: commentText, titleIndex } = parseLine(text);
 
-  if (title) wrapper.appendChild(titleWrap(title));
-  if (code) appendCode(wrapper, code);
+  if (titleIndex !== -1) {
+    wrapper.appendChild(titleWrap(rawCode.slice(0, titleIndex + 1)));
+    if (titleIndex + 1 < rawCode.length) appendCode(wrapper, rawCode.slice(titleIndex + 1));
+  } else if (rawCode) {
+    appendCode(wrapper, rawCode);
+  }
   if (commentText) wrapper.appendChild(comment(commentText));
 
   return wrapper;
