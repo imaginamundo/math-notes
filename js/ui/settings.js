@@ -24,7 +24,7 @@ function applyTheme(id) {
   document.documentElement.dataset.theme = id;
   try {
     localStorage.setItem(STORAGE_KEY, id);
-  } catch (error) {
+  } catch {
     // storage unavailable
   }
 }
@@ -34,7 +34,7 @@ function initSettings(contentEditableNode) {
   const modal = document.getElementById('settings-modal');
   const listNode = modal.querySelector('.settings-themes');
 
-  const { close } = initModal(modal, button, { onClose: () => contentEditableNode.focus() });
+  initModal(modal, button, { onClose: () => contentEditableNode.focus() });
 
   THEMES.forEach((theme) => {
     const card = document.createElement('button');
@@ -77,7 +77,7 @@ function initSettings(contentEditableNode) {
     RESET_KEYS.forEach((key) => {
       try {
         localStorage.removeItem(key);
-      } catch (error) {
+      } catch {
         // storage unavailable
       }
     });
