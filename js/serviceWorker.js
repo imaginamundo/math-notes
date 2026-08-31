@@ -13,6 +13,7 @@ const urlsToCache = [
   './parseLine.js',
   './renderInput.js',
   './renderResults.js',
+  './shortcuts.js',
   './renderTotal.js',
   './tabs.js',
   './dom/cosmetic.js',
