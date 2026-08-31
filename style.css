@@ -319,6 +319,7 @@ button:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
   column-gap: 0.75em;
   row-gap: 0.4em;
@@ -330,7 +331,6 @@ button:hover {
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
-  margin-left: auto;
 }
 .actions > * + * {
   margin-left: 0.5em;
