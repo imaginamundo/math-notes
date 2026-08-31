@@ -181,6 +181,19 @@ test('evaluateLines aggregate of nothing is 0', () => {
   assert.equal(evaluateLines(['', 'average']).results[1].value, 0);
 });
 
+test('evaluateLines resolves aggregates inside expressions', () => {
+  const { results } = evaluateLines(['10 + 10 + 20', 'a = sum', 'a']);
+  assert.equal(results[2].value, 40);
+  const avg = evaluateLines(['10', '20', '30', 'avg = average']);
+  assert.equal(avg.results[3].value, 20);
+  assert.equal(evaluateLines(['10', '20', 'sum * 2']).results[2].value, 60);
+  assert.equal(evaluateLines(['5', '10', 'sum + prev']).results[2].value, 25);
+});
+
+test('evaluateLines keeps the mathjs sum function callable', () => {
+  assert.equal(evaluateLines(['sum([1, 2, 3])']).results[0].value, 6);
+});
+
 test('evaluateLines supports Numi function aliases', () => {
   const { results } = evaluateLines([
     'ln(e)',

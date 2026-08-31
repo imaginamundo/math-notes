@@ -37,6 +37,31 @@ function evaluateLine(line, scope) {
   return { type, result: result instanceof Error ? result.message : result, variable };
 }
 
+// Matches a standalone aggregate keyword, i.e. not a mathjs function call
+// like `sum([1, 2, 3])`.
+const AGGREGATE_WORD = /\b(?:sum|total|average|avg)\b(?!\s*\()/;
+const AGGREGATE_SUM_WORD = /\b(?:sum|total)\b(?!\s*\()/g;
+const AGGREGATE_AVG_WORD = /\b(?:average|avg)\b(?!\s*\()/g;
+
+// Replace aggregate keywords in an expression with the block's values so they
+// work inside expressions too, e.g. `a = sum` or `sum * 2`.
+function substituteAggregates(parsed, sum, average) {
+  const replace = (expression) =>
+    expression
+      .replace(AGGREGATE_SUM_WORD, String(sum))
+      .replace(AGGREGATE_AVG_WORD, String(average));
+
+  if (parsed.isAssignment) {
+    const rhs = replace(parsed.rhs);
+    return { ...parsed, code: `${parsed.label} = ${rhs}`, rhs };
+  }
+  return {
+    ...parsed,
+    code: replace(parsed.code),
+    rhs: parsed.rhs ? replace(parsed.rhs) : parsed.rhs,
+  };
+}
+
 function evaluateLines(lines) {
   const variables = {};
   const results = [];
@@ -59,7 +84,15 @@ function evaluateLines(lines) {
 
     const scope = { ...variables };
     if (previousResult !== undefined) scope.prev = previousResult;
-    const { type, result, variable } = evaluateLine(parsed, scope);
+
+    let parsedLine = parsed;
+    if (AGGREGATE_WORD.test(parsed.code)) {
+      const blockSum = aggregateAbove(results, lastBlankIndex + 1, i, 'sum');
+      const blockAvg = aggregateAbove(results, lastBlankIndex + 1, i, 'average');
+      parsedLine = substituteAggregates(parsed, blockSum, blockAvg);
+    }
+
+    const { type, result, variable } = evaluateLine(parsedLine, scope);
     if (variable) variables[variable.label] = variable.value;
     results.push({ type, value: result });
     if (type !== 'error' && result !== undefined && typeof result !== 'function') {
