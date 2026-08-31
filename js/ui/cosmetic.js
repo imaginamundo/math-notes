@@ -11,7 +11,7 @@ function initFontControls() {
   };
   function setFontSize() {
     window.localStorage.fontSize = fontSize.current;
-    document.body.style.fontSize = `${fontSize.current}px`;
+    document.documentElement.style.setProperty('--app-font-size', `${fontSize.current}px`);
   }
   fontMinusNode.addEventListener('click', () => {
     if (fontSize.current <= fontSize.min) return;

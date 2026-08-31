@@ -132,6 +132,7 @@ body {
   margin: 0;
   background: var(--color-primary);
   color: var(--color-text);
+  font-size: var(--app-font-size, 14px);
   font-family: monospace;
   line-height: 1.65em;
 }

@@ -11,6 +11,8 @@
       try {
         var t = localStorage.getItem('math-notes-theme');
         if (t) document.documentElement.dataset.theme = t;
+        var f = parseInt(localStorage.getItem('fontSize'), 10);
+        if (f) document.documentElement.style.setProperty('--app-font-size', f + 'px');
       } catch (e) {}
     })();
   </script>
@@ -32,7 +34,7 @@
   <meta name="apple-mobile-web-app-title" content="Math Notes" />
   <meta name="theme-color" content="#0A3190" />
 </head>
-<body style="font-size: 14px;">
+<body>
   <div class="layout">
     <div class="tabs-bar" id="tabs-bar"></div>
     <div class="calculator">
