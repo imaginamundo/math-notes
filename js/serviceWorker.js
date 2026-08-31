@@ -1,14 +1,16 @@
-const cacheName = 'math-notes-v9';
+const cacheName = 'math-notes-v13';
 const urlsToCache = [
   '../index.html',
   '../style.css',
   './calculate.js',
+  './currency.js',
   './format.js',
   './index.js',
   './parseLine.js',
   './renderInput.js',
   './renderResults.js',
   './renderTotal.js',
+  './tabs.js',
   './dom/cosmetic.js',
   './dom/help.js',
   './lib/math.bundle.min.js'
@@ -19,6 +21,7 @@ self.addEventListener('install', event => {
     caches.open(cacheName)
       .then(cache => cache.addAll(urlsToCache))
   );
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
@@ -31,21 +34,18 @@ self.addEventListener('activate', event => {
   );
 });
 
+// Network-first with a cache fallback: always serve fresh assets when the
+// server is reachable, falling back to the cached copy when offline.
 self.addEventListener('fetch', event => {
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
+  event.respondWith(
+    fetch(event.request)
+      .then(response => {
+        if (response.ok && event.request.url.startsWith(self.location.origin)) {
           const copy = response.clone();
           caches.open(cacheName).then(cache => cache.put(event.request, copy));
-          return response;
-        })
-        .catch(() => caches.match(event.request))
-    );
-    return;
-  }
-  event.respondWith(
-    caches.match(event.request)
-      .then(res => res || fetch(event.request))
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });

@@ -14,8 +14,71 @@ body {
 }
 .layout {
   display: grid;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: auto 1fr auto;
   height: 100%;
+}
+.tabs-bar {
+  display: flex;
+  align-items: stretch;
+  min-height: 2.2em;
+  background: #0A3190;
+  border-bottom: 1px solid rgba(255, 255, 255, .2);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.tab {
+  display: flex;
+  align-items: center;
+  padding: 0 .6em;
+  cursor: pointer;
+  user-select: none;
+  color: #949B93;
+  border-right: 1px solid rgba(255, 255, 255, .15);
+  white-space: nowrap;
+}
+.tab.active {
+  background: #FFF;
+  color: #0A3190;
+}
+.tab-name {
+  font: inherit;
+}
+.tab-close {
+  margin-left: .5em;
+  padding: 0 .3em;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1em;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 3px;
+}
+.tab-close:hover {
+  background: rgba(0, 0, 0, .12);
+}
+.tab-new {
+  margin-left: auto;
+  align-self: stretch;
+  padding: 0 .9em;
+  border: 0;
+  background: transparent;
+  color: #949B93;
+  font-size: 1.5em;
+  line-height: 1;
+  cursor: pointer;
+}
+.tab-new:hover {
+  color: #FFF;
+}
+.tab-rename {
+  font: inherit;
+  color: inherit;
+  background: #FFF;
+  border: 0;
+  outline: 1px solid #FFA800;
+  padding: .1em .3em;
+  min-width: 6em;
 }
 .calculator {
   display: grid;

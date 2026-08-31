@@ -4,8 +4,8 @@ import renderResults from './renderResults.js';
 import renderTotal from './renderTotal.js';
 import registerServiceWorker from './registerServiceWorker.js';
 import initHelpModal from './dom/help.js';
-
 import initFontControls from './dom/cosmetic.js';
+import initTabs from './tabs.js';
 
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');
@@ -20,13 +20,8 @@ function update() {
   renderTotal(totalNode, total);
 }
 
-contentEditableNode.focus();
-
 // Trigger changes
-contentEditableNode.addEventListener('input', () => {
-  window.localStorage.setItem('input', contentEditableNode.value);
-  update();
-});
+contentEditableNode.addEventListener('input', update);
 
 // Keep the highlighted overlay aligned with the visible input
 contentEditableNode.addEventListener('scroll', () => {
@@ -34,11 +29,7 @@ contentEditableNode.addEventListener('scroll', () => {
   viewNode.scrollLeft = contentEditableNode.scrollLeft;
 });
 
-const savedInput = window.localStorage.getItem('input');
-if (savedInput) {
-  contentEditableNode.value = savedInput;
-  update();
-}
+initTabs(contentEditableNode, update);
 
 initHelpModal(contentEditableNode);
 initFontControls();
