@@ -222,6 +222,20 @@ body {
 }
 button {
   font-size: 1em;
+  background: var(--color-primary);
+  color: var(--color-surface);
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+}
+button:hover {
+  filter: brightness(1.15);
+}
+/* Small icon buttons stay transparent */
+.tab-close,
+.modal-close {
+  background: transparent;
+  color: inherit;
 }
 .button-wrap {
   display: flex;
