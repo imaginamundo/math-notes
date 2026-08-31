@@ -1,4 +1,5 @@
 import initModal from './modal.js';
+import initExamples from './examples.js';
 
 function initHelpModal(contentEditableNode) {
   const helpButtonNode = document.getElementById('help-button');
@@ -11,6 +12,8 @@ function initHelpModal(contentEditableNode) {
     onOpen: updateActiveLink,
     onClose: () => contentEditableNode.focus(),
   });
+
+  initExamples(helpModalNode, contentEditableNode, close);
 
   function updateActiveLink() {
     const threshold = helpBodyNode.getBoundingClientRect().top + 40;
@@ -25,32 +28,7 @@ function initHelpModal(contentEditableNode) {
     });
   }
 
-  helpModalNode.querySelectorAll('.help-example').forEach((example) => {
-    const codeNode = example.querySelector('code');
-    if (codeNode) codeNode.textContent = example.dataset.expr;
-
-    const run = () => {
-      insertExample(contentEditableNode, example.dataset.expr);
-      close();
-    };
-    example.addEventListener('click', run);
-    example.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        run();
-      }
-    });
-  });
-
   helpBodyNode.addEventListener('scroll', updateActiveLink, { passive: true });
-}
-
-function insertExample(editableNode, expression) {
-  if (!expression) return;
-  const current = editableNode.value;
-  editableNode.value = current ? current.replace(/\s+$/, '') + '\n' + expression : expression;
-  editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-  editableNode.scrollTop = editableNode.scrollHeight;
 }
 
 export default initHelpModal;
