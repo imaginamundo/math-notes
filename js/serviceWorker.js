@@ -12,6 +12,7 @@ const urlsToCache = [
   './io.js',
   './modal.js',
   './parseLine.js',
+  './percentage.js',
   './preprocess.js',
   './scales.js',
   './wordOperators.js',
