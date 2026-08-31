@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build:mathjs": "deno bundle js/lib/math.js js/lib/math.bundle.js",
-    "test": "node --test test/"
+    "test": "node --test"
   },
   "devDependencies": {
     "mathjs": "7.1.0"
