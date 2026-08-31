@@ -44,6 +44,7 @@
           <button id="export-button" class="export">Export</button>
           <button id="import-button" class="import">Import</button>
           <span id="currency-status" class="currency-status" aria-live="polite"></span>
+          <button id="recipes-button" class="recipes">Recipes</button>
           <button id="help-button" class="help">Help</button>
           <a href="https://github.com/imaginamundo/math-notes" rel="noopener" target="_blank">GitHub</a>
         </span>
@@ -365,6 +366,72 @@
             </tbody>
           </table>
         </section>
+  </dialog>
+
+  <dialog id="recipes-modal" class="modal" aria-labelledby="recipes-title">
+    <header class="modal-header">
+      <h1 id="recipes-title" class="modal-title">Recipes</h1>
+      <button class="modal-close" data-modal-close aria-label="Close recipes">×</button>
+    </header>
+    <div class="modal-body">
+      <p>Ready-made calculations. Click one to add it to the editor and edit the values.</p>
+
+      <section class="help-section">
+        <h2>Restaurant payment split</h2>
+        <p>Split a bill evenly, including the tip.</p>
+        <div class="help-example" data-expr="bill = 120&#10;tip = bill * 10%&#10;people = 4&#10;(bill + tip) / people" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">last line returns 33</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Hours of work</h2>
+        <p>Gross pay for a given number of hours at an hourly rate.</p>
+        <div class="help-example" data-expr="hours = 40&#10;rate = 25&#10;hours * rate" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">last line returns 1000</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Rule of three</h2>
+        <p>Find the unknown term in a proportion: <code>a</code> is to <code>b</code> as <code>c</code> is to <code>x</code>.</p>
+        <div class="help-example" data-expr="a = 4&#10;b = 6&#10;c = 8&#10;b * c / a" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">last line returns 12</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Percentage discount</h2>
+        <p>Price after a percentage discount.</p>
+        <div class="help-example" data-expr="price = 80&#10;discount = 15%&#10;price - price * discount" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">last line returns 68</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Simple interest</h2>
+        <p>Interest earned on a principal over a number of years.</p>
+        <div class="help-example" data-expr="principal = 1000&#10;rate = 5%&#10;years = 3&#10;principal * rate * years" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">last line returns 150</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Fuel cost for a trip</h2>
+        <p>Cost of fuel for a distance at a given consumption and price per litre.</p>
+        <div class="help-example" data-expr="distance = 300&#10;consumption = 8&#10;fuelPrice = 1.7&#10;distance / 100 * consumption * fuelPrice" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">last line returns 40.8</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Body Mass Index</h2>
+        <p>BMI from weight in kg and height in metres.</p>
+        <div class="help-example" data-expr="weight = 70&#10;height = 1.75&#10;weight / height^2" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">last line returns ≈ 22.86</span>
+        </div>
+      </section>
+    </div>
   </dialog>
 </body>
 </html>

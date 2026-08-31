@@ -3,6 +3,7 @@ import renderInput from './render/renderInput.js';
 import renderTotal from './render/renderTotal.js';
 import registerServiceWorker from './registerServiceWorker.js';
 import initHelpModal from './ui/help.js';
+import initRecipes from './ui/recipes.js';
 import initFontControls from './ui/cosmetic.js';
 import initTabs from './ui/tabs.js';
 import initIo from './ui/io.js';
@@ -36,6 +37,7 @@ contentEditableNode.addEventListener('scroll', () => {
 initTabs(contentEditableNode, update);
 
 initHelpModal(contentEditableNode);
+initRecipes(contentEditableNode);
 initFontControls();
 initIo(contentEditableNode);
 initShortcuts(contentEditableNode);
