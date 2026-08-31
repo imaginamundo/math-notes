@@ -39,12 +39,12 @@ people = 4
 
 ## Keyboard shortcuts
 
-| Shortcut | Action |
-| --- | --- |
-| `⇧⌘C` / `Ctrl+Shift+C` | Copy the current line's result |
-| `⇧⌘E` / `Ctrl+Shift+E` | Export the active sheet |
-| `⇧⌘I` / `Ctrl+Shift+I` | Import a sheet |
-| `⇧⌘⌫` / `Ctrl+Shift+Backspace` | Clear the active sheet |
+| Shortcut                       | Action                         |
+| ------------------------------ | ------------------------------ |
+| `⇧⌘C` / `Ctrl+Shift+C`         | Copy the current line's result |
+| `⇧⌘E` / `Ctrl+Shift+E`         | Export the active sheet        |
+| `⇧⌘I` / `Ctrl+Shift+I`         | Import a sheet                 |
+| `⇧⌘⌫` / `Ctrl+Shift+Backspace` | Clear the active sheet         |
 
 The **Help** button opens the full reference with clickable examples.
 
@@ -61,6 +61,7 @@ math.js dependency is pre-bundled and committed in `js/lib/`.
 ### Updating math.js
 
 The pinned version lives in two places, keep them in sync:
+
 - the import in `js/lib/math.js`
 - the `mathjs` devDependency in `package.json`
 

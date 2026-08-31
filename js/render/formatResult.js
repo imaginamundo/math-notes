@@ -17,7 +17,7 @@ function formatUnit(unit) {
   let value;
   try {
     value = unit.toNumber();
-  } catch (error) {
+  } catch {
     value = unit.value;
   }
   const formatted = typeof value === 'number' ? formatNumber(value) : String(value);

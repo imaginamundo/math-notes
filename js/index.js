@@ -49,9 +49,11 @@ initFontControls();
 initIo(contentEditableNode);
 initShortcuts(contentEditableNode);
 
-window.addEventListener('currency:updated', event => {
+window.addEventListener('currency:updated', (event) => {
   update();
-  showCurrencyStatus(event.detail && event.detail.source === 'cached' ? 'rates: cached' : 'rates: live');
+  showCurrencyStatus(
+    event.detail && event.detail.source === 'cached' ? 'rates: cached' : 'rates: live'
+  );
 });
 
 window.addEventListener('currency:error', () => {

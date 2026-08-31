@@ -2,7 +2,7 @@ import { evaluateLines } from '../core/calculate.js';
 import formatResult from '../render/formatResult.js';
 
 function initShortcuts(editableNode) {
-  document.addEventListener('keydown', event => {
+  document.addEventListener('keydown', (event) => {
     const mod = event.metaKey || event.ctrlKey;
     if (!mod) return;
     const active = document.activeElement;

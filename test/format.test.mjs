@@ -2,8 +2,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 class ClassList {
-  constructor(el) { this.el = el; }
-  add(...names) { names.forEach(name => this.el._classes.add(name)); }
+  constructor(el) {
+    this.el = el;
+  }
+  add(...names) {
+    names.forEach((name) => this.el._classes.add(name));
+  }
 }
 class El {
   constructor(tag) {
@@ -13,11 +17,14 @@ class El {
     this.children = [];
     this.textContent = '';
   }
-  appendChild(child) { this.children.push(child); return child; }
+  appendChild(child) {
+    this.children.push(child);
+    return child;
+  }
 }
 globalThis.document = {
-  createElement: tag => new El(tag),
-  createTextNode: text => ({ nodeType: 3, textContent: String(text) })
+  createElement: (tag) => new El(tag),
+  createTextNode: (text) => ({ nodeType: 3, textContent: String(text) }),
 };
 
 const format = (await import('../js/render/format.js')).default;
@@ -46,20 +53,20 @@ test('comment rendering does not drop following lines', () => {
 
 test('identifiers, numbers and operators get their own classes', () => {
   const node = format.line('pizzas = 2');
-  const classes = node.children.filter(c => c._classes).map(c => c.textContent);
+  const classes = node.children.filter((c) => c._classes).map((c) => c.textContent);
   assert.deepEqual(classes, ['pizzas', '=', '2']);
 });
 
 test('currency symbols get their own class', () => {
   const node = format.line('R$5 to EUR');
   const classes = node.children
-    .filter(c => c._classes)
-    .map(c => ({ text: c.textContent, class: [...c._classes][0] }));
+    .filter((c) => c._classes)
+    .map((c) => ({ text: c.textContent, class: [...c._classes][0] }));
   assert.deepEqual(classes, [
     { text: 'R$', class: 'currency' },
     { text: '5', class: 'number' },
     { text: 'to', class: 'variable' },
-    { text: 'EUR', class: 'variable' }
+    { text: 'EUR', class: 'variable' },
   ]);
 });
 

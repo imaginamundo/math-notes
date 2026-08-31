@@ -8,7 +8,9 @@ const AGGREGATE_KEYWORDS = {
 function aggregateAbove(results, fromIndex, toIndex, mode) {
   const values = results
     .slice(fromIndex, toIndex)
-    .filter(({ type, value, aggregate }) => type === 'value' && !aggregate && Number(value) === value)
+    .filter(
+      ({ type, value, aggregate }) => type === 'value' && !aggregate && Number(value) === value
+    )
     .map(({ value }) => value);
   if (!values.length) return 0;
   const sum = values.reduce((acc, cur) => acc + cur);
@@ -17,7 +19,9 @@ function aggregateAbove(results, fromIndex, toIndex, mode) {
 
 function computeTotal(results) {
   const totalValues = results
-    .filter(({ type, value, aggregate }) => type === 'value' && !aggregate && Number(value) === value)
+    .filter(
+      ({ type, value, aggregate }) => type === 'value' && !aggregate && Number(value) === value
+    )
     .map(({ value }) => value);
   return totalValues.length ? totalValues.reduce((acc, cur) => acc + cur) : null;
 }

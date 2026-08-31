@@ -9,13 +9,18 @@ function generateId() {
 
 function createTab(prev, name) {
   const tab = { id: generateId(), name, content: '' };
-  return { ...prev, tabs: [...prev.tabs, tab], activeId: tab.id, nextTabNumber: prev.nextTabNumber + 1 };
+  return {
+    ...prev,
+    tabs: [...prev.tabs, tab],
+    activeId: tab.id,
+    nextTabNumber: prev.nextTabNumber + 1,
+  };
 }
 
 function closeTab(prev, id) {
-  const index = prev.tabs.findIndex(tab => tab.id === id);
+  const index = prev.tabs.findIndex((tab) => tab.id === id);
   if (index === -1) return prev;
-  const tabs = prev.tabs.filter(tab => tab.id !== id);
+  const tabs = prev.tabs.filter((tab) => tab.id !== id);
   let activeId = prev.activeId;
   if (activeId === id) {
     const next = tabs[Math.min(index, tabs.length - 1)];
@@ -25,7 +30,7 @@ function closeTab(prev, id) {
 }
 
 function renameTab(prev, id, name) {
-  return { ...prev, tabs: prev.tabs.map(tab => (tab.id === id ? { ...tab, name } : tab)) };
+  return { ...prev, tabs: prev.tabs.map((tab) => (tab.id === id ? { ...tab, name } : tab)) };
 }
 
 function setActiveTab(prev, id) {
@@ -33,15 +38,15 @@ function setActiveTab(prev, id) {
 }
 
 function setContent(prev, id, content) {
-  return { ...prev, tabs: prev.tabs.map(tab => (tab.id === id ? { ...tab, content } : tab)) };
+  return { ...prev, tabs: prev.tabs.map((tab) => (tab.id === id ? { ...tab, content } : tab)) };
 }
 
 function loadInitialState() {
   let saved = null;
   try {
     saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-  } catch (error) {
-    saved = null;
+  } catch {
+    // storage unavailable or malformed, fall back to the null default
   }
   if (saved && Array.isArray(saved.tabs) && saved.tabs.length) {
     return { ...saved, nextTabNumber: saved.nextTabNumber || saved.tabs.length + 1 };
@@ -50,7 +55,7 @@ function loadInitialState() {
   try {
     content = localStorage.getItem(LEGACY_KEY) || '';
     localStorage.removeItem(LEGACY_KEY);
-  } catch (error) {
+  } catch {
     // storage unavailable
   }
   const tab = { id: generateId(), name: 'Tab 1', content };
@@ -60,7 +65,7 @@ function loadInitialState() {
 function persist() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch (error) {
+  } catch {
     // storage unavailable
   }
 }
@@ -70,7 +75,7 @@ function initTabs(editableNode, onUpdate) {
   state = loadInitialState();
   persist();
 
-  const getActiveTab = () => state.tabs.find(tab => tab.id === state.activeId) || state.tabs[0];
+  const getActiveTab = () => state.tabs.find((tab) => tab.id === state.activeId) || state.tabs[0];
 
   editableNode.value = getActiveTab().content;
 
@@ -83,7 +88,7 @@ function initTabs(editableNode, onUpdate) {
     tabBarNode.innerHTML = '';
     tabBarNode.setAttribute('role', 'tablist');
     tabBarNode.setAttribute('aria-label', 'Worksheets');
-    state.tabs.forEach(tab => tabBarNode.appendChild(renderTab(tab)));
+    state.tabs.forEach((tab) => tabBarNode.appendChild(renderTab(tab)));
     tabBarNode.appendChild(renderNewButton());
   }
 
@@ -123,7 +128,7 @@ function initTabs(editableNode, onUpdate) {
     if (state.activeId === id) return;
     state = setContent(state, state.activeId, editableNode.value);
     state = setActiveTab(state, id);
-    editableNode.value = state.tabs.find(tab => tab.id === id).content;
+    editableNode.value = state.tabs.find((tab) => tab.id === id).content;
     persist();
     render();
     onUpdate();
@@ -141,7 +146,7 @@ function initTabs(editableNode, onUpdate) {
   }
 
   function handleClose(id) {
-    const tab = state.tabs.find(tab => tab.id === id);
+    const tab = state.tabs.find((tab) => tab.id === id);
     if (!tab) return;
     if (!window.confirm(`Close "${tab.name}"? Its content will be lost.`)) return;
     if (state.activeId === id) state = setContent(state, id, editableNode.value);
@@ -159,13 +164,13 @@ function initTabs(editableNode, onUpdate) {
     input.type = 'text';
     input.className = 'tab-rename';
     input.maxLength = 30;
-    input.value = state.tabs.find(tab => tab.id === id).name;
+    input.value = state.tabs.find((tab) => tab.id === id).name;
     nameNode.replaceWith(input);
     input.focus();
     input.select();
 
     let done = false;
-    const finish = save => {
+    const finish = (save) => {
       if (done) return;
       done = true;
       if (save) {
@@ -177,14 +182,14 @@ function initTabs(editableNode, onUpdate) {
       }
       render();
     };
-    input.addEventListener('keydown', event => {
+    input.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') finish(true);
       else if (event.key === 'Escape') finish(false);
     });
     input.addEventListener('blur', () => finish(true));
   }
 
-  tabBarNode.addEventListener('click', event => {
+  tabBarNode.addEventListener('click', (event) => {
     const closeButton = event.target.closest('.tab-close');
     if (closeButton) {
       handleClose(closeButton.closest('.tab').dataset.id);
@@ -198,16 +203,16 @@ function initTabs(editableNode, onUpdate) {
     if (event.target.closest('.tab-new')) handleNew();
   });
 
-  tabBarNode.addEventListener('dblclick', event => {
+  tabBarNode.addEventListener('dblclick', (event) => {
     const nameElement = event.target.closest('.tab-name');
     if (!nameElement) return;
     beginRename(nameElement.closest('.tab').dataset.id, nameElement);
   });
 
-  tabBarNode.addEventListener('keydown', event => {
+  tabBarNode.addEventListener('keydown', (event) => {
     const tabElement = event.target.closest('.tab');
     if (!tabElement) return;
-    const ids = state.tabs.map(tab => tab.id);
+    const ids = state.tabs.map((tab) => tab.id);
     const index = ids.indexOf(tabElement.dataset.id);
     let nextIndex = -1;
 

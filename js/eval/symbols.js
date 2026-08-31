@@ -1,30 +1,67 @@
 const CURRENCY_SYMBOLS = {
-  '$': 'USD',
+  $: 'USD',
   '€': 'EUR',
   '£': 'GBP',
   '¥': 'JPY',
   '₹': 'INR',
   '₺': 'TRY',
   '₩': 'KRW',
-  'R$': 'BRL',
+  R$: 'BRL',
 };
 
 const CURRENCY_CODES = new Set([
-  'AUD', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD',
-  'HUF', 'IDR', 'ILS', 'INR', 'ISK', 'JPY', 'KRW', 'MXN', 'MYR', 'NOK',
-  'NZD', 'PHP', 'PLN', 'RON', 'SEK', 'SGD', 'THB', 'TRY', 'USD', 'ZAR',
+  'AUD',
+  'BRL',
+  'CAD',
+  'CHF',
+  'CNY',
+  'CZK',
+  'DKK',
+  'EUR',
+  'GBP',
+  'HKD',
+  'HUF',
+  'IDR',
+  'ILS',
+  'INR',
+  'ISK',
+  'JPY',
+  'KRW',
+  'MXN',
+  'MYR',
+  'NOK',
+  'NZD',
+  'PHP',
+  'PLN',
+  'RON',
+  'SEK',
+  'SGD',
+  'THB',
+  'TRY',
+  'USD',
+  'ZAR',
 ]);
 
 const SYMBOLS = Object.keys(CURRENCY_SYMBOLS).sort((a, b) => b.length - a.length);
-const SYMBOL_SOURCE = SYMBOLS.map(symbol => symbol.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+const SYMBOL_SOURCE = SYMBOLS.map((symbol) => symbol.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join(
+  '|'
+);
 const SYMBOL_AFTER_NUMBER = new RegExp(`(\\d[\\d.]*)\\s*(${SYMBOL_SOURCE})`, 'g');
 const SYMBOL_BEFORE_NUMBER = new RegExp(`(${SYMBOL_SOURCE})\\s*(\\d[\\d.]*)`, 'g');
 const CODE_PATTERN = /[A-Za-z]{3}/g;
 
 function preprocessSymbols(expression) {
-  return uppercaseCurrencyCodes(expression
-    .replace(SYMBOL_AFTER_NUMBER, (match, number, symbol) => `${number} ${CURRENCY_SYMBOLS[symbol]}`)
-    .replace(SYMBOL_BEFORE_NUMBER, (match, symbol, number) => `${number} ${CURRENCY_SYMBOLS[symbol]}`));
+  return uppercaseCurrencyCodes(
+    expression
+      .replace(
+        SYMBOL_AFTER_NUMBER,
+        (match, number, symbol) => `${number} ${CURRENCY_SYMBOLS[symbol]}`
+      )
+      .replace(
+        SYMBOL_BEFORE_NUMBER,
+        (match, symbol, number) => `${number} ${CURRENCY_SYMBOLS[symbol]}`
+      )
+  );
 }
 
 function uppercaseCurrencyCodes(expression) {

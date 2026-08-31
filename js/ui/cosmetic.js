@@ -7,11 +7,11 @@ function initFontControls() {
   const fontSize = {
     min: 10,
     max: 80,
-    current: 14
+    current: 14,
   };
   function setFontSize() {
     window.localStorage.fontSize = fontSize.current;
-    document.body.style.fontSize = `${ fontSize.current }px`;
+    document.body.style.fontSize = `${fontSize.current}px`;
   }
   fontMinusNode.addEventListener('click', () => {
     if (fontSize.current <= fontSize.min) return;

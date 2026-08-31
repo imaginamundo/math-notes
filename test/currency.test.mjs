@@ -59,7 +59,7 @@ test('registerRates creates the base unit and overrides the rest', () => {
   const math = {
     createUnit(name, definition, options) {
       created.push({ name, definition: definition && definition.definition, options });
-    }
+    },
   };
 
   registerRates(math, { base: 'EUR', rates: { USD: 1.1596, GBP: 0.85662 } });
@@ -77,7 +77,11 @@ test('registerRates creates the base unit and overrides the rest', () => {
 });
 
 test('registerRates ignores data with a foreign base', () => {
-  const math = { createUnit: () => { throw new Error('should not be called'); } };
+  const math = {
+    createUnit: () => {
+      throw new Error('should not be called');
+    },
+  };
   assert.doesNotThrow(() => registerRates(math, { base: 'USD', rates: { EUR: 0.9 } }));
 });
 
@@ -91,6 +95,10 @@ test('currency conversion evaluates through the registered units', () => {
 
   closeTo(math.evaluate('100 USD to EUR').toNumeric('EUR'), 86.23663332183511, 'USD to EUR');
   closeTo(math.evaluate('100 GBP to JPY').toNumeric('JPY'), 21619.85477808129, 'GBP to JPY');
-  closeTo(math.evaluate(preprocessSymbols('$50 to GBP')).toNumeric('GBP'), 36.9360124180752, 'symbol USD to GBP');
+  closeTo(
+    math.evaluate(preprocessSymbols('$50 to GBP')).toNumeric('GBP'),
+    36.9360124180752,
+    'symbol USD to GBP'
+  );
   closeTo(math.evaluate('1 EUR in USD').toNumeric('USD'), 1.1596, 'EUR to USD');
 });

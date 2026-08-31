@@ -22,7 +22,10 @@ test('closeTab removes a non-active tab without changing the active tab', () => 
   const next = closeTab(baseState(), 'b');
   assert.equal(next.tabs.length, 2);
   assert.equal(next.activeId, 'a');
-  assert.deepEqual(next.tabs.map(t => t.id), ['a', 'c']);
+  assert.deepEqual(
+    next.tabs.map((t) => t.id),
+    ['a', 'c']
+  );
 });
 
 test('closeTab activates the right neighbour when closing the active tab', () => {

@@ -20,12 +20,12 @@ function initHelpModal(contentEditableNode) {
     for (const section of sections) {
       if (atBottom || section.getBoundingClientRect().top <= threshold) currentId = section.id;
     }
-    navLinks.forEach(link => {
+    navLinks.forEach((link) => {
       link.classList.toggle('active', link.getAttribute('href') === '#' + currentId);
     });
   }
 
-  helpModalNode.querySelectorAll('.help-example').forEach(example => {
+  helpModalNode.querySelectorAll('.help-example').forEach((example) => {
     const codeNode = example.querySelector('code');
     if (codeNode) codeNode.textContent = example.dataset.expr;
 
@@ -34,7 +34,7 @@ function initHelpModal(contentEditableNode) {
       close();
     };
     example.addEventListener('click', run);
-    example.addEventListener('keydown', event => {
+    example.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
         run();

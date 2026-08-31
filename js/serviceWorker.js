@@ -26,36 +26,34 @@ const urlsToCache = [
   './ui/tabs.js',
   './ui/cosmetic.js',
   './ui/help.js',
-  './lib/math.bundle.min.js'
+  './lib/math.bundle.min.js',
 ];
 
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(cacheName)
-      .then(cache => cache.addAll(urlsToCache))
-  );
+self.addEventListener('install', (event) => {
+  event.waitUntil(caches.open(cacheName).then((cache) => cache.addAll(urlsToCache)));
   self.skipWaiting();
 });
 
-self.addEventListener('activate', event => {
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(
-        keys.filter(key => key !== cacheName).map(key => caches.delete(key))
-      ))
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(keys.filter((key) => key !== cacheName).map((key) => caches.delete(key)))
+      )
       .then(() => self.clients.claim())
   );
 });
 
 // Network-first with a cache fallback: always serve fresh assets when the
 // server is reachable, falling back to the cached copy when offline.
-self.addEventListener('fetch', event => {
+self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
-      .then(response => {
+      .then((response) => {
         if (response.ok && event.request.url.startsWith(self.location.origin)) {
           const copy = response.clone();
-          caches.open(cacheName).then(cache => cache.put(event.request, copy));
+          caches.open(cacheName).then((cache) => cache.put(event.request, copy));
         }
         return response;
       })

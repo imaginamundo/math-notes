@@ -12,7 +12,7 @@ test('parseLine splits a plain expression', () => {
     rhs: '',
     isAssignment: false,
     equalsIndex: -1,
-    title: ''
+    title: '',
   });
 });
 
@@ -93,7 +93,7 @@ test('evaluateLines stores derived variables as numbers', () => {
     'pizzaPrice = 30',
     'people = 4',
     'costEach = (pizzas * pizzaPrice) / people',
-    'costEach * 2'
+    'costEach * 2',
   ]);
   assert.equal(results[3].value, 15);
   assert.equal(results[4].value, 30);
@@ -113,10 +113,7 @@ test('evaluateLines tags evaluation errors', () => {
 });
 
 test('evaluateLines supports function variables', () => {
-  const { results } = evaluateLines([
-    'myCustomFunction = f(x) = x * 2',
-    'myCustomFunction(4)'
-  ]);
+  const { results } = evaluateLines(['myCustomFunction = f(x) = x * 2', 'myCustomFunction(4)']);
   assert.equal(results[0].type, 'assignment');
   assert.equal(results[0].value, undefined);
   assert.equal(results[1].value, 8);
@@ -130,7 +127,8 @@ test('evaluateLines keeps Infinity and null as results', () => {
 
 test('evaluateLines computes a total that excludes assignments', () => {
   assert.equal(
-    evaluateLines(['pizzas = 2', 'pizzaPrice = 30', 'people = 4', '(pizzas * pizzaPrice) / people']).total,
+    evaluateLines(['pizzas = 2', 'pizzaPrice = 30', 'people = 4', '(pizzas * pizzaPrice) / people'])
+      .total,
     15
   );
   assert.equal(evaluateLines(['x = 5', 'y = 6', 'x + y']).total, 11);
@@ -184,7 +182,15 @@ test('evaluateLines aggregate of nothing is 0', () => {
 });
 
 test('evaluateLines supports Numi function aliases', () => {
-  const { results } = evaluateLines(['ln(e)', 'fact(5)', 'arcsin(0.5)', 'arccos(1)', 'arctan(1)', 'root(8, 3)', 'cbrt(27)']);
+  const { results } = evaluateLines([
+    'ln(e)',
+    'fact(5)',
+    'arcsin(0.5)',
+    'arccos(1)',
+    'arctan(1)',
+    'root(8, 3)',
+    'cbrt(27)',
+  ]);
   assert.ok(Math.abs(results[0].value - 1) < 1e-9);
   assert.equal(results[1].value, 120);
   assert.ok(Math.abs(results[2].value - Math.PI / 6) < 1e-9);

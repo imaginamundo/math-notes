@@ -69,7 +69,7 @@ function evaluateLines(lines) {
 
   return {
     results,
-    total: computeTotal(results)
+    total: computeTotal(results),
   };
 }
 

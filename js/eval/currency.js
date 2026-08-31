@@ -7,7 +7,7 @@ const STORAGE_KEY = 'math-notes-currency-rates';
 function ensureBaseUnit(math) {
   try {
     math.createUnit(BASE);
-  } catch (error) {
+  } catch {
     // base unit already exists
   }
 }
@@ -20,7 +20,7 @@ function registerRates(math, data) {
     CURRENCY_CODES.add(code.toUpperCase());
     try {
       math.createUnit(code, { definition: `${1 / perBase} ${BASE}` }, { override: true });
-    } catch (error) {
+    } catch {
       // skip codes that cannot be registered
     }
   }
@@ -31,7 +31,7 @@ function loadCached() {
   try {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
     return parsed && parsed.base && parsed.rates ? parsed : null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -39,7 +39,7 @@ function loadCached() {
 function save(data) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, fetchedAt: Date.now() }));
-  } catch (error) {
+  } catch {
     // storage unavailable
   }
 }
@@ -68,11 +68,11 @@ function initCurrency(math) {
   if (cached) registerRates(math, cached);
 
   fetch(API_URL)
-    .then(res => {
+    .then((res) => {
       if (!res.ok) throw new Error(String(res.status));
       return res.json();
     })
-    .then(data => {
+    .then((data) => {
       save(data);
       registerRates(math, data);
       notify('currency:updated', { source: 'live' });

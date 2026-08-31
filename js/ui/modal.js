@@ -15,12 +15,12 @@ function initModal(dialogNode, openButtonNode, { onOpen, onClose } = {}) {
 
   openButtonNode.addEventListener('click', open);
 
-  dialogNode.querySelectorAll('[data-modal-close]').forEach(button => {
+  dialogNode.querySelectorAll('[data-modal-close]').forEach((button) => {
     button.addEventListener('click', close);
   });
 
   // Clicking the backdrop targets the dialog element itself.
-  dialogNode.addEventListener('click', event => {
+  dialogNode.addEventListener('click', (event) => {
     if (event.target === dialogNode) close();
   });
 
