@@ -1,4 +1,4 @@
-import { preprocessSymbols } from './currency.js';
+import { preprocessSymbols } from './symbols.js';
 import { preprocessScales } from './scales.js';
 import { preprocessPercent } from './percentage.js';
 import { preprocessWordOps } from './wordOperators.js';

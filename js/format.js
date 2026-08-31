@@ -1,9 +1,10 @@
 import parseLine from './parseLine.js';
+import { SYMBOL_SOURCE } from './symbols.js';
 
 const RULES = {
   whitespace: /^\s+/,
   number: /^\d*\.?\d+(e[+-]?\d+)?/i,
-  currency: /^(?:R\$|\$|€|£|¥|₹|₺|₩)/,
+  currency: new RegExp(`^(?:${SYMBOL_SOURCE})`),
   identifier: /^[A-Za-z_][A-Za-z0-9_]*/,
   operator: /^[+\-*/^=(),%!<>]/,
 };

@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { create, all } from '../js/lib/math.bundle.min.js';
-import { preprocessSymbols, registerRates } from '../js/currency.js';
+import { preprocessSymbols } from '../js/symbols.js';
+import { registerRates } from '../js/currency.js';
 
 test('preprocessSymbols converts a symbol before a number', () => {
   assert.equal(preprocessSymbols('$5 to EUR'), '5 USD to EUR');
