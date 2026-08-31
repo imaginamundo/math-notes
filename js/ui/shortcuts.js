@@ -21,8 +21,10 @@ function initShortcuts(editableNode) {
       document.getElementById('import-button').click();
     } else if (shift && key === 'backspace') {
       event.preventDefault();
-      editableNode.value = '';
-      editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+      if (!editableNode.value || window.confirm('Clear the active sheet?')) {
+        editableNode.value = '';
+        editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+      }
     }
   });
 }
