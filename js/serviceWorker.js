@@ -4,6 +4,7 @@ const urlsToCache = [
   '../style.css',
   './aliases.js',
   './calculate.js',
+  './cssUnits.js',
   './currency.js',
   './format.js',
   './formatResult.js',

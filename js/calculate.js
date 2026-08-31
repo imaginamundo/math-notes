@@ -2,9 +2,11 @@ import { create, all } from './lib/math.bundle.min.js';
 import parseLine from './parseLine.js';
 import initCurrency, { preprocessSymbols } from './currency.js';
 import initAliases from './aliases.js';
+import initCssUnits from './cssUnits.js';
 
 const math = create(all);
 initAliases(math);
+initCssUnits(math);
 
 initCurrency(math, () => {
   if (typeof window !== 'undefined') {
