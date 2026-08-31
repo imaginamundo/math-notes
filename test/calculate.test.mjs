@@ -184,7 +184,7 @@ test('evaluateLines aggregate of nothing is 0', () => {
 test('evaluateLines resolves aggregates inside expressions', () => {
   const { results } = evaluateLines(['10 + 10 + 20', 'a = sum', 'a']);
   assert.equal(results[2].value, 40);
-  const avg = evaluateLines(['10', '20', '30', 'avg = average']);
+  const avg = evaluateLines(['10', '20', '30', 'm = average']);
   assert.equal(avg.results[3].value, 20);
   assert.equal(evaluateLines(['10', '20', 'sum * 2']).results[2].value, 60);
   assert.equal(evaluateLines(['5', '10', 'sum + prev']).results[2].value, 25);
@@ -192,6 +192,14 @@ test('evaluateLines resolves aggregates inside expressions', () => {
 
 test('evaluateLines keeps the mathjs sum function callable', () => {
   assert.equal(evaluateLines(['sum([1, 2, 3])']).results[0].value, 6);
+});
+
+test('evaluateLines rejects assigning to aggregate keywords', () => {
+  const { results } = evaluateLines(['sum = 5', 'average = 3', 'total']);
+  assert.equal(results[0].type, 'error');
+  assert.match(results[0].value, /reserved/);
+  assert.equal(results[1].type, 'error');
+  assert.equal(results[2].value, 0);
 });
 
 test('evaluateLines supports Numi function aliases', () => {

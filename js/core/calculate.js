@@ -73,6 +73,12 @@ function evaluateLines(lines) {
     if (line.trim() === '') lastBlankIndex = i;
 
     const parsed = parseLine(line);
+
+    if (parsed.isAssignment && AGGREGATE_KEYWORDS[parsed.label.toLowerCase()]) {
+      results.push({ type: 'error', value: `"${parsed.label}" is a reserved word` });
+      continue;
+    }
+
     const keyword = AGGREGATE_KEYWORDS[parsed.code.trim().toLowerCase()];
 
     if (keyword) {
