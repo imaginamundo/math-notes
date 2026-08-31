@@ -15,8 +15,11 @@ function ghostResult(result) {
   if (!result || result.type === 'assignment' || result.value === undefined) return null;
   const span = document.createElement('span');
   span.className = 'ghost-result' + (result.type === 'error' ? ' error' : '');
-  const text = result.type === 'error' ? result.value : `→ ${formatResult(result.value)}`;
-  span.textContent = truncate(text, 80);
+  const text =
+    result.type === 'error'
+      ? truncate(result.value, 80)
+      : `→ ${truncate(formatResult(result.value), 80)}`;
+  span.textContent = text;
   return span;
 }
 
