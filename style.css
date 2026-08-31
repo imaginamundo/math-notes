@@ -319,6 +319,7 @@ button:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
   column-gap: 0.75em;
   row-gap: 0.4em;
@@ -328,12 +329,11 @@ button:hover {
 }
 .actions {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
+  column-gap: 0.5em;
+  row-gap: 0.4em;
   white-space: nowrap;
-  margin-left: auto;
-}
-.actions > * + * {
-  margin-left: 0.5em;
 }
 .currency-status {
   display: none;
@@ -352,7 +352,7 @@ button:hover {
     opacity: 1;
   }
 }
-.footer button + button {
+.size-controls button + button {
   margin-left: 0.5em;
 }
 /* Modal component (generic, reusable) */
