@@ -40,6 +40,6 @@ inputNode.addEventListener('click', (event) => {
   }
 });
 
-controlHelpModal();
+controlHelpModal(contentEditableNode);
 
 registerServiceWorker();
