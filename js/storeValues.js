@@ -16,7 +16,7 @@ function storeValues(input) {
     
     try {
       result = input && math.evaluate(input.trim(), scope);
-      value = value && math.evaluate(value);
+      value = value && math.evaluate(value, scope);
     } catch (error) {};
     
     if (label && value) variable = { label, value };
