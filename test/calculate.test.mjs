@@ -125,6 +125,11 @@ test('evaluateLines keeps Infinity and null as results', () => {
   assert.equal(results[1].value, null);
 });
 
+test('evaluateLines total excludes non-finite values', () => {
+  assert.equal(evaluateLines(['1 / 0', '10']).total, 10);
+  assert.equal(evaluateLines(['1 / 0', '10', 'sum']).results[2].value, 10);
+});
+
 test('evaluateLines computes a total that excludes assignments', () => {
   assert.equal(
     evaluateLines(['pizzas = 2', 'pizzaPrice = 30', 'people = 4', '(pizzas * pizzaPrice) / people'])
