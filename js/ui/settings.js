@@ -23,6 +23,9 @@ function currentTheme() {
 
 function applyTheme(id) {
   document.documentElement.dataset.theme = id;
+  const theme = THEMES.find((entry) => entry.id === id);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (theme && meta) meta.setAttribute('content', theme.swatch[0]);
   try {
     localStorage.setItem(STORAGE_KEY, id);
   } catch {
