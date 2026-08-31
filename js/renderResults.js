@@ -1,12 +1,7 @@
-import { results } from './store/results.js';
-
-function printResults(resultsNode) {
+function renderResults(resultsNode, results) {
   resultsNode.innerHTML = '';
-  results.forEach(({ type, value }) => {
-    if (type === 'break') {
-      resultsNode.appendChild(document.createElement('br'));
-      return;
-    }
+  results.forEach(({ type, value }, index) => {
+    if (index > 0) resultsNode.appendChild(document.createElement('br'));
     if (type === 'error') {
       const span = document.createElement('span');
       span.classList.add('error');
@@ -20,4 +15,4 @@ function printResults(resultsNode) {
   });
 }
 
-export default printResults;
+export default renderResults;

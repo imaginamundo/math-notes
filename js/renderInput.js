@@ -1,8 +1,11 @@
-import { view } from './store/view.js';
+import format from './format.js';
 
-function printInputs(viewNode) {
+function renderInput(viewNode, lines) {
   viewNode.innerHTML = '';
-  view.forEach(node => viewNode.appendChild(node));
+  lines.forEach((line, index) => {
+    if (index > 0) viewNode.appendChild(document.createElement('br'));
+    viewNode.appendChild(format.line(line));
+  });
 }
 
-export default printInputs;
+export default renderInput;

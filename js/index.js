@@ -1,4 +1,4 @@
-import linesLoop from './linesLoop.js';
+import { evaluateLines } from './calculate.js';
 import renderInput from './renderInput.js';
 import renderResults from './renderResults.js';
 import renderTotal from './renderTotal.js';
@@ -13,15 +13,6 @@ const viewNode = document.getElementById('view');
 const resultsNode = document.getElementById('results');
 const totalNode = document.getElementById('total');
 
-contentEditableNode.focus();
-
-function update() {
-  linesLoop(contentEditableNode.childNodes);
-  renderInput(viewNode);
-  renderResults(resultsNode);
-  renderTotal(totalNode);
-}
-
 function serializeInput() {
   return [...contentEditableNode.childNodes]
     .map(node => (node.nodeName === 'BR' ? '\n' : node.textContent))
@@ -35,6 +26,16 @@ function setInputText(text) {
     if (line) contentEditableNode.appendChild(document.createTextNode(line));
   });
 }
+
+function update() {
+  const lines = serializeInput().split('\n');
+  const { results, total } = evaluateLines(lines);
+  renderInput(viewNode, lines);
+  renderResults(resultsNode, results);
+  renderTotal(totalNode, total);
+}
+
+contentEditableNode.focus();
 
 // Trigger changes
 contentEditableNode.addEventListener('input', () => {
