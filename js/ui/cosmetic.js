@@ -10,7 +10,7 @@ function initFontControls() {
     current: 14,
   };
   function setFontSize() {
-    window.localStorage.fontSize = fontSize.current;
+    window.localStorage.setItem('math-notes-font-size', String(fontSize.current));
     document.documentElement.style.setProperty('--app-font-size', `${fontSize.current}px`);
   }
   fontMinusNode.addEventListener('click', () => {
@@ -29,10 +29,19 @@ function initFontControls() {
     setFontSize();
   });
 
-  const saved = parseInt(window.localStorage.fontSize, 10);
-  if (saved) {
-    fontSize.current = Math.min(fontSize.max, Math.max(fontSize.min, saved));
+  const saved = parseInt(window.localStorage.getItem('math-notes-font-size'), 10);
+  const legacy = parseInt(window.localStorage.getItem('fontSize'), 10);
+  const current = saved || legacy;
+  if (current) {
+    fontSize.current = Math.min(fontSize.max, Math.max(fontSize.min, current));
     setFontSize();
+    if (!saved && legacy) {
+      try {
+        window.localStorage.removeItem('fontSize');
+      } catch {
+        // storage unavailable
+      }
+    }
   }
 }
 

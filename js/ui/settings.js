@@ -6,6 +6,7 @@ const RESET_KEYS = [
   'math-notes-tabs',
   'math-notes-currency-rates',
   'input',
+  'math-notes-font-size',
   'fontSize',
 ];
 
