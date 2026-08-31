@@ -1,5 +1,5 @@
-import { evaluateLines } from './calculate.js';
-import formatResult from './formatResult.js';
+import { evaluateLines } from '../core/calculate.js';
+import formatResult from '../render/formatResult.js';
 
 function initShortcuts(editableNode) {
   document.addEventListener('keydown', event => {

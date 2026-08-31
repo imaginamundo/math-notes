@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluateLines } from '../js/calculate.js';
+import { evaluateLines } from '../js/core/calculate.js';
 
 test('evaluateLines converts unix timestamps to dates', () => {
   const { results } = evaluateLines(['fromunix(0)']);

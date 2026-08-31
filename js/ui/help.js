@@ -1,4 +1,4 @@
-import initModal from '../modal.js';
+import initModal from './modal.js';
 
 function initHelpModal(contentEditableNode) {
   const helpButtonNode = document.getElementById('help-button');

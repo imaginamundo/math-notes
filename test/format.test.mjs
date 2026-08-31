@@ -20,8 +20,8 @@ globalThis.document = {
   createTextNode: text => ({ nodeType: 3, textContent: String(text) })
 };
 
-const format = (await import('../js/format.js')).default;
-const renderInput = (await import('../js/renderInput.js')).default;
+const format = (await import('../js/render/format.js')).default;
+const renderInput = (await import('../js/render/renderInput.js')).default;
 
 test('a line with a comment renders without throwing', () => {
   const node = format.line('1 + 1 # hello');

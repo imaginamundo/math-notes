@@ -1,13 +1,13 @@
-import { evaluateLines } from './calculate.js';
-import renderInput from './renderInput.js';
-import renderResults from './renderResults.js';
-import renderTotal from './renderTotal.js';
+import { evaluateLines } from './core/calculate.js';
+import renderInput from './render/renderInput.js';
+import renderResults from './render/renderResults.js';
+import renderTotal from './render/renderTotal.js';
 import registerServiceWorker from './registerServiceWorker.js';
-import initHelpModal from './dom/help.js';
-import initFontControls from './dom/cosmetic.js';
-import initTabs from './tabs.js';
-import initIo from './io.js';
-import initShortcuts from './shortcuts.js';
+import initHelpModal from './ui/help.js';
+import initFontControls from './ui/cosmetic.js';
+import initTabs from './ui/tabs.js';
+import initIo from './ui/io.js';
+import initShortcuts from './ui/shortcuts.js';
 
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');

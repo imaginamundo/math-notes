@@ -1,7 +1,7 @@
-import { preprocessSymbols } from './symbols.js';
-import { preprocessScales } from './scales.js';
-import { preprocessPercent } from './percentage.js';
-import { preprocessWordOps } from './wordOperators.js';
+import { preprocessSymbols } from '../eval/symbols.js';
+import { preprocessScales } from '../eval/scales.js';
+import { preprocessPercent } from '../eval/percentage.js';
+import { preprocessWordOps } from '../eval/wordOperators.js';
 
 // Applied in order. Scales must run before currency so `$2k` expands to
 // `2000 USD`; percentage before word operators so its `of|on|off` phrases

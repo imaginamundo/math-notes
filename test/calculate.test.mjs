@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluateLines, evaluateLine } from '../js/calculate.js';
-import parseLine from '../js/parseLine.js';
+import { evaluateLines, evaluateLine } from '../js/core/calculate.js';
+import parseLine from '../js/core/parseLine.js';
 
 test('parseLine splits a plain expression', () => {
   const parsed = parseLine('1 + 1');

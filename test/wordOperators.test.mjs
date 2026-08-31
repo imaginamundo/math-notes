@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluateLines } from '../js/calculate.js';
-import { preprocessWordOps } from '../js/wordOperators.js';
+import { evaluateLines } from '../js/core/calculate.js';
+import { preprocessWordOps } from '../js/eval/wordOperators.js';
 
 function valueOf(line) {
   return evaluateLines([line]).results[0].value;

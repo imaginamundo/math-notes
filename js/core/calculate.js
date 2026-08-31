@@ -1,9 +1,9 @@
-import { create, all } from './lib/math.bundle.min.js';
+import { create, all } from '../lib/math.bundle.min.js';
 import parseLine from './parseLine.js';
-import initCurrency from './currency.js';
-import initAliases from './aliases.js';
-import initCssUnits from './cssUnits.js';
-import initDatetime from './datetime.js';
+import initCurrency from '../eval/currency.js';
+import initAliases from '../eval/aliases.js';
+import initCssUnits from '../eval/cssUnits.js';
+import initDatetime from '../eval/datetime.js';
 import preprocess from './preprocess.js';
 import { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal } from './aggregate.js';
 

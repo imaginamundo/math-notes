@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createTab, closeTab, renameTab, setActiveTab, setContent } from '../js/tabs.js';
+import { createTab, closeTab, renameTab, setActiveTab, setContent } from '../js/ui/tabs.js';
 
 function baseState() {
   const a = { id: 'a', name: 'A', content: '1' };

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import formatResult from '../js/formatResult.js';
+import formatResult from '../js/render/formatResult.js';
 import { create, all } from '../js/lib/math.bundle.min.js';
 
 const math = create(all);

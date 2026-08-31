@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { indexOfLineAt } from '../js/shortcuts.js';
+import { indexOfLineAt } from '../js/ui/shortcuts.js';
 
 test('indexOfLineAt resolves the line under a caret position', () => {
   assert.equal(indexOfLineAt('a\nb\nc', 0), 0);

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluateLines } from '../js/calculate.js';
+import { evaluateLines } from '../js/core/calculate.js';
 
 function valueOf(line) {
   return evaluateLines([line]).results[0].value;

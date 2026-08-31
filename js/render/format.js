@@ -1,5 +1,5 @@
-import parseLine from './parseLine.js';
-import { SYMBOL_SOURCE } from './symbols.js';
+import parseLine from '../core/parseLine.js';
+import { SYMBOL_SOURCE } from '../eval/symbols.js';
 
 const RULES = {
   whitespace: /^\s+/,
