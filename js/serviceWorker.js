@@ -1,4 +1,4 @@
-const cacheName = 'math-notes-v13';
+const cacheName = 'math-notes-v14';
 const urlsToCache = [
   '../index.html',
   '../style.css',
@@ -16,6 +16,7 @@ const urlsToCache = [
   './core/parseLine.js',
   './eval/percentage.js',
   './core/preprocess.js',
+  './registerServiceWorker.js',
   './eval/scales.js',
   './eval/symbols.js',
   './eval/wordOperators.js',
