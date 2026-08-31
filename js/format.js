@@ -1,3 +1,5 @@
+import parseLine from './parseLine.js';
+
 function createWrapper(type, text) {
   const wrapper = document.createElement('span');
   wrapper.classList.add(type);
@@ -7,21 +9,17 @@ function createWrapper(type, text) {
 
 function line(text) {
   const wrapper = createWrapper('line', '');
+  const { code, comment, equalsIndex } = parseLine(text);
 
-  const hashIndex = text.indexOf('#');
-  const commentText = hashIndex === -1 ? '' : text.slice(hashIndex);
-  const codeText = hashIndex === -1 ? text : text.slice(0, hashIndex);
-
-  if (codeText) {
-    const equalsIndex = codeText.indexOf('=');
+  if (code) {
     if (equalsIndex > 0) {
-      wrapper.appendChild(variable(codeText.slice(0, equalsIndex)));
-      wrapper.appendChild(document.createTextNode(codeText.slice(equalsIndex)));
+      wrapper.appendChild(variable(code.slice(0, equalsIndex)));
+      wrapper.appendChild(document.createTextNode(code.slice(equalsIndex)));
     } else {
-      wrapper.appendChild(document.createTextNode(codeText));
+      wrapper.appendChild(document.createTextNode(code));
     }
   }
-  if (commentText) wrapper.appendChild(comment(commentText));
+  if (comment) wrapper.appendChild(comment(comment));
 
   return wrapper;
 }
