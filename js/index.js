@@ -1,7 +1,7 @@
 import linesLoop from './linesLoop.js';
-import printInputs from './printInputs.js';
-import printResults from './printResults.js';
-import printTotal from './printTotal.js';
+import renderInput from './renderInput.js';
+import renderResults from './renderResults.js';
+import renderTotal from './renderTotal.js';
 import registerServiceWorker from './registerServiceWorker.js';
 import controlHelpModal from './dom/help.js';
 
@@ -17,9 +17,9 @@ contentEditableNode.focus();
 
 function update() {
   linesLoop(contentEditableNode.childNodes);
-  printInputs(viewNode);
-  printResults(resultsNode);
-  printTotal(totalNode);
+  renderInput(viewNode);
+  renderResults(resultsNode);
+  renderTotal(totalNode);
 }
 
 function serializeInput() {

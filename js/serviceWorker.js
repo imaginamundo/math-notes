@@ -1,13 +1,13 @@
-const cacheName = 'math-notes-v2';
+const cacheName = 'math-notes-v3';
 const urlsToCache = [
   '../index.html',
   '../style.css',
   './format.js',
   './index.js',
   './linesLoop.js',
-  './printInputs.js',
-  './printResults.js',
-  './printTotal.js',
+  './renderInput.js',
+  './renderResults.js',
+  './renderTotal.js',
   './storeValues.js',
   './dom/cosmetic.js',
   './dom/help.js',
