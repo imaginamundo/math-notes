@@ -3,9 +3,9 @@ import renderInput from './renderInput.js';
 import renderResults from './renderResults.js';
 import renderTotal from './renderTotal.js';
 import registerServiceWorker from './registerServiceWorker.js';
-import controlHelpModal from './dom/help.js';
+import initHelpModal from './dom/help.js';
 
-import './dom/cosmetic.js';
+import initFontControls from './dom/cosmetic.js';
 
 const inputNode = document.getElementById('input');
 const contentEditableNode = document.getElementById('content-editable');
@@ -76,6 +76,7 @@ if (savedInput) {
   update();
 }
 
-controlHelpModal(contentEditableNode);
+initHelpModal(contentEditableNode);
+initFontControls();
 
 registerServiceWorker();

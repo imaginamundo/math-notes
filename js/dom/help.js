@@ -1,4 +1,4 @@
-function controlHelpModal(contentEditableNode) {
+function initHelpModal(contentEditableNode) {
   const helpButtonNode = document.getElementById('help-button');
   const helpModalNode = document.getElementById('help-modal');
 
@@ -12,4 +12,4 @@ function controlHelpModal(contentEditableNode) {
   });
 }
 
-export default controlHelpModal;
+export default initHelpModal;
