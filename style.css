@@ -191,31 +191,43 @@ button {
 }
 .button-wrap {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   width: 100%;
+  column-gap: 0.75em;
+  row-gap: 0.4em;
 }
-.button-wrap .help {
+.size-controls {
+  white-space: nowrap;
+}
+.actions {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
   margin-left: auto;
 }
-.button-wrap .export,
-.button-wrap .import {
+.actions > * + * {
   margin-left: 0.5em;
 }
 .currency-status {
-  margin-left: 0.75em;
+  display: none;
   font-size: 0.85em;
   color: rgba(255, 255, 255, 0.8);
-  opacity: 0;
-  transition: opacity 0.3s;
 }
 .currency-status.visible {
-  opacity: 1;
+  display: inline;
+  animation: status-fade 0.3s ease;
+}
+@keyframes status-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 .footer button + button {
   margin-left: 0.5em;
-}
-.help {
-  margin: 0 0.75em;
 }
 /* Modal component (generic, reusable) */
 .modal {
@@ -354,4 +366,20 @@ code {
 }
 .operator-table tbody tr td:first-child {
   text-align: right;
+}
+
+/* Stack the calculator on narrow screens */
+@media (max-width: 700px) {
+  .calculator {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+  .results-panel {
+    border-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    max-height: 40vh;
+  }
+  .results {
+    white-space: normal;
+  }
 }
