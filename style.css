@@ -86,9 +86,8 @@ body {
   white-space: nowrap;
 }
 .tab.active {
-  background: var(--color-surface);
+  background: var(--color-button);
   color: var(--color-text);
-  box-shadow: inset 0 -2px 0 var(--color-operator);
 }
 .tab-name {
   font: inherit;
@@ -99,6 +98,11 @@ body {
 }
 .tab-close {
   margin-left: 0.5em;
+}
+.tab-close,
+.modal-close {
+  background: transparent;
+  color: inherit;
 }
 .tab-new {
   margin-left: auto;
@@ -333,8 +337,8 @@ button:hover {
   background: var(--surface-link-hover);
 }
 .modal-nav-link.active {
-  background: var(--color-text);
-  color: var(--color-primary);
+  background: var(--color-button);
+  color: var(--color-text);
 }
 .modal-body {
   flex: 1 1 auto;
