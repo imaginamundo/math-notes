@@ -59,16 +59,20 @@
       <nav class="modal-nav">
         <a class="modal-nav-link" href="#help-basics">Basics</a>
         <a class="modal-nav-link" href="#help-tabs">Tabs</a>
-        <a class="modal-nav-link" href="#help-comments">Comments</a>
+        <a class="modal-nav-link" href="#help-comments">Comments &amp; labels</a>
         <a class="modal-nav-link" href="#help-variables">Variables</a>
         <a class="modal-nav-link" href="#help-functions">Functions</a>
+        <a class="modal-nav-link" href="#help-percentages">Percentages</a>
+        <a class="modal-nav-link" href="#help-operators">Operators &amp; scales</a>
         <a class="modal-nav-link" href="#help-units">Units</a>
         <a class="modal-nav-link" href="#help-currency">Currency</a>
+        <a class="modal-nav-link" href="#help-dates">Dates</a>
+        <a class="modal-nav-link" href="#help-shortcuts">Shortcuts</a>
       </nav>
       <div class="modal-body">
         <section id="help-basics" class="help-section">
           <h2>Basics</h2>
-          <p>Type a calculation on any line; the result appears in the sidebar. The <b>total</b> at the bottom sums all numeric results.</p>
+          <p>Type a calculation on any line; the result appears in the sidebar. The <b>total</b> at the bottom sums all numeric results. Results are formatted with thousands separators.</p>
           <div class="help-example" data-expr="1 + 1" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 2</span>
           </div>
@@ -83,6 +87,9 @@
           </div>
           <div class="help-example" data-expr="10 % 3" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 1</span>
+          </div>
+          <div class="help-example" data-expr="1000000" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 1,000,000</span>
           </div>
           <table class="operator-table">
             <thead>
@@ -104,43 +111,108 @@
           <h2>Tabs</h2>
           <p>Use the tabs at the top to keep separate worksheets. Every tab is saved automatically as you type.</p>
           <ul>
-            <li><b>Switch</b> — click a tab.</li>
+            <li><b>Switch</b> — click a tab (or use <code>←</code>/<code>→</code> once focused).</li>
             <li><b>Rename</b> — double-click the tab name.</li>
             <li><b>Close</b> — click the <code>×</code> (you'll be asked to confirm).</li>
             <li><b>Add</b> — click the <code>+</code> tab.</li>
+            <li><b>Export / Import</b> — the buttons in the footer download the active sheet as text or load one from a file.</li>
           </ul>
         </section>
 
         <section id="help-comments" class="help-section">
-          <h2>Comments</h2>
-          <p>Everything after a <code>#</code> on a line is ignored.</p>
+          <h2>Comments &amp; labels</h2>
+          <p>Everything after a <code>#</code> on a line is ignored. A <code>label:</code> before an expression names the line without being evaluated.</p>
           <div class="help-example" data-expr="2 + 2 # this is a note" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 4</span>
+          </div>
+          <div class="help-example" data-expr="Price: 10 + 5" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 15</span>
           </div>
         </section>
 
         <section id="help-variables" class="help-section">
           <h2>Variables</h2>
-          <p>Assign a value with <code>=</code> and reuse it on later lines.</p>
+          <p>Assign a value with <code>=</code> and reuse it on later lines. Use <code>prev</code> for the previous line's result, and <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> to aggregate the lines above until a blank line.</p>
           <div class="help-example" data-expr="pizzas = 2&#10;pizzaPrice = 30&#10;people = 4&#10;(pizzas * pizzaPrice) / people" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">last line returns 15</span>
+          </div>
+          <div class="help-example" data-expr="20&#10;prev * 4" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">last line returns 80</span>
+          </div>
+          <div class="help-example" data-expr="10&#10;20&#10;sum" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">last line returns 30</span>
+          </div>
+          <div class="help-example" data-expr="4&#10;8&#10;average" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">last line returns 6</span>
           </div>
         </section>
 
         <section id="help-functions" class="help-section">
           <h2>Functions</h2>
-          <p>Store a function with <code>f(x) = …</code> and call it later.</p>
+          <p>Store a function with <code>f(x) = …</code> and call it later. Numi-style aliases are available too: <code>ln</code>, <code>fact</code>, <code>arcsin</code>, <code>arccos</code>, <code>arctan</code>, <code>root</code>.</p>
           <div class="help-example" data-expr="double = f(x) = x * 2" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">stores a function</span>
           </div>
           <div class="help-example" data-expr="double(21)" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 42</span>
           </div>
+          <div class="help-example" data-expr="fact(5)" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 120</span>
+          </div>
+          <div class="help-example" data-expr="ln(e)" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 1</span>
+          </div>
+          <div class="help-example" data-expr="root(8, 3)" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 2</span>
+          </div>
+        </section>
+
+        <section id="help-percentages" class="help-section">
+          <h2>Percentages</h2>
+          <p>Use <code>of</code>, <code>on</code> and <code>off</code> with <code>%</code> for percentage math.</p>
+          <div class="help-example" data-expr="20% of 10" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 2</span>
+          </div>
+          <div class="help-example" data-expr="5% on 30" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 31.5</span>
+          </div>
+          <div class="help-example" data-expr="6% off 40" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 37.6</span>
+          </div>
+          <div class="help-example" data-expr="50 as a % of 100" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 50</span>
+          </div>
+          <div class="help-example" data-expr="5% of what is 6" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 120</span>
+          </div>
+        </section>
+
+        <section id="help-operators" class="help-section">
+          <h2>Operators &amp; scales</h2>
+          <p>Word operators and number scales work naturally.</p>
+          <div class="help-example" data-expr="8 times 9" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 72</span>
+          </div>
+          <div class="help-example" data-expr="2 plus 3" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 5</span>
+          </div>
+          <div class="help-example" data-expr="10 minus 3" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 7</span>
+          </div>
+          <div class="help-example" data-expr="6 multiplied by 7" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 42</span>
+          </div>
+          <div class="help-example" data-expr="2k" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 2,000</span>
+          </div>
+          <div class="help-example" data-expr="2M" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 2,000,000</span>
+          </div>
         </section>
 
         <section id="help-units" class="help-section">
           <h2>Unit conversion</h2>
-          <p>Convert units with <code>to</code> or <code>in</code>.</p>
+          <p>Convert units with <code>to</code> or <code>in</code>. CSS units are supported too: <code>px</code>, <code>em</code> and <code>point</code>.</p>
           <div class="help-example" data-expr="1cm to m" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 0.01 m</span>
           </div>
@@ -152,6 +224,12 @@
           </div>
           <div class="help-example" data-expr="30 degC to degF" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 86 degF</span>
+          </div>
+          <div class="help-example" data-expr="1 cm in px" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns ≈ 37.8 px</span>
+          </div>
+          <div class="help-example" data-expr="2 em in px" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 32 px</span>
           </div>
           <table class="units-table">
             <thead>
@@ -254,6 +332,39 @@
             <code></code><span class="help-returns">converts to BRL</span>
           </div>
           <p><b>Supported codes:</b> <code>BRL</code>, <code>CAD</code>, <code>CHF</code>, <code>CNY</code>, <code>CZK</code>, <code>DKK</code>, <code>EUR</code>, <code>GBP</code>, <code>HKD</code>, <code>HUF</code>, <code>IDR</code>, <code>ILS</code>, <code>INR</code>, <code>ISK</code>, <code>JPY</code>, <code>KRW</code>, <code>MXN</code>, <code>MYR</code>, <code>NOK</code>, <code>NZD</code>, <code>PHP</code>, <code>PLN</code>, <code>RON</code>, <code>SEK</code>, <code>SGD</code>, <code>THB</code>, <code>TRY</code>, <code>USD</code>, <code>ZAR</code>.</p>
+        </section>
+
+        <section id="help-dates" class="help-section">
+          <h2>Dates</h2>
+          <p>Convert unix timestamps with <code>fromunix</code>, get the current time with <code>unix()</code>, and use date units directly.</p>
+          <div class="help-example" data-expr="fromunix(0)" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">Jan 1, 1970…</span>
+          </div>
+          <div class="help-example" data-expr="fromunix(1446587186)" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">Nov 3, 2015…</span>
+          </div>
+          <div class="help-example" data-expr="unix()" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">current timestamp</span>
+          </div>
+          <div class="help-example" data-expr="1 month in days" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">30.4375 days</span>
+          </div>
+        </section>
+
+        <section id="help-shortcuts" class="help-section">
+          <h2>Shortcuts &amp; files</h2>
+          <p>The active sheet can be exported and imported from the footer or with the shortcuts below.</p>
+          <table class="operator-table">
+            <thead>
+              <tr><th>Shortcut</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>⇧⌘C</code></td><td>Copy the current line's result</td></tr>
+              <tr><td><code>⇧⌘E</code></td><td>Export the active sheet</td></tr>
+              <tr><td><code>⇧⌘I</code></td><td>Import a sheet</td></tr>
+              <tr><td><code>⇧⌘⌫</code></td><td>Clear the active sheet</td></tr>
+            </tbody>
+          </table>
         </section>
   </dialog>
 </body>
