@@ -81,14 +81,20 @@ function initTabs(editableNode, onUpdate) {
 
   function render() {
     tabBarNode.innerHTML = '';
+    tabBarNode.setAttribute('role', 'tablist');
+    tabBarNode.setAttribute('aria-label', 'Worksheets');
     state.tabs.forEach(tab => tabBarNode.appendChild(renderTab(tab)));
     tabBarNode.appendChild(renderNewButton());
   }
 
   function renderTab(tab) {
+    const active = tab.id === state.activeId;
     const tabNode = document.createElement('div');
-    tabNode.className = 'tab' + (tab.id === state.activeId ? ' active' : '');
+    tabNode.className = 'tab' + (active ? ' active' : '');
     tabNode.dataset.id = tab.id;
+    tabNode.setAttribute('role', 'tab');
+    tabNode.setAttribute('aria-selected', String(active));
+    tabNode.tabIndex = active ? 0 : -1;
 
     const nameNode = document.createElement('span');
     nameNode.className = 'tab-name';
@@ -196,6 +202,32 @@ function initTabs(editableNode, onUpdate) {
     const nameElement = event.target.closest('.tab-name');
     if (!nameElement) return;
     beginRename(nameElement.closest('.tab').dataset.id, nameElement);
+  });
+
+  tabBarNode.addEventListener('keydown', event => {
+    const tabElement = event.target.closest('.tab');
+    if (!tabElement) return;
+    const ids = state.tabs.map(tab => tab.id);
+    const index = ids.indexOf(tabElement.dataset.id);
+    let nextIndex = -1;
+
+    if (event.key === 'ArrowRight') nextIndex = (index + 1) % ids.length;
+    else if (event.key === 'ArrowLeft') nextIndex = (index - 1 + ids.length) % ids.length;
+    else if (event.key === 'Home') nextIndex = 0;
+    else if (event.key === 'End') nextIndex = ids.length - 1;
+
+    if (nextIndex !== -1) {
+      event.preventDefault();
+      activate(ids[nextIndex]);
+      const next = tabBarNode.querySelector(`.tab[data-id="${ids[nextIndex]}"]`);
+      if (next) next.focus();
+      return;
+    }
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      activate(tabElement.dataset.id);
+    }
   });
 
   render();

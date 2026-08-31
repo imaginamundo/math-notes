@@ -43,6 +43,10 @@ body {
 .tab-name {
   font: inherit;
 }
+.tab:focus-visible {
+  outline: 2px solid #FFA800;
+  outline-offset: -2px;
+}
 .tab-close {
   margin-left: .5em;
 }
