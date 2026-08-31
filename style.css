@@ -21,6 +21,10 @@
   /* Feedback */
   --color-error: #ff6b6b;
 
+  /* Links */
+  --color-link: #8ab4f8;
+  --color-link-visited: #c09cf8;
+
   /* Inline ghost results */
   --color-ghost: rgba(255, 255, 255, 0.5);
   --color-ghost-error: #ff7b72;
@@ -317,7 +321,8 @@ button:hover {
   border-bottom: 1px solid var(--border-soft);
   background: var(--surface-nav);
 }
-.modal-nav-link {
+.modal-nav-link,
+.modal-nav-link:visited {
   color: var(--color-text);
   text-decoration: none;
   padding: 0.2em 0.6em;
@@ -414,4 +419,15 @@ code {
 }
 .operator-table tbody tr td:first-child {
   text-align: right;
+}
+a {
+  color: var(--color-link);
+  text-decoration: underline;
+}
+a:visited {
+  color: var(--color-link-visited);
+}
+a:hover {
+  text-decoration: underline;
+  filter: brightness(1.2);
 }
