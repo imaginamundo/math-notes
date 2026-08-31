@@ -172,6 +172,9 @@ body {
 .comment {
   opacity: .5;
 }
+.title {
+  color: #8A9188;
+}
 .footer {
   display: flex;
   align-items: center;

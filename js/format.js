@@ -17,8 +17,9 @@ function createWrapper(type, text) {
 
 function line(text) {
   const wrapper = createWrapper('line', '');
-  const { code, comment: commentText } = parseLine(text);
+  const { code, comment: commentText, title } = parseLine(text);
 
+  if (title) wrapper.appendChild(titleWrap(title));
   if (code) appendCode(wrapper, code);
   if (commentText) wrapper.appendChild(comment(commentText));
 
@@ -88,4 +89,8 @@ function comment(text) {
   return createWrapper('comment', text);
 }
 
-export default { line, variable, number, currency, operator, comment };
+function titleWrap(text) {
+  return createWrapper('title', text);
+}
+
+export default { line, variable, number, currency, operator, comment, title: titleWrap };

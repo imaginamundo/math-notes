@@ -70,3 +70,9 @@ test('a bare dollar sign is highlighted as currency', () => {
   assert.equal(node.children[1]._classes.has('number'), true);
   assert.equal(node.children[1].textContent, '5');
 });
+
+test('a colon label renders as a title', () => {
+  const node = format.line('Price: 1 + 1');
+  assert.equal(node.children[0]._classes.has('title'), true);
+  assert.equal(node.children[0].textContent, 'Price');
+});

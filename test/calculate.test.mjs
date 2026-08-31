@@ -11,7 +11,8 @@ test('parseLine splits a plain expression', () => {
     label: '',
     rhs: '',
     isAssignment: false,
-    equalsIndex: -1
+    equalsIndex: -1,
+    title: ''
   });
 });
 
@@ -55,6 +56,29 @@ test('parseLine handles a comment-only line', () => {
   const parsed = parseLine('# hi');
   assert.equal(parsed.code, '');
   assert.equal(parsed.comment, '# hi');
+});
+
+test('parseLine splits a colon label from the expression', () => {
+  const parsed = parseLine('Price: 10 + 5');
+  assert.equal(parsed.title, 'Price');
+  assert.equal(parsed.code, '10 + 5');
+  assert.equal(parsed.isAssignment, false);
+});
+
+test('parseLine rejects numeric colon prefixes as labels', () => {
+  assert.equal(parseLine('2:30').title, '');
+});
+
+test('parseLine keeps an equals sign before the colon out of the label', () => {
+  const parsed = parseLine('a: b = 3');
+  assert.equal(parsed.title, 'a');
+  assert.equal(parsed.code, 'b = 3');
+  assert.equal(parsed.isAssignment, true);
+});
+
+test('evaluateLines evaluates the expression after a colon label', () => {
+  const { results } = evaluateLines(['Price: 10 + 5']);
+  assert.equal(results[0].value, 15);
 });
 
 test('evaluateLine resolves chained variables through the scope', () => {
