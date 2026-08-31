@@ -18,7 +18,6 @@
   --color-title: #9aa4b0;
 
   /* Feedback */
-  --color-error: #e06c75;
 
   /* Links */
   --color-link: #61afef;
@@ -59,7 +58,6 @@ html[data-theme='dracula'] {
   --color-operator: #8be9fd;
   --color-currency: #50fa7b;
   --color-title: #9aa0b8;
-  --color-error: #ff5555;
   --color-ghost-error: #ff8a8a;
   --color-link: #8be9fd;
   --color-link-visited: #bd93f9;
@@ -84,7 +82,6 @@ html[data-theme='solarized-dark'] {
   --color-operator: #2aa198;
   --color-currency: #859900;
   --color-title: #a4b1b4;
-  --color-error: #dc322f;
   --color-ghost-error: #e56757;
   --color-link: #2f98d6;
   --color-link-visited: #8b92e0;
@@ -109,7 +106,6 @@ html[data-theme='monokai'] {
   --color-operator: #e6db74;
   --color-currency: #a6e22e;
   --color-title: #9a958a;
-  --color-error: #f92672;
   --color-ghost-error: #ff8a8a;
   --color-link: #66d9ef;
   --color-link-visited: #ae81ff;
@@ -279,9 +275,6 @@ body {
 .total {
   font-weight: 700;
   color: var(--color-text);
-}
-.error {
-  color: var(--color-error);
 }
 .variable {
   color: var(--color-variable);
