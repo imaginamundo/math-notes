@@ -10,7 +10,7 @@
     (function () {
       try {
         var t = localStorage.getItem('math-notes-theme');
-        if (t && t !== 'math-notes') document.documentElement.dataset.theme = t;
+        if (t) document.documentElement.dataset.theme = t;
       } catch (e) {}
     })();
   </script>

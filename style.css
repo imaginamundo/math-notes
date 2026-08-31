@@ -1,78 +1,51 @@
 :root {
   /* Brand */
-  --color-primary: #09183e;
-  --color-primary-dim: rgba(0, 0, 0, 0.6);
-  --color-surface: #1c1c28;
-  --color-text: #e2e2e2;
-  --color-text-strong: #a7a7a7;
-  --color-text-muted: #9aa0b4;
-
-  /* Buttons & footer */
-  --color-button: #3a5cc8;
-  --color-button-text: #e2e2e2;
-  --color-footer: #14141f;
-
-  /* Syntax highlighting */
-  --color-variable: #ffa800;
-  --color-number: #64b5f6;
-  --color-operator: #ffd54f;
-  --color-currency: #66bb6a;
-  --color-title: #c7cdd4;
-
-  /* Feedback */
-  --color-error: #ff6b6b;
-
-  /* Links */
-  --color-link: #8ab4f8;
-  --color-link-visited: #c09cf8;
-
-  /* Inline ghost results */
-  --color-ghost: rgba(255, 255, 255, 0.5);
-  --color-ghost-error: #ff7b72;
-
-  /* Borders */
-  --border-light: rgba(255, 255, 255, 0.2);
-  --border-faint: rgba(255, 255, 255, 0.15);
-  --border-strong: #3a3a4e;
-  --border-soft: rgba(255, 255, 255, 0.12);
-  --border-table: rgba(255, 255, 255, 0.1);
-
-  /* Modal surfaces */
-  --surface-nav: #1a1a26;
-  --surface-chip: #222233;
-  --surface-chip-hover: #2a2a3d;
-  --surface-link-hover: #242436;
-  --surface-code: #141420;
-  --border-chip: rgba(255, 255, 255, 0.14);
-  --shadow-modal: rgba(0, 0, 0, 0.5);
-  --text-over-primary: rgba(255, 255, 255, 0.8);
-}
-
-/* One Dark (Atom) */
-html[data-theme='one-dark'] {
   --color-primary: #282c34;
+  --color-primary-dim: rgba(0, 0, 0, 0.6);
   --color-surface: #2f343d;
   --color-text: #abb2bf;
   --color-text-strong: #c0c7d1;
   --color-text-muted: #98a0ac;
+
+  /* Buttons & footer */
   --color-button: #61afef;
   --color-button-text: #1f232b;
   --color-footer: #1f232b;
+
+  /* Syntax highlighting */
   --color-variable: #e87884;
   --color-number: #d19a66;
   --color-operator: #56b6c2;
   --color-currency: #98c379;
   --color-title: #9aa4b0;
+
+  /* Feedback */
   --color-error: #e06c75;
-  --color-ghost-error: #ef8181;
+
+  /* Links */
   --color-link: #61afef;
   --color-link-visited: #c678dd;
+
+  /* Inline ghost results */
+  --color-ghost: rgba(255, 255, 255, 0.5);
+  --color-ghost-error: #ef8181;
+
+  /* Borders */
+  --border-light: rgba(255, 255, 255, 0.2);
+  --border-faint: rgba(255, 255, 255, 0.15);
   --border-strong: #3e4451;
+  --border-soft: rgba(255, 255, 255, 0.12);
+  --border-table: rgba(255, 255, 255, 0.1);
+
+  /* Modal surfaces */
   --surface-nav: #1f232b;
   --surface-chip: #2f343d;
   --surface-chip-hover: #353b45;
   --surface-link-hover: #353b45;
   --surface-code: #1f232b;
+  --border-chip: rgba(255, 255, 255, 0.14);
+  --shadow-modal: rgba(0, 0, 0, 0.5);
+  --text-over-primary: rgba(255, 255, 255, 0.8);
 }
 
 /* Dracula */

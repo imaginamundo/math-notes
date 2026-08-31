@@ -17,7 +17,7 @@ const THEMES = [
 ];
 
 function currentTheme() {
-  return document.documentElement.dataset.theme || '';
+  return document.documentElement.dataset.theme || 'one-dark';
 }
 
 function applyTheme(id) {
