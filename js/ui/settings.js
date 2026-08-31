@@ -1,6 +1,13 @@
 import initModal from './modal.js';
 
 const STORAGE_KEY = 'math-notes-theme';
+const RESET_KEYS = [
+  STORAGE_KEY,
+  'math-notes-tabs',
+  'math-notes-currency-rates',
+  'input',
+  'fontSize',
+];
 
 const THEMES = [
   { id: 'one-dark', name: 'One Dark', swatch: ['#282c34', '#2f343d', '#61afef'] },
@@ -63,6 +70,19 @@ function initSettings(contentEditableNode) {
     });
   }
   renderActive();
+
+  const resetButton = document.getElementById('reset-data-button');
+  resetButton.addEventListener('click', () => {
+    if (!window.confirm('This will reset the theme, tabs and all stored data. Continue?')) return;
+    RESET_KEYS.forEach((key) => {
+      try {
+        localStorage.removeItem(key);
+      } catch (error) {
+        // storage unavailable
+      }
+    });
+    window.location.reload();
+  });
 }
 
 export default initSettings;
