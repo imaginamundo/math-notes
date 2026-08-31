@@ -135,6 +135,7 @@ function initTabs(editableNode, onUpdate) {
     persist();
     render();
     onUpdate();
+    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
     editableNode.focus();
   }
 
@@ -145,6 +146,7 @@ function initTabs(editableNode, onUpdate) {
     persist();
     render();
     onUpdate();
+    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
     editableNode.focus();
   }
 
@@ -159,6 +161,7 @@ function initTabs(editableNode, onUpdate) {
     persist();
     render();
     onUpdate();
+    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
     editableNode.focus();
   }
 
