@@ -84,6 +84,12 @@ body {
 .variable {
   color: #FFA800;
 }
+.number {
+  color: #64B5F6;
+}
+.operator {
+  color: #FFD54F;
+}
 .comment {
   opacity: .5;
 }
