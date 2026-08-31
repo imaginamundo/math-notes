@@ -1,8 +1,9 @@
 import { create, all } from './lib/math.bundle.min.js';
 import parseLine from './parseLine.js';
-import initCurrency, { preprocessSymbols } from './currency.js';
+import initCurrency from './currency.js';
 import initAliases from './aliases.js';
 import initCssUnits from './cssUnits.js';
+import preprocess from './preprocess.js';
 
 const math = create(all);
 initAliases(math);
@@ -21,8 +22,8 @@ function evaluateLine(line, scope) {
   let result;
 
   try {
-    result = math.evaluate(preprocessSymbols(code), scope);
-    value = rhs && math.evaluate(preprocessSymbols(rhs), scope);
+    result = math.evaluate(preprocess(code), scope);
+    value = rhs && math.evaluate(preprocess(rhs), scope);
   } catch (error) {
     result = error;
     value = undefined;
