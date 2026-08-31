@@ -1,7 +1,8 @@
 # Math Notes
 
 An inline calculator that runs in the browser. Type calculations line by line
-and each result appears in the sidebar, with an automatic running total.
+and each result appears right beside it as ghost text, with an automatic
+running total.
 
 Based on [Numi](https://numi.app/).
 
