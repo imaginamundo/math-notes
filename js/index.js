@@ -1,6 +1,5 @@
 import { evaluateLines } from './core/calculate.js';
 import renderInput from './render/renderInput.js';
-import renderResults from './render/renderResults.js';
 import renderTotal from './render/renderTotal.js';
 import registerServiceWorker from './registerServiceWorker.js';
 import initHelpModal from './ui/help.js';
@@ -11,22 +10,14 @@ import initShortcuts from './ui/shortcuts.js';
 
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');
-const resultsNode = document.getElementById('results');
 const totalNode = document.getElementById('total');
 const currencyStatusNode = document.getElementById('currency-status');
 
-let lastValue = null;
-
 function update() {
   try {
-    const value = contentEditableNode.value;
-    const lines = value.split('\n');
-    if (value !== lastValue) {
-      lastValue = value;
-      renderInput(viewNode, lines);
-    }
+    const lines = contentEditableNode.value.split('\n');
     const { results, total } = evaluateLines(lines);
-    renderResults(resultsNode, results);
+    renderInput(viewNode, lines, results);
     renderTotal(totalNode, total);
   } catch (error) {
     console.error('Failed to update the sheet:', error);

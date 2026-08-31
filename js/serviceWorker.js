@@ -20,7 +20,6 @@ const urlsToCache = [
   './eval/symbols.js',
   './eval/wordOperators.js',
   './render/renderInput.js',
-  './render/renderResults.js',
   './ui/shortcuts.js',
   './render/renderTotal.js',
   './ui/tabs.js',

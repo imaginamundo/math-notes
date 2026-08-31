@@ -51,6 +51,27 @@ test('comment rendering does not drop following lines', () => {
   assert.equal(view.children[4]._classes.has('line'), true);
 });
 
+test('renderInput appends inline ghost results', () => {
+  const view = new El('pre');
+  renderInput(
+    view,
+    ['1 + 1', 'x = 5', '2 +', ''],
+    [
+      { type: 'value', value: 2 },
+      { type: 'assignment', value: 5 },
+      { type: 'error', value: 'Undefined symbol x' },
+      { type: 'value', value: undefined },
+    ]
+  );
+  const ghosts = view.children.filter(
+    (child) => child.className && child.className.includes('ghost-result')
+  );
+  assert.equal(ghosts.length, 2);
+  assert.equal(ghosts[0].textContent, '→ 2');
+  assert.equal(ghosts[1].className, 'ghost-result error');
+  assert.equal(ghosts[1].textContent, 'Undefined symbol x');
+});
+
 test('identifiers, numbers and operators get their own classes', () => {
   const node = format.line('pizzas = 2');
   const classes = node.children.filter((c) => c._classes).map((c) => c.textContent);
