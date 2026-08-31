@@ -10,10 +10,10 @@ const RESET_KEYS = [
 ];
 
 const THEMES = [
-  { id: 'one-dark', name: 'One Dark', swatch: ['#282c34', '#2f343d', '#61afef'] },
-  { id: 'dracula', name: 'Dracula', swatch: ['#282a36', '#2f3141', '#bd93f9'] },
-  { id: 'solarized-dark', name: 'Solarized Dark', swatch: ['#002b36', '#073642', '#268bd2'] },
-  { id: 'monokai', name: 'Monokai', swatch: ['#272822', '#2d2d26', '#66d9ef'] },
+  { id: 'one-dark', name: 'One Dark', swatch: ['#282c34', '#2f343d', '#abb2bf'] },
+  { id: 'dracula', name: 'Dracula', swatch: ['#282a36', '#2f3141', '#f8f8f2'] },
+  { id: 'solarized-dark', name: 'Solarized Dark', swatch: ['#002b36', '#073642', '#93a1a1'] },
+  { id: 'monokai', name: 'Monokai', swatch: ['#272822', '#2d2d26', '#f8f8f2'] },
 ];
 
 function currentTheme() {

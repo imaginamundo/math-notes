@@ -8,8 +8,6 @@
   --color-text-muted: #98a0ac;
 
   /* Buttons & footer */
-  --color-button: #61afef;
-  --color-button-text: #1f232b;
   --color-footer: #1f232b;
 
   /* Syntax highlighting */
@@ -55,8 +53,6 @@ html[data-theme='dracula'] {
   --color-text: #f8f8f2;
   --color-text-strong: #e3e3e6;
   --color-text-muted: #9aa0b8;
-  --color-button: #bd93f9;
-  --color-button-text: #1e1f29;
   --color-footer: #1e1f29;
   --color-variable: #ff79c6;
   --color-number: #bd93f9;
@@ -82,8 +78,6 @@ html[data-theme='solarized-dark'] {
   --color-text: #93a1a1;
   --color-text-strong: #a4b1b4;
   --color-text-muted: #8fa1a8;
-  --color-button: #268bd2;
-  --color-button-text: #001f27;
   --color-footer: #001f27;
   --color-variable: #2f98d6;
   --color-number: #b58900;
@@ -109,8 +103,6 @@ html[data-theme='monokai'] {
   --color-text: #f8f8f2;
   --color-text-strong: #e6e6df;
   --color-text-muted: #9a958a;
-  --color-button: #66d9ef;
-  --color-button-text: #1d1e19;
   --color-footer: #1d1e19;
   --color-variable: #ff4f8f;
   --color-number: #ae81ff;
@@ -152,7 +144,7 @@ body {
   display: flex;
   align-items: stretch;
   min-height: 2.2em;
-  background: var(--color-primary);
+  background: var(--color-footer);
   border-bottom: 1px solid var(--border-light);
   overflow-x: auto;
   scrollbar-width: thin;
@@ -168,8 +160,8 @@ body {
   white-space: nowrap;
 }
 .tab.active {
-  background: var(--color-button);
-  color: var(--color-button-text);
+  background: var(--color-primary);
+  color: var(--color-text);
 }
 .tab-name {
   font: inherit;
@@ -318,15 +310,15 @@ body {
 }
 button {
   font-size: 1em;
-  background: var(--color-button);
-  color: var(--color-button-text);
+  background: var(--color-primary);
+  color: var(--color-text);
   border: 0;
   border-radius: 0;
   padding: 0.5em 0.8em;
   cursor: pointer;
 }
 button:hover {
-  filter: brightness(0.92);
+  filter: brightness(1.15);
 }
 .button-wrap {
   display: flex;
@@ -419,8 +411,8 @@ button:hover {
   background: var(--surface-link-hover);
 }
 .modal-nav-link.active {
-  background: var(--color-button);
-  color: var(--color-button-text);
+  background: var(--color-primary);
+  color: var(--color-text);
 }
 .modal-body {
   flex: 1 1 auto;
