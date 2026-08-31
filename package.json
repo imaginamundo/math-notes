@@ -1,0 +1,14 @@
+{
+  "name": "math-notes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Inline calculator for modern browsers.",
+  "type": "module",
+  "scripts": {
+    "build:mathjs": "deno bundle js/lib/math.js js/lib/math.bundle.js",
+    "test": "node --test test/"
+  },
+  "devDependencies": {
+    "mathjs": "7.1.0"
+  }
+}
