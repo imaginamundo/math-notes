@@ -29,6 +29,15 @@ body {
   min-height: 100%;
   cursor: text;
 }
+/*
+ * The editor is a transparent contenteditable. A mirrored .view layer sits
+ * behind it and renders the same text with syntax highlighting, so the
+ * caret still lives in the real input while the styled copy is what the
+ * user sees. Keep .content-editable and .view metrics identical (same
+ * font, size, line-height and padding) or the mirror drifts from the
+ * caret. Because input text is transparent, the mirror also backs up
+ * assistive tech that reads the visible text.
+ */
 .content-editable {
   color: transparent;
   caret-color: #949B93;
