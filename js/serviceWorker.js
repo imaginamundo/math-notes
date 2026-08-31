@@ -2,6 +2,7 @@ const cacheName = 'math-notes-v13';
 const urlsToCache = [
   '../index.html',
   '../style.css',
+  './aliases.js',
   './calculate.js',
   './currency.js',
   './format.js',

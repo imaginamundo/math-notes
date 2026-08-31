@@ -157,3 +157,14 @@ test('evaluateLines aggregate excludes assignments and other aggregates', () => 
 test('evaluateLines sum of nothing is 0', () => {
   assert.equal(evaluateLines(['', 'sum']).results[1].value, 0);
 });
+
+test('evaluateLines supports Numi function aliases', () => {
+  const { results } = evaluateLines(['ln(e)', 'fact(5)', 'arcsin(0.5)', 'arccos(1)', 'arctan(1)', 'root(8, 3)', 'cbrt(27)']);
+  assert.ok(Math.abs(results[0].value - 1) < 1e-9);
+  assert.equal(results[1].value, 120);
+  assert.ok(Math.abs(results[2].value - Math.PI / 6) < 1e-9);
+  assert.ok(Math.abs(results[3].value) < 1e-9);
+  assert.ok(Math.abs(results[4].value - Math.PI / 4) < 1e-9);
+  assert.ok(Math.abs(results[5].value - 2) < 1e-9);
+  assert.equal(results[6].value, 3);
+});
