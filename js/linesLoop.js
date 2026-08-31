@@ -17,7 +17,7 @@ function lineLoop(childNodes) {
       storeValues(input);
       addNode(format.line(input));
     } else {
-      addResult(null);
+      addResult(null, 'break');
       addNode(document.createElement('br'));
     }
   });

@@ -1,7 +1,7 @@
 let results = [];
 
-function addResult(value) {
-  results.push(value);
+function addResult(value, type = 'value') {
+  results.push({ type, value });
 }
 
 function clearResults() {

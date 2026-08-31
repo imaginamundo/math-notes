@@ -2,13 +2,13 @@ import { results } from './store/results.js';
 
 function printResults(resultsNode) {
   resultsNode.innerHTML = '';
-  results.forEach(result => {
-    if (result === null) {
+  results.forEach(({ type, value }) => {
+    if (type === 'break') {
       resultsNode.appendChild(document.createElement('br'));
       return;
     }
-    if (result !== undefined) {
-      resultsNode.appendChild(document.createTextNode(String(result)));
+    if (value !== undefined) {
+      resultsNode.appendChild(document.createTextNode(String(value)));
     }
   });
 }

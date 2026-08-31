@@ -1,11 +1,13 @@
 import { results } from './store/results.js';
 
 function printTotal(totalNode) {
-  const resultsWithValues = results.filter(result => Number(result) === result);
+  const values = results
+    .filter(({ value }) => Number(value) === value)
+    .map(({ value }) => value);
 
   totalNode.innerHTML = ' ';
-  if (resultsWithValues.length) {
-    totalNode.innerHTML = resultsWithValues.reduce((acc, cur) => acc + cur);
+  if (values.length) {
+    totalNode.innerHTML = values.reduce((acc, cur) => acc + cur);
   }
 }
 
