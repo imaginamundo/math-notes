@@ -193,6 +193,10 @@ button {
 .button-wrap .help {
   margin-left: auto;
 }
+.button-wrap .export,
+.button-wrap .import {
+  margin-left: .5em;
+}
 .footer button + button {
   margin-left: .5em;
 }

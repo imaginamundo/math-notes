@@ -8,6 +8,7 @@ const urlsToCache = [
   './format.js',
   './formatResult.js',
   './index.js',
+  './io.js',
   './modal.js',
   './parseLine.js',
   './renderInput.js',

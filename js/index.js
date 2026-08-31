@@ -6,6 +6,7 @@ import registerServiceWorker from './registerServiceWorker.js';
 import initHelpModal from './dom/help.js';
 import initFontControls from './dom/cosmetic.js';
 import initTabs from './tabs.js';
+import initIo from './io.js';
 
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');
@@ -33,6 +34,7 @@ initTabs(contentEditableNode, update);
 
 initHelpModal(contentEditableNode);
 initFontControls();
+initIo(contentEditableNode);
 
 window.addEventListener('currency:updated', update);
 
