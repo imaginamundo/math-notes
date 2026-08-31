@@ -18,15 +18,19 @@ const currencyStatusNode = document.getElementById('currency-status');
 let lastValue = null;
 
 function update() {
-  const value = contentEditableNode.value;
-  const lines = value.split('\n');
-  if (value !== lastValue) {
-    lastValue = value;
-    renderInput(viewNode, lines);
+  try {
+    const value = contentEditableNode.value;
+    const lines = value.split('\n');
+    if (value !== lastValue) {
+      lastValue = value;
+      renderInput(viewNode, lines);
+    }
+    const { results, total } = evaluateLines(lines);
+    renderResults(resultsNode, results);
+    renderTotal(totalNode, total);
+  } catch (error) {
+    console.error('Failed to update the sheet:', error);
   }
-  const { results, total } = evaluateLines(lines);
-  renderResults(resultsNode, results);
-  renderTotal(totalNode, total);
 }
 
 // Trigger changes
