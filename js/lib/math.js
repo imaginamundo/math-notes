@@ -1,3 +1,3 @@
-import { create, all } from 'https://cdn.skypack.dev/mathjs@7.1.0';
+import { create, all } from 'npm:mathjs@15.2.0';
 export { create, all };
 export default { create, all }

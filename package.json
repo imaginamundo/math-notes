@@ -5,10 +5,10 @@
   "description": "Inline calculator for modern browsers.",
   "type": "module",
   "scripts": {
-    "build:mathjs": "deno bundle js/lib/math.js js/lib/math.bundle.js",
+    "build:mathjs": "make -C js/lib",
     "test": "node --test"
   },
   "devDependencies": {
-    "mathjs": "7.1.0"
+    "mathjs": "15.2.0"
   }
 }
