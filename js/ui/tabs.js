@@ -125,7 +125,10 @@ function initTabs(editableNode, onUpdate) {
   }
 
   function activate(id) {
-    if (state.activeId === id) return;
+    if (state.activeId === id) {
+      editableNode.focus();
+      return;
+    }
     state = setContent(state, state.activeId, editableNode.value);
     state = setActiveTab(state, id);
     editableNode.value = state.tabs.find((tab) => tab.id === id).content;

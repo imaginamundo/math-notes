@@ -6,10 +6,16 @@ const AGGREGATE_KEYWORDS = {
 };
 
 const NUMERIC = (result) =>
-  result.type === 'value' && !result.aggregate && Number(result.value) === result.value && Number.isFinite(result.value);
+  result.type === 'value' &&
+  !result.aggregate &&
+  Number(result.value) === result.value &&
+  Number.isFinite(result.value);
 
 function aggregateAbove(results, fromIndex, toIndex, mode) {
-  const values = results.slice(fromIndex, toIndex).filter(NUMERIC).map(({ value }) => value);
+  const values = results
+    .slice(fromIndex, toIndex)
+    .filter(NUMERIC)
+    .map(({ value }) => value);
   if (!values.length) return 0;
   const sum = values.reduce((acc, cur) => acc + cur);
   return mode === 'sum' ? sum : sum / values.length;
