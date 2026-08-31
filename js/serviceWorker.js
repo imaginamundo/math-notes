@@ -14,6 +14,7 @@ const urlsToCache = [
   './parseLine.js',
   './preprocess.js',
   './scales.js',
+  './wordOperators.js',
   './renderInput.js',
   './renderResults.js',
   './shortcuts.js',
