@@ -20,13 +20,13 @@ body {
 .calculator {
   display: grid;
   grid-template-columns: 1fr 30%;
-  max-height: 100%;
-  overflow: auto;
+  min-height: 0;
+  overflow: hidden;
 }
 .input {
   position: relative;
   margin: 0 1em;
-  min-height: 100%;
+  min-height: 0;
   cursor: text;
 }
 /*
@@ -73,12 +73,34 @@ body {
   pointer-events: none;
   color: #949B93;
 }
+.results-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  border-left: 1px solid rgba(255, 255, 255, .2);
+}
 .results {
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 1em;
-  min-height: 100%;
   background: #FFF;
   white-space: nowrap;
-  overflow-x: auto;
+  overflow: auto;
+}
+.total-row {
+  display: flex;
+  align-items: center;
+  padding: .5em 1em;
+  background: #FFF;
+  border-top: 1px solid #D8D8D8;
+}
+.total-label {
+  margin-right: .75em;
+}
+.total {
+  font-weight: 700;
+  color: #0A3190;
 }
 .error {
   color: #B00020;
@@ -97,7 +119,8 @@ body {
 }
 .footer {
   display: flex;
-  padding: .5em;
+  align-items: center;
+  padding: .5em 1em;
   background: #949B93;
   color: #fff;
 }
@@ -105,14 +128,15 @@ button {
   font-size: 1em;
 }
 .button-wrap {
+  display: flex;
+  align-items: center;
   width: 100%;
 }
-.total-label {
+.button-wrap .help {
   margin-left: auto;
-  margin-right: 1em;
 }
-.total {
-  width: 30%;
+.help {
+  margin: 0 .75em;
 }
 .modal {
   position: absolute;
@@ -142,7 +166,4 @@ table td {
 }
 .operator-table tbody tr td:first-child{
   text-align: right;
-}
-.help {
-  margin: 0 .5em;
 }
