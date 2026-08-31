@@ -9,6 +9,7 @@
 
   /* Buttons & footer */
   --color-button: #3a5cc8;
+  --color-button-text: #e2e2e2;
   --color-footer: #14141f;
 
   /* Syntax highlighting */
@@ -45,6 +46,114 @@
   --border-chip: rgba(255, 255, 255, 0.14);
   --shadow-modal: rgba(0, 0, 0, 0.5);
   --text-over-primary: rgba(255, 255, 255, 0.8);
+}
+
+/* One Dark (Atom) */
+html[data-theme='one-dark'] {
+  --color-primary: #282c34;
+  --color-surface: #2f343d;
+  --color-text: #abb2bf;
+  --color-text-strong: #c0c7d1;
+  --color-text-muted: #98a0ac;
+  --color-button: #61afef;
+  --color-button-text: #1f232b;
+  --color-footer: #1f232b;
+  --color-variable: #e87884;
+  --color-number: #d19a66;
+  --color-operator: #56b6c2;
+  --color-currency: #98c379;
+  --color-title: #9aa4b0;
+  --color-error: #e06c75;
+  --color-ghost-error: #ef8181;
+  --color-link: #61afef;
+  --color-link-visited: #c678dd;
+  --border-strong: #3e4451;
+  --surface-nav: #1f232b;
+  --surface-chip: #2f343d;
+  --surface-chip-hover: #353b45;
+  --surface-link-hover: #353b45;
+  --surface-code: #1f232b;
+}
+
+/* Dracula */
+html[data-theme='dracula'] {
+  --color-primary: #282a36;
+  --color-surface: #2f3141;
+  --color-text: #f8f8f2;
+  --color-text-strong: #e3e3e6;
+  --color-text-muted: #9aa0b8;
+  --color-button: #bd93f9;
+  --color-button-text: #1e1f29;
+  --color-footer: #1e1f29;
+  --color-variable: #ff79c6;
+  --color-number: #bd93f9;
+  --color-operator: #8be9fd;
+  --color-currency: #50fa7b;
+  --color-title: #9aa0b8;
+  --color-error: #ff5555;
+  --color-ghost-error: #ff8a8a;
+  --color-link: #8be9fd;
+  --color-link-visited: #bd93f9;
+  --border-strong: #44475a;
+  --surface-nav: #21222c;
+  --surface-chip: #2f3141;
+  --surface-chip-hover: #353b52;
+  --surface-link-hover: #353b52;
+  --surface-code: #21222c;
+}
+
+/* Solarized Dark */
+html[data-theme='solarized-dark'] {
+  --color-primary: #002b36;
+  --color-surface: #073642;
+  --color-text: #93a1a1;
+  --color-text-strong: #a4b1b4;
+  --color-text-muted: #8fa1a8;
+  --color-button: #268bd2;
+  --color-button-text: #001f27;
+  --color-footer: #001f27;
+  --color-variable: #2f98d6;
+  --color-number: #b58900;
+  --color-operator: #2aa198;
+  --color-currency: #859900;
+  --color-title: #a4b1b4;
+  --color-error: #dc322f;
+  --color-ghost-error: #e56757;
+  --color-link: #2f98d6;
+  --color-link-visited: #8b92e0;
+  --border-strong: #586e75;
+  --surface-nav: #00232c;
+  --surface-chip: #073642;
+  --surface-chip-hover: #0a4150;
+  --surface-link-hover: #0a4150;
+  --surface-code: #00232c;
+}
+
+/* Monokai */
+html[data-theme='monokai'] {
+  --color-primary: #272822;
+  --color-surface: #2d2d26;
+  --color-text: #f8f8f2;
+  --color-text-strong: #e6e6df;
+  --color-text-muted: #9a958a;
+  --color-button: #66d9ef;
+  --color-button-text: #1d1e19;
+  --color-footer: #1d1e19;
+  --color-variable: #ff4f8f;
+  --color-number: #ae81ff;
+  --color-operator: #e6db74;
+  --color-currency: #a6e22e;
+  --color-title: #9a958a;
+  --color-error: #f92672;
+  --color-ghost-error: #ff8a8a;
+  --color-link: #66d9ef;
+  --color-link-visited: #ae81ff;
+  --border-strong: #49483e;
+  --surface-nav: #1d1e19;
+  --surface-chip: #2d2d26;
+  --surface-chip-hover: #34342c;
+  --surface-link-hover: #34342c;
+  --surface-code: #1d1e19;
 }
 
 * {
@@ -87,7 +196,7 @@ body {
 }
 .tab.active {
   background: var(--color-button);
-  color: var(--color-text);
+  color: var(--color-button-text);
 }
 .tab-name {
   font: inherit;
@@ -237,7 +346,7 @@ body {
 button {
   font-size: 1em;
   background: var(--color-button);
-  color: var(--color-text);
+  color: var(--color-button-text);
   border: 0;
   border-radius: 0;
   padding: 0.5em 0.8em;
@@ -338,7 +447,7 @@ button:hover {
 }
 .modal-nav-link.active {
   background: var(--color-button);
-  color: var(--color-text);
+  color: var(--color-button-text);
 }
 .modal-body {
   flex: 1 1 auto;
@@ -423,6 +532,38 @@ code {
 }
 .operator-table tbody tr td:first-child {
   text-align: right;
+}
+/* Theme picker */
+.theme-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  width: 100%;
+  margin: 0.3em 0;
+  padding: 0.5em 0.8em;
+  background: var(--surface-chip);
+  color: var(--color-text);
+  border: 1px solid var(--border-chip);
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+}
+.theme-card:hover {
+  background: var(--surface-chip-hover);
+  filter: none;
+}
+.theme-card.active {
+  border-color: var(--color-operator);
+  box-shadow: inset 0 0 0 1px var(--color-operator);
+}
+.theme-swatch {
+  display: inline-flex;
+  gap: 2px;
+}
+.theme-swatch span {
+  width: 1.2em;
+  height: 1.2em;
+  border-radius: 2px;
 }
 a {
   color: var(--color-link);
