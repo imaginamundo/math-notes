@@ -1,0 +1,23 @@
+{
+  "name": "math-notes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Inline calculator for modern browsers.",
+  "type": "module",
+  "scripts": {
+    "build:mathjs": "make -C js/lib",
+    "test": "node --test",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.9.1",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.11.0",
+    "mathjs": "15.2.0",
+    "prettier": "^3.9.6"
+  }
+}

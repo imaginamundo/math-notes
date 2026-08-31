@@ -1,33 +1,65 @@
-const cacheName = 'v1';
+const cacheName = 'math-notes-v16';
 const urlsToCache = [
   '../index.html',
   '../style.css',
-  './format.js',
+  './core/aggregate.js',
+  './eval/aliases.js',
+  './core/calculate.js',
+  './eval/cssUnits.js',
+  './eval/currency.js',
+  './eval/datetime.js',
+  './render/format.js',
+  './render/formatResult.js',
   './index.js',
-  './linesLoop.js',
-  './printInputs.js',
-  './printResults.js',
-  './printTotal.js',
-  './storeValues.js',
-  './dom/cosmetic.js',
-  './dom/help.js',
-  './store/math.js',
-  './store/results.js',
-  './store/variables.js',
-  './store/view.js',
-  './lib/math.bundle.min.js'
+  './ui/io.js',
+  './ui/modal.js',
+  './core/parseLine.js',
+  './eval/percentage.js',
+  './core/preprocess.js',
+  './registerServiceWorker.js',
+  './ui/examples.js',
+  './ui/recipes.js',
+  './ui/settings.js',
+  './eval/scales.js',
+  './eval/symbols.js',
+  './eval/wordOperators.js',
+  './render/renderInput.js',
+  './ui/shortcuts.js',
+  './render/renderTotal.js',
+  './ui/tabs.js',
+  './ui/cosmetic.js',
+  './ui/help.js',
+  './lib/math.bundle.min.js',
 ];
 
-self.addEventListener('install', event => {
+self.addEventListener('install', (event) => {
+  event.waitUntil(caches.open(cacheName).then((cache) => cache.addAll(urlsToCache)));
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.open(cacheName)
-      .then(cache => cache.addAll(urlsToCache))
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(keys.filter((key) => key !== cacheName).map((key) => caches.delete(key)))
+      )
+      .then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', event => {
+// Network-first with a cache fallback: always serve fresh assets when the
+// server is reachable, falling back to the cached copy when offline.
+self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request)
-      .then(res => res || fetch(event.request))
+    fetch(event.request)
+      .then((response) => {
+        if (response.ok && event.request.url.startsWith(self.location.origin)) {
+          const copy = response.clone();
+          caches.open(cacheName).then((cache) => cache.put(event.request, copy));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });

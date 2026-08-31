@@ -1,58 +1,91 @@
 # Math Notes
-Inline calculator to run on browser.
 
-## Dependencies
-Created using ECMAScript, and [math.js](https://mathjs.org/).
+An inline calculator that runs in the browser. Type calculations line by line
+and each result appears right beside it as ghost text, with an automatic
+running total.
 
-## ECMAScript features
-- Modules;
-- Descructuring;
-- Arrow Functions;
-- let, const;
-- Listener for paste;
-- Listener for input;
-- async, await;
+Based on [Numi](https://numi.app/).
 
-If your browser doesn't support these features, the calculator will not work.
+## Features
 
-## To do:
-- [ ] Save information on browser;
+- **Line-by-line evaluation** with an automatic total of numeric results.
+- **Tabs** for separate worksheets — rename by double-clicking a tab, close with
+  `×` (you're asked to confirm), add with `+`. Everything is saved locally.
+- **Variables and functions**: `price = 30`, `double = f(x) = x * 2`.
+- **`prev`** — reference the previous line's result.
+- **`sum` / `total` / `average` / `avg`** — aggregate the lines above (until a
+  blank line).
+- **Comments** with `#` and **labels** like `Price: 10 + 5`.
+- **Unit conversion** (`1 cm to m`) including CSS units (`px`, `em`, `point`).
+- **Currency conversion** (`100 USD to EUR`, `$5 to GBP`, `R$5 to EUR`) with
+  live rates from the European Central Bank, cached for offline use.
+- **Percentages**: `20% of $10`, `5% on $30`, `6% off 40 EUR`,
+  `$50 as a % of $100`, `5% of what is 6`.
+- **Number scales**: `2k`, `2M eur`, `5 million`.
+- **Word operators**: `8 times 9`, `2 plus 3`, `10 minus 3`, `6 multiplied by 7`.
+- **Function aliases**: `ln`, `fact`, `arcsin`, `arccos`, `arctan`, `root`.
+- **Dates**: `fromunix(1446587186)`, `unix()`.
+- **Import / Export** of the active sheet as plain text.
+- **Keyboard shortcuts** (see below).
+- Offline-first PWA via a service worker.
 
-Save inputed information on browser to return the same information after the site is reopened.
+## Example
 
-- [ ] Syntax highlighting;
-
-Add color to syntax to differenciate variables and comments.
-
-- [ ] Create percentage calculus;
 ```
-5% of 100 (resolve 5)
-
-10% off 50 (resolve 45)
-
-50% on 10 (resolve 15)
-
-50 as a % of 100 (resolve 50%)
-
-70 as a % on 20 (resolve 250%)
-
-20 as a % off 80 (resolve 75%)
-```
-- [ ] Currency convertion;
-```
-1 USD to EUR
-
-1 USD + 50 EUR
-
-1 BRL * 2
-
-1 BTC to USD
+pizzas = 2
+pizzaPrice = 30
+people = 4
+(pizzas * pizzaPrice) / people   → 15
 ```
 
-- [ ] Avoid 3 loops (parse input, print input and print response);
+## Keyboard shortcuts
 
-Performance improvement to avoid multiple loops.
+| Shortcut                       | Action                         |
+| ------------------------------ | ------------------------------ |
+| `⇧⌘C` / `Ctrl+Shift+C`         | Copy the current line's result |
+| `⇧⌘E` / `Ctrl+Shift+E`         | Export the active sheet        |
+| `⇧⌘I` / `Ctrl+Shift+I`         | Import a sheet                 |
+| `⇧⌘⌫` / `Ctrl+Shift+Backspace` | Clear the active sheet         |
 
----
+The **Help** button opens the full reference with clickable examples.
 
-Project based on [Numi](https://numi.app/) app for MacOS.
+## Reserved words
+
+`prev`, `sum`, `total`, `average` and `avg` are treated as operators, so they
+cannot be used as variable names.
+
+## Development
+
+There is no runtime build step: the app runs as plain ES modules. Only the
+math.js dependency is pre-bundled and committed in `js/lib/`.
+
+### Updating math.js
+
+The pinned version lives in two places, keep them in sync:
+
+- the import in `js/lib/math.js`
+- the `mathjs` devDependency in `package.json`
+
+Regenerate the bundle, then minify it into the file the app loads:
+
+```sh
+make -C js/lib
+```
+
+### Tests
+
+The calculation pipeline is pure and covered by the Node test runner:
+
+```sh
+npm test
+```
+
+### Architecture
+
+- `js/core/` — parsing and evaluation (`calculate.js`, `parseLine.js`,
+  `preprocess.js`, `aggregate.js`).
+- `js/eval/` — mathjs extensions and preprocessors (`aliases.js`, `cssUnits.js`,
+  `currency.js`, `datetime.js`, `scales.js`, `symbols.js`, `wordOperators.js`,
+  `percentage.js`).
+- `js/render/` — highlighting and result rendering.
+- `js/ui/` — tabs, modal, help, shortcuts, import/export and font controls.
