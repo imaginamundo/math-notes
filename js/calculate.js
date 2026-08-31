@@ -15,7 +15,8 @@ initDatetime(math);
 initCurrency(math);
 
 function evaluateLine(line, scope) {
-  const { code, label, rhs, isAssignment } = parseLine(line);
+  const parsed = typeof line === 'string' ? parseLine(line) : line;
+  const { code, label, rhs, isAssignment } = parsed;
   let type = isAssignment ? 'assignment' : 'value';
   let value;
   let result;
@@ -46,8 +47,8 @@ function evaluateLines(lines) {
     const line = lines[i];
     if (line.trim() === '') lastBlankIndex = i;
 
-    const { code } = parseLine(line);
-    const keyword = AGGREGATE_KEYWORDS[code.trim().toLowerCase()];
+    const parsed = parseLine(line);
+    const keyword = AGGREGATE_KEYWORDS[parsed.code.trim().toLowerCase()];
 
     if (keyword) {
       const value = aggregateAbove(results, lastBlankIndex + 1, i, keyword);
@@ -58,7 +59,7 @@ function evaluateLines(lines) {
 
     const scope = { ...variables };
     if (previousResult !== undefined) scope.prev = previousResult;
-    const { type, result, variable } = evaluateLine(line, scope);
+    const { type, result, variable } = evaluateLine(parsed, scope);
     if (variable) variables[variable.label] = variable.value;
     results.push({ type, value: result });
     if (type !== 'error' && result !== undefined && typeof result !== 'function') {
