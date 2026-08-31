@@ -7,8 +7,6 @@ import controlHelpModal from './dom/help.js';
 
 import './dom/cosmetic.js';
 
-document.execCommand('defaultParagraphSeparator', false, 'br');
-
 const inputNode = document.getElementById('input');
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');
@@ -27,11 +25,25 @@ function update() {
 // Trigger changes
 contentEditableNode.addEventListener('input', () => update());
 
+// Always separate lines with a <br> element
+contentEditableNode.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    document.execCommand('insertLineBreak', false, null);
+  }
+});
+
 // Only paste text
 contentEditableNode.addEventListener('paste', (e) => {
   e.preventDefault();
   const text = (e.originalEvent || e).clipboardData.getData('text/plain');
-  document.execCommand('insertText', false, text);
+  const lines = text.split('\n');
+  lines.forEach((line, index) => {
+    document.execCommand('insertText', false, line);
+    if (index < lines.length - 1) {
+      document.execCommand('insertLineBreak', false, null);
+    }
+  });
 });
 
 inputNode.addEventListener('click', (event) => {
