@@ -186,8 +186,12 @@ function initTabs(editableNode, onUpdate) {
       render();
     };
     input.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') finish(true);
-      else if (event.key === 'Escape') finish(false);
+      if (event.key === 'Enter') {
+        finish(true);
+        editableNode.focus();
+      } else if (event.key === 'Escape') {
+        finish(false);
+      }
     });
     input.addEventListener('blur', () => finish(true));
   }
@@ -213,6 +217,8 @@ function initTabs(editableNode, onUpdate) {
   });
 
   tabBarNode.addEventListener('keydown', (event) => {
+    // Don't hijack keys while the rename input is focused (typing spaces, etc.)
+    if (event.target.tagName === 'INPUT') return;
     const tabElement = event.target.closest('.tab');
     if (!tabElement) return;
     const ids = state.tabs.map((tab) => tab.id);
