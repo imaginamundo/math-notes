@@ -55,6 +55,9 @@ body {
   white-space: nowrap;
   overflow-x: auto;
 }
+.error {
+  color: #B00020;
+}
 .variable {
   color: #FFA800;
 }
