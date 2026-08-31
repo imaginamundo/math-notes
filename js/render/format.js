@@ -98,4 +98,4 @@ function titleWrap(text) {
   return createWrapper('title', text);
 }
 
-export default { line, variable, number, currency, operator, comment, title: titleWrap };
+export default { line, variable, number, currency, operator, comment };
