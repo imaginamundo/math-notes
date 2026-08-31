@@ -34,3 +34,11 @@ test('formatResult formats units with grouped values', () => {
   assert.equal(formatResult(math.unit(0.01, 'm')), '0.01 m');
   assert.equal(formatResult(math.unit(1000000, 'm')), '1,000,000 m');
 });
+
+test('formatResult keeps unit prefixes', () => {
+  assert.equal(formatResult(math.unit(2.5, 'km')), '2.5 km');
+  assert.equal(formatResult(math.unit(3, 'GB')), '3 GB');
+  math.createUnit('px', { definition: `${0.0254 / 96} m` });
+  const converted = formatResult(math.evaluate('1 cm in px'));
+  assert.match(converted, /^37\.7952755906 px$/);
+});

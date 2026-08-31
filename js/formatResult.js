@@ -14,7 +14,12 @@ function formatNumber(n) {
 }
 
 function formatUnit(unit) {
-  const value = unit.value;
+  let value;
+  try {
+    value = unit.toNumber();
+  } catch (error) {
+    value = unit.value;
+  }
   const formatted = typeof value === 'number' ? formatNumber(value) : String(value);
   return `${formatted} ${unit.formatUnits()}`;
 }
