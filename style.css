@@ -355,6 +355,75 @@ button:hover {
 .size-controls button + button {
   margin-left: 0.5em;
 }
+.find-bar {
+  position: absolute;
+  top: 0.5em;
+  right: 0.5em;
+  z-index: 2;
+  display: none;
+  flex-direction: column;
+  gap: 0.35em;
+  max-width: calc(100% - 1em);
+  padding: 0.5em;
+  background: var(--color-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.25em;
+  box-shadow: 0 4px 16px var(--shadow-modal);
+}
+.find-bar.open {
+  display: flex;
+}
+.find-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3em;
+}
+.find-bar input[type='text'] {
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.2em;
+  padding: 0.25em 0.4em;
+  outline: none;
+  min-width: 8em;
+}
+.find-bar input[type='text']:focus {
+  outline: 1px solid var(--color-operator);
+}
+.find-count {
+  font-size: 0.85em;
+  color: var(--color-text-muted);
+  min-width: 3.5em;
+  text-align: right;
+}
+.find-bar button {
+  font-size: 0.9em;
+  padding: 0.25em 0.55em;
+  background: var(--color-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.2em;
+  color: var(--color-text);
+  cursor: pointer;
+}
+.find-bar button:hover {
+  filter: brightness(1.2);
+}
+.find-bar .find-case.active {
+  color: var(--color-operator);
+  outline: 1px solid var(--color-operator);
+}
+.find-match {
+  background: rgba(255, 213, 79, 0.35);
+  outline: 1px solid rgba(255, 213, 79, 0.5);
+  border-radius: 0.15em;
+  color: inherit;
+}
+.find-match.active {
+  background: rgba(255, 213, 79, 0.6);
+  outline: 2px solid rgba(255, 213, 79, 0.9);
+}
 /* Modal component (generic, reusable) */
 .modal {
   width: min(58rem, 100%);
@@ -456,7 +525,8 @@ button:hover {
   background: transparent;
   padding: 0;
   color: var(--color-text);
-  white-space: pre;
+  white-space: pre-wrap;
+  min-width: 0;
   font-family: inherit;
   line-height: 1.4;
 }
@@ -489,6 +559,11 @@ code {
 .help-section td:first-child {
   white-space: nowrap;
   font-weight: 600;
+}
+.operator-table th:first-child,
+.operator-table td:first-child {
+  width: 1%;
+  white-space: nowrap;
 }
 .operator-table tbody tr td:first-child {
   text-align: right;
