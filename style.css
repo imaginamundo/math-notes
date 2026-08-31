@@ -565,6 +565,10 @@ code {
   height: 1.2em;
   border-radius: 2px;
 }
+.settings-files {
+  display: flex;
+  gap: 0.5em;
+}
 a {
   color: var(--color-link);
   text-decoration: underline;

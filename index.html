@@ -49,8 +49,6 @@
       <div class="button-wrap">
         <b class="size-controls">Size: <button id="font-minus">-</button><button id="font-plus">+</button><button id="font-reset">Reset size</button></b>
         <span class="actions">
-          <button id="export-button" class="export">Export</button>
-          <button id="import-button" class="import">Import</button>
           <span id="currency-status" class="currency-status" aria-live="polite"></span>
           <button id="settings-button" class="settings">Settings</button>
           <button id="recipes-button" class="recipes">Recipes</button>
@@ -124,7 +122,7 @@
             <li><b>Rename</b> — double-click the tab name.</li>
             <li><b>Close</b> — click the <code>×</code> (you'll be asked to confirm).</li>
             <li><b>Add</b> — click the <code>+</code> tab.</li>
-            <li><b>Export / Import</b> — the buttons in the footer download the active sheet as text or load one from a file.</li>
+            <li><b>Export / Import</b> — use the buttons in the <b>Settings</b> modal to download the active sheet as text or load one from a file.</li>
           </ul>
         </section>
 
@@ -362,7 +360,7 @@
 
         <section id="help-shortcuts" class="help-section">
           <h2>Shortcuts &amp; files</h2>
-          <p>The active sheet can be exported and imported from the footer or with the shortcuts below.</p>
+          <p>The active sheet can be exported and imported from the <b>Settings</b> modal or with the shortcuts below.</p>
           <table class="operator-table">
             <thead>
               <tr><th>Shortcut</th><th>Action</th></tr>
@@ -449,8 +447,19 @@
       <button class="modal-close" data-modal-close aria-label="Close settings">×</button>
     </header>
     <div class="modal-body">
-      <p>Choose a theme.</p>
-      <div class="settings-themes"></div>
+      <section class="help-section">
+        <h2>Files</h2>
+        <p>Export the active sheet as text or import one from a file.</p>
+        <div class="settings-files">
+          <button id="export-button" class="export">Export</button>
+          <button id="import-button" class="import">Import</button>
+        </div>
+      </section>
+      <section class="help-section">
+        <h2>Theme</h2>
+        <p>Choose a theme.</p>
+        <div class="settings-themes"></div>
+      </section>
     </div>
   </dialog>
 </body>
