@@ -16,10 +16,10 @@ function createWrapper(type, text) {
 
 function line(text) {
   const wrapper = createWrapper('line', '');
-  const { code, comment } = parseLine(text);
+  const { code, comment: commentText } = parseLine(text);
 
   if (code) appendCode(wrapper, code);
-  if (comment) wrapper.appendChild(comment(comment));
+  if (commentText) wrapper.appendChild(comment(commentText));
 
   return wrapper;
 }
