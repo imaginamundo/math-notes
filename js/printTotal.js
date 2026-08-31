@@ -5,10 +5,7 @@ function printTotal(totalNode) {
     .filter(({ value }) => Number(value) === value)
     .map(({ value }) => value);
 
-  totalNode.innerHTML = ' ';
-  if (values.length) {
-    totalNode.innerHTML = values.reduce((acc, cur) => acc + cur);
-  }
+  totalNode.textContent = values.length ? values.reduce((acc, cur) => acc + cur) : '';
 }
 
 export default printTotal;
