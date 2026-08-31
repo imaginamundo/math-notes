@@ -135,6 +135,9 @@ button {
 .button-wrap .help {
   margin-left: auto;
 }
+.footer button + button {
+  margin-left: .5em;
+}
 .help {
   margin: 0 .75em;
 }

@@ -1,4 +1,4 @@
-const cacheName = 'math-notes-v8';
+const cacheName = 'math-notes-v9';
 const urlsToCache = [
   '../index.html',
   '../style.css',
