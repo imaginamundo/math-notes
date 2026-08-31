@@ -24,7 +24,6 @@ fontPlusNode.addEventListener('click', () => {
   setFontSize();
 });
 fontResetNode.addEventListener('click', () => {
-  if (fontSize.current >= fontSize.max) return;
   fontSize.current = 14;
   setFontSize();
 });
