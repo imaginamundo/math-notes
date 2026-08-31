@@ -111,6 +111,9 @@ body {
 .number {
   color: #64B5F6;
 }
+.currency {
+  color: #66BB6A;
+}
 .operator {
   color: #FFD54F;
 }

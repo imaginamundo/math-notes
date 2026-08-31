@@ -3,6 +3,7 @@ import parseLine from './parseLine.js';
 const RULES = {
   whitespace: /^\s+/,
   number: /^\d*\.?\d+(e[+-]?\d+)?/i,
+  currency: /^(?:R\$|\$|€|£|¥|₹|₺|₩)/,
   identifier: /^[A-Za-z_][A-Za-z0-9_]*/,
   operator: /^[+\-*/^=(),%!<>]/,
 };
@@ -41,6 +42,13 @@ function appendCode(wrapper, code) {
       rest = rest.slice(token.length);
       continue;
     }
+    match = RULES.currency.exec(rest);
+    if (match) {
+      const [token] = match;
+      wrapper.appendChild(currency(token));
+      rest = rest.slice(token.length);
+      continue;
+    }
     match = RULES.identifier.exec(rest);
     if (match) {
       const [token] = match;
@@ -68,6 +76,10 @@ function number(text) {
   return createWrapper('number', text);
 }
 
+function currency(text) {
+  return createWrapper('currency', text);
+}
+
 function operator(text) {
   return createWrapper('operator', text);
 }
@@ -76,4 +88,4 @@ function comment(text) {
   return createWrapper('comment', text);
 }
 
-export default { line, variable, number, operator, comment };
+export default { line, variable, number, currency, operator, comment };

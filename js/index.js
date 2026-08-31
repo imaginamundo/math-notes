@@ -43,4 +43,6 @@ if (savedInput) {
 initHelpModal(contentEditableNode);
 initFontControls();
 
+window.addEventListener('currency:updated', update);
+
 registerServiceWorker();

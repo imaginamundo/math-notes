@@ -1,7 +1,14 @@
 import { create, all } from './lib/math.bundle.min.js';
 import parseLine from './parseLine.js';
+import initCurrency, { preprocessSymbols } from './currency.js';
 
 const math = create(all);
+
+initCurrency(math, () => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('currency:updated'));
+  }
+});
 
 function evaluateLine(line, scope) {
   const { code, label, rhs, isAssignment } = parseLine(line);
@@ -10,8 +17,8 @@ function evaluateLine(line, scope) {
   let result;
 
   try {
-    result = math.evaluate(code, scope);
-    value = rhs && math.evaluate(rhs, scope);
+    result = math.evaluate(preprocessSymbols(code), scope);
+    value = rhs && math.evaluate(preprocessSymbols(rhs), scope);
   } catch (error) {
     result = error;
     value = undefined;

@@ -49,3 +49,24 @@ test('identifiers, numbers and operators get their own classes', () => {
   const classes = node.children.filter(c => c._classes).map(c => c.textContent);
   assert.deepEqual(classes, ['pizzas', '=', '2']);
 });
+
+test('currency symbols get their own class', () => {
+  const node = format.line('R$5 to EUR');
+  const classes = node.children
+    .filter(c => c._classes)
+    .map(c => ({ text: c.textContent, class: [...c._classes][0] }));
+  assert.deepEqual(classes, [
+    { text: 'R$', class: 'currency' },
+    { text: '5', class: 'number' },
+    { text: 'to', class: 'variable' },
+    { text: 'EUR', class: 'variable' }
+  ]);
+});
+
+test('a bare dollar sign is highlighted as currency', () => {
+  const node = format.line('$5');
+  assert.equal(node.children[0]._classes.has('currency'), true);
+  assert.equal(node.children[0].textContent, '$');
+  assert.equal(node.children[1]._classes.has('number'), true);
+  assert.equal(node.children[1].textContent, '5');
+});
