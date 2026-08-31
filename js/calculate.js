@@ -5,6 +5,7 @@ import initAliases from './aliases.js';
 import initCssUnits from './cssUnits.js';
 import initDatetime from './datetime.js';
 import preprocess from './preprocess.js';
+import { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal } from './aggregate.js';
 
 const math = create(all);
 initAliases(math);
@@ -39,23 +40,6 @@ function evaluateLine(line, scope) {
   return { type, result: result instanceof Error ? result.message : result, variable };
 }
 
-const AGGREGATE_KEYWORDS = {
-  sum: 'sum',
-  total: 'sum',
-  average: 'average',
-  avg: 'average',
-};
-
-function aggregateAbove(results, fromIndex, toIndex, mode) {
-  const values = results
-    .slice(fromIndex, toIndex)
-    .filter(({ type, value, aggregate }) => type === 'value' && !aggregate && Number(value) === value)
-    .map(({ value }) => value);
-  if (!values.length) return 0;
-  const sum = values.reduce((acc, cur) => acc + cur);
-  return mode === 'sum' ? sum : sum / values.length;
-}
-
 function evaluateLines(lines) {
   const variables = {};
   const results = [];
@@ -86,13 +70,9 @@ function evaluateLines(lines) {
     }
   }
 
-  const totalValues = results
-    .filter(({ type, value, aggregate }) => type === 'value' && !aggregate && Number(value) === value)
-    .map(({ value }) => value);
-
   return {
     results,
-    total: totalValues.length ? totalValues.reduce((acc, cur) => acc + cur) : null
+    total: computeTotal(results)
   };
 }
 
