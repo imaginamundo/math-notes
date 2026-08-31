@@ -35,12 +35,17 @@ function evaluateLine(line, scope) {
 function evaluateLines(lines) {
   const variables = {};
   const results = [];
+  let previousResult;
 
   for (const line of lines) {
     const scope = { ...variables };
+    if (previousResult !== undefined) scope.prev = previousResult;
     const { type, result, variable } = evaluateLine(line, scope);
     if (variable) variables[variable.label] = variable.value;
     results.push({ type, value: result });
+    if (type !== 'error' && result !== undefined && typeof result !== 'function') {
+      previousResult = result;
+    }
   }
 
   const totalValues = results

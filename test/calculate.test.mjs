@@ -117,3 +117,17 @@ test('evaluateLines returns no total without value results', () => {
   assert.equal(evaluateLines(['', '']).total, null);
   assert.equal(evaluateLines(['# only a comment']).total, null);
 });
+
+test('evaluateLines resolves prev from the previous line', () => {
+  const { results } = evaluateLines(['5', 'prev * 2', 'prev + 1']);
+  assert.equal(results[1].value, 10);
+  assert.equal(results[2].value, 11);
+});
+
+test('evaluateLines chains prev through assignments and errors', () => {
+  const { results } = evaluateLines(['10', '2 +', 'prev / 2']);
+  assert.equal(results[1].type, 'error');
+  assert.equal(results[2].value, 5);
+  const { results: ok } = evaluateLines(['x = 20', 'prev / 4']);
+  assert.equal(ok[1].value, 5);
+});
