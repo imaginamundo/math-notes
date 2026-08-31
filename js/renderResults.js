@@ -1,3 +1,5 @@
+import formatResult from './formatResult.js';
+
 function renderResults(resultsNode, results) {
   resultsNode.innerHTML = '';
   results.forEach(({ type, value }, index) => {
@@ -10,7 +12,7 @@ function renderResults(resultsNode, results) {
       return;
     }
     if (value !== undefined) {
-      resultsNode.appendChild(document.createTextNode(String(value)));
+      resultsNode.appendChild(document.createTextNode(formatResult(value)));
     }
   });
 }

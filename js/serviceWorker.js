@@ -6,6 +6,7 @@ const urlsToCache = [
   './calculate.js',
   './currency.js',
   './format.js',
+  './formatResult.js',
   './index.js',
   './modal.js',
   './parseLine.js',
