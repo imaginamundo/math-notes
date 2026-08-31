@@ -22,8 +22,25 @@ function update() {
   printTotal(totalNode);
 }
 
+function serializeInput() {
+  return [...contentEditableNode.childNodes]
+    .map(node => (node.nodeName === 'BR' ? '\n' : node.textContent))
+    .join('');
+}
+
+function setInputText(text) {
+  contentEditableNode.innerHTML = '';
+  text.split('\n').forEach((line, index) => {
+    if (index > 0) contentEditableNode.appendChild(document.createElement('br'));
+    if (line) contentEditableNode.appendChild(document.createTextNode(line));
+  });
+}
+
 // Trigger changes
-contentEditableNode.addEventListener('input', () => update());
+contentEditableNode.addEventListener('input', () => {
+  window.localStorage.setItem('input', serializeInput());
+  update();
+});
 
 // Always separate lines with a <br> element
 contentEditableNode.addEventListener('keydown', (e) => {
@@ -51,6 +68,12 @@ inputNode.addEventListener('click', (event) => {
     contentEditableNode.focus();
   }
 });
+
+const savedInput = window.localStorage.getItem('input');
+if (savedInput) {
+  setInputText(savedInput);
+  update();
+}
 
 controlHelpModal(contentEditableNode);
 

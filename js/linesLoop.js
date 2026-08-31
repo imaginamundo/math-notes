@@ -14,8 +14,6 @@ function lineLoop(childNodes) {
     if (node.nodeName === '#text') {
       const input = node.textContent;
 
-      window.localStorage.setItem('input', input.trim());
-
       storeValues(input);
       addNode(format.line(input));
     } else {
