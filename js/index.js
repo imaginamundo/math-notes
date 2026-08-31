@@ -15,10 +15,16 @@ const resultsNode = document.getElementById('results');
 const totalNode = document.getElementById('total');
 const currencyStatusNode = document.getElementById('currency-status');
 
+let lastValue = null;
+
 function update() {
-  const lines = contentEditableNode.value.split('\n');
+  const value = contentEditableNode.value;
+  const lines = value.split('\n');
+  if (value !== lastValue) {
+    lastValue = value;
+    renderInput(viewNode, lines);
+  }
   const { results, total } = evaluateLines(lines);
-  renderInput(viewNode, lines);
   renderResults(resultsNode, results);
   renderTotal(totalNode, total);
 }
