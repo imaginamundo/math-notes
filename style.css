@@ -176,7 +176,7 @@ body {
 }
 .content-editable::placeholder {
   color: var(--color-text);
-  opacity: 1;
+  opacity: 0.55;
 }
 .view {
   z-index: 0;
