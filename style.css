@@ -30,32 +30,46 @@ body {
   cursor: text;
 }
 /*
- * The editor is a transparent contenteditable. A mirrored .view layer sits
- * behind it and renders the same text with syntax highlighting, so the
- * caret still lives in the real input while the styled copy is what the
- * user sees. Keep .content-editable and .view metrics identical (same
- * font, size, line-height and padding) or the mirror drifts from the
- * caret. Because input text is transparent, the mirror also backs up
- * assistive tech that reads the visible text.
+ * The editor is a transparent textarea. A highlighted .view layer (a pre)
+ * sits behind it and renders the same text with syntax highlighting, so
+ * the caret lives in the real input while the styled copy is what the
+ * user sees. Both layers must share identical metrics (font, line-height,
+ * padding, white-space and scrollbar gutter) and scroll position, which
+ * index.js mirrors from the textarea to the view, or they drift apart.
  */
-.content-editable {
-  color: transparent;
-  caret-color: #949B93;
-}
+.content-editable,
 .view {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: -1;
-}
-.content-editable,
-.view {
-  display: inline-block;
-  padding: 1em 0;
   width: 100%;
   height: 100%;
-  outline: none;
+  margin: 0;
+  padding: 1em 0;
+  font: inherit;
+  line-height: inherit;
   white-space: nowrap;
+  scrollbar-gutter: stable;
+}
+.content-editable {
+  z-index: 1;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: #949B93;
+  outline: none;
+  resize: none;
+  overflow: auto;
+}
+.content-editable::placeholder {
+  color: #949B93;
+  opacity: 1;
+}
+.view {
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  color: #949B93;
 }
 .results {
   padding: 1em;
@@ -91,9 +105,6 @@ button {
 }
 .total {
   width: 30%;
-}
-.placeholder {
-  opacity: .5;
 }
 .modal {
   position: absolute;

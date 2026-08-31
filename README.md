@@ -9,7 +9,6 @@ Created using ECMAScript, and [math.js](https://mathjs.org/).
 - Descructuring;
 - Arrow Functions;
 - let, const;
-- Listener for paste;
 - Listener for input;
 - async, await;
 
