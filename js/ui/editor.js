@@ -1,13 +1,29 @@
 import { indexOfLineAt } from './shortcuts.js';
 
-// The editor layers live inside a scroll container, so the textarea no longer
-// scrolls natively and the caret must be kept visible manually. The sheet is
+// With the editor layers inside a scroll container, the textarea no longer
+// scrolls natively, so the caret must be kept visible manually. The sheet is
 // monospace, so the caret position is computed from column and line math.
 function initEditorScroll(editableNode) {
   const scroller = editableNode.closest('.editor-scroll');
   if (!scroller) return {};
 
   let charWidth = 0;
+
+  // The textarea's intrinsic height is ~2 rows (its `rows` attribute), which
+  // would shrink the grid and desync the ghost layer, so size it to its own
+  // content dimensions. The ghost rows and line numbers use the same integer
+  // pixel line height as the textarea (1.65 × font size, rounded), so there is
+  // no sub-pixel difference to accumulate into drift over many lines. The
+  // browser may also set an internal scroll position while moving the caret;
+  // reset it so the overlay stays aligned.
+  function syncSize() {
+    const lineHeight = Math.round(parseFloat(getComputedStyle(editableNode).fontSize) * 1.65);
+    document.documentElement.style.setProperty('--editor-line-height', `${lineHeight}px`);
+    editableNode.style.width = `${editableNode.scrollWidth}px`;
+    editableNode.style.height = `${editableNode.scrollHeight}px`;
+    editableNode.scrollTop = 0;
+    editableNode.scrollLeft = 0;
+  }
 
   function measureCharWidth() {
     const cs = getComputedStyle(editableNode);
@@ -20,10 +36,6 @@ function initEditorScroll(editableNode) {
   }
 
   function scrollCaretIntoView() {
-    // The grid sizes the textarea to its content, so it must never scroll
-    // internally; reset any scroll the browser set while moving the caret.
-    editableNode.scrollTop = 0;
-    editableNode.scrollLeft = 0;
     if (document.activeElement !== editableNode) return;
     const value = editableNode.value;
     const pos = editableNode.selectionStart;
@@ -48,12 +60,18 @@ function initEditorScroll(editableNode) {
     }
   }
 
-  editableNode.addEventListener('input', scrollCaretIntoView);
+  editableNode.addEventListener('input', () => {
+    syncSize();
+    scrollCaretIntoView();
+  });
   editableNode.addEventListener('keyup', scrollCaretIntoView);
   editableNode.addEventListener('click', scrollCaretIntoView);
   document.addEventListener('selectionchange', () => {
     if (document.activeElement === editableNode) scrollCaretIntoView();
   });
+
+  syncSize();
+  return { syncSize };
 }
 
 export default initEditorScroll;

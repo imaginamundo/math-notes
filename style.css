@@ -266,7 +266,7 @@ body {
   margin: 0;
   padding: 1em calc(1em + var(--safe-right)) 1em calc(1em + var(--line-gutter) + var(--safe-left));
   font: inherit;
-  line-height: 1.65em;
+  line-height: var(--editor-line-height, 1.65em);
   white-space: pre;
 }
 .content-editable {
@@ -295,12 +295,12 @@ input::placeholder {
 }
 .line-row {
   /* The row spans the line plus its result, so the view (and the scroll
-     container) is wide enough to reveal the result by scrolling. The pinned
-     height also makes the grid size the textarea to match, keeping rows and
-     the caret aligned. */
+     container) is wide enough to reveal the result by scrolling. The height is
+     the integer pixel line height measured from the textarea, so rows can never
+     drift from the input, no matter how the browser renders form controls. */
   width: max-content;
-  height: 1.65em;
-  line-height: 1.65em;
+  height: var(--editor-line-height, 1.65em);
+  line-height: var(--editor-line-height, 1.65em);
 }
 .ghost-result {
   margin-left: 1.5em;
@@ -324,7 +324,7 @@ input::placeholder {
   padding: 1em 0.5em 1em 0;
   overflow: hidden;
   font: inherit;
-  line-height: 1.65em;
+  line-height: var(--editor-line-height, 1.65em);
   color: var(--color-text);
   text-align: right;
   white-space: pre;

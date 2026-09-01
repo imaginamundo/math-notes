@@ -23,12 +23,13 @@ const currencyStatusNode = document.getElementById('currency-status');
 const evalClient = createEvalClient(contentEditableNode, (lines, data) => {
   renderInput(viewNode, lines, data.results, data.startLine);
   renderTotal(totalNode, data.total);
+  editorScroll.syncSize();
 });
 
 // Trigger changes
 contentEditableNode.addEventListener('input', evalClient.schedule);
 
-initEditorScroll(contentEditableNode);
+const editorScroll = initEditorScroll(contentEditableNode);
 
 const tabsApi = initTabs(contentEditableNode, evalClient.update);
 
