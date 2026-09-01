@@ -1,14 +1,37 @@
 import format from './format.js';
 import formatResult from './formatResult.js';
 
-function renderInput(viewNode, lines, results) {
-  viewNode.innerHTML = '';
-  lines.forEach((line, index) => {
-    if (index > 0) viewNode.appendChild(document.createElement('br'));
-    viewNode.appendChild(format.line(line));
-    const ghost = ghostResult(results && results[index]);
-    if (ghost) viewNode.appendChild(ghost);
-  });
+let lastViewNode = null;
+const rows = [];
+
+function renderInput(viewNode, lines, results, startLine) {
+  if (viewNode !== lastViewNode) {
+    rows.length = 0;
+    lastViewNode = viewNode;
+  }
+  if (startLine === -1) return;
+
+  const from = rows.length === 0 ? 0 : startLine || 0;
+
+  // Remove the tail starting at the first changed row; the prefix stays
+  // untouched. rows[i] is the block wrapper of line i.
+  let node = rows[from];
+  while (node) {
+    const next = node.nextSibling;
+    node.remove();
+    node = next;
+  }
+  rows.length = from;
+
+  for (let i = from; i < lines.length; i++) {
+    const row = document.createElement('div');
+    row.className = 'line-row';
+    row.appendChild(format.line(lines[i]));
+    const ghost = ghostResult(results && results[i]);
+    if (ghost) row.appendChild(ghost);
+    viewNode.appendChild(row);
+    rows[i] = row;
+  }
 }
 
 function ghostResult(result) {

@@ -262,6 +262,10 @@ input::placeholder {
   pointer-events: none;
   color: var(--color-text);
 }
+.line-row {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1.65em;
+}
 .ghost-result {
   margin-left: 1.5em;
   color: var(--color-ghost);

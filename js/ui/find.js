@@ -1,4 +1,4 @@
-function initFind(editableNode, viewNode, onUpdate) {
+function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
   const barNode = buildBar();
   const findInput = barNode.querySelector('.find-input');
   const replaceInput = barNode.querySelector('.replace-input');
@@ -39,13 +39,13 @@ function initFind(editableNode, viewNode, onUpdate) {
     editableNode.focus();
   }
 
-  function refresh(renderView, scrollTo) {
+  async function refresh(renderView, scrollTo) {
     const prevAnchor =
       activeIndex !== -1 && matches[activeIndex]
         ? matches[activeIndex].start
         : editableNode.selectionStart;
     query = findInput.value;
-    if (renderView) onUpdate();
+    if (renderView) await onUpdate();
     if (!query) {
       matches = [];
       activeIndex = -1;
@@ -86,7 +86,7 @@ function initFind(editableNode, viewNode, onUpdate) {
     scrollToActive();
   }
 
-  function replaceCurrent() {
+  async function replaceCurrent() {
     if (!query || activeIndex === -1) return;
     const match = matches[activeIndex];
     const replacement = replaceInput.value;
@@ -94,11 +94,12 @@ function initFind(editableNode, viewNode, onUpdate) {
       editableNode.value.slice(0, match.start) + replacement + editableNode.value.slice(match.end);
     editableNode.selectionStart = editableNode.selectionEnd = match.start + replacement.length;
     editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+    await lastRefresh;
     scrollToActive();
     replaceInput.focus();
   }
 
-  function replaceAll() {
+  async function replaceAll() {
     if (!query || !matches.length) return;
     const replacement = replaceInput.value;
     const value = editableNode.value;
@@ -112,6 +113,7 @@ function initFind(editableNode, viewNode, onUpdate) {
     editableNode.value = out;
     editableNode.selectionStart = editableNode.selectionEnd = editableNode.value.length;
     editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+    await lastRefresh;
     scrollToActive();
     replaceInput.focus();
   }
@@ -123,7 +125,10 @@ function initFind(editableNode, viewNode, onUpdate) {
   function scrollToActive() {
     const mark = viewNode.querySelector('.find-match.active');
     if (!mark) return;
-    editableNode.scrollTop = Math.max(0, mark.offsetTop - editableNode.clientHeight / 2);
+    // Offscreen rows are skipped by content-visibility, so the mark has no
+    // layout; the row keeps its intrinsic-size box and is a safe vertical anchor.
+    const row = mark.closest('.line-row') || mark;
+    editableNode.scrollTop = Math.max(0, row.offsetTop - editableNode.clientHeight / 2);
     editableNode.scrollLeft = Math.max(0, mark.offsetLeft - editableNode.clientWidth / 2);
   }
 
@@ -158,8 +163,13 @@ function initFind(editableNode, viewNode, onUpdate) {
   replaceOneButton.addEventListener('click', replaceCurrent);
   replaceAllButton.addEventListener('click', replaceAll);
 
+  let lastRefresh = Promise.resolve();
   editableNode.addEventListener('input', () => {
-    if (barNode.classList.contains('open')) refresh(false, false);
+    if (barNode.classList.contains('open')) {
+      lastRefresh = Promise.resolve(flushUpdate ? flushUpdate() : undefined).then(() =>
+        refresh(false, false)
+      );
+    }
   });
 
   document.addEventListener('keydown', (event) => {
@@ -280,30 +290,34 @@ function clearMarks(root) {
 
 function applyMarks(root, matches, activeIndex) {
   clearMarks(root);
-  for (let matchIndex = 0; matchIndex < matches.length; matchIndex++) {
+  if (!matches.length) return;
+
+  // Single pass: collect every text node with its start offset once, then wrap
+  // matches from last to first so DOM mutations only touch text already passed.
+  const entries = textNodesInOrder(root);
+  const starts = entries.map((entry) => entry.start);
+
+  for (let matchIndex = matches.length - 1; matchIndex >= 0; matchIndex--) {
     const match = matches[matchIndex];
-    const entries = textNodesInOrder(root);
     let startIndex = -1;
-    let endIndex = -1;
     for (let i = 0; i < entries.length; i++) {
-      const nodeEnd = entries[i].start + entries[i].node.textContent.length;
-      if (startIndex === -1 && nodeEnd > match.start) startIndex = i;
-      if (nodeEnd >= match.end) {
-        endIndex = i;
+      if (starts[i] + entries[i].node.textContent.length > match.start) {
+        startIndex = i;
         break;
       }
     }
-    if (startIndex === -1 || endIndex === -1) continue;
+    if (startIndex === -1) continue;
 
-    const nodes = entries.map((entry) => entry.node);
-    const starts = entries.map((entry) => entry.start);
+    let endIndex = startIndex;
+    while (endIndex + 1 < entries.length && starts[endIndex + 1] < match.end) endIndex++;
+
     const localStart = match.start - starts[startIndex];
     const localEnd = match.end - starts[endIndex];
     const mark = document.createElement('mark');
     mark.className = 'find-match' + (matchIndex === activeIndex ? ' active' : '');
 
     if (startIndex === endIndex) {
-      const node = nodes[startIndex];
+      const node = entries[startIndex].node;
       let target = node;
       if (localStart > 0) {
         node.splitText(localStart);
@@ -313,12 +327,13 @@ function applyMarks(root, matches, activeIndex) {
       mark.textContent = target.textContent;
       target.replaceWith(mark);
     } else {
-      if (localStart > 0) nodes[startIndex].splitText(localStart);
-      const startNode = localStart > 0 ? nodes[startIndex].nextSibling : nodes[startIndex];
-      if (localEnd < nodes[endIndex].length) nodes[endIndex].splitText(localEnd);
+      if (localStart > 0) entries[startIndex].node.splitText(localStart);
+      const startNode =
+        localStart > 0 ? entries[startIndex].node.nextSibling : entries[startIndex].node;
+      if (localEnd < entries[endIndex].node.length) entries[endIndex].node.splitText(localEnd);
       const parts = [startNode];
-      for (let k = startIndex + 1; k < endIndex; k++) parts.push(nodes[k]);
-      parts.push(nodes[endIndex]);
+      for (let k = startIndex + 1; k < endIndex; k++) parts.push(entries[k].node);
+      parts.push(entries[endIndex].node);
       mark.textContent = parts.map((node) => node.textContent).join('');
       parts[0].replaceWith(mark);
       for (let k = 1; k < parts.length; k++) parts[k].remove();
@@ -329,7 +344,6 @@ function applyMarks(root, matches, activeIndex) {
 function textNodesInOrder(root) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_ALL, {
     acceptNode(node) {
-      if (node.nodeName === 'BR') return NodeFilter.FILTER_ACCEPT;
       if (node.nodeType === Node.TEXT_NODE) return NodeFilter.FILTER_ACCEPT;
       if (node.nodeType === Node.ELEMENT_NODE) {
         return node.classList.contains('ghost-result')
@@ -341,14 +355,16 @@ function textNodesInOrder(root) {
   });
   const entries = [];
   let textLength = 0;
-  let brCount = 0;
+  let rowCount = 0;
   let node;
   while ((node = walker.nextNode())) {
-    if (node.nodeName === 'BR') {
-      brCount++;
-    } else if (node.nodeType === Node.TEXT_NODE) {
-      entries.push({ node, start: textLength + brCount });
+    if (node.nodeType === Node.TEXT_NODE) {
+      // Each line-row represents one newline; rowCount is one ahead of the
+      // row being traversed because the row element precedes its text.
+      entries.push({ node, start: textLength + Math.max(0, rowCount - 1) });
       textLength += node.textContent.length;
+    } else if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('line-row')) {
+      rowCount++;
     }
   }
   return entries;

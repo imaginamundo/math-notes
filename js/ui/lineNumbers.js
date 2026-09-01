@@ -5,32 +5,38 @@ function initLineNumbers(editableNode) {
   gutter.className = 'line-numbers';
   editableNode.parentElement.appendChild(gutter);
 
+  const rows = [];
   let caretIndex = 0;
 
   // Always number every line contiguously (1..N), plus one phantom line for
-  // the row you'd land on after Enter, so numbering never has gaps.
+  // the row you'd land on after Enter, so numbering never has gaps. Rows are
+  // reused across renders, so typing only adds or removes the delta.
   function render() {
     const lines = editableNode.value.split('\n');
     caretIndex = indexOfLineAt(editableNode.value, editableNode.selectionStart);
     const rowCount = lines.length + 1;
-    gutter.textContent = '';
-    for (let i = 0; i < rowCount; i++) {
+    while (rows.length < rowCount) {
       const span = document.createElement('span');
-      span.textContent = i + 1;
-      span.dataset.line = i;
-      if (i === caretIndex) span.classList.add('active');
+      span.textContent = rows.length + 1;
+      span.dataset.line = rows.length;
+      if (rows.length > 0) gutter.appendChild(document.createTextNode('\n'));
       gutter.appendChild(span);
-      if (i < rowCount - 1) gutter.appendChild(document.createTextNode('\n'));
+      rows.push(span);
     }
+    while (rows.length > rowCount) {
+      const span = rows.pop();
+      const separator = span.previousSibling;
+      span.remove();
+      if (separator && separator.nodeType === 3) separator.remove();
+    }
+    rows.forEach((span, i) => span.classList.toggle('active', i === caretIndex));
   }
 
   function sync() {
     const index = indexOfLineAt(editableNode.value, editableNode.selectionStart);
     if (index === caretIndex) return;
     caretIndex = index;
-    gutter.querySelectorAll('span').forEach((span) => {
-      span.classList.toggle('active', Number(span.dataset.line) === index);
-    });
+    rows.forEach((span, i) => span.classList.toggle('active', i === index));
   }
 
   editableNode.addEventListener('scroll', () => {
