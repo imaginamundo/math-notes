@@ -227,3 +227,51 @@ test('evaluateLines supports Numi function aliases', () => {
   assert.ok(Math.abs(results[5].value - 2) < 1e-9);
   assert.equal(results[6].value, 3);
 });
+
+test('evaluateLines skips unchanged input', () => {
+  const lines = ['a = 1', 'a + 1'];
+  evaluateLines(lines);
+  const cached = evaluateLines(lines);
+  assert.equal(cached.startLine, -1);
+  assert.deepEqual(
+    cached.results.map((r) => r.value),
+    [1, 2]
+  );
+});
+
+test('evaluateLines recomputes from the first changed line', () => {
+  evaluateLines(['a = 1', 'b = 2', 'a + b']);
+  const changed = evaluateLines(['a = 1', 'b = 10', 'a + b']);
+  assert.equal(changed.startLine, 1);
+  assert.deepEqual(
+    changed.results.map((r) => r.value),
+    [1, 10, 11]
+  );
+});
+
+test('evaluateLines handles lines added and removed incrementally', () => {
+  evaluateLines(['1', '2']);
+  assert.deepEqual(
+    evaluateLines(['1', '2', '3']).results.map((r) => r.value),
+    [1, 2, 3]
+  );
+  assert.deepEqual(
+    evaluateLines(['1']).results.map((r) => r.value),
+    [1]
+  );
+});
+
+test('evaluateLines keeps aggregates correct across incremental edits', () => {
+  evaluateLines(['1', '2']);
+  const { results } = evaluateLines(['1', '', '2', 'sum']);
+  assert.equal(results[3].value, 2);
+  const { results: after } = evaluateLines(['5', '', '2', 'sum']);
+  assert.equal(after[3].value, 2);
+});
+
+test('evaluateLines keeps function variables when resuming from a change', () => {
+  evaluateLines(['double = f(x) = x * 2', 'double(3)']);
+  const { results } = evaluateLines(['double = f(x) = x * 2', 'double(5)']);
+  assert.equal(results[0].type, 'assignment');
+  assert.equal(results[1].value, 10);
+});

@@ -20,8 +20,8 @@ const currencyStatusNode = document.getElementById('currency-status');
 function update() {
   try {
     const lines = contentEditableNode.value.split('\n');
-    const { results, total } = evaluateLines(lines);
-    renderInput(viewNode, lines, results);
+    const { results, total, startLine } = evaluateLines(lines);
+    renderInput(viewNode, lines, results, startLine);
     renderTotal(totalNode, total);
   } catch (error) {
     console.error('Failed to update the sheet:', error);

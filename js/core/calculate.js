@@ -62,20 +62,65 @@ function substituteAggregates(parsed, sum, average) {
   };
 }
 
+const cache = {
+  lines: [],
+  results: [],
+};
+
+// Returns the index of the first line that differs, or -1 when identical.
+function findFirstDifference(previous, next) {
+  const length = Math.max(previous.length, next.length);
+  for (let i = 0; i < length; i++) {
+    if (previous[i] !== next[i]) return i;
+  }
+  return -1;
+}
+
 function evaluateLines(lines) {
+  const startLine = findFirstDifference(cache.lines, lines);
+  if (startLine === -1) {
+    return { results: cache.results, total: computeTotal(cache.results), startLine };
+  }
+
+  // Reuse the results of unchanged lines and rebuild the evaluation context up
+  // to the first changed line from the cached values (no mathjs evaluation).
+  const results = cache.results.slice(0, startLine);
   const variables = {};
-  const results = [];
   let previousResult;
   let lastBlankIndex = -1;
 
-  for (let i = 0; i < lines.length; i++) {
+  for (let i = 0; i < startLine; i++) {
+    const line = lines[i];
+    if (line.trim() === '') lastBlankIndex = i;
+    const parsed = parseLine(line);
+    if (parsed.isAssignment && !AGGREGATE_KEYWORDS[parsed.label.toLowerCase()]) {
+      const stored = results[i];
+      const assigned = stored
+        ? stored.assigned !== undefined
+          ? stored.assigned
+          : stored.value
+        : undefined;
+      if (assigned !== undefined) variables[parsed.label] = assigned;
+    }
+    const result = results[i];
+    if (
+      result &&
+      result.type !== 'error' &&
+      result.value !== undefined &&
+      typeof result.value !== 'function'
+    ) {
+      previousResult = result.value;
+    }
+  }
+
+  for (let i = startLine; i < lines.length; i++) {
     const line = lines[i];
     if (line.trim() === '') lastBlankIndex = i;
 
     const parsed = parseLine(line);
 
     if (parsed.isAssignment && AGGREGATE_KEYWORDS[parsed.label.toLowerCase()]) {
-      results.push({ type: 'error', value: `"${parsed.label}" is a reserved word` });
+      results[i] = { type: 'error', value: `"${parsed.label}" is a reserved word` };
       continue;
     }
 
@@ -83,7 +128,7 @@ function evaluateLines(lines) {
 
     if (keyword) {
       const value = aggregateAbove(results, lastBlankIndex + 1, i, keyword);
-      results.push({ type: 'value', value, aggregate: true });
+      results[i] = { type: 'value', value, aggregate: true };
       if (value !== undefined) previousResult = value;
       continue;
     }
@@ -100,16 +145,16 @@ function evaluateLines(lines) {
 
     const { type, result, variable } = evaluateLine(parsedLine, scope);
     if (variable) variables[variable.label] = variable.value;
-    results.push({ type, value: result });
+    results[i] = { type, value: result, assigned: variable ? variable.value : undefined };
     if (type !== 'error' && result !== undefined && typeof result !== 'function') {
       previousResult = result;
     }
   }
 
-  return {
-    results,
-    total: computeTotal(results),
-  };
+  cache.lines = lines;
+  cache.results = results;
+
+  return { results, total: computeTotal(results), startLine };
 }
 
 export { evaluateLines, evaluateLine };
