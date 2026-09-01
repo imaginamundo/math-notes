@@ -28,8 +28,25 @@ function update() {
   }
 }
 
+let updateTimer = null;
+
+// Run a pending update now (used by find so highlights apply to a fresh view).
+function flushUpdate() {
+  if (updateTimer !== null) {
+    clearTimeout(updateTimer);
+    updateTimer = null;
+    update();
+  }
+}
+
+// Batch rapid typing into a single evaluation on the trailing edge.
+function scheduleUpdate() {
+  clearTimeout(updateTimer);
+  updateTimer = setTimeout(update, 50);
+}
+
 // Trigger changes
-contentEditableNode.addEventListener('input', update);
+contentEditableNode.addEventListener('input', scheduleUpdate);
 
 // Keep the highlighted overlay aligned with the visible input
 contentEditableNode.addEventListener('scroll', () => {
@@ -45,7 +62,7 @@ initSettings(contentEditableNode);
 initFontControls();
 initIo(contentEditableNode);
 initShortcuts(contentEditableNode);
-initFind(contentEditableNode, viewNode, update);
+initFind(contentEditableNode, viewNode, update, flushUpdate);
 initLineNumbers(contentEditableNode);
 
 window.addEventListener('currency:updated', (event) => {

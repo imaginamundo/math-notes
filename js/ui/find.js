@@ -1,4 +1,4 @@
-function initFind(editableNode, viewNode, onUpdate) {
+function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
   const barNode = buildBar();
   const findInput = barNode.querySelector('.find-input');
   const replaceInput = barNode.querySelector('.replace-input');
@@ -159,7 +159,10 @@ function initFind(editableNode, viewNode, onUpdate) {
   replaceAllButton.addEventListener('click', replaceAll);
 
   editableNode.addEventListener('input', () => {
-    if (barNode.classList.contains('open')) refresh(false, false);
+    if (barNode.classList.contains('open')) {
+      if (flushUpdate) flushUpdate();
+      refresh(false, false);
+    }
   });
 
   document.addEventListener('keydown', (event) => {
