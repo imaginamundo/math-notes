@@ -43,12 +43,16 @@ project's terminology.
 ## Invariants you must not break
 
 1. The `.content-editable` and `.view` layers must stay pixel-aligned: same
-   font, line-height, padding, `white-space`, and scroll position. Change one
-   only together with the other.
-2. A native textarea's horizontal scroll range excludes its right padding, so
-   the editor uses an outer right inset (`right: 1em`) to keep a gap at the end
-   of long lines. Don't reintroduce internal right padding expecting it to
-   scroll.
+   font, line-height, padding, and `white-space`. They are content-sized grid
+   cells inside `.editor-scroll`; keep them inside that scroll container (the
+   textarea no longer scrolls natively). Change one only together with the
+   other.
+2. `.editor-scroll` is the scroll owner and `.line-row` is `width: max-content`,
+   so a line's ghost result is scrollable content (scrolling to the end of a
+   long line reveals it). `js/ui/editor.js` keeps the caret in view manually —
+   the textarea has `overflow: hidden` and provides no native caret scrolling.
+   Don't move the layers out of the scroll container or re-enable textarea
+   scrolling without restoring caret tracking.
 3. Worker results are pre-formatted strings; `renderInput`'s ghost formatting
    must accept both numbers (fallback path) and strings (worker path).
 4. The view is built as `.line-row` block wrappers, and `find.js`'s text walker

@@ -6,33 +6,41 @@ evaluation, or persistence code.
 
 ## The editor: a transparent textarea over a ghost layer
 
-The editor is built from two absolutely positioned layers inside `.input`:
+The editor is built from two overlaid layers inside a scroll container:
 
-- `.content-editable` — a real, transparent `<textarea>`. It owns the caret,
-  text selection, and native scrolling.
+- `.content-editable` — a real, transparent `<textarea>`. It owns the caret
+  and text selection.
 - `.view` — a `<pre>` that renders the same text with syntax highlighting. It
   sits _behind_ the textarea (`z-index: 0`), and because the textarea's text is
   `transparent`, the styled copy is what the user actually sees.
 
+Both layers are content-sized cells in a `max-content` grid (`.editor-content`)
+inside `.editor-scroll`, which is the scroll container. Because the layers
+move together inside it, no scroll mirroring is needed; and because the view
+may be wider than the textarea — its `.ghost-result` text extends past the
+line — the result is **real scrollable content**: scrolling to the end of a
+long line reveals it.
+
+The textarea no longer scrolls natively, so the caret is kept in view by
+`js/ui/editor.js`, which computes the caret position from monospace column/line
+math and scrolls `.editor-scroll` on input, clicks and selection changes.
+
 Both layers must share **identical metrics** — font, font-size, line-height,
-padding, `white-space: pre`, and scrollbar gutter — or the ghost text drifts
-from the caret. `js/index.js` mirrors the textarea's `scrollTop`/`scrollLeft`
-onto the view on every scroll event.
+padding, and `white-space: pre` — or the ghost text drifts from the caret.
 
 ### Line rows
 
 The view is a sequence of `.line-row` block wrappers (one per line), each
-containing the highlighted `.line` span and an optional `.ghost-result`. There
-are no `<br>` separators; each row is exactly one `1.65em` line.
+containing the highlighted `.line` span and an optional `.ghost-result`. Rows
+are `width: max-content` so the view (and therefore the scrollable extent)
+spans the line plus its result. There are no `<br>` separators; each row is
+exactly one `1.65em` line.
 
 ### End-of-line padding
 
-A native textarea's horizontal scroll range is `left padding + text width` —
-its **right padding is excluded** from the scrollable extent, so a long line
-always scrolls flush against the right edge. To keep breathing room after the
-last character, the editor layers are inset from the container's right edge
-(`right: 1em`) instead of using internal right padding. The inset is
-physical space, so it is always visible at max scroll.
+The textarea's own scroll range would exclude right padding, but here the
+wrapper scrolls the full content box, so `padding-right` on the layers counts
+toward the scrollable extent and gives breathing room after long lines.
 
 ## Evaluation
 

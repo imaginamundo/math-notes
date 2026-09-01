@@ -125,8 +125,7 @@ function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
   function scrollToActive() {
     const mark = viewNode.querySelector('.find-match.active');
     if (!mark) return;
-    editableNode.scrollTop = Math.max(0, mark.offsetTop - editableNode.clientHeight / 2);
-    editableNode.scrollLeft = Math.max(0, mark.offsetLeft - editableNode.clientWidth / 2);
+    mark.scrollIntoView({ block: 'center', inline: 'center' });
   }
 
   findInput.addEventListener('input', () => refresh(true, true));

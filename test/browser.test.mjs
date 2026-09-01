@@ -184,3 +184,22 @@ test('tabs can be reordered by dragging', async () => {
   assert.deepEqual(names, ['Tab 2', 'Tab 1']);
   assert.deepEqual(errors, []);
 });
+
+test('a result on an overflowing line is reachable by horizontal scroll', async () => {
+  await newPage();
+  const longLine =
+    '1234567890 + 1234567890 + 1234567890 + 1234567890 + 1234567890 + 1234567890 + 1234567890 + 1234567890';
+  await setContent(longLine + '\n5 + 5');
+  await wait(300);
+  const visible = await page.evaluate(async () => {
+    const scroller = document.querySelector('.editor-scroll');
+    scroller.scrollLeft = scroller.scrollWidth;
+    await new Promise((r) => setTimeout(r, 80));
+    const ghost = document.querySelector('#view .ghost-result');
+    const g = ghost.getBoundingClientRect();
+    const s = scroller.getBoundingClientRect();
+    return g.right <= s.right + 1 && g.left >= s.left;
+  });
+  assert.equal(visible, true);
+  assert.deepEqual(errors, []);
+});

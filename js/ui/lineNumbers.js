@@ -4,7 +4,9 @@ function initLineNumbers(editableNode) {
   const gutter = document.createElement('pre');
   gutter.className = 'line-numbers';
   gutter.setAttribute('aria-hidden', 'true');
-  editableNode.parentElement.appendChild(gutter);
+  editableNode.closest('.input').appendChild(gutter);
+
+  const scroller = editableNode.closest('.editor-scroll');
 
   const rows = [];
   let caretIndex = 0;
@@ -40,15 +42,17 @@ function initLineNumbers(editableNode) {
     rows.forEach((span, i) => span.classList.toggle('active', i === index));
   }
 
-  editableNode.addEventListener('scroll', () => {
-    gutter.scrollTop = editableNode.scrollTop;
-  });
+  if (scroller) {
+    scroller.addEventListener('scroll', () => {
+      gutter.scrollTop = scroller.scrollTop;
+    });
+  }
   editableNode.addEventListener('input', render);
   editableNode.addEventListener('keyup', sync);
   editableNode.addEventListener('click', sync);
 
   render();
-  gutter.scrollTop = editableNode.scrollTop;
+  if (scroller) gutter.scrollTop = scroller.scrollTop;
 }
 
 export default initLineNumbers;
