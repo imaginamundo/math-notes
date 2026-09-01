@@ -25,6 +25,10 @@ Based on [Numi](https://numi.app/).
 - **Word operators**: `8 times 9`, `2 plus 3`, `10 minus 3`, `6 multiplied by 7`.
 - **Function aliases**: `ln`, `fact`, `arcsin`, `arccos`, `arctan`, `root`.
 - **Dates**: `fromunix(1446587186)`, `unix()`.
+- **Find & replace** — press `⌘F` / `Ctrl+F` to search the active sheet with
+  live match highlighting, then replace one or all matches.
+- **Line numbers** — a left gutter numbers the sheet and highlights the line
+  the caret is on.
 - **Import / Export** of the active sheet as plain text.
 - **Keyboard shortcuts** (see below).
 - Offline-first PWA via a service worker.
@@ -42,6 +46,7 @@ people = 4
 
 | Shortcut                       | Action                         |
 | ------------------------------ | ------------------------------ |
+| `⌘F` / `Ctrl+F`                | Find & replace in the sheet    |
 | `⇧⌘C` / `Ctrl+Shift+C`         | Copy the current line's result |
 | `⇧⌘E` / `Ctrl+Shift+E`         | Export the active sheet        |
 | `⇧⌘I` / `Ctrl+Shift+I`         | Import a sheet                 |
@@ -88,4 +93,5 @@ npm test
   `currency.js`, `datetime.js`, `scales.js`, `symbols.js`, `wordOperators.js`,
   `percentage.js`).
 - `js/render/` — highlighting and result rendering.
-- `js/ui/` — tabs, modal, help, shortcuts, import/export and font controls.
+- `js/ui/` — tabs, modals, help, recipes, settings, find & replace, line
+  numbers, import/export, shortcuts and font controls.
