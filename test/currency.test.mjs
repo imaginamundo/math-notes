@@ -54,6 +54,13 @@ test('preprocessSymbols leaves non-currency identifiers alone', () => {
   assert.equal(preprocessSymbols('5cm to m'), '5cm to m');
 });
 
+test('preprocessSymbols keeps currency codes used as variables lowercase', () => {
+  assert.equal(preprocessSymbols('usd = 5'), 'usd = 5');
+  assert.equal(preprocessSymbols('usd + usd'), 'usd + usd');
+  assert.equal(preprocessSymbols('usd * 2'), 'usd * 2');
+  assert.equal(preprocessSymbols('gbp = eur * 2'), 'gbp = eur * 2');
+});
+
 test('registerRates creates the base unit and overrides the rest', () => {
   const created = [];
   const math = {
