@@ -55,18 +55,14 @@ function notify(name, detail) {
   }
 }
 
-function initCurrency(math) {
-  if (typeof window === 'undefined') return;
-  ensureBaseUnit(math);
+// Fetch-and-notify, independent of any math instance, so the main thread can
+// fetch rates and forward them to the worker without loading mathjs.
+function fetchRates() {
   const cached = loadCached();
-
   if (isFresh(cached)) {
-    registerRates(math, cached);
     notify('currency:updated', { source: 'cached', data: cached });
     return;
   }
-  if (cached) registerRates(math, cached);
-
   fetch(API_URL)
     .then((res) => {
       if (!res.ok) throw new Error(String(res.status));
@@ -74,7 +70,6 @@ function initCurrency(math) {
     })
     .then((data) => {
       save(data);
-      registerRates(math, data);
       notify('currency:updated', { source: 'live', data });
     })
     .catch(() => {
@@ -82,5 +77,17 @@ function initCurrency(math) {
     });
 }
 
-export { registerRates, loadCached };
+function initCurrency(math) {
+  if (typeof window === 'undefined') return;
+  ensureBaseUnit(math);
+  const cached = loadCached();
+  if (cached) registerRates(math, cached);
+  // Keep the fallback math instance in sync with later live updates.
+  window.addEventListener('currency:updated', (event) => {
+    const data = event.detail && event.detail.data;
+    if (data) registerRates(math, data);
+  });
+}
+
+export { registerRates, loadCached, fetchRates };
 export default initCurrency;

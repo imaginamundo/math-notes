@@ -1,7 +1,6 @@
-import { evaluateLines } from '../core/calculate.js';
 import formatResult from '../render/formatResult.js';
 
-function initShortcuts(editableNode) {
+function initShortcuts(editableNode, requestResults) {
   document.addEventListener('keydown', (event) => {
     const mod = event.metaKey || event.ctrlKey;
     if (!mod) return;
@@ -12,7 +11,7 @@ function initShortcuts(editableNode) {
 
     if (shift && key === 'c') {
       event.preventDefault();
-      copyCurrentLineResult(editableNode);
+      copyCurrentLineResult(editableNode, requestResults);
     } else if (shift && key === 'e') {
       event.preventDefault();
       document.getElementById('export-button').click();
@@ -29,13 +28,17 @@ function initShortcuts(editableNode) {
   });
 }
 
-function copyCurrentLineResult(editableNode) {
+async function copyCurrentLineResult(editableNode, requestResults) {
   const value = editableNode.value;
   const lineIndex = indexOfLineAt(value, editableNode.selectionStart);
-  const { results } = evaluateLines(value.split('\n'));
-  const result = results[lineIndex];
-  if (result && result.type !== 'error' && result.value !== undefined) {
-    copyText(formatResult(result.value));
+  try {
+    const { results } = await requestResults(value.split('\n'));
+    const result = results[lineIndex];
+    if (result && result.type !== 'error' && result.value !== undefined) {
+      copyText(formatResult(result.value));
+    }
+  } catch {
+    // evaluation failed; nothing to copy
   }
 }
 

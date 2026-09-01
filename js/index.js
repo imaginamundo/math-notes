@@ -1,5 +1,4 @@
-import { evaluateLines } from './core/calculate.js';
-import { loadCached } from './eval/currency.js';
+import { fetchRates, loadCached } from './eval/currency.js';
 import renderInput from './render/renderInput.js';
 import renderTotal from './render/renderTotal.js';
 import registerServiceWorker from './registerServiceWorker.js';
@@ -18,11 +17,13 @@ const viewNode = document.getElementById('view');
 const totalNode = document.getElementById('total');
 const currencyStatusNode = document.getElementById('currency-status');
 
-// Evaluation runs in a Web Worker so heavy sheets never block typing. Falls
-// back to the main thread when workers are unavailable.
+// Evaluation runs in a Web Worker so heavy sheets never block typing and
+// mathjs is only parsed on the worker thread. Falls back to a lazily loaded
+// main-thread evaluation when workers are unavailable.
 let worker = null;
 let latestId = 0;
 const pending = new Map();
+let fallbackModule = null;
 
 if (typeof Worker !== 'undefined') {
   worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
@@ -36,30 +37,34 @@ if (typeof Worker !== 'undefined') {
   if (cachedRates) worker.postMessage({ type: 'rates', data: cachedRates });
 }
 
+function requestEvaluate(lines) {
+  if (worker) {
+    return new Promise((resolve, reject) => {
+      const id = ++latestId;
+      pending.set(id, (data) => {
+        if (data.type === 'error') reject(new Error(data.message));
+        else resolve({ id, data });
+      });
+      worker.postMessage({ id, type: 'evaluate', lines });
+    });
+  }
+  const load = fallbackModule
+    ? Promise.resolve(fallbackModule)
+    : import('./core/calculate.js').then((mod) => (fallbackModule = mod));
+  return load.then((mod) => ({ id: 0, data: mod.evaluateLines(lines) }));
+}
+
 function renderResults(lines, results, total, startLine) {
   renderInput(viewNode, lines, results, startLine);
   renderTotal(totalNode, total);
 }
 
-function update() {
+async function update() {
   const lines = contentEditableNode.value.split('\n');
-  if (worker) {
-    const id = ++latestId;
-    return new Promise((resolve) => {
-      pending.set(id, (data) => {
-        if (data.type === 'error') {
-          console.error('Failed to update the sheet:', data.message);
-        } else if (id === latestId) {
-          renderResults(lines, data.results, data.total, data.startLine);
-        }
-        resolve();
-      });
-      worker.postMessage({ id, type: 'evaluate', lines });
-    });
-  }
   try {
-    const { results, total, startLine } = evaluateLines(lines);
-    renderResults(lines, results, total, startLine);
+    const { id, data } = await requestEvaluate(lines);
+    if (worker && id !== latestId) return;
+    renderResults(lines, data.results, data.total, data.startLine);
   } catch (error) {
     console.error('Failed to update the sheet:', error);
   }
@@ -84,6 +89,8 @@ function scheduleUpdate() {
 // Trigger changes
 contentEditableNode.addEventListener('input', scheduleUpdate);
 
+fetchRates();
+
 // Keep the highlighted overlay aligned with the visible input
 contentEditableNode.addEventListener('scroll', () => {
   viewNode.scrollTop = contentEditableNode.scrollTop;
@@ -97,7 +104,7 @@ initRecipes(contentEditableNode);
 initSettings(contentEditableNode);
 initFontControls();
 initIo(contentEditableNode);
-initShortcuts(contentEditableNode);
+initShortcuts(contentEditableNode, (lines) => requestEvaluate(lines).then(({ data }) => data));
 initFind(contentEditableNode, viewNode, update, flushUpdate);
 initLineNumbers(contentEditableNode);
 
