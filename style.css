@@ -672,19 +672,12 @@ code {
   border: 1px solid var(--border-chip);
   border-radius: 6px;
 }
-.snapshot-row:hover {
-  background: var(--surface-chip-hover);
-}
 .snapshot-row span {
   font-size: 0.9em;
   color: var(--color-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.snapshot-row button {
-  padding: 0.25em 0.6em;
-  font-size: 0.9em;
 }
 a {
   color: var(--color-link);
