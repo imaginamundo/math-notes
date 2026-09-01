@@ -10,7 +10,8 @@ Based on [Numi](https://numi.app/).
 
 - **Line-by-line evaluation** with an automatic total of numeric results.
 - **Tabs** for separate worksheets — rename by double-clicking a tab, close with
-  `×` (you're asked to confirm), add with `+`. Everything is saved locally.
+  `×` (you're asked to confirm), add with `+`, or drag a tab to reorder it.
+  Switch with `Ctrl+Tab` or `⌘1…9` / `Ctrl+1…9`. Everything is saved locally.
 - **Undo / redo** per tab — `⌘Z` / `Ctrl+Z` (and `⇧⌘Z` to redo) restores the
   last change, with a separate history for every tab.
 - **Variables and functions**: `price = 30`, `double = f(x) = x * 2`.
@@ -50,6 +51,8 @@ people = 4
 | ------------------------------ | ------------------------------- |
 | `⌘Z` / `Ctrl+Z`                | Undo the last change in the tab |
 | `⇧⌘Z` / `Ctrl+Shift+Z`         | Redo                            |
+| `Ctrl+Tab` / `Ctrl+Shift+Tab`  | Next / previous tab             |
+| `⌘1…9` / `Ctrl+1…9`            | Jump to the nth tab             |
 | `⌘F` / `Ctrl+F`                | Find & replace in the sheet     |
 | `⇧⌘C` / `Ctrl+Shift+C`         | Copy the current line's result  |
 | `⇧⌘E` / `Ctrl+Shift+E`         | Export the active sheet         |

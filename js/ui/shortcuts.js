@@ -1,6 +1,6 @@
 import formatResult from '../render/formatResult.js';
 
-function initShortcuts(editableNode, requestResults) {
+function initShortcuts(editableNode, requestResults, switchTab) {
   document.addEventListener('keydown', (event) => {
     const mod = event.metaKey || event.ctrlKey;
     if (!mod) return;
@@ -9,7 +9,13 @@ function initShortcuts(editableNode, requestResults) {
     const shift = event.shiftKey;
     const key = event.key.toLowerCase();
 
-    if (shift && key === 'c') {
+    if (key === 'tab' && !event.metaKey) {
+      event.preventDefault();
+      switchTab({ offset: shift ? -1 : 1 });
+    } else if (key >= '1' && key <= '9') {
+      event.preventDefault();
+      switchTab({ index: parseInt(key, 10) - 1 });
+    } else if (shift && key === 'c') {
       event.preventDefault();
       copyCurrentLineResult(editableNode, requestResults);
     } else if (shift && key === 'e') {

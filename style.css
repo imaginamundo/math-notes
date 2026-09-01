@@ -158,6 +158,12 @@ body {
   color: var(--color-text);
   border-right: 1px solid var(--border-faint);
   white-space: nowrap;
+  touch-action: none;
+}
+.tab.dragging {
+  opacity: 0.5;
+  outline: 1px dashed var(--color-operator);
+  outline-offset: -1px;
 }
 .tab.active {
   background: var(--color-primary);

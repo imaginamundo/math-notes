@@ -103,6 +103,15 @@ function setContent(prev, id, content) {
   return { ...prev, tabs: prev.tabs.map((tab) => (tab.id === id ? { ...tab, content } : tab)) };
 }
 
+function moveTab(prev, id, toIndex) {
+  const fromIndex = prev.tabs.findIndex((tab) => tab.id === id);
+  if (fromIndex === -1 || fromIndex === toIndex) return prev;
+  const tabs = [...prev.tabs];
+  const [moved] = tabs.splice(fromIndex, 1);
+  tabs.splice(toIndex, 0, moved);
+  return { ...prev, tabs };
+}
+
 function loadInitialState() {
   let saved = null;
   try {
@@ -341,6 +350,7 @@ function initTabs(editableNode, onUpdate) {
   }
 
   tabBarNode.addEventListener('click', (event) => {
+    if (Date.now() - lastDragTime < 100) return;
     const closeButton = event.target.closest('.tab-close');
     if (closeButton) {
       handleClose(closeButton.closest('.tab').dataset.id);
@@ -388,11 +398,87 @@ function initTabs(editableNode, onUpdate) {
     }
   });
 
+  // Drag to reorder tabs: pointer down on a tab starts a candidate, a move past
+  // the threshold turns it into a drag that live-reorders the bar.
+  let drag = null;
+  let lastDragTime = 0;
+
+  function syncStateFromDom() {
+    const order = [...tabBarNode.querySelectorAll('.tab')].map((tab) => tab.dataset.id);
+    state = { ...state, tabs: order.map((id) => state.tabs.find((tab) => tab.id === id)) };
+  }
+
+  tabBarNode.addEventListener('pointerdown', (event) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    const tabElement = event.target.closest('.tab');
+    if (!tabElement || event.target.closest('.tab-close')) return;
+    drag = {
+      id: tabElement.dataset.id,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      active: false,
+    };
+  });
+
+  document.addEventListener('pointermove', (event) => {
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    if (!drag.active) {
+      if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < 6) return;
+      drag.active = true;
+      const el = tabBarNode.querySelector(`.tab[data-id="${drag.id}"]`);
+      if (el) el.classList.add('dragging');
+    }
+    event.preventDefault();
+    const others = [...tabBarNode.querySelectorAll('.tab')].filter(
+      (tab) => tab.dataset.id !== drag.id
+    );
+    let target = others.length;
+    for (let i = 0; i < others.length; i++) {
+      const rect = others[i].getBoundingClientRect();
+      if (event.clientX < rect.left + rect.width / 2) {
+        target = i;
+        break;
+      }
+    }
+    const draggedEl = tabBarNode.querySelector(`.tab[data-id="${drag.id}"]`);
+    if (!draggedEl) return;
+    const anchor = others[target] || tabBarNode.querySelector('.tab-new');
+    if (draggedEl.nextSibling === anchor) return;
+    tabBarNode.insertBefore(draggedEl, anchor);
+    syncStateFromDom();
+  });
+
+  const endDrag = () => {
+    if (!drag) return;
+    if (drag.active) {
+      const el = tabBarNode.querySelector(`.tab[data-id="${drag.id}"]`);
+      if (el) el.classList.remove('dragging');
+      persist();
+      lastDragTime = Date.now();
+    }
+    drag = null;
+  };
+  document.addEventListener('pointerup', (event) => {
+    if (drag && event.pointerId === drag.pointerId) endDrag();
+  });
+  document.addEventListener('pointercancel', endDrag);
+
+  function switchTab({ index, offset } = {}) {
+    const ids = state.tabs.map((tab) => tab.id);
+    const current = ids.indexOf(state.activeId);
+    const target =
+      index !== undefined ? index : (current + (offset || 1) + ids.length) % ids.length;
+    if (ids[target]) activate(ids[target]);
+  }
+
   render();
   onUpdate();
   editableNode.focus();
+
+  return { switchTab };
 }
 
-export { createTab, closeTab, renameTab, setActiveTab, setContent };
+export { createTab, closeTab, renameTab, setActiveTab, setContent, moveTab };
 export { recordChange, commitDraft, applyUndo, applyRedo };
 export default initTabs;

@@ -1,6 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createTab, closeTab, renameTab, setActiveTab, setContent } from '../js/ui/tabs.js';
+import {
+  createTab,
+  closeTab,
+  renameTab,
+  setActiveTab,
+  setContent,
+  moveTab,
+} from '../js/ui/tabs.js';
 
 function baseState() {
   const a = { id: 'a', name: 'A', content: '1' };
@@ -66,4 +73,32 @@ test('setContent updates only the target tab', () => {
   assert.equal(next.tabs[1].content, '2 + 2');
   assert.equal(next.tabs[0].content, '1');
   assert.equal(next.tabs[2].content, '3');
+});
+
+test('moveTab reorders a tab to an earlier position', () => {
+  const next = moveTab(baseState(), 'c', 0);
+  assert.deepEqual(
+    next.tabs.map((t) => t.id),
+    ['c', 'a', 'b']
+  );
+});
+
+test('moveTab reorders a tab to a later position', () => {
+  const next = moveTab(baseState(), 'a', 2);
+  assert.deepEqual(
+    next.tabs.map((t) => t.id),
+    ['b', 'c', 'a']
+  );
+});
+
+test('moveTab keeps tabs content and the active id', () => {
+  const next = moveTab(baseState(), 'b', 0);
+  assert.equal(next.activeId, 'a');
+  assert.equal(next.tabs[0].content, '2');
+});
+
+test('moveTab is a no-op when the position is unchanged', () => {
+  const state = baseState();
+  assert.equal(moveTab(state, 'b', 1), state);
+  assert.equal(moveTab(state, 'missing', 0), state);
 });

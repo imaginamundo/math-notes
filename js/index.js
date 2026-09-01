@@ -97,14 +97,18 @@ contentEditableNode.addEventListener('scroll', () => {
   viewNode.scrollLeft = contentEditableNode.scrollLeft;
 });
 
-initTabs(contentEditableNode, update);
+const tabsApi = initTabs(contentEditableNode, update);
 
 initHelpModal(contentEditableNode);
 initRecipes(contentEditableNode);
 initSettings(contentEditableNode);
 initFontControls();
 initIo(contentEditableNode);
-initShortcuts(contentEditableNode, (lines) => requestEvaluate(lines).then(({ data }) => data));
+initShortcuts(
+  contentEditableNode,
+  (lines) => requestEvaluate(lines).then(({ data }) => data),
+  tabsApi.switchTab
+);
 initFind(contentEditableNode, viewNode, update, flushUpdate);
 initLineNumbers(contentEditableNode);
 
