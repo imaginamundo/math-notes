@@ -22,6 +22,7 @@ const currencyStatusNode = document.getElementById('currency-status');
 // main-thread evaluation when workers are unavailable.
 let worker = null;
 let latestId = 0;
+let latestRenderId = 0;
 const pending = new Map();
 let fallbackModule = null;
 
@@ -61,9 +62,10 @@ function renderResults(lines, results, total, startLine) {
 
 async function update() {
   const lines = contentEditableNode.value.split('\n');
+  const renderId = ++latestRenderId;
   try {
-    const { id, data } = await requestEvaluate(lines);
-    if (worker && id !== latestId) return;
+    const { data } = await requestEvaluate(lines);
+    if (worker && renderId !== latestRenderId) return;
     renderResults(lines, data.results, data.total, data.startLine);
   } catch (error) {
     console.error('Failed to update the sheet:', error);
