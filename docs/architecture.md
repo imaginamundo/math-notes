@@ -60,12 +60,14 @@ sequence of interleaved calls (the cache is global, not per caller).
 ### The worker
 
 Evaluation runs in a Web Worker (`js/worker.js`) so a heavy sheet never blocks
-typing, and the main thread never parses the large mathjs bundle. `js/index.js`
-owns the worker client: each request posts `{ id, type: 'evaluate', lines }`
-and resolves when the worker replies. `update()` gates rendering on a
-dedicated render counter (not the message id), so a stale response is never
-rendered and unrelated requests (e.g. copy) never suppress a pending render.
-Every request also has a timeout so a dead worker can't freeze the sheet.
+typing, and the main thread never parses the large mathjs bundle. The worker
+client lives in `js/evalClient.js`: it owns the worker connection, the
+request/reply protocol, and the debounced `schedule`/`flush` update scheduling.
+Each request posts `{ id, type: 'evaluate', lines }` and resolves when the
+worker replies. `update()` gates rendering on a dedicated render counter (not
+the message id), so a stale response is never rendered and unrelated requests
+(e.g. copy) never suppress a pending render. Every request also has a timeout
+so a dead worker can't freeze the sheet.
 
 **Serialization:** mathjs `Unit`, `BigNumber`, etc. lose their prototypes in
 structured clone. The worker therefore pre-formats every result value into a
