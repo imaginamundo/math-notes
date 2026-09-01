@@ -235,10 +235,11 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  right: 1em;
+  width: auto;
   height: 100%;
   margin: 0;
-  padding: 1em 1em 1em calc(1em + var(--line-gutter));
+  padding: 1em 0 1em calc(1em + var(--line-gutter));
   font: inherit;
   line-height: inherit;
   white-space: pre;
