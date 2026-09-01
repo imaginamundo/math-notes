@@ -2,6 +2,26 @@ const STORAGE_KEY = 'math-notes-tabs';
 const LEGACY_KEY = 'input';
 
 let state = null;
+let persistTimer = null;
+
+function writeState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // storage unavailable
+  }
+}
+
+function persist() {
+  clearTimeout(persistTimer);
+  persistTimer = null;
+  writeState();
+}
+
+function schedulePersist() {
+  clearTimeout(persistTimer);
+  persistTimer = setTimeout(writeState, 400);
+}
 
 function generateId() {
   return 'tab-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -62,14 +82,6 @@ function loadInitialState() {
   return { tabs: [tab], activeId: tab.id, nextTabNumber: 2 };
 }
 
-function persist() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // storage unavailable
-  }
-}
-
 function initTabs(editableNode, onUpdate) {
   const tabBarNode = document.getElementById('tabs-bar');
   state = loadInitialState();
@@ -81,8 +93,18 @@ function initTabs(editableNode, onUpdate) {
 
   editableNode.addEventListener('input', () => {
     state = setContent(state, state.activeId, editableNode.value);
-    persist();
+    schedulePersist();
   });
+
+  const flushPersist = () => {
+    if (persistTimer !== null) {
+      clearTimeout(persistTimer);
+      persistTimer = null;
+      writeState();
+    }
+  };
+  editableNode.addEventListener('blur', flushPersist);
+  window.addEventListener('pagehide', flushPersist);
 
   function render() {
     tabBarNode.innerHTML = '';
