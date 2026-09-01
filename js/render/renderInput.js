@@ -1,14 +1,38 @@
 import format from './format.js';
 import formatResult from './formatResult.js';
 
-function renderInput(viewNode, lines, results) {
-  viewNode.innerHTML = '';
-  lines.forEach((line, index) => {
-    if (index > 0) viewNode.appendChild(document.createElement('br'));
-    viewNode.appendChild(format.line(line));
-    const ghost = ghostResult(results && results[index]);
+let lastViewNode = null;
+const lineStart = [];
+
+function renderInput(viewNode, lines, results, startLine) {
+  if (viewNode !== lastViewNode) {
+    lineStart.length = 0;
+    lastViewNode = viewNode;
+  }
+  if (startLine === -1) return;
+
+  const from = lineStart.length === 0 ? 0 : startLine || 0;
+
+  // Remove the tail starting at the first changed line; the prefix DOM stays
+  // untouched. lineStart[i] is the first node of line i (the <br> before it,
+  // or the line itself for line 0).
+  let node = lineStart[from];
+  while (node) {
+    const next = node.nextSibling;
+    node.remove();
+    node = next;
+  }
+  lineStart.length = from;
+
+  for (let i = from; i < lines.length; i++) {
+    const firstNode = i === 0 ? null : document.createElement('br');
+    if (firstNode) viewNode.appendChild(firstNode);
+    const lineNode = format.line(lines[i]);
+    viewNode.appendChild(lineNode);
+    const ghost = ghostResult(results && results[i]);
     if (ghost) viewNode.appendChild(ghost);
-  });
+    lineStart[i] = firstNode || lineNode;
+  }
 }
 
 function ghostResult(result) {
