@@ -2,36 +2,35 @@ import format from './format.js';
 import formatResult from './formatResult.js';
 
 let lastViewNode = null;
-const lineStart = [];
+const rows = [];
 
 function renderInput(viewNode, lines, results, startLine) {
   if (viewNode !== lastViewNode) {
-    lineStart.length = 0;
+    rows.length = 0;
     lastViewNode = viewNode;
   }
   if (startLine === -1) return;
 
-  const from = lineStart.length === 0 ? 0 : startLine || 0;
+  const from = rows.length === 0 ? 0 : startLine || 0;
 
-  // Remove the tail starting at the first changed line; the prefix DOM stays
-  // untouched. lineStart[i] is the first node of line i (the <br> before it,
-  // or the line itself for line 0).
-  let node = lineStart[from];
+  // Remove the tail starting at the first changed row; the prefix stays
+  // untouched. rows[i] is the block wrapper of line i.
+  let node = rows[from];
   while (node) {
     const next = node.nextSibling;
     node.remove();
     node = next;
   }
-  lineStart.length = from;
+  rows.length = from;
 
   for (let i = from; i < lines.length; i++) {
-    const firstNode = i === 0 ? null : document.createElement('br');
-    if (firstNode) viewNode.appendChild(firstNode);
-    const lineNode = format.line(lines[i]);
-    viewNode.appendChild(lineNode);
+    const row = document.createElement('div');
+    row.className = 'line-row';
+    row.appendChild(format.line(lines[i]));
     const ghost = ghostResult(results && results[i]);
-    if (ghost) viewNode.appendChild(ghost);
-    lineStart[i] = firstNode || lineNode;
+    if (ghost) row.appendChild(ghost);
+    viewNode.appendChild(row);
+    rows[i] = row;
   }
 }
 

@@ -46,9 +46,10 @@ test('a comment-only line renders the comment', () => {
 test('comment rendering does not drop following lines', () => {
   const view = new El('pre');
   renderInput(view, ['1 + 1 # one', '2 + 2 # two', '3 + 3']);
-  assert.equal(view.children.length, 5);
-  assert.equal(view.children[0]._classes.has('line'), true);
-  assert.equal(view.children[4]._classes.has('line'), true);
+  assert.equal(view.children.length, 3);
+  assert.equal(view.children[0].className, 'line-row');
+  assert.equal(view.children[0].children[0]._classes.has('line'), true);
+  assert.equal(view.children[2].children[0]._classes.has('line'), true);
 });
 
 test('renderInput appends inline ghost results', () => {
@@ -63,9 +64,9 @@ test('renderInput appends inline ghost results', () => {
       { type: 'value', value: undefined },
     ]
   );
-  const ghosts = view.children.filter(
-    (child) => child.className && child.className.includes('ghost-result')
-  );
+  const ghosts = view.children
+    .flatMap((row) => row.children)
+    .filter((child) => child.className && child.className.includes('ghost-result'));
   assert.equal(ghosts.length, 2);
   assert.equal(ghosts[0].textContent, '→ 2');
   assert.equal(ghosts[1].className, 'ghost-result error');

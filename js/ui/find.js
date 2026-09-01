@@ -125,7 +125,10 @@ function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
   function scrollToActive() {
     const mark = viewNode.querySelector('.find-match.active');
     if (!mark) return;
-    editableNode.scrollTop = Math.max(0, mark.offsetTop - editableNode.clientHeight / 2);
+    // Offscreen rows are skipped by content-visibility, so the mark has no
+    // layout; the row keeps its intrinsic-size box and is a safe vertical anchor.
+    const row = mark.closest('.line-row') || mark;
+    editableNode.scrollTop = Math.max(0, row.offsetTop - editableNode.clientHeight / 2);
     editableNode.scrollLeft = Math.max(0, mark.offsetLeft - editableNode.clientWidth / 2);
   }
 
@@ -341,7 +344,6 @@ function applyMarks(root, matches, activeIndex) {
 function textNodesInOrder(root) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_ALL, {
     acceptNode(node) {
-      if (node.nodeName === 'BR') return NodeFilter.FILTER_ACCEPT;
       if (node.nodeType === Node.TEXT_NODE) return NodeFilter.FILTER_ACCEPT;
       if (node.nodeType === Node.ELEMENT_NODE) {
         return node.classList.contains('ghost-result')
@@ -353,14 +355,16 @@ function textNodesInOrder(root) {
   });
   const entries = [];
   let textLength = 0;
-  let brCount = 0;
+  let rowCount = 0;
   let node;
   while ((node = walker.nextNode())) {
-    if (node.nodeName === 'BR') {
-      brCount++;
-    } else if (node.nodeType === Node.TEXT_NODE) {
-      entries.push({ node, start: textLength + brCount });
+    if (node.nodeType === Node.TEXT_NODE) {
+      // Each line-row represents one newline; rowCount is one ahead of the
+      // row being traversed because the row element precedes its text.
+      entries.push({ node, start: textLength + Math.max(0, rowCount - 1) });
       textLength += node.textContent.length;
+    } else if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('line-row')) {
+      rowCount++;
     }
   }
   return entries;
