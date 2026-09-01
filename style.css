@@ -152,6 +152,7 @@ body {
   min-height: 2.2em;
   padding: var(--safe-top) var(--safe-right) 0 var(--safe-left);
   background: var(--color-footer);
+  border-top: 1px solid var(--border-light);
   border-bottom: 1px solid var(--border-light);
   overflow-x: auto;
   scrollbar-width: thin;
