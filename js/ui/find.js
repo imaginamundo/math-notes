@@ -258,6 +258,13 @@ function button(className, label, title) {
   return node;
 }
 
+/**
+ * Find all non-overlapping occurrences of a query in the sheet text.
+ * @param {string} text
+ * @param {string} query
+ * @param {boolean} caseSensitive
+ * @returns {Array<{ start: number, end: number }>}
+ */
 function computeMatches(text, query, caseSensitive) {
   if (!query) return [];
   const haystack = caseSensitive ? text : text.toLowerCase();

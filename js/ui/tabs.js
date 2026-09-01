@@ -1,5 +1,11 @@
 import { saveSnapshot, latestPerTab } from '../storage/snapshots.js';
 
+/**
+ * @typedef {{ id: string, name: string, content: string }} Tab
+ * @typedef {{ tabs: Tab[], activeId: string|null, nextTabNumber: number }} TabState
+ * @typedef {{ undo: string[], redo: string[], draft: string|null }} History
+ */
+
 const STORAGE_KEY = 'math-notes-tabs';
 const LEGACY_KEY = 'input';
 const HISTORY_LIMIT = 100;

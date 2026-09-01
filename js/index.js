@@ -12,6 +12,8 @@ import initShortcuts from './ui/shortcuts.js';
 import initFind from './ui/find.js';
 import initLineNumbers from './ui/lineNumbers.js';
 
+/** @typedef {import('./core/calculate.js').SheetResult} SheetResult */
+
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');
 const totalNode = document.getElementById('total');
@@ -39,6 +41,13 @@ if (typeof Worker !== 'undefined') {
   if (cachedRates) worker.postMessage({ type: 'rates', data: cachedRates });
 }
 
+/**
+ * Evaluate lines via the worker, or via the lazy main-thread fallback when
+ * workers are unavailable. Resolves with the worker's `{ results, total,
+ * startLine }` payload alongside the correlation id used for render gating.
+ * @param {string[]} lines
+ * @returns {Promise<{ id: number, data: SheetResult }>}
+ */
 function requestEvaluate(lines) {
   if (worker) {
     return new Promise((resolve, reject) => {
