@@ -73,6 +73,22 @@ cannot be used as variable names.
 There is no runtime build step: the app runs as plain ES modules. Only the
 math.js dependency is pre-bundled and committed in `js/lib/`.
 
+Run the app locally with:
+
+```sh
+npm run dev
+```
+
+### Tests
+
+The calculation pipeline is pure and covered by the Node test runner, and the
+DOM-heavy behavior (find & replace, undo, snapshots, tab reordering) is covered
+by browser tests driven through puppeteer:
+
+```sh
+npm test
+```
+
 ### Updating math.js
 
 The pinned version lives in two places, keep them in sync:
