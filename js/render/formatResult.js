@@ -1,3 +1,5 @@
+const numberFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 10 });
+
 function formatResult(value) {
   if (typeof value === 'number') return formatNumber(value);
   if (value && value.isUnit === true) return formatUnit(value);
@@ -10,7 +12,7 @@ function formatNumber(n) {
   if (abs !== 0 && (abs >= 1e16 || abs < 1e-7)) {
     return n.toExponential(10).replace(/\.?0+e/, 'e');
   }
-  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 10 }).format(n);
+  return numberFormatter.format(n);
 }
 
 function formatUnit(unit) {
