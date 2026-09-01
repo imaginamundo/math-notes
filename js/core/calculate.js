@@ -3,6 +3,7 @@ import parseLine from './parseLine.js';
 import initCurrency, { registerRates } from '../eval/currency.js';
 import initAliases from '../eval/aliases.js';
 import initCssUnits from '../eval/cssUnits.js';
+import initUnits from '../eval/units.js';
 import initDatetime from '../eval/datetime.js';
 import preprocess from './preprocess.js';
 import { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal } from './aggregate.js';
@@ -10,6 +11,7 @@ import { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal } from './aggregate.js
 const math = create(all);
 initAliases(math);
 initCssUnits(math);
+initUnits(math);
 initDatetime(math);
 
 initCurrency(math);
