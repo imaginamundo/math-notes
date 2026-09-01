@@ -16,6 +16,7 @@ const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');
 const totalNode = document.getElementById('total');
 const currencyStatusNode = document.getElementById('currency-status');
+const EVALUATE_TIMEOUT = 10000;
 
 // Evaluation runs in a Web Worker so heavy sheets never block typing and
 // mathjs is only parsed on the worker thread. Falls back to a lazily loaded
@@ -42,7 +43,12 @@ function requestEvaluate(lines) {
   if (worker) {
     return new Promise((resolve, reject) => {
       const id = ++latestId;
+      const timer = setTimeout(() => {
+        pending.delete(id);
+        reject(new Error('Evaluation timed out'));
+      }, EVALUATE_TIMEOUT);
       pending.set(id, (data) => {
+        clearTimeout(timer);
         if (data.type === 'error') reject(new Error(data.message));
         else resolve({ id, data });
       });
