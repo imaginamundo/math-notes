@@ -32,7 +32,9 @@ Based on [Numi](https://numi.app/).
   live match highlighting, then replace one or all matches.
 - **Line numbers** — a left gutter numbers the sheet and highlights the line
   the caret is on.
-- **Import / Export** of the active sheet as plain text.
+- **Auto-saved snapshots** — every tab's edits are backed up to IndexedDB and
+  can be recovered from the **Settings** modal; sheets are rebuilt automatically
+  if localStorage is unavailable or corrupt.
 - **Keyboard shortcuts** (see below).
 - Offline-first PWA via a service worker.
 

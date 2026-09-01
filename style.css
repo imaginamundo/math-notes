@@ -661,6 +661,18 @@ code {
   display: flex;
   gap: 0.5em;
 }
+.snapshot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75em;
+  padding: 0.45em 0;
+  border-bottom: 1px solid var(--border-table);
+}
+.snapshot-row button {
+  padding: 0.25em 0.6em;
+  font-size: 0.9em;
+}
 a {
   color: var(--color-link);
   text-decoration: underline;

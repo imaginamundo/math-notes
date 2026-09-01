@@ -101,7 +101,7 @@ const tabsApi = initTabs(contentEditableNode, update);
 
 initHelpModal(contentEditableNode);
 initRecipes(contentEditableNode);
-initSettings(contentEditableNode);
+initSettings(contentEditableNode, tabsApi);
 initFontControls();
 initIo(contentEditableNode);
 initShortcuts(

@@ -1,6 +1,9 @@
+import { saveSnapshot, latestPerTab } from '../storage/snapshots.js';
+
 const STORAGE_KEY = 'math-notes-tabs';
 const LEGACY_KEY = 'input';
 const HISTORY_LIMIT = 100;
+const SNAPSHOT_DELAY = 2000;
 
 let state = null;
 let persistTimer = null;
@@ -112,12 +115,15 @@ function moveTab(prev, id, toIndex) {
   return { ...prev, tabs };
 }
 
+let storageFailed = false;
+
 function loadInitialState() {
   let saved = null;
   try {
     saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
   } catch {
     // storage unavailable or malformed, fall back to the null default
+    storageFailed = true;
   }
   if (saved && Array.isArray(saved.tabs) && saved.tabs.length) {
     return { ...saved, nextTabNumber: saved.nextTabNumber || saved.tabs.length + 1 };
@@ -142,6 +148,7 @@ function initTabs(editableNode, onUpdate) {
 
   let lastValue = getActiveTab().content;
   let burstTimer = null;
+  let snapshotTimer = null;
 
   const history = () => {
     let entry = histories.get(state.activeId);
@@ -151,6 +158,23 @@ function initTabs(editableNode, onUpdate) {
     }
     return entry;
   };
+
+  function saveActiveSnapshot() {
+    const tab = getActiveTab();
+    if (!tab) return;
+    saveSnapshot({ id: tab.id, name: tab.name, content: tab.content }).catch(() => {});
+  }
+
+  function scheduleSnapshot() {
+    clearTimeout(snapshotTimer);
+    snapshotTimer = setTimeout(saveActiveSnapshot, SNAPSHOT_DELAY);
+  }
+
+  function flushSnapshot() {
+    clearTimeout(snapshotTimer);
+    snapshotTimer = null;
+    saveActiveSnapshot();
+  }
 
   function flushDraft() {
     clearTimeout(burstTimer);
@@ -163,6 +187,7 @@ function initTabs(editableNode, onUpdate) {
     editableNode.value = value;
     state = setContent(state, state.activeId, value);
     persist();
+    scheduleSnapshot();
     editableNode.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
@@ -196,6 +221,7 @@ function initTabs(editableNode, onUpdate) {
     }, 700);
     state = setContent(state, state.activeId, value);
     schedulePersist();
+    scheduleSnapshot();
   });
 
   const flushPersist = () => {
@@ -208,6 +234,7 @@ function initTabs(editableNode, onUpdate) {
   const flushAll = () => {
     flushDraft();
     flushPersist();
+    flushSnapshot();
   };
   editableNode.addEventListener('blur', flushAll);
   window.addEventListener('pagehide', flushAll);
@@ -271,6 +298,7 @@ function initTabs(editableNode, onUpdate) {
       return;
     }
     flushDraft();
+    flushSnapshot();
     state = setContent(state, state.activeId, editableNode.value);
     state = setActiveTab(state, id);
     const tab = state.tabs.find((entry) => entry.id === id);
@@ -285,6 +313,7 @@ function initTabs(editableNode, onUpdate) {
 
   function handleNew() {
     flushDraft();
+    flushSnapshot();
     state = setContent(state, state.activeId, editableNode.value);
     state = createTab(state, 'Tab ' + state.nextTabNumber);
     editableNode.value = '';
@@ -301,6 +330,7 @@ function initTabs(editableNode, onUpdate) {
     if (!tab) return;
     if (!window.confirm(`Close "${tab.name}"? Its content will be lost.`)) return;
     flushDraft();
+    flushSnapshot();
     if (state.activeId === id) state = setContent(state, id, editableNode.value);
     state = closeTab(state, id);
     if (!state.tabs.length) state = createTab(state, 'Tab ' + state.nextTabNumber);
@@ -472,11 +502,64 @@ function initTabs(editableNode, onUpdate) {
     if (ids[target]) activate(ids[target]);
   }
 
+  function restoreTab(snapshot) {
+    const targetId = snapshot.tabId || generateId();
+    const existing = state.tabs.find((tab) => tab.id === targetId);
+    state = existing
+      ? setContent(renameTab(state, targetId, snapshot.name), targetId, snapshot.content)
+      : {
+          ...state,
+          tabs: [...state.tabs, { id: targetId, name: snapshot.name, content: snapshot.content }],
+          activeId: targetId,
+        };
+    state = setActiveTab(state, targetId);
+    histories.set(targetId, emptyHistory());
+    const activeTab = getActiveTab();
+    editableNode.value = activeTab.content;
+    lastValue = activeTab.content;
+    persist();
+    render();
+    onUpdate();
+    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+    editableNode.focus();
+  }
+
+  function restoreAll(snapshots) {
+    const tabs = snapshots.map((snapshot) => ({
+      id: snapshot.tabId || generateId(),
+      name: snapshot.name,
+      content: snapshot.content,
+    }));
+    state = { ...state, tabs, activeId: tabs.length ? tabs[0].id : state.activeId };
+    histories.clear();
+    const activeTab = getActiveTab();
+    editableNode.value = activeTab.content;
+    lastValue = activeTab.content;
+    persist();
+    render();
+    onUpdate();
+    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+    editableNode.focus();
+  }
+
+  // If localStorage is unavailable or corrupt, rebuild the collection from the
+  // most recent IndexedDB snapshot of each tab.
+  async function recoverFromSnapshots() {
+    try {
+      const snapshots = await latestPerTab();
+      if (snapshots.length) restoreAll(snapshots);
+    } catch {
+      // storage unavailable
+    }
+  }
+
   render();
   onUpdate();
   editableNode.focus();
 
-  return { switchTab };
+  if (storageFailed) recoverFromSnapshots();
+
+  return { switchTab, restoreTab, restoreAll };
 }
 
 export { createTab, closeTab, renameTab, setActiveTab, setContent, moveTab };
