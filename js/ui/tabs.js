@@ -1,4 +1,5 @@
 import { saveSnapshot, latestPerTab } from '../storage/snapshots.js';
+import debounce from '../util/debounce.js';
 
 /**
  * @typedef {{ id: string, name: string, content: string }} Tab
@@ -12,7 +13,7 @@ const HISTORY_LIMIT = 100;
 const SNAPSHOT_DELAY = 2000;
 
 let state = null;
-let persistTimer = null;
+const persistDebounce = debounce(writeState, 400);
 
 // Per-tab undo/redo history, kept in memory only (not persisted). Each entry is
 // { undo: string[], redo: string[], draft: string | null } where `draft` is the
@@ -64,14 +65,11 @@ function writeState() {
 }
 
 function persist() {
-  clearTimeout(persistTimer);
-  persistTimer = null;
-  writeState();
+  persistDebounce.run();
 }
 
 function schedulePersist() {
-  clearTimeout(persistTimer);
-  persistTimer = setTimeout(writeState, 400);
+  persistDebounce.schedule();
 }
 
 function generateId() {
@@ -163,8 +161,6 @@ function initTabs(editableNode, onUpdate) {
   const getActiveTab = () => state.tabs.find((tab) => tab.id === state.activeId) || state.tabs[0];
 
   let lastValue = getActiveTab().content;
-  let burstTimer = null;
-  let snapshotTimer = null;
 
   const history = () => {
     let entry = histories.get(state.activeId);
@@ -175,6 +171,11 @@ function initTabs(editableNode, onUpdate) {
     return entry;
   };
 
+  const burst = debounce(() => {
+    histories.set(state.activeId, commitDraft(history()));
+  }, 700);
+  const snapshot = debounce(saveActiveSnapshot, SNAPSHOT_DELAY);
+
   function saveActiveSnapshot() {
     const tab = getActiveTab();
     if (!tab) return;
@@ -182,20 +183,15 @@ function initTabs(editableNode, onUpdate) {
   }
 
   function scheduleSnapshot() {
-    clearTimeout(snapshotTimer);
-    snapshotTimer = setTimeout(saveActiveSnapshot, SNAPSHOT_DELAY);
+    snapshot.schedule();
   }
 
   function flushSnapshot() {
-    clearTimeout(snapshotTimer);
-    snapshotTimer = null;
-    saveActiveSnapshot();
+    snapshot.flush();
   }
 
   function flushDraft() {
-    clearTimeout(burstTimer);
-    burstTimer = null;
-    histories.set(state.activeId, commitDraft(history()));
+    burst.run();
   }
 
   function setValue(value) {
@@ -231,22 +227,13 @@ function initTabs(editableNode, onUpdate) {
     const entry = recordChange(history(), lastValue, value);
     histories.set(state.activeId, entry);
     lastValue = value;
-    clearTimeout(burstTimer);
-    burstTimer = setTimeout(() => {
-      histories.set(state.activeId, commitDraft(history()));
-    }, 700);
+    burst.schedule();
     state = setContent(state, state.activeId, value);
     schedulePersist();
     scheduleSnapshot();
   });
 
-  const flushPersist = () => {
-    if (persistTimer !== null) {
-      clearTimeout(persistTimer);
-      persistTimer = null;
-      writeState();
-    }
-  };
+  const flushPersist = () => persistDebounce.flush();
   const flushAll = () => {
     flushDraft();
     flushPersist();
