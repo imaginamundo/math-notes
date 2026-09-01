@@ -189,11 +189,13 @@ function buildBar() {
   bar.setAttribute('role', 'search');
 
   const findRow = row(
-    input('find-input', 'Find in sheet', 'Find in sheet'),
+    inputWrap(
+      input('find-input', 'Find in sheet', 'Find in sheet'),
+      button('find-case', 'Aa', 'Match case')
+    ),
     count('find-count'),
     button('find-prev', '↑', 'Previous match (Shift+Enter)'),
     button('find-next', '↓', 'Next match (Enter)'),
-    button('find-case', 'Aa', 'Match case'),
     button('find-close', '×', 'Close (Escape)')
   );
   const replaceRow = row(
@@ -210,6 +212,13 @@ function buildBar() {
 function row(...children) {
   const wrap = document.createElement('div');
   wrap.className = 'find-row';
+  children.forEach((child) => wrap.appendChild(child));
+  return wrap;
+}
+
+function inputWrap(...children) {
+  const wrap = document.createElement('div');
+  wrap.className = 'find-input-wrap';
   children.forEach((child) => wrap.appendChild(child));
   return wrap;
 }

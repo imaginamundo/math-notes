@@ -174,7 +174,8 @@ body {
   margin-left: 0.5em;
 }
 .tab-close,
-.modal-close {
+.modal-close,
+.find-close {
   background: transparent;
   color: inherit;
 }
@@ -416,6 +417,7 @@ button:hover {
   border-radius: 0.2em;
   padding: 0.25em 0.4em;
   outline: none;
+  width: 14em;
   min-width: 8em;
 }
 .find-field:focus {
@@ -427,9 +429,37 @@ button:hover {
   min-width: 3.5em;
   text-align: right;
 }
-.find-bar .find-case.active {
+.find-prev {
+  margin-right: -0.3em;
+}
+.find-next {
+  border-left: 1px solid var(--border-strong);
+}
+.find-input-wrap {
+  position: relative;
+}
+.find-input-wrap .find-field {
+  padding-right: 2em;
+}
+.find-input-wrap .find-case {
+  position: absolute;
+  right: 0.25em;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.15em 0.35em;
+  font-size: 0.85em;
+  line-height: 1;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+.find-input-wrap .find-case:hover {
+  filter: none;
+  color: var(--color-text);
+}
+.find-input-wrap .find-case.active {
   color: var(--color-operator);
-  outline: 1px solid var(--color-operator);
+  outline: none;
 }
 .find-match {
   background: rgba(255, 213, 79, 0.35);
