@@ -4,7 +4,7 @@ import globals from 'globals';
 
 export default [
   {
-    ignores: ['js/lib/**', 'node_modules/**'],
+    ignores: ['js/lib/**', 'node_modules/**', '**/*.tmp.*'],
   },
   js.configs.recommended,
   {
@@ -23,6 +23,14 @@ export default [
     files: ['eslint.config.js'],
     languageOptions: {
       globals: globals.node,
+    },
+  },
+  {
+    // Root-level dev scripts (e.g. ad-hoc verification files) may use either
+    // Node or browser globals, so lint them with both instead of erroring.
+    files: ['*.{js,mjs,cjs}'],
+    languageOptions: {
+      globals: { ...globals.node, ...globals.browser },
     },
   },
   prettier,
