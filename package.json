@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build:mathjs": "make -C js/lib",
+    "dev": "node scripts/dev.mjs",
     "test": "node --test",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

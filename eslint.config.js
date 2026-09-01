@@ -28,7 +28,7 @@ export default [
   {
     // Root-level dev scripts (e.g. ad-hoc verification files) may use either
     // Node or browser globals, so lint them with both instead of erroring.
-    files: ['*.{js,mjs,cjs}'],
+    files: ['*.{js,mjs,cjs}', 'scripts/**/*.{js,mjs}'],
     languageOptions: {
       globals: { ...globals.node, ...globals.browser },
     },
