@@ -10,6 +10,7 @@ import initTabs from './ui/tabs.js';
 import initIo from './ui/io.js';
 import initShortcuts from './ui/shortcuts.js';
 import initFind from './ui/find.js';
+import initLineNumbers from './ui/lineNumbers.js';
 
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');
@@ -45,6 +46,7 @@ initFontControls();
 initIo(contentEditableNode);
 initShortcuts(contentEditableNode);
 initFind(contentEditableNode, viewNode, update);
+initLineNumbers(contentEditableNode);
 
 window.addEventListener('currency:updated', (event) => {
   update();
