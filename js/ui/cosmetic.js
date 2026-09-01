@@ -7,7 +7,7 @@ function initFontControls() {
   const fontSize = {
     min: 10,
     max: 80,
-    current: 14,
+    current: 16,
   };
   function setFontSize() {
     try {
