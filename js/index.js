@@ -1,4 +1,5 @@
 import { evaluateLines } from './core/calculate.js';
+import { loadCached } from './eval/currency.js';
 import renderInput from './render/renderInput.js';
 import renderTotal from './render/renderTotal.js';
 import registerServiceWorker from './registerServiceWorker.js';
@@ -17,12 +18,48 @@ const viewNode = document.getElementById('view');
 const totalNode = document.getElementById('total');
 const currencyStatusNode = document.getElementById('currency-status');
 
+// Evaluation runs in a Web Worker so heavy sheets never block typing. Falls
+// back to the main thread when workers are unavailable.
+let worker = null;
+let latestId = 0;
+const pending = new Map();
+
+if (typeof Worker !== 'undefined') {
+  worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+  worker.addEventListener('message', (event) => {
+    const callback = pending.get(event.data.id);
+    if (!callback) return;
+    pending.delete(event.data.id);
+    callback(event.data);
+  });
+  const cachedRates = loadCached();
+  if (cachedRates) worker.postMessage({ type: 'rates', data: cachedRates });
+}
+
+function renderResults(lines, results, total, startLine) {
+  renderInput(viewNode, lines, results, startLine);
+  renderTotal(totalNode, total);
+}
+
 function update() {
+  const lines = contentEditableNode.value.split('\n');
+  if (worker) {
+    const id = ++latestId;
+    return new Promise((resolve) => {
+      pending.set(id, (data) => {
+        if (data.type === 'error') {
+          console.error('Failed to update the sheet:', data.message);
+        } else if (id === latestId) {
+          renderResults(lines, data.results, data.total, data.startLine);
+        }
+        resolve();
+      });
+      worker.postMessage({ id, type: 'evaluate', lines });
+    });
+  }
   try {
-    const lines = contentEditableNode.value.split('\n');
     const { results, total, startLine } = evaluateLines(lines);
-    renderInput(viewNode, lines, results, startLine);
-    renderTotal(totalNode, total);
+    renderResults(lines, results, total, startLine);
   } catch (error) {
     console.error('Failed to update the sheet:', error);
   }
@@ -30,13 +67,12 @@ function update() {
 
 let updateTimer = null;
 
-// Run a pending update now (used by find so highlights apply to a fresh view).
+// Run an update now and return when it has rendered (used by find so
+// highlights apply to a fresh view).
 function flushUpdate() {
-  if (updateTimer !== null) {
-    clearTimeout(updateTimer);
-    updateTimer = null;
-    update();
-  }
+  clearTimeout(updateTimer);
+  updateTimer = null;
+  return update();
 }
 
 // Batch rapid typing into a single evaluation on the trailing edge.
@@ -66,6 +102,8 @@ initFind(contentEditableNode, viewNode, update, flushUpdate);
 initLineNumbers(contentEditableNode);
 
 window.addEventListener('currency:updated', (event) => {
+  const data = event.detail && event.detail.data;
+  if (worker && data) worker.postMessage({ type: 'rates', data });
   update();
   showCurrencyStatus(
     event.detail && event.detail.source === 'cached' ? 'rates: cached' : 'rates: live'

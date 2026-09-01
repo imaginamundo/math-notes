@@ -1,6 +1,6 @@
 import { create, all } from '../lib/math.bundle.min.js';
 import parseLine from './parseLine.js';
-import initCurrency from '../eval/currency.js';
+import initCurrency, { registerRates } from '../eval/currency.js';
 import initAliases from '../eval/aliases.js';
 import initCssUnits from '../eval/cssUnits.js';
 import initDatetime from '../eval/datetime.js';
@@ -157,4 +157,8 @@ function evaluateLines(lines) {
   return { results, total: computeTotal(results), startLine };
 }
 
-export { evaluateLines, evaluateLine };
+function registerCurrencyRates(data) {
+  registerRates(math, data);
+}
+
+export { evaluateLines, evaluateLine, registerCurrencyRates };

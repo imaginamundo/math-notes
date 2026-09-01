@@ -39,13 +39,13 @@ function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
     editableNode.focus();
   }
 
-  function refresh(renderView, scrollTo) {
+  async function refresh(renderView, scrollTo) {
     const prevAnchor =
       activeIndex !== -1 && matches[activeIndex]
         ? matches[activeIndex].start
         : editableNode.selectionStart;
     query = findInput.value;
-    if (renderView) onUpdate();
+    if (renderView) await onUpdate();
     if (!query) {
       matches = [];
       activeIndex = -1;
@@ -86,7 +86,7 @@ function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
     scrollToActive();
   }
 
-  function replaceCurrent() {
+  async function replaceCurrent() {
     if (!query || activeIndex === -1) return;
     const match = matches[activeIndex];
     const replacement = replaceInput.value;
@@ -94,11 +94,12 @@ function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
       editableNode.value.slice(0, match.start) + replacement + editableNode.value.slice(match.end);
     editableNode.selectionStart = editableNode.selectionEnd = match.start + replacement.length;
     editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+    await lastRefresh;
     scrollToActive();
     replaceInput.focus();
   }
 
-  function replaceAll() {
+  async function replaceAll() {
     if (!query || !matches.length) return;
     const replacement = replaceInput.value;
     const value = editableNode.value;
@@ -112,6 +113,7 @@ function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
     editableNode.value = out;
     editableNode.selectionStart = editableNode.selectionEnd = editableNode.value.length;
     editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+    await lastRefresh;
     scrollToActive();
     replaceInput.focus();
   }
@@ -158,10 +160,12 @@ function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
   replaceOneButton.addEventListener('click', replaceCurrent);
   replaceAllButton.addEventListener('click', replaceAll);
 
+  let lastRefresh = Promise.resolve();
   editableNode.addEventListener('input', () => {
     if (barNode.classList.contains('open')) {
-      if (flushUpdate) flushUpdate();
-      refresh(false, false);
+      lastRefresh = Promise.resolve(flushUpdate ? flushUpdate() : undefined).then(() =>
+        refresh(false, false)
+      );
     }
   });
 

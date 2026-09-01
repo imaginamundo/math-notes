@@ -62,7 +62,7 @@ function initCurrency(math) {
 
   if (isFresh(cached)) {
     registerRates(math, cached);
-    notify('currency:updated', { source: 'cached' });
+    notify('currency:updated', { source: 'cached', data: cached });
     return;
   }
   if (cached) registerRates(math, cached);
@@ -75,12 +75,12 @@ function initCurrency(math) {
     .then((data) => {
       save(data);
       registerRates(math, data);
-      notify('currency:updated', { source: 'live' });
+      notify('currency:updated', { source: 'live', data });
     })
     .catch(() => {
       if (!cached) notify('currency:error');
     });
 }
 
-export { registerRates };
+export { registerRates, loadCached };
 export default initCurrency;
