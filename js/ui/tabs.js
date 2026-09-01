@@ -288,6 +288,7 @@ function initTabs(editableNode, onUpdate) {
     closeNode.className = 'tab-close';
     closeNode.textContent = '×';
     closeNode.title = 'Close tab';
+    closeNode.setAttribute('aria-label', 'Close tab');
 
     tabNode.appendChild(nameNode);
     tabNode.appendChild(closeNode);
@@ -299,6 +300,7 @@ function initTabs(editableNode, onUpdate) {
     button.className = 'tab-new';
     button.textContent = '+';
     button.title = 'New tab';
+    button.setAttribute('aria-label', 'New tab');
     return button;
   }
 

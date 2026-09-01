@@ -254,6 +254,7 @@ function button(className, label, title) {
   node.className = className;
   node.textContent = label;
   node.title = title;
+  if (title) node.setAttribute('aria-label', title);
   return node;
 }
 
