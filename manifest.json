@@ -4,8 +4,8 @@
   "description": "Inline calculator for modern browsers.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#0A3190",
-  "theme_color": "#0A3190",
+  "background_color": "#282c34",
+  "theme_color": "#282c34",
   "orientation": "portrait-primary",
   "icons": [
     {

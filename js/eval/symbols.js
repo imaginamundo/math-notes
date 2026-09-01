@@ -48,7 +48,16 @@ const SYMBOL_SOURCE = SYMBOLS.map((symbol) => symbol.replace(/[.*+?^${}()|[\]\\]
 );
 const SYMBOL_AFTER_NUMBER = new RegExp(`(\\d[\\d.]*)\\s*(${SYMBOL_SOURCE})`, 'g');
 const SYMBOL_BEFORE_NUMBER = new RegExp(`(${SYMBOL_SOURCE})\\s*(\\d[\\d.]*)`, 'g');
-const CODE_PATTERN = /[A-Za-z]{3}/g;
+
+// Currency codes only become units in currency contexts (amounts and `to`/`in`
+// conversions), so bare codes used as identifiers keep their case, e.g.
+// `usd = 5` stays a variable assignment instead of `USD = 5`.
+const CODE = '[A-Za-z]{3}';
+const CODE_AFTER_NUMBER = new RegExp(`(\\d[\\d.]*)\\s*(${CODE})(?!\\w)`, 'g');
+const CODE_BEFORE_NUMBER = new RegExp(`(?<![\\w.])(${CODE})\\s*(\\d[\\d.]*)`, 'g');
+const CODE_BEFORE_TO = new RegExp(`(?<![\\w.])(${CODE})(\\s+)to\\b`, 'gi');
+const CODE_AFTER_TO = new RegExp(`\\bto(\\s+)(${CODE})(?!\\w)`, 'gi');
+const CODE_AFTER_IN = new RegExp(`\\bin(\\s+)(${CODE})(?!\\w)`, 'gi');
 
 function preprocessSymbols(expression) {
   return uppercaseCurrencyCodes(
@@ -65,17 +74,17 @@ function preprocessSymbols(expression) {
 }
 
 function uppercaseCurrencyCodes(expression) {
-  return expression.replace(CODE_PATTERN, (token, offset) => {
-    const upper = token.toUpperCase();
-    if (!CURRENCY_CODES.has(upper)) return token;
-    const before = expression[offset - 1];
-    const after = expression[offset + 3];
-    if (before && /[A-Za-z]/.test(before)) return token;
-    if (after && /[A-Za-z]/.test(after)) return token;
-    const prefix = before && /[0-9]/.test(before) ? ' ' : '';
-    const suffix = after && /[0-9]/.test(after) ? ' ' : '';
-    return prefix + upper + suffix;
-  });
+  return expression
+    .replace(CODE_AFTER_NUMBER, (match, number, code) => `${number} ${uppercaseCode(code)}`)
+    .replace(CODE_BEFORE_NUMBER, (match, code, number) => `${uppercaseCode(code)} ${number}`)
+    .replace(CODE_BEFORE_TO, (match, code, space) => `${uppercaseCode(code)}${space}to`)
+    .replace(CODE_AFTER_TO, (match, space, code) => `to${space}${uppercaseCode(code)}`)
+    .replace(CODE_AFTER_IN, (match, space, code) => `in${space}${uppercaseCode(code)}`);
+}
+
+function uppercaseCode(token) {
+  const upper = token.toUpperCase();
+  return CURRENCY_CODES.has(upper) ? upper : token;
 }
 
 export { CURRENCY_SYMBOLS, CURRENCY_CODES, SYMBOL_SOURCE, preprocessSymbols };
