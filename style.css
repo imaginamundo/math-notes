@@ -158,6 +158,12 @@ body {
   color: var(--color-text);
   border-right: 1px solid var(--border-faint);
   white-space: nowrap;
+  touch-action: none;
+}
+.tab.dragging {
+  opacity: 0.5;
+  outline: 1px dashed var(--color-operator);
+  outline-offset: -1px;
 }
 .tab.active {
   background: var(--color-primary);
@@ -654,6 +660,36 @@ code {
 .settings-files {
   display: flex;
   gap: 0.5em;
+}
+.snapshot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75em;
+  padding: 0.4em 0.7em;
+  background: var(--surface-chip);
+  border: 1px solid var(--border-chip);
+}
+.snapshot-row:first-child {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+.snapshot-row:last-child {
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+.snapshot-row + .snapshot-row {
+  margin-top: -1px;
+}
+.snapshot-row span {
+  font-size: 0.9em;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#snapshot-history {
+  margin-top: 0.5em;
 }
 a {
   color: var(--color-link);

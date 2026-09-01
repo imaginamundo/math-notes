@@ -33,12 +33,12 @@ function applyTheme(id) {
   }
 }
 
-function initSettings(contentEditableNode) {
+function initSettings(contentEditableNode, tabsApi) {
   const button = document.getElementById('settings-button');
   const modal = document.getElementById('settings-modal');
   const listNode = modal.querySelector('.settings-themes');
 
-  initModal(modal, button, { onClose: () => contentEditableNode.focus() });
+  initModal(modal, button, { onOpen: renderSnapshots, onClose: () => contentEditableNode.focus() });
 
   THEMES.forEach((theme) => {
     const card = document.createElement('button');
@@ -76,7 +76,7 @@ function initSettings(contentEditableNode) {
   renderActive();
 
   const resetButton = document.getElementById('reset-data-button');
-  resetButton.addEventListener('click', () => {
+  resetButton.addEventListener('click', async () => {
     if (!window.confirm('This will reset the theme, tabs and all stored data. Continue?')) return;
     RESET_KEYS.forEach((key) => {
       try {
@@ -85,8 +85,70 @@ function initSettings(contentEditableNode) {
         // storage unavailable
       }
     });
+    try {
+      const { clearSnapshots } = await import('../storage/snapshots.js');
+      await clearSnapshots();
+    } catch {
+      // storage unavailable
+    }
     window.location.reload();
   });
+
+  async function renderSnapshots() {
+    const container = document.getElementById('snapshot-history');
+    const restoreAllButton = document.getElementById('restore-all-button');
+    let snapshots = [];
+    try {
+      const { latestPerTab } = await import('../storage/snapshots.js');
+      snapshots = await latestPerTab();
+    } catch {
+      // storage unavailable
+    }
+    container.textContent = '';
+    restoreAllButton.disabled = !snapshots.length;
+    if (!snapshots.length) {
+      container.textContent = 'No snapshots yet. They appear a few seconds after you edit a tab.';
+      return;
+    }
+    for (const snapshot of snapshots) {
+      const row = document.createElement('div');
+      row.className = 'snapshot-row';
+
+      const label = document.createElement('span');
+      label.textContent = `${snapshot.name} — ${timeAgo(snapshot.timestamp)}`;
+
+      const restore = document.createElement('button');
+      restore.type = 'button';
+      restore.textContent = 'Restore';
+      restore.addEventListener('click', () => {
+        const confirm = window.confirm(
+          `Restore "${snapshot.name}" from ${timeAgo(snapshot.timestamp)}? This replaces its current content.`
+        );
+        if (confirm) tabsApi.restoreTab(snapshot);
+      });
+
+      row.appendChild(label);
+      row.appendChild(restore);
+      container.appendChild(row);
+    }
+    restoreAllButton.onclick = () => {
+      if (!snapshots.length) return;
+      const confirm = window.confirm(
+        'Replace all tabs with the latest snapshot of each? This discards the current tabs.'
+      );
+      if (confirm) tabsApi.restoreAll(snapshots);
+    };
+  }
+}
+
+function timeAgo(timestamp) {
+  const seconds = Math.floor((Date.now() - timestamp) / 1000);
+  if (seconds < 60) return 'just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
 }
 
 export default initSettings;

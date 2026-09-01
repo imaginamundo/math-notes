@@ -123,7 +123,8 @@
           <h2>Tabs</h2>
           <p>Use the tabs at the top to keep separate worksheets. Every tab is saved automatically as you type.</p>
           <ul>
-            <li><b>Switch</b> — click a tab (or use <code>←</code>/<code>→</code> once focused).</li>
+            <li><b>Switch</b> — click a tab (or use <code>←</code>/<code>→</code> once focused, or <code>Ctrl+Tab</code>).</li>
+            <li><b>Reorder</b> — click and drag a tab to a new position.</li>
             <li><b>Rename</b> — double-click the tab name.</li>
             <li><b>Close</b> — click the <code>×</code> (you'll be asked to confirm).</li>
             <li><b>Add</b> — click the <code>+</code> tab.</li>
@@ -371,6 +372,10 @@
               <tr><th>Shortcut</th><th>Action</th></tr>
             </thead>
             <tbody>
+              <tr><td><code>⌘Z</code></td><td>Undo the last change in the tab</td></tr>
+              <tr><td><code>⇧⌘Z</code></td><td>Redo</td></tr>
+              <tr><td><code>Ctrl+Tab</code> / <code>Ctrl+⇧Tab</code></td><td>Next / previous tab</td></tr>
+              <tr><td><code>⌘1…9</code> / <code>Ctrl+1…9</code></td><td>Jump to the nth tab</td></tr>
               <tr><td><code>⌘F</code></td><td>Find &amp; replace in the active sheet</td></tr>
               <tr><td><code>⇧⌘C</code></td><td>Copy the current line's result</td></tr>
               <tr><td><code>⇧⌘E</code></td><td>Export the active sheet</td></tr>
@@ -465,6 +470,12 @@
         <h2>Theme</h2>
         <p>Choose a theme.</p>
         <div class="settings-themes"></div>
+      </section>
+      <section class="help-section">
+        <h2>Recover</h2>
+        <p>Auto-saved snapshots of each tab are kept in IndexedDB. Restore one to recover lost work.</p>
+        <button id="restore-all-button" class="restore-all">Restore all from latest backup</button>
+        <div id="snapshot-history"></div>
       </section>
       <section class="help-section">
         <h2>Reset</h2>
