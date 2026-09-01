@@ -301,6 +301,10 @@ input::placeholder {
 .ghost-result {
   margin-left: 1.5em;
   color: var(--color-ghost);
+  /* A subtle chip separates results/errors from the user's input. */
+  background: var(--color-footer);
+  border-radius: 3px;
+  padding: 0 0.35em;
 }
 .ghost-result.error {
   color: var(--color-ghost-error);
