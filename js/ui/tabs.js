@@ -115,6 +115,16 @@ function moveTab(prev, id, toIndex) {
   return { ...prev, tabs };
 }
 
+// The next auto-numbered tab name must not collide with an existing one.
+function deriveNextTabNumber(tabs) {
+  let next = tabs.length + 1;
+  for (const tab of tabs) {
+    const match = /^Tab (\d+)$/.exec(tab.name);
+    if (match) next = Math.max(next, parseInt(match[1], 10) + 1);
+  }
+  return next;
+}
+
 let storageFailed = false;
 
 function loadInitialState() {
@@ -513,6 +523,7 @@ function initTabs(editableNode, onUpdate) {
           activeId: targetId,
         };
     state = setActiveTab(state, targetId);
+    state = { ...state, nextTabNumber: deriveNextTabNumber(state.tabs) };
     histories.set(targetId, emptyHistory());
     const activeTab = getActiveTab();
     editableNode.value = activeTab.content;
@@ -530,7 +541,12 @@ function initTabs(editableNode, onUpdate) {
       name: snapshot.name,
       content: snapshot.content,
     }));
-    state = { ...state, tabs, activeId: tabs.length ? tabs[0].id : state.activeId };
+    state = {
+      ...state,
+      tabs,
+      activeId: tabs.length ? tabs[0].id : state.activeId,
+      nextTabNumber: deriveNextTabNumber(tabs),
+    };
     histories.clear();
     const activeTab = getActiveTab();
     editableNode.value = activeTab.content;
@@ -563,5 +579,6 @@ function initTabs(editableNode, onUpdate) {
 }
 
 export { createTab, closeTab, renameTab, setActiveTab, setContent, moveTab };
+export { deriveNextTabNumber };
 export { recordChange, commitDraft, applyUndo, applyRedo };
 export default initTabs;

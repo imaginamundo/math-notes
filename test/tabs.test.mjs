@@ -7,6 +7,7 @@ import {
   setActiveTab,
   setContent,
   moveTab,
+  deriveNextTabNumber,
 } from '../js/ui/tabs.js';
 
 function baseState() {
@@ -101,4 +102,14 @@ test('moveTab is a no-op when the position is unchanged', () => {
   const state = baseState();
   assert.equal(moveTab(state, 'b', 1), state);
   assert.equal(moveTab(state, 'missing', 0), state);
+});
+
+test('deriveNextTabNumber avoids colliding with existing names', () => {
+  assert.equal(deriveNextTabNumber(baseState().tabs), 4);
+  const recovered = [
+    { id: 'a', name: 'Tab 2', content: '' },
+    { id: 'b', name: 'Budget', content: '' },
+    { id: 'c', name: 'Tab 9', content: '' },
+  ];
+  assert.equal(deriveNextTabNumber(recovered), 10);
 });
