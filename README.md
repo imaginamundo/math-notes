@@ -11,6 +11,8 @@ Based on [Numi](https://numi.app/).
 - **Line-by-line evaluation** with an automatic total of numeric results.
 - **Tabs** for separate worksheets — rename by double-clicking a tab, close with
   `×` (you're asked to confirm), add with `+`. Everything is saved locally.
+- **Undo / redo** per tab — `⌘Z` / `Ctrl+Z` (and `⇧⌘Z` to redo) restores the
+  last change, with a separate history for every tab.
 - **Variables and functions**: `price = 30`, `double = f(x) = x * 2`.
 - **`prev`** — reference the previous line's result.
 - **`sum` / `total` / `average` / `avg`** — aggregate the lines above (until a
@@ -44,13 +46,15 @@ people = 4
 
 ## Keyboard shortcuts
 
-| Shortcut                       | Action                         |
-| ------------------------------ | ------------------------------ |
-| `⌘F` / `Ctrl+F`                | Find & replace in the sheet    |
-| `⇧⌘C` / `Ctrl+Shift+C`         | Copy the current line's result |
-| `⇧⌘E` / `Ctrl+Shift+E`         | Export the active sheet        |
-| `⇧⌘I` / `Ctrl+Shift+I`         | Import a sheet                 |
-| `⇧⌘⌫` / `Ctrl+Shift+Backspace` | Clear the active sheet         |
+| Shortcut                       | Action                          |
+| ------------------------------ | ------------------------------- |
+| `⌘Z` / `Ctrl+Z`                | Undo the last change in the tab |
+| `⇧⌘Z` / `Ctrl+Shift+Z`         | Redo                            |
+| `⌘F` / `Ctrl+F`                | Find & replace in the sheet     |
+| `⇧⌘C` / `Ctrl+Shift+C`         | Copy the current line's result  |
+| `⇧⌘E` / `Ctrl+Shift+E`         | Export the active sheet         |
+| `⇧⌘I` / `Ctrl+Shift+I`         | Import a sheet                  |
+| `⇧⌘⌫` / `Ctrl+Shift+Backspace` | Clear the active sheet          |
 
 The **Help** button opens the full reference with clickable examples.
 

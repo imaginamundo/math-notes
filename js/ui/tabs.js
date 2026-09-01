@@ -1,8 +1,50 @@
 const STORAGE_KEY = 'math-notes-tabs';
 const LEGACY_KEY = 'input';
+const HISTORY_LIMIT = 100;
 
 let state = null;
 let persistTimer = null;
+
+// Per-tab undo/redo history, kept in memory only (not persisted). Each entry is
+// { undo: string[], redo: string[], draft: string | null } where `draft` is the
+// value captured at the start of the current typing burst.
+const histories = new Map();
+
+function emptyHistory() {
+  return { undo: [], redo: [], draft: null };
+}
+
+// A new edit begins a burst: record the pre-burst value as the draft and drop
+// the redo stack (a new edit invalidates redo).
+function recordChange(entry, lastValue, newValue) {
+  if (newValue === lastValue) return entry;
+  if (entry.draft === null) {
+    return { ...entry, draft: lastValue, redo: [] };
+  }
+  return entry;
+}
+
+// End a burst: the draft becomes the undo boundary for the whole burst.
+function commitDraft(entry) {
+  if (entry.draft === null) return entry;
+  return { undo: [...entry.undo, entry.draft].slice(-HISTORY_LIMIT), redo: [], draft: null };
+}
+
+function applyUndo(entry, current) {
+  if (!entry.undo.length) return null;
+  return {
+    entry: { ...entry, undo: entry.undo.slice(0, -1), redo: [...entry.redo, current] },
+    value: entry.undo[entry.undo.length - 1],
+  };
+}
+
+function applyRedo(entry, current) {
+  if (!entry.redo.length) return null;
+  return {
+    entry: { ...entry, undo: [...entry.undo, current], redo: entry.redo.slice(0, -1) },
+    value: entry.redo[entry.redo.length - 1],
+  };
+}
 
 function writeState() {
   try {
@@ -89,10 +131,61 @@ function initTabs(editableNode, onUpdate) {
 
   const getActiveTab = () => state.tabs.find((tab) => tab.id === state.activeId) || state.tabs[0];
 
-  editableNode.value = getActiveTab().content;
+  let lastValue = getActiveTab().content;
+  let burstTimer = null;
+
+  const history = () => {
+    let entry = histories.get(state.activeId);
+    if (!entry) {
+      entry = emptyHistory();
+      histories.set(state.activeId, entry);
+    }
+    return entry;
+  };
+
+  function flushDraft() {
+    clearTimeout(burstTimer);
+    burstTimer = null;
+    histories.set(state.activeId, commitDraft(history()));
+  }
+
+  function setValue(value) {
+    lastValue = value;
+    editableNode.value = value;
+    state = setContent(state, state.activeId, value);
+    persist();
+    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  function undo() {
+    flushDraft();
+    const result = applyUndo(history(), lastValue);
+    if (!result) return;
+    histories.set(state.activeId, result.entry);
+    setValue(result.value);
+  }
+
+  function redo() {
+    flushDraft();
+    const result = applyRedo(history(), lastValue);
+    if (!result) return;
+    histories.set(state.activeId, result.entry);
+    setValue(result.value);
+  }
+
+  editableNode.value = lastValue;
 
   editableNode.addEventListener('input', () => {
-    state = setContent(state, state.activeId, editableNode.value);
+    const value = editableNode.value;
+    if (value === lastValue) return;
+    const entry = recordChange(history(), lastValue, value);
+    histories.set(state.activeId, entry);
+    lastValue = value;
+    clearTimeout(burstTimer);
+    burstTimer = setTimeout(() => {
+      histories.set(state.activeId, commitDraft(history()));
+    }, 700);
+    state = setContent(state, state.activeId, value);
     schedulePersist();
   });
 
@@ -103,8 +196,25 @@ function initTabs(editableNode, onUpdate) {
       writeState();
     }
   };
-  editableNode.addEventListener('blur', flushPersist);
-  window.addEventListener('pagehide', flushPersist);
+  const flushAll = () => {
+    flushDraft();
+    flushPersist();
+  };
+  editableNode.addEventListener('blur', flushAll);
+  window.addEventListener('pagehide', flushAll);
+
+  document.addEventListener('keydown', (event) => {
+    const mod = event.metaKey || event.ctrlKey;
+    if (!mod) return;
+    const key = event.key.toLowerCase();
+    if (key !== 'z' && key !== 'y') return;
+    const active = document.activeElement;
+    if (active && active !== editableNode && active.tagName === 'INPUT') return;
+    if (document.querySelector('dialog[open]')) return;
+    event.preventDefault();
+    if (event.shiftKey || key === 'y') redo();
+    else undo();
+  });
 
   function render() {
     tabBarNode.innerHTML = '';
@@ -151,9 +261,12 @@ function initTabs(editableNode, onUpdate) {
       editableNode.focus();
       return;
     }
+    flushDraft();
     state = setContent(state, state.activeId, editableNode.value);
     state = setActiveTab(state, id);
-    editableNode.value = state.tabs.find((tab) => tab.id === id).content;
+    const tab = state.tabs.find((entry) => entry.id === id);
+    editableNode.value = tab.content;
+    lastValue = tab.content;
     persist();
     render();
     onUpdate();
@@ -162,9 +275,11 @@ function initTabs(editableNode, onUpdate) {
   }
 
   function handleNew() {
+    flushDraft();
     state = setContent(state, state.activeId, editableNode.value);
     state = createTab(state, 'Tab ' + state.nextTabNumber);
     editableNode.value = '';
+    lastValue = '';
     persist();
     render();
     onUpdate();
@@ -173,13 +288,17 @@ function initTabs(editableNode, onUpdate) {
   }
 
   function handleClose(id) {
-    const tab = state.tabs.find((tab) => tab.id === id);
+    const tab = state.tabs.find((entry) => entry.id === id);
     if (!tab) return;
     if (!window.confirm(`Close "${tab.name}"? Its content will be lost.`)) return;
+    flushDraft();
     if (state.activeId === id) state = setContent(state, id, editableNode.value);
     state = closeTab(state, id);
     if (!state.tabs.length) state = createTab(state, 'Tab ' + state.nextTabNumber);
-    editableNode.value = getActiveTab().content;
+    histories.delete(id);
+    const activeTab = getActiveTab();
+    editableNode.value = activeTab.content;
+    lastValue = activeTab.content;
     persist();
     render();
     onUpdate();
@@ -275,4 +394,5 @@ function initTabs(editableNode, onUpdate) {
 }
 
 export { createTab, closeTab, renameTab, setActiveTab, setContent };
+export { recordChange, commitDraft, applyUndo, applyRedo };
 export default initTabs;
