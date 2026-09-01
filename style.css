@@ -30,6 +30,12 @@
   /* Editor line-number gutter */
   --line-gutter: 3.5em;
 
+  /* Safe-area insets for standalone PWA (notch / home indicator) */
+  --safe-top: env(safe-area-inset-top);
+  --safe-left: env(safe-area-inset-left);
+  --safe-right: env(safe-area-inset-right);
+  --safe-bottom: env(safe-area-inset-bottom);
+
   /* Borders */
   --border-light: rgba(255, 255, 255, 0.2);
   --border-faint: rgba(255, 255, 255, 0.15);
@@ -131,7 +137,7 @@ body {
   margin: 0;
   background: var(--color-primary);
   color: var(--color-text);
-  font-size: var(--app-font-size, 14px);
+  font-size: var(--app-font-size, 16px);
   font-family: monospace;
   line-height: 1.65em;
 }
@@ -144,6 +150,7 @@ body {
   display: flex;
   align-items: stretch;
   min-height: 2.2em;
+  padding: var(--safe-top) var(--safe-right) 0 var(--safe-left);
   background: var(--color-footer);
   border-bottom: 1px solid var(--border-light);
   overflow-x: auto;
@@ -235,11 +242,11 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  right: 1em;
+  right: calc(1em + var(--safe-right));
   width: auto;
   height: 100%;
   margin: 0;
-  padding: 1em 0 1em calc(1em + var(--line-gutter));
+  padding: 1em 0 1em calc(1em + var(--line-gutter) + var(--safe-left));
   font: inherit;
   line-height: inherit;
   white-space: pre;
@@ -279,7 +286,7 @@ input::placeholder {
 .line-numbers {
   position: absolute;
   top: 0;
-  left: 0;
+  left: var(--safe-left);
   z-index: 0;
   width: var(--line-gutter);
   height: 100%;
@@ -305,7 +312,7 @@ input::placeholder {
 .total-row {
   display: flex;
   align-items: center;
-  padding: 0.5em 1em 0.5em calc(1em + var(--line-gutter));
+  padding: 0.5em 1em 0.5em calc(1em + var(--line-gutter) + var(--safe-left));
   background: var(--color-surface);
   border-top: 1px solid var(--border-strong);
 }
@@ -337,7 +344,8 @@ input::placeholder {
 .footer {
   display: flex;
   align-items: center;
-  padding: 0.5em 1em calc(0.5em + env(safe-area-inset-bottom));
+  padding: 0.5em calc(1em + var(--safe-right)) calc(0.5em + var(--safe-bottom))
+    calc(1em + var(--safe-left));
   background: var(--color-footer);
   color: var(--color-text);
   border-top: 1px solid var(--border-strong);
@@ -398,7 +406,7 @@ button:hover {
 .find-bar {
   position: absolute;
   top: 0.5em;
-  right: 1em;
+  right: calc(1em + var(--safe-right));
   z-index: 2;
   display: none;
   flex-direction: column;

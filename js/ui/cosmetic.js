@@ -29,7 +29,7 @@ function initFontControls() {
     setFontSize();
   });
   fontResetNode.addEventListener('click', () => {
-    fontSize.current = 14;
+    fontSize.current = 16;
     setFontSize();
   });
 
