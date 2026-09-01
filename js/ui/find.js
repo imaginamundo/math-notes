@@ -125,10 +125,7 @@ function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
   function scrollToActive() {
     const mark = viewNode.querySelector('.find-match.active');
     if (!mark) return;
-    // Offscreen rows are skipped by content-visibility, so the mark has no
-    // layout; the row keeps its intrinsic-size box and is a safe vertical anchor.
-    const row = mark.closest('.line-row') || mark;
-    editableNode.scrollTop = Math.max(0, row.offsetTop - editableNode.clientHeight / 2);
+    editableNode.scrollTop = Math.max(0, mark.offsetTop - editableNode.clientHeight / 2);
     editableNode.scrollLeft = Math.max(0, mark.offsetLeft - editableNode.clientWidth / 2);
   }
 
