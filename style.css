@@ -251,6 +251,10 @@ body {
   color: var(--color-text);
   opacity: 0.55;
 }
+input::placeholder {
+  color: var(--color-text);
+  opacity: 0.55;
+}
 .view {
   z-index: 0;
   overflow: hidden;
@@ -386,17 +390,14 @@ button:hover {
 .find-bar {
   position: absolute;
   top: 0.5em;
-  right: 0.5em;
+  right: 1em;
   z-index: 2;
   display: none;
   flex-direction: column;
   gap: 0.35em;
   max-width: calc(100% - 1em);
   padding: 0.5em;
-  background: var(--color-surface);
-  border: 1px solid var(--border-strong);
-  border-radius: 0.25em;
-  box-shadow: 0 4px 16px var(--shadow-modal);
+  background: var(--color-footer);
 }
 .find-bar.open {
   display: flex;
@@ -407,7 +408,7 @@ button:hover {
   align-items: center;
   gap: 0.3em;
 }
-.find-bar input[type='text'] {
+.find-field {
   font: inherit;
   color: var(--color-text);
   background: var(--color-primary);
@@ -417,7 +418,7 @@ button:hover {
   outline: none;
   min-width: 8em;
 }
-.find-bar input[type='text']:focus {
+.find-field:focus {
   outline: 1px solid var(--color-operator);
 }
 .find-count {
@@ -425,18 +426,6 @@ button:hover {
   color: var(--color-text-muted);
   min-width: 3.5em;
   text-align: right;
-}
-.find-bar button {
-  font-size: 0.9em;
-  padding: 0.25em 0.55em;
-  background: var(--color-primary);
-  border: 1px solid var(--border-strong);
-  border-radius: 0.2em;
-  color: var(--color-text);
-  cursor: pointer;
-}
-.find-bar button:hover {
-  filter: brightness(1.2);
 }
 .find-bar .find-case.active {
   color: var(--color-operator);

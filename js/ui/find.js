@@ -217,7 +217,7 @@ function row(...children) {
 function input(className, placeholder, ariaLabel) {
   const node = document.createElement('input');
   node.type = 'text';
-  node.className = className;
+  node.className = `find-field ${className}`;
   node.placeholder = placeholder;
   node.setAttribute('aria-label', ariaLabel);
   node.autocomplete = 'off';
