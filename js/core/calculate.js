@@ -16,6 +16,21 @@ initDatetime(math);
 
 initCurrency(math);
 
+/**
+ * @typedef {Object} LineResult
+ * @property {('value'|'assignment'|'error')} type
+ * @property {*} value  Display value; for the worker path this is a pre-formatted string.
+ * @property {*} [assigned]  The value stored for an assignment (functions survive here).
+ * @property {boolean} [aggregate]  True for aggregate (`sum`/`average`) rows.
+ */
+
+/**
+ * @typedef {Object} SheetResult
+ * @property {LineResult[]} results
+ * @property {number|null} total
+ * @property {number} startLine  First line that changed (-1 when input is unchanged).
+ */
+
 function evaluateLine(line, scope) {
   const parsed = typeof line === 'string' ? parseLine(line) : line;
   const { code, label, rhs, isAssignment } = parsed;
@@ -78,6 +93,11 @@ function findFirstDifference(previous, next) {
   return -1;
 }
 
+/**
+ * Evaluate a sheet line by line.
+ * @param {string[]} lines
+ * @returns {SheetResult}
+ */
 function evaluateLines(lines) {
   const startLine = findFirstDifference(cache.lines, lines);
   if (startLine === -1) {
@@ -159,6 +179,10 @@ function evaluateLines(lines) {
   return { results, total: computeTotal(results), startLine };
 }
 
+/**
+ * Register currency rates on this module's math instance (used by the worker).
+ * @param {{ base: string, rates: Record<string, number> }} data
+ */
 function registerCurrencyRates(data) {
   registerRates(math, data);
 }

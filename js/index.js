@@ -12,16 +12,20 @@ import initShortcuts from './ui/shortcuts.js';
 import initFind from './ui/find.js';
 import initLineNumbers from './ui/lineNumbers.js';
 
+/** @typedef {import('./core/calculate.js').SheetResult} SheetResult */
+
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');
 const totalNode = document.getElementById('total');
 const currencyStatusNode = document.getElementById('currency-status');
+const EVALUATE_TIMEOUT = 10000;
 
 // Evaluation runs in a Web Worker so heavy sheets never block typing and
 // mathjs is only parsed on the worker thread. Falls back to a lazily loaded
 // main-thread evaluation when workers are unavailable.
 let worker = null;
 let latestId = 0;
+let latestRenderId = 0;
 const pending = new Map();
 let fallbackModule = null;
 
@@ -37,11 +41,23 @@ if (typeof Worker !== 'undefined') {
   if (cachedRates) worker.postMessage({ type: 'rates', data: cachedRates });
 }
 
+/**
+ * Evaluate lines via the worker, or via the lazy main-thread fallback when
+ * workers are unavailable. Resolves with the worker's `{ results, total,
+ * startLine }` payload alongside the correlation id used for render gating.
+ * @param {string[]} lines
+ * @returns {Promise<{ id: number, data: SheetResult }>}
+ */
 function requestEvaluate(lines) {
   if (worker) {
     return new Promise((resolve, reject) => {
       const id = ++latestId;
+      const timer = setTimeout(() => {
+        pending.delete(id);
+        reject(new Error('Evaluation timed out'));
+      }, EVALUATE_TIMEOUT);
       pending.set(id, (data) => {
+        clearTimeout(timer);
         if (data.type === 'error') reject(new Error(data.message));
         else resolve({ id, data });
       });
@@ -61,9 +77,10 @@ function renderResults(lines, results, total, startLine) {
 
 async function update() {
   const lines = contentEditableNode.value.split('\n');
+  const renderId = ++latestRenderId;
   try {
-    const { id, data } = await requestEvaluate(lines);
-    if (worker && id !== latestId) return;
+    const { data } = await requestEvaluate(lines);
+    if (worker && renderId !== latestRenderId) return;
     renderResults(lines, data.results, data.total, data.startLine);
   } catch (error) {
     console.error('Failed to update the sheet:', error);

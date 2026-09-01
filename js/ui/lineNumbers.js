@@ -3,6 +3,7 @@ import { indexOfLineAt } from './shortcuts.js';
 function initLineNumbers(editableNode) {
   const gutter = document.createElement('pre');
   gutter.className = 'line-numbers';
+  gutter.setAttribute('aria-hidden', 'true');
   editableNode.parentElement.appendChild(gutter);
 
   const rows = [];

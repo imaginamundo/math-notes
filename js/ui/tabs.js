@@ -1,5 +1,11 @@
 import { saveSnapshot, latestPerTab } from '../storage/snapshots.js';
 
+/**
+ * @typedef {{ id: string, name: string, content: string }} Tab
+ * @typedef {{ tabs: Tab[], activeId: string|null, nextTabNumber: number }} TabState
+ * @typedef {{ undo: string[], redo: string[], draft: string|null }} History
+ */
+
 const STORAGE_KEY = 'math-notes-tabs';
 const LEGACY_KEY = 'input';
 const HISTORY_LIMIT = 100;
@@ -113,6 +119,16 @@ function moveTab(prev, id, toIndex) {
   const [moved] = tabs.splice(fromIndex, 1);
   tabs.splice(toIndex, 0, moved);
   return { ...prev, tabs };
+}
+
+// The next auto-numbered tab name must not collide with an existing one.
+function deriveNextTabNumber(tabs) {
+  let next = tabs.length + 1;
+  for (const tab of tabs) {
+    const match = /^Tab (\d+)$/.exec(tab.name);
+    if (match) next = Math.max(next, parseInt(match[1], 10) + 1);
+  }
+  return next;
 }
 
 let storageFailed = false;
@@ -258,15 +274,19 @@ function initTabs(editableNode, onUpdate) {
     tabBarNode.setAttribute('aria-label', 'Worksheets');
     state.tabs.forEach((tab) => tabBarNode.appendChild(renderTab(tab)));
     tabBarNode.appendChild(renderNewButton());
+    const panel = document.getElementById('editor-panel');
+    if (panel) panel.setAttribute('aria-labelledby', state.activeId);
   }
 
   function renderTab(tab) {
     const active = tab.id === state.activeId;
     const tabNode = document.createElement('div');
     tabNode.className = 'tab' + (active ? ' active' : '');
+    tabNode.id = tab.id;
     tabNode.dataset.id = tab.id;
     tabNode.setAttribute('role', 'tab');
     tabNode.setAttribute('aria-selected', String(active));
+    tabNode.setAttribute('aria-controls', 'editor-panel');
     tabNode.tabIndex = active ? 0 : -1;
 
     const nameNode = document.createElement('span');
@@ -278,6 +298,7 @@ function initTabs(editableNode, onUpdate) {
     closeNode.className = 'tab-close';
     closeNode.textContent = '×';
     closeNode.title = 'Close tab';
+    closeNode.setAttribute('aria-label', 'Close tab');
 
     tabNode.appendChild(nameNode);
     tabNode.appendChild(closeNode);
@@ -289,6 +310,7 @@ function initTabs(editableNode, onUpdate) {
     button.className = 'tab-new';
     button.textContent = '+';
     button.title = 'New tab';
+    button.setAttribute('aria-label', 'New tab');
     return button;
   }
 
@@ -513,6 +535,7 @@ function initTabs(editableNode, onUpdate) {
           activeId: targetId,
         };
     state = setActiveTab(state, targetId);
+    state = { ...state, nextTabNumber: deriveNextTabNumber(state.tabs) };
     histories.set(targetId, emptyHistory());
     const activeTab = getActiveTab();
     editableNode.value = activeTab.content;
@@ -530,7 +553,12 @@ function initTabs(editableNode, onUpdate) {
       name: snapshot.name,
       content: snapshot.content,
     }));
-    state = { ...state, tabs, activeId: tabs.length ? tabs[0].id : state.activeId };
+    state = {
+      ...state,
+      tabs,
+      activeId: tabs.length ? tabs[0].id : state.activeId,
+      nextTabNumber: deriveNextTabNumber(tabs),
+    };
     histories.clear();
     const activeTab = getActiveTab();
     editableNode.value = activeTab.content;
@@ -563,5 +591,6 @@ function initTabs(editableNode, onUpdate) {
 }
 
 export { createTab, closeTab, renameTab, setActiveTab, setContent, moveTab };
+export { deriveNextTabNumber };
 export { recordChange, commitDraft, applyUndo, applyRedo };
 export default initTabs;

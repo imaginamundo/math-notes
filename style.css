@@ -480,7 +480,7 @@ button:hover {
 }
 /* Modal component (generic, reusable) */
 .modal {
-  width: min(58rem, 100%);
+  width: min(50rem, 100%);
   max-height: calc(100% - 3em);
   margin: auto;
   padding: 0;
@@ -501,7 +501,7 @@ button:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.7em 1.25em;
+  padding: 0.7em 0.7em 0.7em 1.25em;
   background: var(--color-primary);
   color: var(--color-text);
 }

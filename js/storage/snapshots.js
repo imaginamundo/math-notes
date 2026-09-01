@@ -1,3 +1,12 @@
+/**
+ * @typedef {Object} Snapshot
+ * @property {number} id  Auto-increment IndexedDB key.
+ * @property {string} tabId
+ * @property {string} name
+ * @property {string} content
+ * @property {number} timestamp
+ */
+
 const DB_NAME = 'math-notes';
 const STORE = 'snapshots';
 const SNAPSHOT_LIMIT = 10;
@@ -36,6 +45,11 @@ function sortNewest(snapshots) {
   return [...snapshots].sort((a, b) => b.timestamp - a.timestamp);
 }
 
+/**
+ * Save a snapshot of a tab, then trim that tab's history to SNAPSHOT_LIMIT.
+ * @param {{ id: string, name: string, content: string }} tab
+ * @returns {Promise<void>}
+ */
 async function saveSnapshot(tab) {
   const db = await openDb();
   await new Promise((resolve, reject) => {
@@ -80,6 +94,9 @@ async function listSnapshots() {
 }
 
 // The most recent snapshot of each tab, newest first.
+/**
+ * @returns {Promise<Snapshot[]>}
+ */
 async function latestPerTab() {
   const byTab = new Map();
   for (const snapshot of await listSnapshots()) {
