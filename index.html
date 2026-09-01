@@ -78,6 +78,7 @@
         <a class="modal-nav-link" href="#help-comments">Comments &amp; labels</a>
         <a class="modal-nav-link" href="#help-variables">Variables</a>
         <a class="modal-nav-link" href="#help-functions">Functions</a>
+        <a class="modal-nav-link" href="#help-ranges">Sequences</a>
         <a class="modal-nav-link" href="#help-percentages">Percentages</a>
         <a class="modal-nav-link" href="#help-operators">Operators &amp; scales</a>
         <a class="modal-nav-link" href="#help-units">Units</a>
@@ -181,6 +182,31 @@
           </div>
           <div class="help-example" data-expr="root(8, 3)" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 2</span>
+          </div>
+        </section>
+
+        <section id="help-ranges" class="help-section">
+          <h2>Sequences &amp; iteration</h2>
+          <p>A range <code>start:end</code> (with an optional <code>:step</code>) makes a list of numbers, and
+          calling a function with a range applies it to every element. Lists can be named and indexed like
+          any other variable.</p>
+          <div class="help-example" data-expr="1:5" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">[1, 2, 3, 4, 5]</span>
+          </div>
+          <div class="help-example" data-expr="1:2:10" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">[1, 3, 5, 7, 9]</span>
+          </div>
+          <div class="help-example" data-expr="n = 1:5&#10;n[3]" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">3</span>
+          </div>
+          <div class="help-example" data-expr="double = f(x) = x * 2&#10;double(1:5)" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">[2, 4, 6, 8, 10]</span>
+          </div>
+          <div class="help-example" data-expr="sum(1:100)" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 5050</span>
+          </div>
+          <div class="help-example" data-expr="mean(1:5)" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 3</span>
           </div>
         </section>
 

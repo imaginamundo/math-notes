@@ -15,6 +15,9 @@ Based on [Numi](https://numi.app/).
 - **Undo / redo** per tab — `⌘Z` / `Ctrl+Z` (and `⇧⌘Z` to redo) restores the
   last change, with a separate history for every tab.
 - **Variables and functions**: `price = 30`, `double = f(x) = x * 2`.
+- **Sequences and iteration**: mathjs ranges — `1:5` makes `[1, 2, 3, 4, 5]`,
+  `1:2:10` steps by 2, and calling a function with a range applies it to every
+  element (`double(1:5)`); aggregate with `sum(1:100)` or `mean(1:5)`.
 - **`prev`** — reference the previous line's result.
 - **`sum` / `total` / `average` / `avg`** — aggregate the lines above (until a
   blank line).

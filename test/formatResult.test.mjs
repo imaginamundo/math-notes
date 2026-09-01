@@ -42,3 +42,13 @@ test('formatResult keeps unit prefixes', () => {
   const converted = formatResult(math.evaluate('1 cm in px'));
   assert.match(converted, /^37\.7952755906 px$/);
 });
+
+test('formatResult shows short lists in full', () => {
+  assert.equal(formatResult([1, 2, 3, 4, 5]), '[1, 2, 3, 4, 5]');
+  assert.equal(formatResult(math.matrix([1, 2, 3])), '[1, 2, 3]');
+});
+
+test('formatResult compacts long lists', () => {
+  const out = formatResult(Array.from({ length: 100 }, (_, i) => i + 1));
+  assert.match(out, /^\[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, …, 100\]$/);
+});
