@@ -11,7 +11,7 @@ The editor is built from two absolutely positioned layers inside `.input`:
 - `.content-editable` — a real, transparent `<textarea>`. It owns the caret,
   text selection, and native scrolling.
 - `.view` — a `<pre>` that renders the same text with syntax highlighting. It
-  sits *behind* the textarea (`z-index: 0`), and because the textarea's text is
+  sits _behind_ the textarea (`z-index: 0`), and because the textarea's text is
   `transparent`, the styled copy is what the user actually sees.
 
 Both layers must share **identical metrics** — font, font-size, line-height,

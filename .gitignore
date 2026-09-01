@@ -1,2 +1,6 @@
 node_modules/
 .DS_Store
+
+# Throwaway verification scripts
+*.tmp.*
+verify-*.mjs
