@@ -203,3 +203,40 @@ test('a result on an overflowing line is reachable by horizontal scroll', async 
   assert.equal(visible, true);
   assert.deepEqual(errors, []);
 });
+
+test('blank lines keep the ghost rows aligned with the input', async () => {
+  await newPage();
+  await setContent('pizza = 4\npeople = 4');
+  await wait(300);
+  const gap = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll('#view .line-row')];
+    const tops = rows.map((r) => Math.round(r.getBoundingClientRect().top));
+    return tops[1] - tops[0];
+  });
+  assert.equal(gap > 20, true);
+  // insert a blank line in the middle, then re-check spacing is even
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.focus();
+    ed.setSelectionRange(ed.value.indexOf('people'), ed.value.indexOf('people'));
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })
+    );
+    ed.value = 'pizza = 4\n\npeople = 4';
+    ed.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await wait(300);
+  const gaps = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll('#view .line-row')];
+    const tops = rows.map((r) => Math.round(r.getBoundingClientRect().top));
+    const heights = rows.map((r) => Math.round(r.getBoundingClientRect().height));
+    return {
+      gaps: [tops[1] - tops[0], tops[2] - tops[1]],
+      row0Height: heights[0],
+      blankRowHeight: heights[1],
+    };
+  });
+  assert.ok(Math.abs(gaps.gaps[0] - gaps.gaps[1]) < 2, 'rows spaced evenly');
+  assert.ok(gaps.blankRowHeight > 20, 'blank row keeps its line height');
+  assert.deepEqual(errors, []);
+});

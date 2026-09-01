@@ -295,8 +295,10 @@ input::placeholder {
 }
 .line-row {
   /* The row spans the line plus its result, so the view (and the scroll
-     container) is wide enough to reveal the result by scrolling. */
+     container) is wide enough to reveal the result by scrolling. Empty rows
+     still need a line box so blank lines keep the textarea alignment. */
   width: max-content;
+  min-height: 1.65em;
 }
 .ghost-result {
   margin-left: 1.5em;

@@ -9,6 +9,14 @@ function initEditorScroll(editableNode) {
 
   let charWidth = 0;
 
+  // The textarea's intrinsic height is ~2 rows (its `rows` attribute), which
+  // would shrink the grid and desync the ghost layer, so size it to its own
+  // content dimensions.
+  function syncSize() {
+    editableNode.style.width = `${editableNode.scrollWidth}px`;
+    editableNode.style.height = `${editableNode.scrollHeight}px`;
+  }
+
   function measureCharWidth() {
     const cs = getComputedStyle(editableNode);
     const probe = document.createElement('span');
@@ -44,12 +52,18 @@ function initEditorScroll(editableNode) {
     }
   }
 
-  editableNode.addEventListener('input', scrollCaretIntoView);
+  editableNode.addEventListener('input', () => {
+    syncSize();
+    scrollCaretIntoView();
+  });
   editableNode.addEventListener('keyup', scrollCaretIntoView);
   editableNode.addEventListener('click', scrollCaretIntoView);
   document.addEventListener('selectionchange', () => {
     if (document.activeElement === editableNode) scrollCaretIntoView();
   });
+
+  syncSize();
+  return { syncSize };
 }
 
 export default initEditorScroll;
