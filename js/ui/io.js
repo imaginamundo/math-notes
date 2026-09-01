@@ -29,7 +29,8 @@ function initIo(editableNode) {
       }
       editableNode.value = imported;
       editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-      editableNode.scrollTop = editableNode.scrollHeight;
+      const scroller = editableNode.closest('.editor-scroll');
+      if (scroller) scroller.scrollTop = scroller.scrollHeight;
     };
     reader.readAsText(file);
   });

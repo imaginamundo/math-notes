@@ -24,7 +24,8 @@ function insertExample(editableNode, expression) {
   const current = editableNode.value;
   editableNode.value = current ? current.replace(/\s+$/, '') + '\n' + expression : expression;
   editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-  editableNode.scrollTop = editableNode.scrollHeight;
+  const scroller = editableNode.closest('.editor-scroll');
+  if (scroller) scroller.scrollTop = scroller.scrollHeight;
 }
 
 export default initExamples;

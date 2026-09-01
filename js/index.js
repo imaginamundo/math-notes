@@ -11,6 +11,7 @@ import initIo from './ui/io.js';
 import initShortcuts from './ui/shortcuts.js';
 import initFind from './ui/find.js';
 import initLineNumbers from './ui/lineNumbers.js';
+import initEditorScroll from './ui/editor.js';
 
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');
@@ -22,16 +23,13 @@ const currencyStatusNode = document.getElementById('currency-status');
 const evalClient = createEvalClient(contentEditableNode, (lines, data) => {
   renderInput(viewNode, lines, data.results, data.startLine);
   renderTotal(totalNode, data.total);
+  editorScroll.syncSize();
 });
 
 // Trigger changes
 contentEditableNode.addEventListener('input', evalClient.schedule);
 
-// Keep the highlighted overlay aligned with the visible input
-contentEditableNode.addEventListener('scroll', () => {
-  viewNode.scrollTop = contentEditableNode.scrollTop;
-  viewNode.scrollLeft = contentEditableNode.scrollLeft;
-});
+const editorScroll = initEditorScroll(contentEditableNode);
 
 const tabsApi = initTabs(contentEditableNode, evalClient.update);
 

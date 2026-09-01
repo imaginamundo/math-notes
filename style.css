@@ -230,29 +230,44 @@ body {
   background: var(--color-primary);
 }
 /*
- * The editor is a transparent textarea. A highlighted .view layer (a pre)
- * sits behind it and renders the same text with syntax highlighting, so
- * the caret lives in the real input while the styled copy is what the
- * user sees. Both layers must share identical metrics (font, line-height,
- * padding, white-space and scrollbar gutter) and scroll position, which
- * index.js mirrors from the textarea to the view, or they drift apart.
- * white-space: pre keeps line breaks and spacing intact while preventing
- * soft wrap, so each expression stays on one line in both layers.
+ * The editor is a transparent textarea overlaid by a highlighted .view layer
+ * (a pre) that renders the same text, so the caret lives in the real input
+ * while the styled copy is what the user sees. Both layers are content-sized
+ * grid cells inside .editor-scroll, which is the scroll container — the view
+ * may be wider than the textarea (its ghost results are scrollable content),
+ * and both layers move together, so no scroll mirroring is needed. They must
+ * share identical metrics (font, line-height, padding, white-space) or the
+ * ghost text drifts from the caret. white-space: pre keeps every expression
+ * on one line.
  */
-.content-editable,
-.view {
+.editor-scroll {
   position: absolute;
   top: 0;
   left: 0;
-  right: calc(1em + var(--safe-right));
-  width: auto;
-  height: 100%;
-  margin: 0;
-  padding: 1em 0 1em calc(1em + var(--line-gutter) + var(--safe-left));
-  font: inherit;
-  line-height: inherit;
-  white-space: pre;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
   scrollbar-gutter: stable;
+}
+.editor-content {
+  display: grid;
+  grid-template-columns: max-content;
+  grid-template-rows: max-content;
+  width: max-content;
+  height: max-content;
+  min-width: 100%;
+  min-height: 100%;
+}
+.content-editable,
+.view {
+  grid-area: 1 / 1;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 1em calc(1em + var(--safe-right)) 1em calc(1em + var(--line-gutter) + var(--safe-left));
+  font: inherit;
+  line-height: var(--editor-line-height, 1.65em);
+  white-space: pre;
 }
 .content-editable {
   z-index: 1;
@@ -262,7 +277,7 @@ body {
   caret-color: var(--color-text);
   outline: none;
   resize: none;
-  overflow: auto;
+  overflow: hidden;
 }
 .content-editable::placeholder {
   color: var(--color-text);
@@ -278,9 +293,22 @@ input::placeholder {
   pointer-events: none;
   color: var(--color-text);
 }
+.line-row {
+  /* The row spans the line plus its result, so the view (and the scroll
+     container) is wide enough to reveal the result by scrolling. The height is
+     the integer pixel line height measured from the textarea, so rows can never
+     drift from the input, no matter how the browser renders form controls. */
+  width: max-content;
+  height: var(--editor-line-height, 1.65em);
+  line-height: var(--editor-line-height, 1.65em);
+}
 .ghost-result {
   margin-left: 1.5em;
   color: var(--color-ghost);
+  /* A subtle chip separates results/errors from the user's input. */
+  background: var(--color-footer);
+  border-radius: 3px;
+  padding: 0 0.35em;
 }
 .ghost-result.error {
   color: var(--color-ghost-error);
@@ -296,7 +324,7 @@ input::placeholder {
   padding: 1em 0.5em 1em 0;
   overflow: hidden;
   font: inherit;
-  line-height: inherit;
+  line-height: var(--editor-line-height, 1.65em);
   color: var(--color-text);
   text-align: right;
   white-space: pre;
