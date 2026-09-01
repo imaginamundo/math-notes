@@ -268,15 +268,19 @@ function initTabs(editableNode, onUpdate) {
     tabBarNode.setAttribute('aria-label', 'Worksheets');
     state.tabs.forEach((tab) => tabBarNode.appendChild(renderTab(tab)));
     tabBarNode.appendChild(renderNewButton());
+    const panel = document.getElementById('editor-panel');
+    if (panel) panel.setAttribute('aria-labelledby', state.activeId);
   }
 
   function renderTab(tab) {
     const active = tab.id === state.activeId;
     const tabNode = document.createElement('div');
     tabNode.className = 'tab' + (active ? ' active' : '');
+    tabNode.id = tab.id;
     tabNode.dataset.id = tab.id;
     tabNode.setAttribute('role', 'tab');
     tabNode.setAttribute('aria-selected', String(active));
+    tabNode.setAttribute('aria-controls', 'editor-panel');
     tabNode.tabIndex = active ? 0 : -1;
 
     const nameNode = document.createElement('span');
