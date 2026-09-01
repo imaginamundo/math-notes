@@ -135,7 +135,7 @@ body {
 }
 body {
   margin: 0;
-  background: var(--color-primary);
+  background: var(--color-footer);
   color: var(--color-text);
   font-size: var(--app-font-size, 16px);
   font-family: monospace;
@@ -226,6 +226,7 @@ body {
   position: relative;
   min-height: 0;
   cursor: text;
+  background: var(--color-primary);
 }
 /*
  * The editor is a transparent textarea. A highlighted .view layer (a pre)
