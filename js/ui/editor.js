@@ -11,10 +11,14 @@ function initEditorScroll(editableNode) {
 
   // The textarea's intrinsic height is ~2 rows (its `rows` attribute), which
   // would shrink the grid and desync the ghost layer, so size it to its own
-  // content dimensions. The browser may also set an internal scroll position
-  // while moving the caret, which would shift the text; reset it so the ghost
-  // overlay stays aligned.
+  // content dimensions. The ghost rows and line numbers use the same integer
+  // pixel line height as the textarea (1.65 × font size, rounded), so there is
+  // no sub-pixel difference to accumulate into drift over many lines. The
+  // browser may also set an internal scroll position while moving the caret;
+  // reset it so the overlay stays aligned.
   function syncSize() {
+    const lineHeight = Math.round(parseFloat(getComputedStyle(editableNode).fontSize) * 1.65);
+    document.documentElement.style.setProperty('--editor-line-height', `${lineHeight}px`);
     editableNode.style.width = `${editableNode.scrollWidth}px`;
     editableNode.style.height = `${editableNode.scrollHeight}px`;
     editableNode.scrollTop = 0;
