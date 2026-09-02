@@ -17,6 +17,7 @@ jobs:
         run: |
           mkdir -p public
           cp -r index.html style.css manifest.json favicon.ico images js public/
+          cp CNAME public/
           find public -name '.DS_Store' -delete
 
       - name: Deploy to gh-pages
