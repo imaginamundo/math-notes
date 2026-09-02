@@ -16,11 +16,16 @@ function initEditorScroll(editableNode) {
   // no sub-pixel difference to accumulate into drift over many lines. The
   // browser may also set an internal scroll position while moving the caret;
   // reset it so the overlay stays aligned.
+  //
+  // Floor the box at the scroll container's size so the textarea covers the
+  // whole editor area: a short sheet (or an empty one) still lets a tap
+  // anywhere focus the input (and raise the keyboard on iOS). The grid cell
+  // stretches both layers to the same box, so they stay aligned.
   function syncSize() {
     const lineHeight = Math.round(parseFloat(getComputedStyle(editableNode).fontSize) * 1.65);
     document.documentElement.style.setProperty('--editor-line-height', `${lineHeight}px`);
-    editableNode.style.width = `${editableNode.scrollWidth}px`;
-    editableNode.style.height = `${editableNode.scrollHeight}px`;
+    editableNode.style.width = `${Math.max(editableNode.scrollWidth, scroller.clientWidth)}px`;
+    editableNode.style.height = `${Math.max(editableNode.scrollHeight, scroller.clientHeight)}px`;
     editableNode.scrollTop = 0;
     editableNode.scrollLeft = 0;
   }
