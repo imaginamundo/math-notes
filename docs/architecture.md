@@ -14,12 +14,18 @@ The editor is built from two overlaid layers inside a scroll container:
   sits _behind_ the textarea (`z-index: 0`), and because the textarea's text is
   `transparent`, the styled copy is what the user actually sees.
 
-Both layers are content-sized cells in a `max-content` grid (`.editor-content`)
-inside `.editor-scroll`, which is the scroll container. Because the layers
-move together inside it, no scroll mirroring is needed; and because the view
-may be wider than the textarea — its `.ghost-result` text extends past the
-line — the result is **real scrollable content**: scrolling to the end of a
-long line reveals it.
+Both layers are cells in a `max-content` grid (`.editor-content`) inside
+`.editor-scroll`, which is the scroll container. Because the layers move
+together inside it, no scroll mirroring is needed; and because the view may be
+wider than the textarea — its `.ghost-result` text extends past the line — the
+result is **real scrollable content**: scrolling to the end of a long line
+reveals it.
+
+The grid tracks are `minmax(max-content, 1fr)`, and `js/ui/editor.js` sizes the
+textarea to `max(scrollHeight, scroller.clientHeight)` (and likewise for
+width). So for a short sheet the layers stretch to fill the whole editor area —
+a tap anywhere raises the keyboard on iOS — while for a long sheet they keep
+growing with the content, and the ghost results stay scrollable.
 
 The textarea no longer scrolls natively, so the caret is kept in view by
 `js/ui/editor.js`, which computes the caret position from monospace column/line

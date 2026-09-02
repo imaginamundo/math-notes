@@ -251,8 +251,8 @@ body {
 }
 .editor-content {
   display: grid;
-  grid-template-columns: max-content;
-  grid-template-rows: max-content;
+  grid-template-columns: minmax(max-content, 1fr);
+  grid-template-rows: minmax(max-content, 1fr);
   width: max-content;
   height: max-content;
   min-width: 100%;
