@@ -54,13 +54,23 @@
         <span id="total" class="total" aria-live="polite"></span>
       </div>
     </div>
+    <div class="status-bar">
+      <span id="currency-status" class="status" aria-live="polite"></span>
+      <span id="share-status" class="status" aria-live="polite"></span>
+    </div>
     <div class="footer">
       <div class="button-wrap">
-        <b class="size-controls">Size: <button id="font-minus">-</button><button id="font-plus">+</button><button id="font-reset">Reset size</button></b>
-        <span class="actions">
-          <span id="currency-status" class="currency-status" aria-live="polite"></span>
-          <span id="share-status" class="currency-status" aria-live="polite"></span>
+        <div class="footer-start">
+          <span class="font-size" role="group" aria-label="Text size">
+            <span class="font-steps">
+              <button id="font-minus" aria-label="Decrease text size" title="Decrease text size">−</button>
+              <button id="font-plus" aria-label="Increase text size" title="Increase text size">+</button>
+            </span>
+            <button id="font-reset" aria-label="Reset text size to the default" title="Reset text size">Reset</button>
+          </span>
           <button id="share-button" class="share">Share</button>
+        </div>
+        <span class="actions">
           <button id="settings-button" class="settings">Settings</button>
           <button id="recipes-button" class="recipes">Recipes</button>
           <button id="help-button" class="help">Help</button>
