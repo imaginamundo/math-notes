@@ -403,19 +403,20 @@ button:hover {
   row-gap: 0.4em;
 }
 /* A thin, always-reserved status line between the total and the footer. Its
-   height does not depend on whether a message is showing, so transient
-   statuses (exchange rates, link copied) never shift the controls above or
-   below it. */
+   height is fixed and does not depend on whether a message is showing, so
+   transient statuses (exchange rates, link copied) never shift the controls
+   above or below it. */
 .status-bar {
   display: flex;
   align-items: center;
   gap: 1em;
-  min-height: 1.6em;
-  padding: 0.1em calc(1em + var(--safe-right)) 0.1em calc(1em + var(--safe-left));
+  height: 1.7em;
+  padding: 0 calc(0.5em + var(--safe-right)) 0 calc(0.5em + var(--safe-left));
   background: var(--color-surface);
   border-top: 1px solid var(--border-soft);
   color: var(--color-text-muted);
   font-size: 0.8em;
+  line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
 }
