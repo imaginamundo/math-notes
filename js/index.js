@@ -7,6 +7,7 @@ import initRecipes from './ui/recipes.js';
 import initSettings from './ui/settings.js';
 import initFontControls from './ui/cosmetic.js';
 import initTabs from './ui/tabs.js';
+import initShare from './ui/share.js';
 import initIo from './ui/io.js';
 import initShortcuts from './ui/shortcuts.js';
 import initFind from './ui/find.js';
@@ -33,6 +34,7 @@ const editorScroll = initEditorScroll(contentEditableNode);
 
 const tabsApi = initTabs(contentEditableNode, evalClient.update);
 
+initShare(tabsApi);
 initHelpModal(contentEditableNode);
 initRecipes(contentEditableNode);
 initSettings(contentEditableNode, tabsApi);
