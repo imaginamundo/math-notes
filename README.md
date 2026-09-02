@@ -38,6 +38,9 @@ Based on [Numi](https://numi.app/).
 - **Auto-saved snapshots** — every tab's edits are backed up to IndexedDB and
   can be recovered from the **Settings** modal; sheets are rebuilt automatically
   if localStorage is unavailable or corrupt.
+- **Onboarding** — a first visit opens with a working `Welcome` sheet instead
+  of an empty page, plus a five-step tour of the interface. Both are
+  dismissible, and **Settings → Replay tutorial** brings the tour back.
 - **Keyboard shortcuts** (see below).
 - Offline-first PWA via a service worker.
 

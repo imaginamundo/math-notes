@@ -737,3 +737,80 @@ a:hover {
   text-decoration: underline;
   filter: brightness(1.2);
 }
+
+/* Guided tour. The container is empty (and so inert) until the tour starts. */
+.tour:empty {
+  display: none;
+}
+.tour-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  /* Light enough that the sheet the tour is describing stays readable
+     underneath — the anchor for the current step is lifted above it by
+     .tour-highlight, so it is never dimmed at all. */
+  background: rgba(0, 0, 0, 0.35);
+}
+.tour-popover {
+  position: fixed;
+  z-index: 41;
+  max-width: min(26em, calc(100vw - 2em));
+  padding: 1em 1.2em;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--border-chip);
+  border-radius: 6px;
+  box-shadow: 0 10px 40px var(--shadow-modal);
+  animation: tour-in 0.18s ease;
+}
+.tour-popover:focus-visible {
+  outline: 2px solid var(--color-variable);
+  outline-offset: 2px;
+}
+.tour-title {
+  margin: 0 0 0.4em;
+  font-size: 1.05em;
+  color: var(--color-text-strong);
+}
+.tour-body {
+  margin: 0 0 0.9em;
+  font-size: 0.95em;
+  line-height: 1.5;
+}
+.tour-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.tour-count {
+  margin-right: auto;
+  font-size: 0.85em;
+  color: var(--color-text-muted);
+}
+.tour-skip {
+  background: transparent;
+  color: var(--color-text-muted);
+}
+/* Highlighting with an outline on the anchor itself, rather than a cloned
+   spotlight element, means the ring can never desync from what it points at. */
+.tour-highlight {
+  position: relative;
+  z-index: 41;
+  outline: 2px solid var(--color-operator);
+  outline-offset: -2px;
+}
+@keyframes tour-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tour-popover {
+    animation: none;
+  }
+}

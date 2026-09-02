@@ -9,7 +9,12 @@ function renderInput(viewNode, lines, results, startLine) {
     rows.length = 0;
     lastViewNode = viewNode;
   }
-  if (startLine === -1) return;
+  // startLine === -1 means "the sheet is unchanged since the last evaluation".
+  // Skipping is only safe once those rows have actually been drawn: a render
+  // gated out as stale (see the renderId check in evalClient) can leave the
+  // view empty while the engine already considers the sheet unchanged, and
+  // then nothing would ever draw it.
+  if (startLine === -1 && rows.length) return;
 
   const from = rows.length === 0 ? 0 : startLine || 0;
 

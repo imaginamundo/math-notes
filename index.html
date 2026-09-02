@@ -44,7 +44,7 @@
       <div id="input" class="input">
         <div class="editor-scroll">
           <div class="editor-content">
-            <textarea id="content-editable" class="content-editable" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="Calculator input" placeholder="Type your calculations…&#10;Results appear inline"></textarea>
+            <textarea id="content-editable" class="content-editable" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="Calculator input" placeholder="Type your calculations…&#10;Results appear inline&#10;Press Help for everything this understands"></textarea>
             <pre id="view" class="view" aria-hidden="true"></pre>
           </div>
         </div>
@@ -67,6 +67,7 @@
       </div>
     </div>
   </div>
+  <div id="tour" class="tour"></div>
   <dialog id="help-modal" class="modal" aria-labelledby="help-title">
     <header class="modal-header">
       <h1 id="help-title" class="modal-title">Help</h1>
@@ -544,6 +545,11 @@
         <p>Auto-saved snapshots of each tab are kept in IndexedDB. Restore one to recover lost work.</p>
         <button id="restore-all-button" class="restore-all">Restore all from latest backup</button>
         <div id="snapshot-history"></div>
+      </section>
+      <section class="help-section">
+        <h2>Help</h2>
+        <p>Walk through the interface again, one step at a time.</p>
+        <button id="replay-tour-button" class="replay-tour">Replay tutorial</button>
       </section>
       <section class="help-section">
         <h2>Reset</h2>

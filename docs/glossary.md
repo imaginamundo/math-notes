@@ -31,3 +31,11 @@ Terms used throughout the codebase and this documentation.
 - **Currency context** — places where a 3-letter code is treated as a unit
   (next to a number or a `to`/`in` conversion), so codes used as variables stay
   lowercase.
+- **Onboarding** — the first-run experience: the seeded starter sheet plus the
+  tour (`js/ui/onboarding.js`). Gated on `math-notes-onboarded`.
+- **Starter sheet** — the `Welcome` sheet seeded on a first run. Every line
+  evaluates, so the first screen already demonstrates the app.
+- **Tour** — the guided walkthrough (`js/ui/tour.js`): a data-driven `STEPS`
+  array, one popover, and an `outline` ring on the anchor.
+- **Tour step** — `{ anchor, title, body, placement }`. `anchor` is a CSS
+  selector for a real element of the UI.
