@@ -4,7 +4,7 @@ import formatResult from './formatResult.js';
 let lastViewNode = null;
 const rows = [];
 
-function renderInput(viewNode, lines, results, startLine) {
+function renderInput(viewNode, lines, results, startLine, kinds) {
   if (viewNode !== lastViewNode) {
     rows.length = 0;
     lastViewNode = viewNode;
@@ -24,9 +24,12 @@ function renderInput(viewNode, lines, results, startLine) {
   rows.length = from;
 
   for (let i = from; i < lines.length; i++) {
+    const kind = kinds ? kinds[i] : undefined;
     const row = document.createElement('div');
-    row.className = 'line-row';
-    row.appendChild(format.line(lines[i]));
+    // One .line-row per PHYSICAL line, whatever the grouping: find.js's text
+    // walker counts row boundaries as newlines.
+    row.className = 'line-row' + (kind === 'continuation' ? ' continuation' : '');
+    row.appendChild(format.line(lines[i], kind));
     const ghost = ghostResult(results && results[i]);
     if (ghost) row.appendChild(ghost);
     viewNode.appendChild(row);

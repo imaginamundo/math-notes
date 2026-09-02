@@ -240,3 +240,88 @@ test('blank lines keep the ghost rows aligned with the input', async () => {
   assert.ok(gaps.blankRowHeight > 20, 'blank row keeps its line height');
   assert.deepEqual(errors, []);
 });
+
+test('a fenced block renders as comment text with no results', async () => {
+  await newPage();
+  await setContent('10\n### assumptions\nrent = 999\nblank line below\n\nstill notes\n###\n20');
+  await wait(400);
+  const view = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll('#view .line-row')];
+    return {
+      count: rows.length,
+      blockIsComment: rows
+        .slice(1, 7)
+        .every((row) => row.querySelectorAll('.line > :not(.comment)').length === 0),
+      blockGhosts: rows.slice(1, 7).filter((row) => row.querySelector('.ghost-result')).length,
+      lastGhost: rows[7].querySelector('.ghost-result').textContent,
+      total: document.getElementById('total').textContent,
+    };
+  });
+  assert.equal(view.count, 8, 'one row per physical line, block or not');
+  assert.ok(view.blockIsComment, 'every line in the block is comment-coloured');
+  assert.equal(view.blockGhosts, 0, 'no ghost results inside the block');
+  assert.equal(view.lastGhost, '→ 20');
+  assert.equal(view.total, '30', 'the 999 inside the block stayed out of the total');
+  assert.deepEqual(errors, []);
+});
+
+test('a continuation run shows its result on the last physical line', async () => {
+  await newPage();
+  await setContent('sum(1,\n2,\n3)');
+  await wait(400);
+  const rows = await page.evaluate(() =>
+    [...document.querySelectorAll('#view .line-row')].map((row) => ({
+      continuation: row.classList.contains('continuation'),
+      ghost: row.querySelector('.ghost-result')?.textContent ?? null,
+    }))
+  );
+  assert.deepEqual(
+    rows.map((row) => row.continuation),
+    [true, true, false]
+  );
+  assert.deepEqual(
+    rows.map((row) => row.ghost),
+    [null, null, '→ 6']
+  );
+  assert.deepEqual(errors, []);
+});
+
+// Invariant 4: find.js's text walker counts .line-row boundaries as newlines.
+// A block above the match must not shift the offsets it computes.
+test('find still maps offsets correctly with a fenced block above the match', async () => {
+  await newPage();
+  await setContent('###\nnotes 10\nmore 10\n\nstill in the block 10\n###\n10 + 5\nx = 10');
+  await wait(400);
+  await page.evaluate(() =>
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'f', metaKey: true, bubbles: true, cancelable: true })
+    )
+  );
+  await wait(100);
+  await page.evaluate(() => {
+    const input = document.querySelector('.find-input');
+    input.value = '10';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  // Five matches: three inside the block, two below it. Marks must land on the
+  // literal text, block or not.
+  await waitFor(() =>
+    page.evaluate(() => document.querySelectorAll('#view .find-match').length === 5)
+  );
+  assert.equal(await page.evaluate(() => document.querySelector('.find-count').textContent), '5/5');
+  assert.deepEqual(
+    await page.evaluate(() =>
+      [...document.querySelectorAll('#view .find-match')].map((mark) => mark.textContent)
+    ),
+    ['10', '10', '10', '10', '10']
+  );
+
+  await page.evaluate(() => document.querySelector('.replace-all').click());
+  await wait(400);
+  assert.equal(
+    await value(),
+    '###\nnotes \nmore \n\nstill in the block \n###\n + 5\nx = ',
+    'replace-all rewrote exactly the matched offsets'
+  );
+  assert.deepEqual(errors, []);
+});

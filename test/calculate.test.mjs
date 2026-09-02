@@ -154,7 +154,9 @@ test('evaluateLines resolves prev from the previous line', () => {
 });
 
 test('evaluateLines chains prev through assignments and errors', () => {
-  const { results } = evaluateLines(['10', '2 +', 'prev / 2']);
+  // `2 +` and `nope(` would now be continuations onto the next line, so use
+  // an error that does not dangle.
+  const { results } = evaluateLines(['10', 'notAVariable', 'prev / 2']);
   assert.equal(results[1].type, 'error');
   assert.equal(results[2].value, 5);
   const { results: ok } = evaluateLines(['x = 20', 'prev / 4']);
@@ -274,4 +276,103 @@ test('evaluateLines keeps function variables when resuming from a change', () =>
   const { results } = evaluateLines(['double = f(x) = x * 2', 'double(5)']);
   assert.equal(results[0].type, 'assignment');
   assert.equal(results[1].value, 10);
+});
+
+// --- Grouping: block comments and continuations -----------------------------
+//
+// evaluateLines keeps a module-level cache, so these cases matter more than
+// the single-shot ones: an edit inside a group must widen the recompute window
+// back to the group's first line, or a stale result survives.
+
+test('evaluateLines evaluates a continuation run once, on its last line', () => {
+  const { results, kinds } = evaluateLines(['x = 1 +', '2', 'x * 10']);
+  assert.deepEqual(kinds, ['continuation', 'code', 'code']);
+  assert.equal(results[0].value, undefined, 'no result on a continued line');
+  assert.equal(results[1].value, 3);
+  assert.equal(results[2].value, 30, 'the joined assignment reached the scope');
+});
+
+test('evaluateLines gives a fenced block no results and no total', () => {
+  const { results, total, kinds } = evaluateLines(['10', '###', '999', 'notes', '###', '20']);
+  assert.deepEqual(kinds, ['code', 'fence', 'comment', 'comment', 'fence', 'code']);
+  for (const index of [1, 2, 3, 4]) {
+    assert.equal(results[index].value, undefined, `line ${index} produced a result`);
+  }
+  assert.equal(total, 30, 'the 999 inside the block stayed out of the total');
+});
+
+test('evaluateLines keeps an aggregate block alive across a fenced comment', () => {
+  const { results } = evaluateLines(['10', '###', '', 'a blank line in here', '###', '20', 'sum']);
+  // A blank line inside the block must not reset the aggregate block.
+  assert.equal(results[6].value, 30);
+});
+
+test('evaluateLines still resets an aggregate block on a real blank line', () => {
+  const { results } = evaluateLines(['10', '', '20', 'sum']);
+  assert.equal(results[3].value, 20);
+});
+
+test('evaluateLines lets prev skip over comment and continuation lines', () => {
+  const { results } = evaluateLines(['10', '###', '999', '###', 'prev * 2']);
+  assert.equal(results[4].value, 20);
+});
+
+test('evaluateLines recomputes the whole group when a continued line is edited', () => {
+  evaluateLines(['x = 1 +', '2', 'x * 10']);
+  const { results, startLine } = evaluateLines(['x = 5 +', '2', 'x * 10']);
+  assert.equal(startLine, 0);
+  assert.equal(results[1].value, 7);
+  assert.equal(results[2].value, 70, 'the stale x = 3 did not survive');
+});
+
+test('evaluateLines widens the recompute window back to the group start', () => {
+  evaluateLines(['a = 1', 'sum(1,', '2,', '3)']);
+  // Editing the LAST line of the run must recompute from the run's first line.
+  const { startLine, results } = evaluateLines(['a = 1', 'sum(1,', '2,', '30)']);
+  assert.equal(startLine, 1, 'expected the window to widen to the group start');
+  assert.equal(results[3].value, 33);
+});
+
+test('evaluateLines re-kinds everything below a newly opened fence', () => {
+  evaluateLines(['10', '20', '30']);
+  const { results, total, kinds } = evaluateLines(['10', '###', '30']);
+  assert.deepEqual(kinds, ['code', 'fence', 'comment']);
+  assert.equal(results[2].value, undefined, 'line 3 is comment text now');
+  assert.equal(total, 10);
+});
+
+test('evaluateLines re-kinds everything below a closed fence', () => {
+  evaluateLines(['10', '###', '30', '40']);
+  const { results, total } = evaluateLines(['10', '###', '###', '40']);
+  assert.equal(results[3].value, 40, 'line 4 evaluates again once the block closed');
+  assert.equal(total, 50);
+});
+
+test('evaluateLines restores results when a fence is deleted', () => {
+  evaluateLines(['10', '###', '30', '40']);
+  const { results, total } = evaluateLines(['10', '20', '30', '40']);
+  assert.equal(results[2].value, 30);
+  assert.equal(results[3].value, 40);
+  assert.equal(total, 100);
+});
+
+test('evaluateLines stays correct across interleaved sheets', () => {
+  // The cache is module-level, so two sheets sharing it must not bleed.
+  const sheetA = ['a = 2 +', '3', 'a * 10'];
+  const sheetB = ['###', 'a = 999', '###', '7'];
+  assert.equal(evaluateLines(sheetA).results[2].value, 50);
+  assert.equal(evaluateLines(sheetB).results[3].value, 7);
+  assert.equal(evaluateLines(sheetA).results[2].value, 50);
+  assert.equal(evaluateLines(sheetB).total, 7);
+});
+
+test('evaluateLines returns a kind for every line, on every path', () => {
+  const lines = ['1', '###', 'x', '###', '2 +', '3', ''];
+  const first = evaluateLines(lines);
+  assert.equal(first.kinds.length, lines.length);
+  // The unchanged-input fast path must still report kinds, or the renderer
+  // would lose them on a no-op update.
+  const again = evaluateLines(lines.slice());
+  assert.equal(again.startLine, -1);
+  assert.deepEqual(again.kinds, first.kinds);
 });

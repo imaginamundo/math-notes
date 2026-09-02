@@ -7,6 +7,7 @@ import initUnits from '../eval/units.js';
 import initDatetime from '../eval/datetime.js';
 import preprocess from './preprocess.js';
 import { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal } from './aggregate.js';
+import groupLines from './blocks.js';
 
 const math = create(all);
 initAliases(math);
@@ -22,6 +23,7 @@ initCurrency(math);
  * @property {*} value  Display value; for the worker path this is a pre-formatted string.
  * @property {*} [assigned]  The value stored for an assignment (functions survive here).
  * @property {boolean} [aggregate]  True for aggregate (`sum`/`average`) rows.
+ * @property {string} [kind]  Grouping kind for non-code lines (see js/core/blocks.js).
  */
 
 /**
@@ -29,6 +31,7 @@ initCurrency(math);
  * @property {LineResult[]} results
  * @property {number|null} total
  * @property {number} startLine  First line that changed (-1 when input is unchanged).
+ * @property {string[]} kinds  One grouping kind per physical line (see js/core/blocks.js).
  */
 
 function evaluateLine(line, scope) {
@@ -99,10 +102,21 @@ function findFirstDifference(previous, next) {
  * @returns {SheetResult}
  */
 function evaluateLines(lines) {
-  const startLine = findFirstDifference(cache.lines, lines);
-  if (startLine === -1) {
-    return { results: cache.results, total: computeTotal(cache.results), startLine };
+  // Grouping is derived on every call, never cached: it is a single forward
+  // pass, and because it only ever looks backwards, the kind of any line
+  // before the first edit is guaranteed unchanged — which is what makes the
+  // incremental cache below still sound.
+  const groups = groupLines(lines);
+  const kinds = groups.map((entry) => entry.kind);
+
+  const firstDiff = findFirstDifference(cache.lines, lines);
+  if (firstDiff === -1) {
+    return { results: cache.results, total: computeTotal(cache.results), startLine: -1, kinds };
   }
+
+  // Editing anywhere inside a group must recompute the whole group, so widen
+  // the recompute window back to the group's first physical line.
+  const startLine = groups[firstDiff] ? groups[firstDiff].startIndex : firstDiff;
 
   // Reuse the results of unchanged lines and rebuild the evaluation context up
   // to the first changed line from the cached values (no mathjs evaluation).
@@ -112,9 +126,14 @@ function evaluateLines(lines) {
   let lastBlankIndex = -1;
 
   for (let i = 0; i < startLine; i++) {
-    const line = lines[i];
-    if (line.trim() === '') lastBlankIndex = i;
-    const parsed = parseLine(line);
+    const entry = groups[i];
+    if (entry.kind === 'blank') lastBlankIndex = i;
+    // Comment, fence and continuation lines hold no value of their own: they
+    // neither define a variable nor become `prev`.
+    if (entry.kind !== 'code') continue;
+    // The owner's joined expression, not the physical line — otherwise a
+    // variable assigned across two lines would not be restored here.
+    const parsed = parseLine(entry.code);
     if (parsed.isAssignment && !AGGREGATE_KEYWORDS[parsed.label.toLowerCase()]) {
       const stored = results[i];
       const assigned = stored
@@ -136,10 +155,17 @@ function evaluateLines(lines) {
   }
 
   for (let i = startLine; i < lines.length; i++) {
-    const line = lines[i];
-    if (line.trim() === '') lastBlankIndex = i;
+    const entry = groups[i];
 
-    const parsed = parseLine(line);
+    // Only a genuinely blank line resets the aggregate block. A blank line
+    // inside a `###` fence is comment text and resets nothing.
+    if (entry.kind !== 'code') {
+      if (entry.kind === 'blank') lastBlankIndex = i;
+      results[i] = { type: 'value', value: undefined, kind: entry.kind };
+      continue;
+    }
+
+    const parsed = parseLine(entry.code);
 
     if (parsed.isAssignment && AGGREGATE_KEYWORDS[parsed.label.toLowerCase()]) {
       results[i] = { type: 'error', value: `"${parsed.label}" is a reserved word` };
@@ -176,7 +202,7 @@ function evaluateLines(lines) {
   cache.lines = lines;
   cache.results = results;
 
-  return { results, total: computeTotal(results), startLine };
+  return { results, total: computeTotal(results), startLine, kinds };
 }
 
 /**

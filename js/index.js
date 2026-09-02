@@ -21,7 +21,7 @@ const currencyStatusNode = document.getElementById('currency-status');
 // Evaluation runs in a Web Worker owned by the eval client, which debounces
 // updates, gates stale renders, and forwards currency rates.
 const evalClient = createEvalClient(contentEditableNode, (lines, data) => {
-  renderInput(viewNode, lines, data.results, data.startLine);
+  renderInput(viewNode, lines, data.results, data.startLine, data.kinds);
   renderTotal(totalNode, data.total);
   editorScroll.syncSize();
 });

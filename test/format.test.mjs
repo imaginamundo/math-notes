@@ -113,3 +113,39 @@ test('format.line renders colon labels exactly as typed', () => {
     assert.equal(text, line);
   }
 });
+
+test('format.line renders a fenced block line as one comment span', () => {
+  for (const kind of ['comment', 'fence']) {
+    const node = format.line('### rent = 1200', kind);
+    // Nothing inside a block is tokenized: one span, no code tokens.
+    assert.equal(node.children.length, 1);
+    assert.equal(node.children[0]._classes.has('comment'), true);
+    assert.equal(node.children[0].textContent, '### rent = 1200');
+  }
+});
+
+test('format.line without a kind tokenizes exactly as before', () => {
+  const withUndefined = format.line('x = 1 + 2');
+  const asCode = format.line('x = 1 + 2', 'code');
+  assert.equal(withUndefined.children.length, asCode.children.length);
+  assert.ok(withUndefined.children.length > 1, 'a code line is tokenized');
+  assert.equal(withUndefined.children[0]._classes.has('variable'), true);
+});
+
+test('renderInput marks continued rows and keeps one row per physical line', () => {
+  const view = new El('pre');
+  renderInput(
+    view,
+    ['sum(1,', '2)', '### note'],
+    [{ type: 'value' }, { type: 'value', value: 3 }, { type: 'value' }],
+    0,
+    ['continuation', 'code', 'fence']
+  );
+  assert.equal(view.children.length, 3, 'one .line-row per physical line');
+  assert.equal(view.children[0].className, 'line-row continuation');
+  assert.equal(view.children[1].className, 'line-row');
+  // A continued line carries no ghost result; its owner does.
+  assert.equal(view.children[0].children.length, 1);
+  assert.equal(view.children[1].children.length, 2);
+  assert.equal(view.children[2].children[0].children[0]._classes.has('comment'), true);
+});
