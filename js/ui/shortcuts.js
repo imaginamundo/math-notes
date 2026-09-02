@@ -18,6 +18,9 @@ function initShortcuts(editableNode, requestResults, switchTab) {
     } else if (shift && key === 'c') {
       event.preventDefault();
       copyCurrentLineResult(editableNode, requestResults);
+    } else if (shift && key === 'g') {
+      event.preventDefault();
+      document.dispatchEvent(new CustomEvent('plot:open'));
     } else if (shift && key === 'e') {
       event.preventDefault();
       document.getElementById('export-button').click();

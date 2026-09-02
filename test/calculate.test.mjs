@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluateLines, evaluateLine } from '../js/core/calculate.js';
+import { evaluateLines, evaluateLine, sampleFunction, MAX_SAMPLES } from '../js/core/calculate.js';
 import parseLine from '../js/core/parseLine.js';
 
 test('parseLine splits a plain expression', () => {
@@ -274,4 +274,103 @@ test('evaluateLines keeps function variables when resuming from a change', () =>
   const { results } = evaluateLines(['double = f(x) = x * 2', 'double(5)']);
   assert.equal(results[0].type, 'assignment');
   assert.equal(results[1].value, 10);
+});
+
+// --- Function sampling for the plot modal ---------------------------------
+//
+// This must run in the worker: `evaluateLine` drops function results and
+// structured clone cannot carry a function, so the main thread can never
+// sample a user function itself.
+
+test('evaluateLines tags a function definition with its name and arity', () => {
+  const { results } = evaluateLines(['double = f(x) = x * 2', 'area = f(w, h) = w * h', '5']);
+  assert.deepEqual(results[0].fn, { name: 'double', arity: 1 });
+  assert.deepEqual(results[1].fn, { name: 'area', arity: 2 });
+  assert.equal(results[2].fn, undefined, 'a plain value is not tagged');
+});
+
+test('sampleFunction samples a single-argument function evenly', () => {
+  const { points, skipped, reason } = sampleFunction(['double = f(x) = x * 2'], 'double', -2, 2, 5);
+  assert.equal(reason, null);
+  assert.equal(skipped, 0);
+  assert.deepEqual(points, [
+    [-2, -4],
+    [-1, -2],
+    [0, 0],
+    [1, 2],
+    [2, 4],
+  ]);
+});
+
+test('sampleFunction skips a singularity instead of emitting Infinity', () => {
+  const { points, skipped, reason } = sampleFunction(['inv = f(x) = 1 / x'], 'inv', -1, 1, 3);
+  assert.equal(reason, null);
+  assert.equal(skipped, 1, 'the point at x = 0 was dropped');
+  assert.deepEqual(points, [
+    [-1, -1],
+    [1, 1],
+  ]);
+  assert.ok(points.every(([, y]) => Number.isFinite(y)));
+});
+
+test('sampleFunction never lets a throwing function escape', () => {
+  const { points, skipped } = sampleFunction(
+    ['boom = f(x) = sqrt(x) + unknownSymbol'],
+    'boom',
+    1,
+    4,
+    4
+  );
+  assert.equal(points.length, 0);
+  assert.equal(skipped, 4, 'every sample was caught individually');
+});
+
+test('sampleFunction rejects a multi-argument function with a reason', () => {
+  const { points, reason } = sampleFunction(['area = f(w, h) = w * h'], 'area', 0, 10, 8);
+  assert.deepEqual(points, []);
+  assert.match(reason, /only single-argument functions/);
+});
+
+test('sampleFunction reports an unknown name rather than throwing', () => {
+  const { points, reason } = sampleFunction(['a = 1'], 'nope', 0, 10, 8);
+  assert.deepEqual(points, []);
+  assert.match(reason, /not a function in this sheet/);
+});
+
+test('sampleFunction refuses a function that returns a unit', () => {
+  const { points, reason } = sampleFunction(['toCm = f(x) = x * 1 cm'], 'toCm', 0, 2, 4);
+  assert.deepEqual(points, []);
+  assert.match(reason, /doesn't return a plain number/);
+});
+
+test('sampleFunction rejects a degenerate domain', () => {
+  for (const [from, to] of [
+    [1, 1],
+    [NaN, 5],
+    [0, Infinity],
+  ]) {
+    const { reason } = sampleFunction(['d = f(x) = x'], 'd', from, to, 8);
+    assert.match(reason, /two different finite numbers/, `domain ${from}..${to}`);
+  }
+});
+
+test('sampleFunction caps the sample count regardless of what is asked for', () => {
+  assert.equal(sampleFunction(['d = f(x) = x'], 'd', 0, 1, 1e6).points.length, MAX_SAMPLES);
+  assert.equal(sampleFunction(['d = f(x) = x'], 'd', 0, 1, -5).points.length, 2, 'floor of 2');
+  assert.equal(sampleFunction(['d = f(x) = x'], 'd', 0, 1, undefined).points.length, 64);
+});
+
+test('sampleFunction sees functions defined further down the sheet', () => {
+  const { points } = sampleFunction(
+    ['a = 3', 'b = a * 2', 'scale = f(x) = x * b'],
+    'scale',
+    1,
+    3,
+    3
+  );
+  assert.deepEqual(points, [
+    [1, 6],
+    [2, 12],
+    [3, 18],
+  ]);
 });

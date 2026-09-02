@@ -27,8 +27,13 @@ function renderInput(viewNode, lines, results, startLine) {
     const row = document.createElement('div');
     row.className = 'line-row';
     row.appendChild(format.line(lines[i]));
-    const ghost = ghostResult(results && results[i]);
+    const result = results && results[i];
+    const ghost = ghostResult(result);
     if (ghost) row.appendChild(ghost);
+    // Appended AFTER the ghost's own truncation, in its own span, so a
+    // sparkline can never be cut mid-glyph.
+    const spark = sparkResult(result);
+    if (spark) row.appendChild(spark);
     viewNode.appendChild(row);
     rows[i] = row;
   }
@@ -43,6 +48,14 @@ function ghostResult(result) {
       ? truncate(result.value, 80)
       : `→ ${truncate(formatResult(result.value), 80)}`;
   span.textContent = text;
+  return span;
+}
+
+function sparkResult(result) {
+  if (!result || !result.spark) return null;
+  const span = document.createElement('span');
+  span.className = 'ghost-spark';
+  span.textContent = result.spark;
   return span;
 }
 

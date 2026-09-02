@@ -31,3 +31,11 @@ Terms used throughout the codebase and this documentation.
 - **Currency context** — places where a 3-letter code is treated as a unit
   (next to a number or a `to`/`in` conversion), so codes used as variables stay
   lowercase.
+- **Sparkline** — an eight-level Unicode block rendering of a numeric list,
+  appended after a line's ghost result (`js/render/sparkline.js`). Built in the
+  worker, from the real array, before serialization.
+- **Plot** — the modal (`js/ui/plot.js`) that draws a single-argument sheet
+  function over a domain, sampled in the worker at 64 points.
+- **Function tag** — the clone-safe `{ name, arity }` recorded on a result that
+  defines a function. The function itself never leaves the worker; the tag is
+  what the plot picker lists.
