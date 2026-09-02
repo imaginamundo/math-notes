@@ -78,6 +78,8 @@
         <a class="modal-nav-link" href="#help-comments">Comments &amp; labels</a>
         <a class="modal-nav-link" href="#help-variables">Variables</a>
         <a class="modal-nav-link" href="#help-functions">Functions</a>
+        <a class="modal-nav-link" href="#help-lists">Lists</a>
+        <a class="modal-nav-link" href="#help-ranges">Sequences</a>
         <a class="modal-nav-link" href="#help-percentages">Percentages</a>
         <a class="modal-nav-link" href="#help-operators">Operators &amp; scales</a>
         <a class="modal-nav-link" href="#help-units">Units</a>
@@ -184,6 +186,68 @@
           </div>
         </section>
 
+        <section id="help-lists" class="help-section">
+          <h2>Lists</h2>
+          <p>Write a list with square brackets. Lists are <b>1-indexed</b>: <code>n[1]</code> is the first
+          element. Slice with a range, assign elements, do element-wise arithmetic, and combine lists with
+          the mathjs functions.</p>
+          <div class="help-example" data-expr="[1, 2, 3]" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">[1, 2, 3]</span>
+          </div>
+          <div class="help-example" data-expr="n = [10, 20, 30]&#10;n[1]" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">10 (first element)</span>
+          </div>
+          <div class="help-example" data-expr="n = [10, 20, 30, 40]&#10;n[2:4]" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">[20, 30, 40]</span>
+          </div>
+          <div class="help-example" data-expr="n = [10, 20, 30]&#10;n[2] = 99" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">sets the second element</span>
+          </div>
+          <div class="help-example" data-expr="[1, 2] + [3, 4]" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">[4, 6]</span>
+          </div>
+          <div class="help-example" data-expr="sum([1, 2, 3, 4])" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 10</span>
+          </div>
+          <div class="help-example" data-expr="mean(1:10)" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 5.5</span>
+          </div>
+          <div class="help-example" data-expr="sort([3, 1, 2])" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">[1, 2, 3]</span>
+          </div>
+          <div class="help-example" data-expr="concat([1, 2], [3, 4])" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">[1, 2, 3, 4]</span>
+          </div>
+          <div class="help-example" data-expr="m = [[1, 2], [3, 4]]&#10;m[2, 1]" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">3</span>
+          </div>
+        </section>
+
+        <section id="help-ranges" class="help-section">
+          <h2>Sequences &amp; iteration</h2>
+          <p>A range <code>start:end</code> (with an optional <code>:step</code>) makes a list of numbers, and
+          calling a function with a range applies it to every element. Lists can be named and indexed like
+          any other variable.</p>
+          <div class="help-example" data-expr="1:5" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">[1, 2, 3, 4, 5]</span>
+          </div>
+          <div class="help-example" data-expr="1:2:10" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">[1, 3, 5, 7, 9]</span>
+          </div>
+          <div class="help-example" data-expr="n = 1:5&#10;n[3]" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">3</span>
+          </div>
+          <div class="help-example" data-expr="double = f(x) = x * 2&#10;double(1:5)" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">[2, 4, 6, 8, 10]</span>
+          </div>
+          <div class="help-example" data-expr="sum(1:100)" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 5050</span>
+          </div>
+          <div class="help-example" data-expr="mean(1:5)" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 3</span>
+          </div>
+        </section>
+
         <section id="help-percentages" class="help-section">
           <h2>Percentages</h2>
           <p>Use <code>of</code>, <code>on</code> and <code>off</code> with <code>%</code> for percentage math.</p>
@@ -261,7 +325,7 @@
                 <td>meter (m), inch (in), foot (ft), yard (yd), mile (mi), link (li), rod (rd), chain (ch), angstrom, mil</td>
               </tr>
               <tr>
-                <td>Surface area</td>
+                <td>Surface<br /> area</td>
                 <td>m2, sqin, sqft, sqyd, sqmi, sqrd, sqch, sqmil, acre, hectare</td>
               </tr>
               <tr>
@@ -269,7 +333,7 @@
                 <td>m3, litre (l, L, lt, liter), cc, cuin, cuft, cuyd, teaspoon, tablespoon</td>
               </tr>
               <tr>
-                <td>Liquid volume</td>
+                <td>Liquid<br /> volume</td>
                 <td>minim (min), fluiddram (fldr), fluidounce (floz), gill (gi), cup (cp), pint (pt), quart (qt), gallon (gal), beerbarrel (bbl), oilbarrel (obl), hogshead, drop (gtt)</td>
               </tr>
               <tr>
@@ -289,7 +353,7 @@
                 <td>gram(g), tonne, ton, grain (gr), dram (dr), ounce (oz), poundmass (lbm, lb, lbs), hundredweight (cwt), stick, stone</td>
               </tr>
               <tr>
-                <td>Electric current</td>
+                <td>Electric<br /> current</td>
                 <td>ampere (A)</td>
               </tr>
               <tr>
@@ -297,11 +361,11 @@
                 <td>kelvin (K), celsius (degC), fahrenheit (degF), rankine (degR)</td>
               </tr>
               <tr>
-                <td>Amount of substance</td>
+                <td>Amount<br/> of<br /> substance</td>
                 <td>mole (mol)</td>
               </tr>
               <tr>
-                <td>Luminous intensity</td>
+                <td>Luminous<br /> intensity</td>
                 <td>candela (cd)</td>
               </tr>
               <tr>
@@ -321,7 +385,7 @@
                 <td>Pa, psi, atm, torr, bar, mmHg, mmH2O, cmH2O</td>
               </tr>
               <tr>
-                <td>Electricity and magnetism</td>
+                <td>Electricity<br /> and<br /> magnetism</td>
                 <td>ampere (A), coulomb (C), watt (W), volt (V), ohm, farad (F), weber (Wb), tesla (T), henry (H), siemens (S), electronvolt (eV)</td>
               </tr>
               <tr>
@@ -378,8 +442,8 @@
             <tbody>
               <tr><td><code>⌘Z</code></td><td>Undo the last change in the tab</td></tr>
               <tr><td><code>⇧⌘Z</code></td><td>Redo</td></tr>
-              <tr><td><code>Ctrl+Tab</code> / <code>Ctrl+⇧Tab</code></td><td>Next / previous tab</td></tr>
-              <tr><td><code>⌘1…9</code> / <code>Ctrl+1…9</code></td><td>Jump to the nth tab</td></tr>
+              <tr><td><code>Ctrl+Tab</code><br /><code>Ctrl+⇧Tab</code></td><td>Next / previous tab</td></tr>
+              <tr><td><code>⌘1…9</code><br /><code>Ctrl+1…9</code></td><td>Jump to the nth tab</td></tr>
               <tr><td><code>⌘F</code></td><td>Find &amp; replace in the active sheet</td></tr>
               <tr><td><code>⇧⌘C</code></td><td>Copy the current line's result</td></tr>
               <tr><td><code>⇧⌘E</code></td><td>Export the active sheet</td></tr>
