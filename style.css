@@ -374,8 +374,8 @@ input::placeholder {
 .footer {
   display: flex;
   align-items: center;
-  padding: 0.5em calc(1em + var(--safe-right)) calc(0.5em + var(--safe-bottom))
-    calc(1em + var(--safe-left));
+  padding: 0.5em calc(0.5em + var(--safe-right)) calc(0.5em + var(--safe-bottom))
+    calc(0.5em + var(--safe-left));
   background: var(--color-footer);
   color: var(--color-text);
   border-top: 1px solid var(--border-strong);
