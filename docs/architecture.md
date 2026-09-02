@@ -94,6 +94,58 @@ Currency rates are fetched on the main thread (`fetchRates` in
 A lazy main-thread `calculate.js` import is the fallback when `Worker` is
 unavailable.
 
+## Graphs
+
+Two tiers, both deliberately low resolution.
+
+**The inline sparkline** needs no UI at all. A result that is a list of three
+or more finite numbers gets an eight-level Unicode block string appended after
+its ghost text, in its own `.ghost-spark` span. It is appended _after_ the
+ghost's own `truncate(…, 80)`, so it can never be cut mid-glyph. Long series
+are **bucket-averaged** rather than sampled every nth item, so a spike between
+sampled indices still shows; a flat series draws as a mid-level row instead of
+dividing by zero; and non-finite entries are dropped rather than poisoning the
+range.
+
+**The Plot modal** (`js/ui/plot.js`, `⇧⌘G`) lists the single-argument functions
+defined in the current sheet, takes a domain, and draws an SVG line at a fixed
+64 samples. `js/render/plot.js` is the pure half: `plotPath(points, w, h)`
+returns `{ d, bounds, xTicks, yTicks, zeroY }` with no DOM at all.
+
+### Why both compute in the worker
+
+**Functions never cross the worker boundary.** `evaluateLine` explicitly drops
+function results (`if (typeof result === 'function') result = undefined`), and
+structured clone cannot carry a function anyway. So the main thread can never
+sample a user function itself. Both tiers compute where the values still exist:
+
+- the sparkline is built in `js/worker.js`, from the real numeric array, before
+  serialization;
+- the plot goes through a new worker message type. `evalClient.requestPlot`
+  posts `{ type: 'plot', lines, name, from, to, samples }` and gets back
+  `{ points, skipped, reason }` — plain numbers only.
+
+`evaluateLines` tags each function definition with a clone-safe
+`fn: { name, arity }` so the picker can list them. mathjs wraps user functions,
+so `fn.length` is always 2; the declared parameters survive on `fn.syntax`
+(`"f(x)"`), which is what the arity count reads.
+
+### Guardrails
+
+- `samples` is capped at 256 **in the engine**, not the UI.
+- Every sample is individually `try/catch`-ed, so a throwing user function
+  cannot take the worker down.
+- A function returning a `Unit`, matrix or complex number is detected and
+  reported (`"f" doesn't return a plain number…`) rather than drawn as
+  nonsense. A `BigNumber` is converted and plotted.
+- Non-finite samples are dropped and **counted**: the modal says
+  "1 of 64 points were undefined and were skipped" rather than silently drawing
+  a gap.
+- The ghost layer is `aria-hidden` and sits behind the textarea, so the
+  sparkline is decorative only. The modal is the accessible surface: a real
+  `<dialog>`, focusable controls, and a text summary of the series next to the
+  SVG (referenced by the SVG's `aria-labelledby`).
+
 ## Tabs and persistence
 
 Per-tab state is a single object `{ tabs, activeId, nextTabNumber }` held in

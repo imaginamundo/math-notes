@@ -63,6 +63,11 @@ project's terminology.
    logic).
 6. Aggregate blocks (`sum`/`average`/`total`) and `prev` depend on the per-line
    cache; incremental edits recompute from the first changed line.
+7. Worker message types are a contract: `evaluate` and `plot` requests, and
+   `result` / `plot` / `error` replies. Anything new that must reach the main
+   thread has to be serialized in `js/worker.js` first — functions in
+   particular never leave the worker, which is why sampling and the sparkline
+   are computed there and only plain numbers and strings are posted back.
 
 ## Conventions
 

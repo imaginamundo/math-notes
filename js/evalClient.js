@@ -60,6 +60,41 @@ export function createEvalClient(editableNode, onRender) {
   }
 
   /**
+   * Sample a single-argument function over a domain, for the plot modal.
+   *
+   * This must round-trip through the worker: user functions never cross the
+   * structured-clone boundary, so the main thread cannot sample one itself.
+   *
+   * @param {string} name
+   * @param {number} from
+   * @param {number} to
+   * @param {number} samples
+   * @returns {Promise<{ points: Array<[number, number]>, skipped: number, reason: string|null }>}
+   */
+  function requestPlot(name, from, to, samples) {
+    const lines = editableNode.value.split('\n');
+    if (worker) {
+      return new Promise((resolve, reject) => {
+        const id = ++latestId;
+        const timer = setTimeout(() => {
+          pending.delete(id);
+          reject(new Error('Plotting timed out'));
+        }, EVALUATE_TIMEOUT);
+        pending.set(id, (data) => {
+          clearTimeout(timer);
+          if (data.type === 'error') reject(new Error(data.message));
+          else resolve(data);
+        });
+        worker.postMessage({ id, type: 'plot', lines, name, from, to, samples });
+      });
+    }
+    const load = fallbackModule
+      ? Promise.resolve(fallbackModule)
+      : import('./core/calculate.js').then((mod) => (fallbackModule = mod));
+    return load.then((mod) => mod.sampleFunction(lines, name, from, to, samples));
+  }
+
+  /**
    * Evaluate lines and resolve with the result payload (no correlation id).
    * Used by the copy-current-line shortcut.
    * @param {string[]} lines
@@ -94,6 +129,7 @@ export function createEvalClient(editableNode, onRender) {
   return {
     update,
     requestLines,
+    requestPlot,
     syncRates,
     schedule: debounced.schedule,
     flush: debounced.run,

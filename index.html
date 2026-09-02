@@ -59,6 +59,7 @@
         <b class="size-controls">Size: <button id="font-minus">-</button><button id="font-plus">+</button><button id="font-reset">Reset size</button></b>
         <span class="actions">
           <span id="currency-status" class="currency-status" aria-live="polite"></span>
+          <button id="plot-button" class="plot">Plot</button>
           <button id="settings-button" class="settings">Settings</button>
           <button id="recipes-button" class="recipes">Recipes</button>
           <button id="help-button" class="help">Help</button>
@@ -76,6 +77,7 @@
         <a class="modal-nav-link" href="#help-basics">Basics</a>
         <a class="modal-nav-link" href="#help-tabs">Tabs</a>
         <a class="modal-nav-link" href="#help-comments">Comments &amp; labels</a>
+        <a class="modal-nav-link" href="#help-plots">Graphs</a>
         <a class="modal-nav-link" href="#help-variables">Variables</a>
         <a class="modal-nav-link" href="#help-functions">Functions</a>
         <a class="modal-nav-link" href="#help-lists">Lists</a>
@@ -147,6 +149,18 @@
           <div class="help-example" data-expr="Price: 10 + 5" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 15</span>
           </div>
+        </section>
+
+        <section id="help-plots" class="help-section">
+          <h2>Graphs</h2>
+          <p>A line whose result is a list of three or more numbers gets a tiny block sparkline after it — no setup needed.</p>
+          <div class="help-example" data-expr="double = f(x) = x * 2" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">defines a function</span>
+          </div>
+          <div class="help-example" data-expr="double(1:20)" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">a list, with a sparkline</span>
+          </div>
+          <p>For a real chart, the <b>Plot</b> button (<code>⇧⌘G</code>) draws any single-argument function from the sheet over a domain you choose.</p>
         </section>
 
         <section id="help-variables" class="help-section">
@@ -446,6 +460,7 @@
               <tr><td><code>⌘1…9</code><br /><code>Ctrl+1…9</code></td><td>Jump to the nth tab</td></tr>
               <tr><td><code>⌘F</code></td><td>Find &amp; replace in the active sheet</td></tr>
               <tr><td><code>⇧⌘C</code></td><td>Copy the current line's result</td></tr>
+              <tr><td><code>⇧⌘G</code></td><td>Open the Plot modal</td></tr>
               <tr><td><code>⇧⌘E</code></td><td>Export the active sheet</td></tr>
               <tr><td><code>⇧⌘I</code></td><td>Import a sheet</td></tr>
               <tr><td><code>⇧⌘⌫</code></td><td>Clear the active sheet</td></tr>
@@ -516,6 +531,29 @@
         <div class="help-example" data-expr="weight = 70&#10;height = 1.75&#10;weight / height^2" tabindex="0" role="button" title="Click to add to the editor">
           <code></code><span class="help-returns">last line returns ≈ 22.86</span>
         </div>
+      </section>
+    </div>
+  </dialog>
+
+  <dialog id="plot-modal" class="modal" aria-labelledby="plot-title">
+    <header class="modal-header">
+      <h1 id="plot-title" class="modal-title">Plot</h1>
+      <button class="modal-close" data-modal-close aria-label="Close plot">×</button>
+    </header>
+    <div class="modal-body">
+      <section class="help-section">
+        <p>Draw a single-argument function defined in this sheet, at a deliberately low sample count.</p>
+        <div class="plot-controls">
+          <label for="plot-function">Function</label>
+          <select id="plot-function"></select>
+          <label for="plot-from">From</label>
+          <input id="plot-from" type="number" value="-10" step="any" />
+          <label for="plot-to">To</label>
+          <input id="plot-to" type="number" value="10" step="any" />
+        </div>
+        <svg id="plot-chart" class="plot-chart" viewBox="0 0 640 320" role="img" aria-labelledby="plot-summary" preserveAspectRatio="none"></svg>
+        <p id="plot-status" class="plot-status" aria-live="polite"></p>
+        <p id="plot-summary" class="plot-summary"></p>
       </section>
     </div>
   </dialog>

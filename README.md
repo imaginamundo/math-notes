@@ -18,6 +18,10 @@ Based on [Numi](https://numi.app/).
 - **Sequences and iteration**: mathjs ranges — `1:5` makes `[1, 2, 3, 4, 5]`,
   `1:2:10` steps by 2, and calling a function with a range applies it to every
   element (`double(1:5)`); aggregate with `sum(1:100)` or `mean(1:5)`.
+- **Graphs** — a result that is a list of three or more numbers gets an inline
+  eight-level block **sparkline** (`double(1:20) → [2, 4, …, 40] ▁▂▃▄▅▆▇█`),
+  and the **Plot** button (`⇧⌘G`) draws any single-argument function from the
+  sheet over a domain you pick. Both are deliberately low resolution.
 - **`prev`** — reference the previous line's result.
 - **`sum` / `total` / `average` / `avg`** — aggregate the lines above (until a
   blank line).
@@ -60,6 +64,7 @@ people = 4
 | `⌘1…9` / `Ctrl+1…9`            | Jump to the nth tab             |
 | `⌘F` / `Ctrl+F`                | Find & replace in the sheet     |
 | `⇧⌘C` / `Ctrl+Shift+C`         | Copy the current line's result  |
+| `⇧⌘G` / `Ctrl+Shift+G`         | Open the Plot modal             |
 | `⇧⌘E` / `Ctrl+Shift+E`         | Export the active sheet         |
 | `⇧⌘I` / `Ctrl+Shift+I`         | Import a sheet                  |
 | `⇧⌘⌫` / `Ctrl+Shift+Backspace` | Clear the active sheet          |

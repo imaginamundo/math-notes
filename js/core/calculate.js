@@ -22,6 +22,8 @@ initCurrency(math);
  * @property {*} value  Display value; for the worker path this is a pre-formatted string.
  * @property {*} [assigned]  The value stored for an assignment (functions survive here).
  * @property {boolean} [aggregate]  True for aggregate (`sum`/`average`) rows.
+ * @property {{ name: string, arity: number|null }} [fn]  Set when the line defines a
+ *   function. Clone-safe on purpose: the function itself never leaves the worker.
  */
 
 /**
@@ -168,6 +170,11 @@ function evaluateLines(lines) {
     const { type, result, variable } = evaluateLine(parsedLine, scope);
     if (variable) variables[variable.label] = variable.value;
     results[i] = { type, value: result, assigned: variable ? variable.value : undefined };
+    // Tag function definitions so the main thread can list them in the plot
+    // picker. The tag is clone-safe; the function itself stays in the worker.
+    if (variable && typeof variable.value === 'function') {
+      results[i].fn = { name: variable.label, arity: functionArity(variable.value) };
+    }
     if (type !== 'error' && result !== undefined && typeof result !== 'function') {
       previousResult = result;
     }
@@ -179,6 +186,115 @@ function evaluateLines(lines) {
   return { results, total: computeTotal(results), startLine };
 }
 
+// mathjs wraps user functions, so `fn.length` is always 2. The declared
+// parameters survive on `fn.syntax` ("f(x)"), which is what we count.
+function functionArity(fn) {
+  const syntax = typeof fn.syntax === 'string' ? fn.syntax : '';
+  const open = syntax.indexOf('(');
+  const close = syntax.lastIndexOf(')');
+  if (open === -1 || close <= open) return null;
+  const inner = syntax.slice(open + 1, close).trim();
+  return inner ? inner.split(',').length : 0;
+}
+
+// Sampling is capped here, in the engine, regardless of what the UI asks for.
+const MAX_SAMPLES = 256;
+const DEFAULT_SAMPLES = 64;
+
+// Deliberately low resolution, per the issue — and cheap in the worker.
+function clampSamples(samples) {
+  const requested = Math.floor(Number(samples));
+  if (!Number.isFinite(requested)) return DEFAULT_SAMPLES;
+  return Math.max(2, Math.min(MAX_SAMPLES, requested));
+}
+
+function toPlainNumber(value) {
+  if (typeof value === 'number') return value;
+  // A BigNumber is plottable; a Unit, matrix or complex number is not.
+  if (value && value.isBigNumber === true && typeof value.toNumber === 'function') {
+    try {
+      return value.toNumber();
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+/**
+ * Sample a single-argument function defined in the sheet.
+ *
+ * This has to run WHERE THE FUNCTION STILL EXISTS. `evaluateLine` drops
+ * function results and structured clone cannot carry them, so the main thread
+ * can never sample a user function itself — it asks the worker instead.
+ *
+ * Re-evaluating the sheet is close to free: an unchanged sheet is served
+ * straight from the module cache, whose `assigned` slots still hold the live
+ * function objects.
+ *
+ * @param {string[]} lines
+ * @param {string} name
+ * @param {number} from
+ * @param {number} to
+ * @param {number} [samples]
+ * @returns {{ points: Array<[number, number]>, skipped: number, reason: string|null }}
+ */
+function sampleFunction(lines, name, from, to, samples) {
+  const empty = (reason) => ({ points: [], skipped: 0, reason });
+
+  const { results } = evaluateLines(lines);
+  const entry = results.find((result) => result && result.fn && result.fn.name === name);
+  if (!entry || typeof entry.assigned !== 'function') {
+    return empty(`"${name}" is not a function in this sheet`);
+  }
+  if (entry.fn.arity !== 1) {
+    const arity = entry.fn.arity === null ? 'an unknown number of' : entry.fn.arity;
+    return empty(
+      `"${name}" takes ${arity} arguments; only single-argument functions can be plotted`
+    );
+  }
+  if (!Number.isFinite(from) || !Number.isFinite(to) || from === to) {
+    return empty('The domain needs two different finite numbers');
+  }
+
+  const fn = entry.assigned;
+  const count = clampSamples(samples);
+  const points = [];
+  let skipped = 0;
+  let nonNumeric = 0;
+
+  for (let i = 0; i < count; i++) {
+    const x = from + ((to - from) * i) / (count - 1);
+    let raw;
+    // A user function may throw on any single input; that must never take the
+    // worker down, so every sample is guarded individually.
+    try {
+      raw = fn(x);
+    } catch {
+      skipped++;
+      continue;
+    }
+    const y = toPlainNumber(raw);
+    if (y === null || !Number.isFinite(y)) {
+      skipped++;
+      if (y === null && raw !== undefined) nonNumeric++;
+      continue;
+    }
+    points.push([x, y]);
+  }
+
+  if (!points.length) {
+    return {
+      points,
+      skipped,
+      reason: nonNumeric
+        ? `"${name}" doesn't return a plain number, so it can't be plotted`
+        : `"${name}" produced no finite values on that domain`,
+    };
+  }
+  return { points, skipped, reason: null };
+}
+
 /**
  * Register currency rates on this module's math instance (used by the worker).
  * @param {{ base: string, rates: Record<string, number> }} data
@@ -187,4 +303,5 @@ function registerCurrencyRates(data) {
   registerRates(math, data);
 }
 
-export { evaluateLines, evaluateLine, registerCurrencyRates };
+export { evaluateLines, evaluateLine, sampleFunction, registerCurrencyRates };
+export { MAX_SAMPLES, DEFAULT_SAMPLES };

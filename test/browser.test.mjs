@@ -240,3 +240,82 @@ test('blank lines keep the ghost rows aligned with the input', async () => {
   assert.ok(gaps.blankRowHeight > 20, 'blank row keeps its line height');
   assert.deepEqual(errors, []);
 });
+
+test('a list result gets an inline sparkline', async () => {
+  await newPage();
+  await setContent('1:20\n5\ndouble = f(x) = x * 2\ndouble(1:12)');
+  await wait(400);
+  const sparks = await page.evaluate(() =>
+    [...document.querySelectorAll('#view .line-row')].map(
+      (row) => row.querySelector('.ghost-spark')?.textContent ?? null
+    )
+  );
+  assert.ok(sparks[0] && sparks[0].length > 3, `no sparkline on a range: ${sparks[0]}`);
+  assert.equal(sparks[1], null, 'a single number gets no sparkline');
+  assert.equal(sparks[2], null, 'a function definition gets no sparkline');
+  assert.ok(sparks[3] && sparks[3].length > 3, `no sparkline on a mapped range: ${sparks[3]}`);
+  // Only block characters, and the result text is still readable beside it.
+  assert.match(sparks[0], /^[▁▂▃▄▅▆▇█]+$/u);
+  assert.deepEqual(errors, []);
+});
+
+test('the Plot modal lists sheet functions and draws one', async () => {
+  await newPage();
+  await setContent('double = f(x) = x * 2\narea = f(w, h) = w * h\n7');
+  await wait(400);
+  await page.click('#plot-button');
+  await waitFor(() => page.evaluate(() => document.getElementById('plot-modal').open));
+  await waitFor(() => page.evaluate(() => document.querySelector('#plot-chart path') !== null));
+
+  const state = await page.evaluate(() => ({
+    options: [...document.querySelectorAll('#plot-function option')].map((o) => o.value),
+    d: document.querySelector('#plot-chart path').getAttribute('d'),
+    status: document.getElementById('plot-status').textContent,
+    summary: document.getElementById('plot-summary').textContent,
+  }));
+  assert.deepEqual(state.options, ['double'], 'the two-argument function is not offered');
+  assert.ok(state.d.length > 20, `path looks empty: ${state.d}`);
+  assert.equal(/NaN|Infinity|undefined/.test(state.d), false, state.d);
+  assert.equal(state.status, '64 points');
+  assert.match(state.summary, /double sampled at 64 points/);
+  assert.deepEqual(errors, []);
+});
+
+test('the Plot modal says so when the sheet has no plottable function', async () => {
+  await newPage();
+  await setContent('1 + 1');
+  await wait(400);
+  await page.click('#plot-button');
+  await waitFor(() =>
+    page.evaluate(() => document.getElementById('plot-status').textContent.length > 0)
+  );
+  assert.match(
+    await page.evaluate(() => document.getElementById('plot-status').textContent),
+    /No plottable functions yet/
+  );
+  assert.equal(
+    await page.evaluate(() => document.querySelector('#plot-chart path')),
+    null,
+    'nothing is drawn'
+  );
+  assert.deepEqual(errors, []);
+});
+
+test('the Plot modal reports skipped points instead of drawing a silent gap', async () => {
+  await newPage();
+  // The pole sits exactly on the last sample of the default -10..10 domain,
+  // so it is reliably hit: an even sample count never lands on the midpoint.
+  await setContent('inv = f(x) = 1 / (x - 10)');
+  await wait(400);
+  await page.click('#plot-button');
+  await waitFor(() =>
+    page.evaluate(() => /skipped/.test(document.getElementById('plot-status').textContent))
+  );
+  assert.match(
+    await page.evaluate(() => document.getElementById('plot-status').textContent),
+    /^1 of 64 points were undefined and were skipped$/
+  );
+  const d = await page.evaluate(() => document.querySelector('#plot-chart path').getAttribute('d'));
+  assert.equal(/NaN|Infinity/.test(d), false, d);
+  assert.deepEqual(errors, []);
+});
