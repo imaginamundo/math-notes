@@ -68,10 +68,10 @@ function initSettings(contentEditableNode, tabsApi) {
     card.appendChild(name);
     card.addEventListener('click', () => {
       applyTheme(theme.id);
-  renderActive();
-  // The inline startup script restores only data-theme; keep the browser
-  // chrome (theme-color meta) in step with the theme that was just applied.
-  syncThemeColor(currentTheme());
+      renderActive();
+      // The inline startup script restores only data-theme; keep the browser
+      // chrome (theme-color meta) in step with the theme that was just applied.
+      syncThemeColor(currentTheme());
     });
     listNode.appendChild(card);
   });
