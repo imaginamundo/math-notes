@@ -15,7 +15,6 @@ const UPDATE_DELAY = 50;
 export function createEvalClient(editableNode, onRender) {
   let worker = null;
   let latestId = 0;
-  let latestRenderId = 0;
   const pending = new Map();
   let fallbackModule = null;
 
@@ -69,14 +68,19 @@ export function createEvalClient(editableNode, onRender) {
     return requestEvaluate(lines).then(({ data }) => data);
   }
 
-  // Evaluate the current sheet and render it, unless a newer update was
-  // requested while this one was in flight.
+  // Evaluate the current sheet and render it, unless the text changed while
+  // this request was in flight (a newer edit superseded it). A reply is judged
+  // stale by comparing against the current text — not by request order — so two
+  // back-to-back requests for the same sheet cannot both be dropped: the first
+  // one to resolve advances the worker's diff cache and renders, and if we had
+  // skipped it by sequence number alone, the second would come back as "no
+  // change" (startLine -1) and nothing would ever render.
   async function update() {
-    const lines = editableNode.value.split('\n');
-    const renderId = ++latestRenderId;
+    const text = editableNode.value;
+    const lines = text.split('\n');
     try {
       const { data } = await requestEvaluate(lines);
-      if (worker && renderId !== latestRenderId) return;
+      if (editableNode.value !== text) return;
       onRender(lines, data);
     } catch (error) {
       console.error('Failed to update the sheet:', error);
