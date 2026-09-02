@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Math Notes</title>
-  <meta name="description" content="Inline calculator for modern browsers.">
+  <title>Math Notes — inline calculator for the browser</title>
+  <meta name="description" content="Math Notes is a free inline calculator for the browser: type calculations line by line and see each result appear beside it. Units, currencies, percentages and dates. Works offline, no sign-up.">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://imaginamundo.github.io/math-notes/">
   <script>
     (function () {
       try {
@@ -22,20 +24,54 @@
   <script src="./js/index.js" type="module"></script>
   <link rel="stylesheet" href="./style.css">
 
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Math Notes — inline calculator for the browser">
+  <meta property="og:description" content="Type calculations line by line and see each result appear beside it. Units, currencies, percentages and dates. Works offline, no sign-up.">
+  <meta property="og:url" content="https://imaginamundo.github.io/math-notes/">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:image" content="https://imaginamundo.github.io/math-notes/images/og-cover.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="A Math Notes sheet with grocery costs adding up beside each line.">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Math Notes — inline calculator for the browser">
+  <meta name="twitter:description" content="Type calculations line by line and see each result appear beside it. Units, currencies, percentages and dates. Works offline, no sign-up.">
+  <meta name="twitter:image" content="https://imaginamundo.github.io/math-notes/images/og-cover.png">
+  <meta name="twitter:image:alt" content="A Math Notes sheet with grocery costs adding up beside each line.">
+
   <link rel="manifest" href="manifest.json" />
   <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
-  <link rel="apple-touch-icon" href="images/icons/icon-72.png" />
-  <link rel="apple-touch-icon" href="images/icons/icon-96.png" />
-  <link rel="apple-touch-icon" href="images/icons/icon-128.png" />
-  <link rel="apple-touch-icon" href="images/icons/icon-144.png" />
-  <link rel="apple-touch-icon" href="images/icons/icon-152.png" />
-  <link rel="apple-touch-icon" href="images/icons/icon-192.png" />
-  <link rel="apple-touch-icon" href="images/icons/icon-384.png" />
-  <link rel="apple-touch-icon" href="images/icons/icon-512.png" />
-  <meta name="apple-mobile-web-app-status-bar" content="#282c34" />
+  <!-- iOS picks the last matching link, so declare sizes rather than shipping
+       eight unsized candidates and letting it download the 512px one. -->
+  <link rel="apple-touch-icon" sizes="152x152" href="images/icons/icon-152.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="images/icons/icon-192.png" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Math Notes" />
   <meta name="theme-color" content="#282c34" />
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Math Notes",
+      "url": "https://imaginamundo.github.io/math-notes/",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Any",
+      "description": "Inline calculator for the browser: type calculations line by line and see each result appear beside it.",
+      "image": "https://imaginamundo.github.io/math-notes/images/og-cover.png",
+      "isAccessibleForFree": true,
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+  </script>
 </head>
 <body>
   <div class="layout">
