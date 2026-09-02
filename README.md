@@ -43,6 +43,9 @@ Based on [Numi](https://numi.app/).
   a fragment the sheet is never sent to the origin, never lands in an access
   log, and is not forwarded in a `Referer` header. Opening one asks first, then
   adds a new tab — it never overwrites the sheet you already have.
+- **Onboarding** — a first visit opens with a working `Welcome` sheet instead
+  of an empty page, plus a five-step tour of the interface. Both are
+  dismissible, and **Settings → Replay tutorial** brings the tour back.
 - **Keyboard shortcuts** (see below).
 - Offline-first PWA via a service worker.
 

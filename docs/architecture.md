@@ -179,6 +179,43 @@ A `.line-numbers` gutter (`js/ui/lineNumbers.js`) numbers every line (plus one
 phantom row for the next Enter), follows the caret, and scrolls in sync with
 the textarea. It is `aria-hidden`.
 
+## Onboarding
+
+Two independent parts, both dismissible and both replayable.
+
+**The starter sheet.** On a first run the first tab is renamed `Welcome` and
+filled with a short working sheet (`STARTER_SHEET` in `js/ui/onboarding.js`) —
+every line evaluates, so the opening screen demonstrates the app rather than
+describing it. It is seeded through `tabsApi.seedSheet`, which fills the
+_active_ tab; that is deliberately different from an import, which adds one.
+
+**The tour.** `js/ui/tour.js` walks five anchors of the real UI. The highlight
+is an `outline` drawn on the anchor itself plus a raised `z-index`, not a
+cloned "spotlight" element — cheaper, and it cannot desync from what it points
+at. `nextStep` and `placeFor` are pure named exports (clamping, and flipping
+the popover when the preferred side would overflow the viewport), unit-tested
+with no DOM at all; the init module only wires events. `Esc`, the backdrop and
+`Skip tour` all dismiss; arrow keys navigate; focus is moved into the popover,
+trapped while open and restored on close; `prefers-reduced-motion` disables the
+transition.
+
+### First-run detection has one sharp edge
+
+`isFirstRun` requires **all three** of: no `math-notes-onboarded` flag, no
+`math-notes-tabs` key, and an empty active sheet. Any one alone is not enough —
+someone who clears a single localStorage key must not have their work
+overwritten by the starter content.
+
+The `math-notes-tabs` half has to be **snapshotted before `initTabs` runs**.
+`initTabs` persists a fresh tab collection during its own start-up, so by the
+time `initOnboarding` is called the key always exists and every visit would
+look like a return visit. `readOnboardingState()` exists for exactly that, and
+`js/index.js` calls it above `initTabs`.
+
+The flag is written **before** seeding, so a crash mid-tour cannot loop a user
+through onboarding on every reload. `RESET_KEYS` in `js/ui/settings.js`
+includes it, so "Reset data" genuinely returns the app to a first run.
+
 ## Accessibility notes
 
 - The view and line gutter are `aria-hidden`; the textarea is the accessible

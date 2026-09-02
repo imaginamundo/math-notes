@@ -113,3 +113,34 @@ test('format.line renders colon labels exactly as typed', () => {
     assert.equal(text, line);
   }
 });
+
+test('renderInput draws an unchanged sheet that has never been drawn', () => {
+  // startLine === -1 means "unchanged since the last evaluation". If an
+  // earlier render was gated out as stale, the view is still empty and the
+  // rows must be drawn anyway — otherwise nothing ever renders them.
+  const view = new El('pre');
+  renderInput(
+    view,
+    ['1 + 1', '2 + 2'],
+    [
+      { type: 'value', value: 2 },
+      { type: 'value', value: 4 },
+    ],
+    -1
+  );
+  assert.equal(view.children.length, 2);
+
+  // Once drawn, -1 really is a no-op: the rows are left untouched.
+  const drawn = view.children[0];
+  renderInput(
+    view,
+    ['1 + 1', '2 + 2'],
+    [
+      { type: 'value', value: 2 },
+      { type: 'value', value: 4 },
+    ],
+    -1
+  );
+  assert.equal(view.children.length, 2);
+  assert.equal(view.children[0], drawn, 'the existing rows were reused');
+});

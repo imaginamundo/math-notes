@@ -356,6 +356,21 @@ function initTabs(editableNode, onUpdate) {
     return { name: tab ? tab.name : '', content: editableNode.value };
   }
 
+  // Fill the active tab with starter content and rename it. Only ever called
+  // on a genuine first run, so it deliberately writes into the existing empty
+  // tab rather than adding one.
+  function seedSheet({ name, content }) {
+    state = renameTab(state, state.activeId, name);
+    state = setContent(state, state.activeId, content);
+    editableNode.value = content;
+    lastValue = content;
+    histories.set(state.activeId, emptyHistory());
+    persist();
+    render();
+    onUpdate();
+    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
   function handleClose(id) {
     const tab = state.tabs.find((entry) => entry.id === id);
     if (!tab) return;
@@ -596,7 +611,7 @@ function initTabs(editableNode, onUpdate) {
 
   if (storageFailed) recoverFromSnapshots();
 
-  return { switchTab, restoreTab, restoreAll, openSheet, getActiveSheet };
+  return { switchTab, restoreTab, restoreAll, openSheet, getActiveSheet, seedSheet };
 }
 
 export { createTab, closeTab, renameTab, setActiveTab, setContent, moveTab };

@@ -37,3 +37,11 @@ Terms used throughout the codebase and this documentation.
   tag, then base64url of the (usually `deflate`-compressed) sheet JSON.
 - **Import** — opening a share link. Always additive: it prompts, then adds a
   new tab; it never overwrites the active sheet.
+- **Onboarding** — the first-run experience: the seeded starter sheet plus the
+  tour (`js/ui/onboarding.js`). Gated on `math-notes-onboarded`.
+- **Starter sheet** — the `Welcome` sheet seeded on a first run. Every line
+  evaluates, so the first screen already demonstrates the app.
+- **Tour** — the guided walkthrough (`js/ui/tour.js`): a data-driven `STEPS`
+  array, one popover, and an `outline` ring on the anchor.
+- **Tour step** — `{ anchor, title, body, placement }`. `anchor` is a CSS
+  selector for a real element of the UI.

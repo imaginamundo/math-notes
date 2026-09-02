@@ -8,6 +8,8 @@ const RESET_KEYS = [
   'input',
   'math-notes-font-size',
   'fontSize',
+  // So "Reset data" genuinely returns the app to a first run, tour included.
+  'math-notes-onboarded',
 ];
 
 const THEMES = [
