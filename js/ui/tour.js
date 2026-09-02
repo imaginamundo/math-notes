@@ -25,7 +25,7 @@ const STEPS = [
     placement: 'top',
   },
   {
-    anchor: '#help-button',
+    anchor: ['#help-button', '#recipes-button'],
     title: 'Help and Recipes',
     body: 'Help lists every feature — units, currencies, percentages, dates — with clickable examples. Recipes has ready-made sheets to start from.',
     placement: 'top',
@@ -95,7 +95,7 @@ function initTour(editableNode, onFinish) {
   if (!rootNode) return { start: () => {} };
 
   let index = 0;
-  let highlighted = null;
+  let highlighted = [];
   let previousFocus = null;
   let open = false;
 
@@ -139,19 +139,35 @@ function initTour(editableNode, onFinish) {
   popover.append(titleNode, bodyNode, actions);
 
   function clearHighlight() {
-    if (highlighted) highlighted.classList.remove('tour-highlight');
-    highlighted = null;
+    highlighted.forEach((node) => node.classList.remove('tour-highlight'));
+    highlighted = [];
+  }
+
+  // A step may target one element (a selector string) or several (an array of
+  // selectors, e.g. the Help step highlights both the Help and Recipes
+  // buttons). The popover is placed over the box that spans them all.
+  function anchorsFor(step) {
+    const selectors = Array.isArray(step.anchor) ? step.anchor : [step.anchor];
+    return selectors.map((selector) => document.querySelector(selector)).filter((node) => node);
+  }
+
+  function spanOf(nodes) {
+    if (!nodes.length) return null;
+    const rects = nodes.map((node) => node.getBoundingClientRect());
+    const left = Math.min(...rects.map((r) => r.left));
+    const top = Math.min(...rects.map((r) => r.top));
+    const right = Math.max(...rects.map((r) => r.right));
+    const bottom = Math.max(...rects.map((r) => r.bottom));
+    return { top, left, width: right - left, height: bottom - top };
   }
 
   function render() {
     const step = STEPS[index];
-    const anchor = document.querySelector(step.anchor);
+    const anchors = anchorsFor(step);
 
     clearHighlight();
-    if (anchor) {
-      anchor.classList.add('tour-highlight');
-      highlighted = anchor;
-    }
+    anchors.forEach((node) => node.classList.add('tour-highlight'));
+    highlighted = anchors;
 
     titleNode.textContent = step.title;
     bodyNode.textContent = step.body;
@@ -160,9 +176,12 @@ function initTour(editableNode, onFinish) {
     nextButton.textContent = index === STEPS.length - 1 ? 'Done' : 'Next';
 
     // Measure after the text is in place, so the height is the real one.
-    const rect = anchor
-      ? anchor.getBoundingClientRect()
-      : { top: window.innerHeight / 2, left: window.innerWidth / 2, width: 0, height: 0 };
+    const rect = spanOf(anchors) || {
+      top: window.innerHeight / 2,
+      left: window.innerWidth / 2,
+      width: 0,
+      height: 0,
+    };
     const size = popover.getBoundingClientRect();
     const placed = placeFor(
       { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
