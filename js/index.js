@@ -42,7 +42,7 @@ initShare(tabsApi);
 initHelpModal(contentEditableNode);
 initRecipes(contentEditableNode);
 initSettings(contentEditableNode, tabsApi);
-initFontControls();
+initFontControls(editorScroll.refreshMetrics);
 initIo(contentEditableNode);
 initShortcuts(contentEditableNode, evalClient.requestLines, tabsApi.switchTab);
 initFind(contentEditableNode, viewNode, evalClient.update, evalClient.flush);
