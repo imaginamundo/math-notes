@@ -16,8 +16,15 @@ function createWrapper(type, text) {
   return wrapper;
 }
 
-function line(text) {
+// `kind` comes from the grouping pre-pass (js/core/blocks.js). Lines inside a
+// `###` block, and the fences themselves, are comment text end to end — there
+// is nothing to tokenize.
+function line(text, kind) {
   const wrapper = createWrapper('line', '');
+  if (kind === 'comment' || kind === 'fence') {
+    if (text) wrapper.appendChild(comment(text));
+    return wrapper;
+  }
   const { rawCode, comment: commentText, titleIndex } = parseLine(text);
 
   if (titleIndex !== -1) {

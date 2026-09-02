@@ -22,6 +22,12 @@ Based on [Numi](https://numi.app/).
 - **`sum` / `total` / `average` / `avg`** — aggregate the lines above (until a
   blank line).
 - **Comments** with `#` and **labels** like `Price: 10 + 5`.
+- **Block comments** — a `###` line toggles comment mode; everything until the
+  next `###` (or the end of the sheet) is prose: not evaluated, no result, and
+  left out of the total. Blank lines inside a block do not break an aggregate.
+- **Line continuation** — a line ending in a dangling operator (`+ - * / ^ ( ,`)
+  or an explicit `\` joins with the line below, so one expression can span
+  several lines. The result appears on the last line of the run.
 - **Unit conversion** (`1 cm to m`) including CSS units (`px`, `em`, `point`).
 - **Currency conversion** (`100 USD to EUR`, `$5 to GBP`, `R$5 to EUR`) with
   live rates from the European Central Bank, cached for offline use.
@@ -44,6 +50,9 @@ Based on [Numi](https://numi.app/).
 ## Example
 
 ```
+### shopping trip
+prices are per person
+###
 pizzas = 2
 pizzaPrice = 30
 people = 4

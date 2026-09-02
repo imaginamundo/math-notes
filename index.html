@@ -76,6 +76,7 @@
         <a class="modal-nav-link" href="#help-basics">Basics</a>
         <a class="modal-nav-link" href="#help-tabs">Tabs</a>
         <a class="modal-nav-link" href="#help-comments">Comments &amp; labels</a>
+        <a class="modal-nav-link" href="#help-continuation">Long expressions</a>
         <a class="modal-nav-link" href="#help-variables">Variables</a>
         <a class="modal-nav-link" href="#help-functions">Functions</a>
         <a class="modal-nav-link" href="#help-lists">Lists</a>
@@ -146,6 +147,21 @@
           </div>
           <div class="help-example" data-expr="Price: 10 + 5" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 15</span>
+          </div>
+          <p>A <code>###</code> line toggles a <b>block comment</b>: every line until the next <code>###</code> (or the end of the sheet) is prose — not evaluated, no result, and left out of the total. Blank lines inside a block don't break an aggregate.</p>
+          <div class="help-example" data-expr="### notes go here&#10;this line is not evaluated&#10;###" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">no result</span>
+          </div>
+        </section>
+
+        <section id="help-continuation" class="help-section">
+          <h2>Long expressions</h2>
+          <p>A line ending in an operator (<code>+ - * / ^ ( ,</code>) or a <code>\</code> continues onto the line below, so one expression can span several lines. The result appears on the last line of the run.</p>
+          <div class="help-example" data-expr="sum(1,&#10;  2,&#10;  3)" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 6</span>
+          </div>
+          <div class="help-example" data-expr="1200 +&#10;380 +&#10;74" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 1654</span>
           </div>
         </section>
 

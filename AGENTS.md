@@ -63,6 +63,14 @@ project's terminology.
    logic).
 6. Aggregate blocks (`sum`/`average`/`total`) and `prev` depend on the per-line
    cache; incremental edits recompute from the first changed line.
+7. Grouping (`js/core/blocks.js`) is **derived, never stored**, and the results
+   array stays indexed by **physical line**. A group may span several lines,
+   but it never collapses rows: one `.line-row` per physical line always. The
+   recompute window widens back to `groups[firstDiff].startIndex`, which is
+   only sound because the grouping pass looks backwards only.
+8. Anything the main thread needs from the worker must be clone-safe. `kinds`
+   is an array of plain strings for that reason; mathjs `Unit`/`BigNumber`
+   instances and functions never survive the boundary.
 
 ## Conventions
 

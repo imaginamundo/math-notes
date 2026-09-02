@@ -302,6 +302,13 @@ input::placeholder {
   height: var(--editor-line-height, 1.65em);
   line-height: var(--editor-line-height, 1.65em);
 }
+/* A line joined onto the one below it. The cue has to be drawn on the ghost
+   layer only — the textarea sits on top and must stay pixel-identical, so
+   nothing here may change the row's metrics. */
+.line-row.continuation {
+  opacity: 0.85;
+}
+
 .ghost-result {
   margin-left: 1.5em;
   color: var(--color-ghost);

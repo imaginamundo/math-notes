@@ -59,6 +59,54 @@ so its `of|on|off` phrases are consumed first). `js/eval/symbols.js` only
 treats 3-letter currency codes as units in currency contexts (amounts and
 `to`/`in` conversions), so `usd = 5` stays a variable.
 
+### Grouping pre-pass
+
+`js/core/blocks.js` runs before evaluation and classifies every **physical**
+line:
+
+| Kind           | Meaning                                                   |
+| -------------- | --------------------------------------------------------- |
+| `code`         | evaluated; its `code` is the expression to run            |
+| `fence`        | a `###` line — toggles block-comment mode                 |
+| `comment`      | inside a block, or a comment-only line swallowed by a run |
+| `continuation` | joined onto the line below; renders no result of its own  |
+| `blank`        | empty; the only kind that resets an aggregate block       |
+
+Each entry also carries `ownerIndex` (the line the group's result renders on)
+and `startIndex` (the group's first physical line).
+
+Two rules feed it. A `###` fence **toggles** comment mode, so a second `###`
+closes the block and a third reopens it; an unterminated fence comments out the
+rest of the sheet. `###` rather than `/* */` because `*` and `/` are operators
+the tokenizer already owns. Separately, a line whose code ends in a dangling
+operator (`+ - * / ^ ( ,`) or an explicit `\` **continues** onto the line
+below; the joined expression is evaluated once and its result renders on the
+run's last line. A blank line, a fence, or the end of the sheet interrupts a
+run, and the dangling line is then evaluated as written so the user sees the
+syntax error rather than a silently swallowed line. A comment-only line in the
+middle of a run is transparent: it neither ends the run nor contributes code.
+
+**Grouping is derived, never stored.** It is a single forward pass with no
+state carried between calls, and it only ever looks backwards. That is what
+keeps the incremental cache sound: the kind of any line _before_ the first
+edited line cannot change, so `evaluateLines` only has to widen its recompute
+window back to `groups[firstDiff].startIndex` — editing anywhere inside a group
+recomputes the whole group, and everything below a newly opened or deleted
+fence is re-kinded because the loop runs to the end anyway.
+
+**The results array stays indexed by physical line.** Grouping is added
+_underneath_ the one-line-one-result contract rather than collapsing rows, so
+`renderInput`'s row reuse, `find.js`'s `.line-row`-counting text walker
+(invariant 4) and the line-number gutter are all untouched. Non-`code` lines
+get `{ type: 'value', value: undefined, kind }`, which `ghostResult` already
+renders as nothing and the aggregate `NUMERIC` filter already excludes.
+
+`evaluateLines` returns the `kinds` array alongside the results. The worker
+posts it as plain strings (it clones as-is), and `renderInput` passes each kind
+to `format.line`, which short-circuits `comment`/`fence` lines to a single
+`.comment` span instead of tokenizing them. The main-thread fallback returns
+the same shape, so both paths render identically.
+
 ### The pure engine
 
 `evaluateLines(lines)` in `js/core/calculate.js` is the pure evaluation

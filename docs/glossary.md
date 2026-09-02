@@ -31,3 +31,16 @@ Terms used throughout the codebase and this documentation.
 - **Currency context** — places where a 3-letter code is treated as a unit
   (next to a number or a `to`/`in` conversion), so codes used as variables stay
   lowercase.
+- **Group** — one logical unit spanning one or more physical lines, produced by
+  the grouping pre-pass in `js/core/blocks.js`. Every line gets a `kind`
+  (`code`, `comment`, `fence`, `continuation`, `blank`), an `ownerIndex` and a
+  `startIndex`.
+- **Fence** — a `###` line. It toggles block-comment mode.
+- **Block comment** — the lines between two fences (or from a fence to the end
+  of the sheet). Not evaluated, no ghost result, excluded from the total; a
+  blank line inside one does not reset an aggregate block.
+- **Continuation** — a line that ends in a dangling operator or an explicit
+  `\` and therefore joins with the line below. Its result renders on the
+  **owner**, the last physical line of the run.
+- **Owner** — the line of a group whose result is rendered and whose joined
+  expression is evaluated.
