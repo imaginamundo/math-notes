@@ -109,6 +109,49 @@ manual per-tab restore and a "restore all" action.
 Undo/redo is per tab, kept in memory only: edits are grouped into bursts
 (a 700ms idle timer commits the draft), each burst becoming one undo step.
 
+## Sharing a sheet by link
+
+`js/share/shareLink.js` is a pure module that packs the **active** sheet into a
+URL and back out again. `js/ui/share.js` wires the button and the incoming
+import; `js/util/clipboard.js` holds the clipboard write both it and
+`js/ui/shortcuts.js` use.
+
+The sheet goes in `location.hash`, deliberately, not in a query string. A
+fragment is never sent to the server, so the sheet does not reach GitHub Pages
+access logs and is not forwarded in a `Referer` header — someone's salary maths
+should not end up in a log file. It also leaves the service worker's cache keys
+alone, since the fragment is not part of the request URL.
+
+The wire format is `#s=<version>.<base64url>`:
+
+| Version | Payload                               | When                            |
+| ------- | ------------------------------------- | ------------------------------- |
+| `1`     | `deflate` of `{"n":name,"c":content}` | normal path                     |
+| `0`     | the same JSON, uncompressed           | `CompressionStream` unavailable |
+
+The version tag lets a future format change be rejected cleanly instead of
+decoding to garbage. `deflate` rather than `deflate-raw` for portability, at a
+cost of about six bytes. base64url rather than base64 so `+ / =` never need
+percent-encoding.
+
+Two guardrails, because the decoder is fed by strangers:
+
+- **inflate cap** — decoding stops and returns `null` once a payload passes
+  256 KB, so a zip bomb is abandoned mid-stream rather than materialised.
+- **long-link warning** — a URL over 8000 characters is still copied, but the
+  status says some chat clients may truncate it.
+
+Every failure path in `shareLink.js` returns `null`; none throw.
+
+Importing is **additive and confirmed**: an incoming sheet prompts by name and
+then opens in a _new_ tab via `tabsApi.openSheet`, never overwriting the active
+one. The fragment is stripped with `history.replaceState` either way, so a
+refresh cannot re-import a duplicate and a link that failed to decode does not
+re-prompt.
+
+Imported content only ever reaches the DOM as `textarea.value`, never as
+`innerHTML`, so a hostile payload is inert text.
+
 ## Find & replace
 
 `js/ui/find.js` opens a floating bar. Matches are computed against the raw

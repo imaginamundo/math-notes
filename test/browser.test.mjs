@@ -240,3 +240,80 @@ test('blank lines keep the ghost rows aligned with the input', async () => {
   assert.ok(gaps.blankRowHeight > 20, 'blank row keeps its line height');
   assert.deepEqual(errors, []);
 });
+
+test('the Share button builds a link that reopens the sheet in a new tab', async () => {
+  await newPage();
+  const sheet = '# trip 🧳\nnights = 3\nrate = 89\nnights * rate';
+  await setContent(sheet);
+  await wait(300);
+
+  // Read the URL off the button's dataset rather than the clipboard, which
+  // needs permissions headless Chrome does not grant.
+  await page.click('#share-button');
+  await waitFor(() =>
+    page.evaluate(() => Boolean(document.getElementById('share-button').dataset.url))
+  );
+  const url = await page.evaluate(() => document.getElementById('share-button').dataset.url);
+  assert.ok(url.includes('#s='), url);
+  assert.equal(url.includes('?'), false, 'the sheet must not be in a query string');
+  assert.equal(
+    await page.evaluate(() => document.getElementById('share-status').textContent),
+    'Link copied'
+  );
+
+  const tabsBefore = await page.evaluate(
+    () => document.querySelectorAll('#tabs-bar [role="tab"]').length
+  );
+
+  page.once('dialog', (dialog) => dialog.accept());
+  await page.goto(url, { waitUntil: 'load' });
+  await wait(600);
+
+  assert.equal(await value(), sheet, 'the shared sheet reopened verbatim');
+  assert.equal(
+    await page.evaluate(() => document.querySelectorAll('#tabs-bar [role="tab"]').length),
+    tabsBefore + 1,
+    'the import added a tab instead of overwriting one'
+  );
+  assert.equal(
+    await page.evaluate(() => window.location.hash),
+    '',
+    'the fragment is stripped so a refresh cannot re-import'
+  );
+  assert.deepEqual(errors, []);
+});
+
+test('a share link the visitor declines leaves the sheet untouched', async () => {
+  await newPage();
+  await setContent('keep = 1');
+  await wait(300);
+  await page.click('#share-button');
+  await waitFor(() =>
+    page.evaluate(() => Boolean(document.getElementById('share-button').dataset.url))
+  );
+  const url = await page.evaluate(() => document.getElementById('share-button').dataset.url);
+
+  page.once('dialog', (dialog) => dialog.dismiss());
+  await page.goto(url, { waitUntil: 'load' });
+  await wait(600);
+
+  assert.equal(await value(), 'keep = 1', 'the existing sheet survived the declined import');
+  assert.equal(
+    await page.evaluate(() => document.querySelectorAll('#tabs-bar [role="tab"]').length),
+    1
+  );
+  assert.deepEqual(errors, []);
+});
+
+test('a corrupt share link reports itself instead of throwing', async () => {
+  await newPage();
+  const base = await page.evaluate(() => window.location.origin + window.location.pathname);
+  await page.goto(`${base}#s=1.notavalidtokenatall`, { waitUntil: 'load' });
+  await wait(600);
+  assert.equal(
+    await page.evaluate(() => document.getElementById('share-status').textContent),
+    "That share link couldn't be read"
+  );
+  assert.equal(await page.evaluate(() => window.location.hash), '');
+  assert.deepEqual(errors, []);
+});

@@ -1,4 +1,5 @@
 import formatResult from '../render/formatResult.js';
+import { copyText } from '../util/clipboard.js';
 
 function initShortcuts(editableNode, requestResults, switchTab) {
   document.addEventListener('keydown', (event) => {
@@ -18,6 +19,11 @@ function initShortcuts(editableNode, requestResults, switchTab) {
     } else if (shift && key === 'c') {
       event.preventDefault();
       copyCurrentLineResult(editableNode, requestResults);
+    } else if (shift && (key === 's' || key === 'l')) {
+      // Both, because Firefox reserves Ctrl+Shift+S for its own devtools and
+      // a page cannot intercept it there. L is for "link".
+      event.preventDefault();
+      document.dispatchEvent(new CustomEvent('share:copy'));
     } else if (shift && key === 'e') {
       event.preventDefault();
       document.getElementById('export-button').click();
@@ -46,29 +52,6 @@ async function copyCurrentLineResult(editableNode, requestResults) {
   } catch {
     // evaluation failed; nothing to copy
   }
-}
-
-function copyText(text) {
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
-  } else {
-    fallbackCopy(text);
-  }
-}
-
-function fallbackCopy(text) {
-  const textarea = document.createElement('textarea');
-  textarea.value = text;
-  textarea.style.position = 'fixed';
-  textarea.style.opacity = '0';
-  document.body.appendChild(textarea);
-  textarea.select();
-  try {
-    document.execCommand('copy');
-  } catch {
-    // clipboard unavailable
-  }
-  document.body.removeChild(textarea);
 }
 
 function indexOfLineAt(text, position) {
