@@ -436,6 +436,23 @@ button:hover {
     opacity: 1;
   }
 }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+/* The widest frame is "Loading..." (10 chars); reserving its width keeps the
+   dots from nudging any sibling status message while the animation runs. */
+.loading-dots {
+  display: inline-block;
+  min-width: 10ch;
+}
 .footer-start {
   display: inline-flex;
   align-items: center;

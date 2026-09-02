@@ -11,12 +11,21 @@ const UPDATE_DELAY = 50;
  *
  * @param {HTMLTextAreaElement} editableNode  Source of the current sheet text.
  * @param {(lines: string[], data: SheetResult) => void} onRender  Renders the result.
+ * @param {(busy: boolean) => void} [onBusy]  Notified while an evaluation is in flight.
  */
-export function createEvalClient(editableNode, onRender) {
+export function createEvalClient(editableNode, onRender, onBusy) {
   let worker = null;
   let latestId = 0;
   const pending = new Map();
   let fallbackModule = null;
+  let pendingUpdates = 0;
+  let busy = false;
+
+  function setBusy(value) {
+    if (busy === value) return;
+    busy = value;
+    if (onBusy) onBusy(value);
+  }
 
   if (typeof Worker !== 'undefined') {
     worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
@@ -76,6 +85,8 @@ export function createEvalClient(editableNode, onRender) {
   // skipped it by sequence number alone, the second would come back as "no
   // change" (startLine -1) and nothing would ever render.
   async function update() {
+    pendingUpdates++;
+    if (pendingUpdates === 1) setBusy(true);
     const text = editableNode.value;
     const lines = text.split('\n');
     try {
@@ -84,6 +95,9 @@ export function createEvalClient(editableNode, onRender) {
       onRender(lines, data);
     } catch (error) {
       console.error('Failed to update the sheet:', error);
+    } finally {
+      pendingUpdates--;
+      if (pendingUpdates === 0) setBusy(false);
     }
   }
 

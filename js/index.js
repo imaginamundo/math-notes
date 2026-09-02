@@ -13,20 +13,26 @@ import initIo from './ui/io.js';
 import initShortcuts from './ui/shortcuts.js';
 import initFind from './ui/find.js';
 import initLineNumbers from './ui/lineNumbers.js';
+import initLoadingIndicator from './ui/loading.js';
 import initEditorScroll from './ui/editor.js';
 
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');
 const totalNode = document.getElementById('total');
 const currencyStatusNode = document.getElementById('currency-status');
+const loadingIndicator = initLoadingIndicator(document.getElementById('loading'));
 
 // Evaluation runs in a Web Worker owned by the eval client, which debounces
 // updates, gates stale renders, and forwards currency rates.
-const evalClient = createEvalClient(contentEditableNode, (lines, data) => {
-  renderInput(viewNode, lines, data.results, data.startLine);
-  renderTotal(totalNode, data.total);
-  editorScroll.syncSize();
-});
+const evalClient = createEvalClient(
+  contentEditableNode,
+  (lines, data) => {
+    renderInput(viewNode, lines, data.results, data.startLine);
+    renderTotal(totalNode, data.total);
+    editorScroll.syncSize();
+  },
+  (busy) => (busy ? loadingIndicator.show() : loadingIndicator.hide())
+);
 
 // Trigger changes
 contentEditableNode.addEventListener('input', evalClient.schedule);
