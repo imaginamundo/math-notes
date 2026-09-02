@@ -59,6 +59,8 @@
         <b class="size-controls">Size: <button id="font-minus">-</button><button id="font-plus">+</button><button id="font-reset">Reset size</button></b>
         <span class="actions">
           <span id="currency-status" class="currency-status" aria-live="polite"></span>
+          <span id="share-status" class="currency-status" aria-live="polite"></span>
+          <button id="share-button" class="share">Share</button>
           <button id="settings-button" class="settings">Settings</button>
           <button id="recipes-button" class="recipes">Recipes</button>
           <button id="help-button" class="help">Help</button>
@@ -135,6 +137,7 @@
             <li><b>Close</b> — click the <code>×</code> (you'll be asked to confirm).</li>
             <li><b>Add</b> — click the <code>+</code> tab.</li>
             <li><b>Export / Import</b> — use the buttons in the <b>Settings</b> modal to download the active sheet as text or load one from a file.</li>
+            <li><b>Share</b> — the <b>Share</b> button copies a link that carries the active sheet inside it. Anyone who opens it is asked whether to open the sheet in a new tab; it never replaces what they already have. Nothing is uploaded: the sheet travels in the link's <code>#</code> fragment, which browsers never send to a server.</li>
           </ul>
         </section>
 
@@ -446,6 +449,7 @@
               <tr><td><code>⌘1…9</code><br /><code>Ctrl+1…9</code></td><td>Jump to the nth tab</td></tr>
               <tr><td><code>⌘F</code></td><td>Find &amp; replace in the active sheet</td></tr>
               <tr><td><code>⇧⌘C</code></td><td>Copy the current line's result</td></tr>
+              <tr><td><code>⇧⌘S</code><br /><code>⇧⌘L</code></td><td>Copy a share link for the active sheet</td></tr>
               <tr><td><code>⇧⌘E</code></td><td>Export the active sheet</td></tr>
               <tr><td><code>⇧⌘I</code></td><td>Import a sheet</td></tr>
               <tr><td><code>⇧⌘⌫</code></td><td>Clear the active sheet</td></tr>

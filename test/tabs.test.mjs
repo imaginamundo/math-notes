@@ -113,3 +113,23 @@ test('deriveNextTabNumber avoids colliding with existing names', () => {
   ];
   assert.equal(deriveNextTabNumber(recovered), 10);
 });
+
+// The reducer path `openSheet` composes: create a named tab, then fill it.
+// The DOM wiring lives in js/ui/tabs.js; this covers the state transition an
+// imported share link goes through.
+test('createTab + setContent adds a named sheet without touching the others', () => {
+  const before = baseState();
+  const created = createTab(before, 'Shared sheet');
+  const next = setContent(created, created.activeId, 'rent = 1200\nsum');
+
+  assert.equal(next.tabs.length, before.tabs.length + 1);
+  assert.equal(next.tabs.at(-1).name, 'Shared sheet');
+  assert.equal(next.tabs.at(-1).content, 'rent = 1200\nsum');
+  assert.equal(next.activeId, next.tabs.at(-1).id, 'the imported sheet becomes active');
+
+  // Every pre-existing tab survives untouched — an import is additive.
+  for (const tab of before.tabs) {
+    const after = next.tabs.find((entry) => entry.id === tab.id);
+    assert.deepEqual(after, tab, `tab ${tab.id} was modified`);
+  }
+});

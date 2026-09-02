@@ -38,6 +38,11 @@ Based on [Numi](https://numi.app/).
 - **Auto-saved snapshots** — every tab's edits are backed up to IndexedDB and
   can be recovered from the **Settings** modal; sheets are rebuilt automatically
   if localStorage is unavailable or corrupt.
+- **Shareable links** — the **Share** button copies a link with the active
+  sheet packed into its `#` fragment. No server, no database, and because it is
+  a fragment the sheet is never sent to the origin, never lands in an access
+  log, and is not forwarded in a `Referer` header. Opening one asks first, then
+  adds a new tab — it never overwrites the sheet you already have.
 - **Keyboard shortcuts** (see below).
 - Offline-first PWA via a service worker.
 
@@ -60,6 +65,8 @@ people = 4
 | `⌘1…9` / `Ctrl+1…9`            | Jump to the nth tab             |
 | `⌘F` / `Ctrl+F`                | Find & replace in the sheet     |
 | `⇧⌘C` / `Ctrl+Shift+C`         | Copy the current line's result  |
+| `⇧⌘S` / `Ctrl+Shift+S`         | Copy a share link               |
+| `⇧⌘L` / `Ctrl+Shift+L`         | Copy a share link (alternate)   |
 | `⇧⌘E` / `Ctrl+Shift+E`         | Export the active sheet         |
 | `⇧⌘I` / `Ctrl+Shift+I`         | Import a sheet                  |
 | `⇧⌘⌫` / `Ctrl+Shift+Backspace` | Clear the active sheet          |

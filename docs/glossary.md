@@ -31,3 +31,9 @@ Terms used throughout the codebase and this documentation.
 - **Currency context** — places where a 3-letter code is treated as a unit
   (next to a number or a `to`/`in` conversion), so codes used as variables stay
   lowercase.
+- **Share link** — a URL whose `#` fragment carries an encoded sheet
+  (`#s=<version>.<base64url>`). Built and parsed by `js/share/shareLink.js`.
+- **Share token** — the `<version>.<base64url>` part of a share link: a version
+  tag, then base64url of the (usually `deflate`-compressed) sheet JSON.
+- **Import** — opening a share link. Always additive: it prompts, then adds a
+  new tab; it never overwrites the active sheet.
