@@ -411,7 +411,7 @@ button:hover {
   align-items: center;
   gap: 1em;
   height: 1.7em;
-  padding: 0 calc(1em + var(--safe-right)) 0 calc(1em + var(--safe-left));
+  padding: 0 calc(0.5em + var(--safe-right)) 0 calc(0.5em + var(--safe-left));
   background: var(--color-surface);
   border-top: 1px solid var(--border-soft);
   color: var(--color-text-muted);
