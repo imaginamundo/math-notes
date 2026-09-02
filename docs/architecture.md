@@ -143,3 +143,43 @@ the textarea. It is `aria-hidden`.
 - The tabs implement the ARIA tabs pattern (`role="tab"` /
   `role="tabpanel"` with `aria-controls` and `aria-labelledby`).
 - Icon-only buttons carry `aria-label`s (a `title` is not reliably read).
+
+## SEO & sharing assets
+
+`index.html`'s `<head>` carries the canonical URL, the Open Graph and Twitter
+card tags, and a `SoftwareApplication` JSON-LD block. Every absolute URL in
+them points at the canonical origin, `https://imaginamundo.github.io/math-notes/`
+— change it in one place and the `ORIGIN` constant in `test/meta.test.mjs`
+will fail until the rest follows.
+
+The share and store imagery is **generated and committed**, because there is no
+build step at deploy time:
+
+```sh
+npm run build:og     # node scripts/og-image.mjs
+```
+
+`scripts/og-image.mjs` renders four PNGs with puppeteer:
+
+| Output                               | Size       | Used by                        |
+| ------------------------------------ | ---------- | ------------------------------ |
+| `images/og-cover.png`                | 1200 × 630 | `og:image`, `twitter:image`    |
+| `images/icons/icon-512-maskable.png` | 512 × 512  | manifest `purpose: "maskable"` |
+| `images/screenshots/wide.png`        | 1280 × 720 | manifest `screenshots`         |
+| `images/screenshots/narrow.png`      | 720 × 1280 | manifest `screenshots`         |
+
+The cover is a standalone HTML template inside the script (its palette is a
+copy of the default theme's custom properties in `style.css`); the two
+screenshots are taken against the **real app**, served locally, so the manifest
+never advertises a mock-up that has drifted from the shipped UI. They use no
+currency lines, because the screenshot run is offline and every converted line
+would render a rate error.
+
+`test/meta.test.mjs` is the regression guard. It asserts the tags exist, that
+the shared URLs are absolute and on the canonical origin, that every referenced
+local asset is on disk, that `og:image:width`/`height` match the PNG's real
+IHDR dimensions, that the JSON-LD parses, and that the manifest has the keys an
+installable PWA needs. Its last case reads the `cp -r` line in
+`.github/workflows/publish.yml` and fails when a root-level asset referenced by
+`index.html` is missing from it — the deploy copies a fixed list, so a new root
+file is otherwise silently not published.

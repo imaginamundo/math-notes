@@ -240,3 +240,30 @@ test('blank lines keep the ghost rows aligned with the input', async () => {
   assert.ok(gaps.blankRowHeight > 20, 'blank row keeps its line height');
   assert.deepEqual(errors, []);
 });
+
+test('the page serves its canonical metadata and a fetchable manifest', async () => {
+  await newPage();
+  const meta = await page.evaluate(async () => {
+    const attr = (selector, name) => {
+      const node = document.querySelector(selector);
+      return node ? node.getAttribute(name) : null;
+    };
+    const manifestHref = attr('link[rel="manifest"]', 'href');
+    const response = await fetch(manifestHref);
+    return {
+      title: document.title,
+      canonical: attr('link[rel="canonical"]', 'href'),
+      ogImage: attr('meta[property="og:image"]', 'content'),
+      twitterCard: attr('meta[name="twitter:card"]', 'content'),
+      manifestStatus: response.status,
+      manifestName: (await response.json()).name,
+    };
+  });
+  assert.match(meta.title, /^Math Notes/);
+  assert.equal(meta.canonical, 'https://imaginamundo.github.io/math-notes/');
+  assert.equal(meta.ogImage, 'https://imaginamundo.github.io/math-notes/images/og-cover.png');
+  assert.equal(meta.twitterCard, 'summary_large_image');
+  assert.equal(meta.manifestStatus, 200);
+  assert.equal(meta.manifestName, 'Math Notes');
+  assert.deepEqual(errors, []);
+});

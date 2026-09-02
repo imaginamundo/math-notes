@@ -39,7 +39,10 @@ Based on [Numi](https://numi.app/).
   can be recovered from the **Settings** modal; sheets are rebuilt automatically
   if localStorage is unavailable or corrupt.
 - **Keyboard shortcuts** (see below).
-- Offline-first PWA via a service worker.
+- Offline-first PWA via a service worker, with a maskable icon and store
+  screenshots in the manifest.
+- **Rich link previews** — Open Graph and Twitter card tags with a generated
+  cover image, plus a canonical URL, `robots.txt` and `sitemap.xml`.
 
 ## Example
 

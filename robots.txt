@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://imaginamundo.github.io/math-notes/sitemap.xml

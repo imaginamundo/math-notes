@@ -16,7 +16,7 @@ jobs:
       - name: Prepare the site
         run: |
           mkdir -p public
-          cp -r index.html style.css manifest.json favicon.ico images js public/
+          cp -r index.html style.css manifest.json favicon.ico robots.txt sitemap.xml images js public/
           find public -name '.DS_Store' -delete
 
       - name: Deploy to gh-pages
