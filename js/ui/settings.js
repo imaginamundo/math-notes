@@ -23,11 +23,15 @@ function currentTheme() {
   return document.documentElement.dataset.theme || 'one-dark';
 }
 
-function applyTheme(id) {
-  document.documentElement.dataset.theme = id;
+function syncThemeColor(id) {
   const theme = THEMES.find((entry) => entry.id === id);
   const meta = document.querySelector('meta[name="theme-color"]');
   if (theme && meta) meta.setAttribute('content', theme.swatch[0]);
+}
+
+function applyTheme(id) {
+  document.documentElement.dataset.theme = id;
+  syncThemeColor(id);
   try {
     localStorage.setItem(STORAGE_KEY, id);
   } catch {
@@ -64,7 +68,10 @@ function initSettings(contentEditableNode, tabsApi) {
     card.appendChild(name);
     card.addEventListener('click', () => {
       applyTheme(theme.id);
-      renderActive();
+  renderActive();
+  // The inline startup script restores only data-theme; keep the browser
+  // chrome (theme-color meta) in step with the theme that was just applied.
+  syncThemeColor(currentTheme());
     });
     listNode.appendChild(card);
   });
