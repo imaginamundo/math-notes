@@ -28,7 +28,11 @@ test('nextStep tolerates a nonsense index', () => {
 test('every step names an anchor, a title, a body and a placement', () => {
   assert.ok(STEPS.length >= 5);
   for (const step of STEPS) {
-    assert.ok(step.anchor.startsWith('#') || step.anchor.startsWith('.'), step.anchor);
+    const anchors = Array.isArray(step.anchor) ? step.anchor : [step.anchor];
+    assert.ok(anchors.length > 0, 'at least one anchor');
+    for (const anchor of anchors) {
+      assert.ok(anchor.startsWith('#') || anchor.startsWith('.'), anchor);
+    }
     assert.ok(step.title.length > 0);
     assert.ok(step.body.length > 20);
     assert.ok(['top', 'bottom'].includes(step.placement), step.placement);

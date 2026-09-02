@@ -44,4 +44,5 @@ Terms used throughout the codebase and this documentation.
 - **Tour** — the guided walkthrough (`js/ui/tour.js`): a data-driven `STEPS`
   array, one popover, and an `outline` ring on the anchor.
 - **Tour step** — `{ anchor, title, body, placement }`. `anchor` is a CSS
-  selector for a real element of the UI.
+  selector for a real element of the UI, or an array of them (e.g. the Help
+  step highlights both the Help and Recipes buttons).
