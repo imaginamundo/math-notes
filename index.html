@@ -79,6 +79,7 @@
         <a class="modal-nav-link" href="#help-variables">Variables</a>
         <a class="modal-nav-link" href="#help-functions">Functions</a>
         <a class="modal-nav-link" href="#help-ranges">Sequences</a>
+        <a class="modal-nav-link" href="#help-lists">Lists</a>
         <a class="modal-nav-link" href="#help-percentages">Percentages</a>
         <a class="modal-nav-link" href="#help-operators">Operators &amp; scales</a>
         <a class="modal-nav-link" href="#help-units">Units</a>
@@ -207,6 +208,43 @@
           </div>
           <div class="help-example" data-expr="mean(1:5)" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 3</span>
+          </div>
+        </section>
+
+        <section id="help-lists" class="help-section">
+          <h2>Lists</h2>
+          <p>Write a list with square brackets. Lists are <b>1-indexed</b>: <code>n[1]</code> is the first
+          element. Slice with a range, assign elements, do element-wise arithmetic, and combine lists with
+          the mathjs functions.</p>
+          <div class="help-example" data-expr="[1, 2, 3]" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">[1, 2, 3]</span>
+          </div>
+          <div class="help-example" data-expr="n = [10, 20, 30]&#10;n[1]" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">10 (first element)</span>
+          </div>
+          <div class="help-example" data-expr="n = [10, 20, 30, 40]&#10;n[2:4]" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">[20, 30, 40]</span>
+          </div>
+          <div class="help-example" data-expr="n = [10, 20, 30]&#10;n[2] = 99" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">sets the second element</span>
+          </div>
+          <div class="help-example" data-expr="[1, 2] + [3, 4]" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">[4, 6]</span>
+          </div>
+          <div class="help-example" data-expr="sum([1, 2, 3, 4])" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 10</span>
+          </div>
+          <div class="help-example" data-expr="mean(1:10)" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 5.5</span>
+          </div>
+          <div class="help-example" data-expr="sort([3, 1, 2])" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">[1, 2, 3]</span>
+          </div>
+          <div class="help-example" data-expr="concat([1, 2], [3, 4])" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">[1, 2, 3, 4]</span>
+          </div>
+          <div class="help-example" data-expr="m = [[1, 2], [3, 4]]&#10;m[2, 1]" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">3</span>
           </div>
         </section>
 
