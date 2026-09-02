@@ -31,6 +31,46 @@ initCurrency(math);
  * @property {number} startLine  First line that changed (-1 when input is unchanged).
  */
 
+// Guard against expressions that would materialise unbounded arrays. A range
+// like `1:1000000000` or a function over one (e.g. `sum(1:1e9)`) allocates the
+// whole list up front and would lock the worker up, so reject anything a
+// literal array or a (statically resolvable) range would expand beyond this.
+const MAX_LIST_LENGTH = 100;
+
+function assertBoundedExpression(expression, scope) {
+  let tree;
+  try {
+    tree = math.parse(expression);
+  } catch {
+    return; // math.evaluate reports the parse error itself
+  }
+  const resolve = (node, fallback) => {
+    if (node === null || node === undefined) return fallback;
+    try {
+      const value = math.evaluate(node.toString(), scope);
+      return typeof value === 'number' && Number.isFinite(value) ? value : null;
+    } catch {
+      return null;
+    }
+  };
+  tree.traverse((node) => {
+    if (node.isArrayNode && node.items.length > MAX_LIST_LENGTH) {
+      throw new Error(`Lists are limited to ${MAX_LIST_LENGTH} items`);
+    }
+    if (node.isRangeNode) {
+      const start = resolve(node.start, 1);
+      const end = resolve(node.end, null);
+      const step = resolve(node.step, 1);
+      if (end !== null && step !== null) {
+        const count = Math.floor(Math.abs((end - start) / step)) + 1;
+        if (count > MAX_LIST_LENGTH) {
+          throw new Error(`Ranges are limited to ${MAX_LIST_LENGTH} items`);
+        }
+      }
+    }
+  });
+}
+
 function evaluateLine(line, scope) {
   const parsed = typeof line === 'string' ? parseLine(line) : line;
   const { code, label, rhs, isAssignment } = parsed;
@@ -39,7 +79,9 @@ function evaluateLine(line, scope) {
   let result;
 
   try {
-    result = math.evaluate(preprocess(code), scope);
+    const expression = preprocess(code);
+    assertBoundedExpression(expression, scope);
+    result = math.evaluate(expression, scope);
     value = rhs && math.evaluate(preprocess(rhs), scope);
   } catch (error) {
     result = error;

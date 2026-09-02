@@ -140,7 +140,15 @@ function loadInitialState() {
     storageFailed = true;
   }
   if (saved && Array.isArray(saved.tabs) && saved.tabs.length) {
-    return { ...saved, nextTabNumber: saved.nextTabNumber || saved.tabs.length + 1 };
+    // A stale activeId (a partial write, an old schema, a manual edit) would
+    // make every subsequent setContent miss its tab and silently drop edits, so
+    // repair it to the first tab when it no longer points at one.
+    const hasActiveTab = saved.tabs.some((tab) => tab.id === saved.activeId);
+    return {
+      ...saved,
+      activeId: hasActiveTab ? saved.activeId : saved.tabs[0].id,
+      nextTabNumber: saved.nextTabNumber || saved.tabs.length + 1,
+    };
   }
   let content = '';
   try {

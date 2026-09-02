@@ -1,4 +1,7 @@
-function initFontControls() {
+// Applies a saved font size at startup and handles the +/-/reset buttons.
+// `onChange` is invoked after the new size is applied, so the editor can
+// re-sync its line-height and character width to the new metrics.
+function initFontControls(onChange = () => {}) {
   const fontMinusNode = document.getElementById('font-minus');
   const fontPlusNode = document.getElementById('font-plus');
   const fontResetNode = document.getElementById('font-reset');
@@ -16,6 +19,7 @@ function initFontControls() {
       // storage unavailable
     }
     document.documentElement.style.setProperty('--app-font-size', `${fontSize.current}px`);
+    onChange();
   }
   fontMinusNode.addEventListener('click', () => {
     if (fontSize.current <= fontSize.min) return;
