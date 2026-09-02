@@ -17,15 +17,20 @@ function initEditorScroll(editableNode) {
   // browser may also set an internal scroll position while moving the caret;
   // reset it so the overlay stays aligned.
   //
-  // Floor the box at the scroll container's size so the textarea covers the
-  // whole editor area: a short sheet (or an empty one) still lets a tap
-  // anywhere focus the input (and raise the keyboard on iOS). The grid cell
-  // stretches both layers to the same box, so they stay aligned.
+  // When the content fits, drop the inline size and let the grid track
+  // (`minmax(max-content, 1fr)`) stretch both layers to fill the whole editor
+  // area, so a tap anywhere focuses the input (and raises the keyboard on
+  // iOS). Writing an explicit client-size pixel value here would round to the
+  // nearest pixel and overflow the fractional container, forcing a stray
+  // scrollbar. Only pin the size once the content is wider/taller than the
+  // scroll container.
   function syncSize() {
     const lineHeight = Math.round(parseFloat(getComputedStyle(editableNode).fontSize) * 1.65);
     document.documentElement.style.setProperty('--editor-line-height', `${lineHeight}px`);
-    editableNode.style.width = `${Math.max(editableNode.scrollWidth, scroller.clientWidth)}px`;
-    editableNode.style.height = `${Math.max(editableNode.scrollHeight, scroller.clientHeight)}px`;
+    editableNode.style.width =
+      editableNode.scrollWidth > scroller.clientWidth ? `${editableNode.scrollWidth}px` : '';
+    editableNode.style.height =
+      editableNode.scrollHeight > scroller.clientHeight ? `${editableNode.scrollHeight}px` : '';
     editableNode.scrollTop = 0;
     editableNode.scrollLeft = 0;
   }
