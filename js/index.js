@@ -7,6 +7,7 @@ import initRecipes from './ui/recipes.js';
 import initSettings from './ui/settings.js';
 import initFontControls from './ui/cosmetic.js';
 import initTabs from './ui/tabs.js';
+import initOnboarding, { readOnboardingState } from './ui/onboarding.js';
 import initShare from './ui/share.js';
 import initIo from './ui/io.js';
 import initShortcuts from './ui/shortcuts.js';
@@ -32,6 +33,9 @@ contentEditableNode.addEventListener('input', evalClient.schedule);
 
 const editorScroll = initEditorScroll(contentEditableNode);
 
+// Snapshot before initTabs, which persists a tab collection as it starts up.
+const onboardingState = readOnboardingState();
+
 const tabsApi = initTabs(contentEditableNode, evalClient.update);
 
 initShare(tabsApi);
@@ -43,6 +47,9 @@ initIo(contentEditableNode);
 initShortcuts(contentEditableNode, evalClient.requestLines, tabsApi.switchTab);
 initFind(contentEditableNode, viewNode, evalClient.update, evalClient.flush);
 initLineNumbers(contentEditableNode);
+
+// Last, so every surface the tour points at is already wired.
+initOnboarding(contentEditableNode, tabsApi, onboardingState);
 
 window.addEventListener('currency:updated', (event) => {
   evalClient.syncRates(event.detail && event.detail.data);
