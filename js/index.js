@@ -8,6 +8,7 @@ import initSettings from './ui/settings.js';
 import initFontControls from './ui/cosmetic.js';
 import initTabs from './ui/tabs.js';
 import initOnboarding, { readOnboardingState } from './ui/onboarding.js';
+import initShare from './ui/share.js';
 import initIo from './ui/io.js';
 import initShortcuts from './ui/shortcuts.js';
 import initFind from './ui/find.js';
@@ -37,6 +38,7 @@ const onboardingState = readOnboardingState();
 
 const tabsApi = initTabs(contentEditableNode, evalClient.update);
 
+initShare(tabsApi);
 initHelpModal(contentEditableNode);
 initRecipes(contentEditableNode);
 initSettings(contentEditableNode, tabsApi);

@@ -334,6 +334,28 @@ function initTabs(editableNode, onUpdate) {
     editableNode.focus();
   }
 
+  // Open a sheet that came from outside the app (a share link) in a NEW tab.
+  // It never overwrites the active tab: an import is additive by design.
+  function openSheet({ name, content }) {
+    flushDraft();
+    flushSnapshot();
+    state = setContent(state, state.activeId, editableNode.value);
+    state = createTab(state, name || 'Shared sheet');
+    state = setContent(state, state.activeId, content || '');
+    editableNode.value = content || '';
+    lastValue = editableNode.value;
+    persist();
+    render();
+    onUpdate();
+    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+    editableNode.focus();
+  }
+
+  function getActiveSheet() {
+    const tab = getActiveTab();
+    return { name: tab ? tab.name : '', content: editableNode.value };
+  }
+
   // Fill the active tab with starter content and rename it. Only ever called
   // on a genuine first run, so it deliberately writes into the existing empty
   // tab rather than adding one.
@@ -589,7 +611,7 @@ function initTabs(editableNode, onUpdate) {
 
   if (storageFailed) recoverFromSnapshots();
 
-  return { switchTab, restoreTab, restoreAll, seedSheet };
+  return { switchTab, restoreTab, restoreAll, openSheet, getActiveSheet, seedSheet };
 }
 
 export { createTab, closeTab, renameTab, setActiveTab, setContent, moveTab };
