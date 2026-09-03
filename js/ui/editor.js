@@ -24,13 +24,30 @@ function initEditorScroll(editableNode) {
   // nearest pixel and overflow the fractional container, forcing a stray
   // scrollbar. Only pin the size once the content is wider/taller than the
   // scroll container.
+  // The monospace content extent: line count × row height, longest line ×
+  // glyph width, plus padding. The textarea's own scrollWidth/scrollHeight
+  // cannot be used to size it: once the box is pinned larger than its content
+  // (e.g. after a font-size increase) scrollHeight only reports the box height,
+  // so shrinking the font would never let the box come back down.
+  function contentExtent(cs, lineHeight) {
+    const value = editableNode.value;
+    const lines = value.split('\n');
+    let longest = 0;
+    for (const line of lines) if (line.length > longest) longest = line.length;
+    if (!charWidth) measureCharWidth();
+    return {
+      width: parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + longest * charWidth,
+      height: parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + lines.length * lineHeight,
+    };
+  }
+
   function syncSize() {
-    const lineHeight = Math.round(parseFloat(getComputedStyle(editableNode).fontSize) * 1.65);
+    const cs = getComputedStyle(editableNode);
+    const lineHeight = Math.round(parseFloat(cs.fontSize) * 1.65);
     document.documentElement.style.setProperty('--editor-line-height', `${lineHeight}px`);
-    editableNode.style.width =
-      editableNode.scrollWidth > scroller.clientWidth ? `${editableNode.scrollWidth}px` : '';
-    editableNode.style.height =
-      editableNode.scrollHeight > scroller.clientHeight ? `${editableNode.scrollHeight}px` : '';
+    const { width, height } = contentExtent(cs, lineHeight);
+    editableNode.style.width = width > scroller.clientWidth ? `${Math.ceil(width)}px` : '';
+    editableNode.style.height = height > scroller.clientHeight ? `${Math.ceil(height)}px` : '';
     editableNode.scrollTop = 0;
     editableNode.scrollLeft = 0;
   }
