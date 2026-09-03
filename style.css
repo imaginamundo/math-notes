@@ -481,6 +481,22 @@ button:hover {
 .font-steps button + button {
   border-left: 1px solid var(--border-strong);
 }
+/* Floating "Keep content | Clear content" action that appears right after the
+   seeded Welcome sheet's last line while that starter content is still intact. */
+.starter-prompt {
+  position: absolute;
+  z-index: 3;
+  display: none;
+  align-items: center;
+  gap: 0;
+  width: max-content;
+}
+.starter-prompt.visible {
+  display: inline-flex;
+}
+.starter-prompt button + button {
+  border-left: 1px solid var(--border-strong);
+}
 .find-bar {
   position: absolute;
   top: 0.5em;
