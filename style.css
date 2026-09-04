@@ -482,7 +482,10 @@ button:hover {
   border-left: 1px solid var(--border-strong);
 }
 /* Floating "Keep content | Clear content" action that appears right after the
-   seeded Welcome sheet's last line while that starter content is still intact. */
+   seeded Welcome sheet's last line while that starter content is still intact.
+   The buttons need their own surface: the default button background is the same
+   --color-primary as the editor behind them, which would make the whole pill
+   vanish into the sheet. */
 .starter-prompt {
   position: absolute;
   z-index: 3;
@@ -490,9 +493,19 @@ button:hover {
   align-items: center;
   gap: 0;
   width: max-content;
+  background: var(--color-footer);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 2px 8px var(--shadow-modal);
 }
 .starter-prompt.visible {
   display: inline-flex;
+}
+.starter-prompt button {
+  background: transparent;
+  color: var(--color-text);
+}
+.starter-prompt button:hover {
+  filter: brightness(1.3);
 }
 .starter-prompt button + button {
   border-left: 1px solid var(--border-strong);
