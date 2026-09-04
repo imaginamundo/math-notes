@@ -495,7 +495,6 @@ button:hover {
   width: max-content;
   background: var(--color-footer);
   border: 1px solid var(--border-strong);
-  box-shadow: 0 2px 8px var(--shadow-modal);
 }
 .starter-prompt.visible {
   display: inline-flex;

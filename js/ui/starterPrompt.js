@@ -38,7 +38,8 @@ function initStarterPrompt(editableNode) {
 
   const keepButton = document.createElement('button');
   keepButton.type = 'button';
-  keepButton.textContent = 'Keep content';
+  keepButton.className = 'starter-keep';
+  keepButton.textContent = '✓ Keep content';
   keepButton.title = 'Keep this example content';
   keepButton.addEventListener('click', () => {
     writeDismissed();
@@ -47,7 +48,8 @@ function initStarterPrompt(editableNode) {
 
   const clearButton = document.createElement('button');
   clearButton.type = 'button';
-  clearButton.textContent = 'Clear content';
+  clearButton.className = 'starter-clear';
+  clearButton.textContent = '× Clear content';
   clearButton.title = 'Empty this tab';
   clearButton.addEventListener('click', () => {
     writeDismissed();
