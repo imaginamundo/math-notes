@@ -13,6 +13,7 @@ import initIo from './ui/io.js';
 import initShortcuts from './ui/shortcuts.js';
 import initFind from './ui/find.js';
 import initLineNumbers from './ui/lineNumbers.js';
+import initStarterPrompt from './ui/starterPrompt.js';
 import initLoadingIndicator from './ui/loading.js';
 import initEditorScroll from './ui/editor.js';
 
@@ -53,6 +54,8 @@ initIo(contentEditableNode);
 initShortcuts(contentEditableNode, evalClient.requestLines, tabsApi.switchTab);
 initFind(contentEditableNode, viewNode, evalClient.update, evalClient.flush);
 initLineNumbers(contentEditableNode);
+// Runs before initOnboarding, so it sees the seeded starter sheet appear.
+initStarterPrompt(contentEditableNode);
 
 // Last, so every surface the tour points at is already wired.
 initOnboarding(contentEditableNode, tabsApi, onboardingState);

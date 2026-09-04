@@ -10,6 +10,8 @@ const RESET_KEYS = [
   'fontSize',
   // So "Reset data" genuinely returns the app to a first run, tour included.
   'math-notes-onboarded',
+  // A first run should also offer the starter-content actions again.
+  'math-notes-starter-dismissed',
 ];
 
 const THEMES = [
