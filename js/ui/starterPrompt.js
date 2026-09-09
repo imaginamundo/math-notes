@@ -1,5 +1,6 @@
 import { STARTER_SHEET } from './onboarding.js';
 import storage from '../util/storage.js';
+import { setEditorValue } from './editorInput.js';
 
 // A small floating "Keep content | Clear content" control shown right after the
 // seeded Welcome sheet, so the sample content can be dismissed or emptied with
@@ -48,8 +49,7 @@ function initStarterPrompt(editableNode) {
   clearButton.title = 'Empty this tab';
   clearButton.addEventListener('click', () => {
     writeDismissed();
-    editableNode.value = '';
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+    setEditorValue(editableNode, '');
   });
 
   control.append(keepButton, clearButton);

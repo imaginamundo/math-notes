@@ -1,6 +1,7 @@
 import formatResult from '../render/formatResult.js';
 import { indexOfLineAt } from '../util/text.js';
 import { copyText } from '../util/clipboard.js';
+import { setEditorValue } from './editorInput.js';
 
 function initShortcuts(editableNode, requestResults, switchTab) {
   document.addEventListener('keydown', (event) => {
@@ -36,8 +37,7 @@ function initShortcuts(editableNode, requestResults, switchTab) {
     } else if (shift && key === 'backspace') {
       event.preventDefault();
       if (!editableNode.value || window.confirm('Clear the active sheet?')) {
-        editableNode.value = '';
-        editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+        setEditorValue(editableNode, '');
       }
     }
   });

@@ -1,4 +1,5 @@
 import { clearMarks, applyMarks } from '../render/marks.js';
+import { setEditorValue } from './editorInput.js';
 
 function initFind(editableNode, viewNode) {
   const barNode = buildBar();
@@ -95,10 +96,10 @@ function initFind(editableNode, viewNode) {
     if (!query || activeIndex === -1) return;
     const match = matches[activeIndex];
     const replacement = replaceInput.value;
-    editableNode.value =
+    const value =
       editableNode.value.slice(0, match.start) + replacement + editableNode.value.slice(match.end);
-    editableNode.selectionStart = editableNode.selectionEnd = match.start + replacement.length;
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+    const caret = match.start + replacement.length;
+    setEditorValue(editableNode, value, { start: caret, end: caret });
     scrollToActive();
     replaceInput.focus();
   }
@@ -114,9 +115,8 @@ function initFind(editableNode, viewNode) {
       last = match.end;
     }
     out += value.slice(last);
-    editableNode.value = out;
-    editableNode.selectionStart = editableNode.selectionEnd = editableNode.value.length;
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+    const caret = out.length;
+    setEditorValue(editableNode, out, { start: caret, end: caret });
     scrollToActive();
     replaceInput.focus();
   }

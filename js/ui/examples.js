@@ -1,4 +1,5 @@
 import { scrollEditorToEnd } from '../util/scroll.js';
+import { setEditorValue } from './editorInput.js';
 
 // Wires up clickable example chips: fills the <code> from data-expr, inserts
 // the expression into the editor on click/Enter/Space, then runs onInsert.
@@ -24,8 +25,8 @@ function initExamples(containerNode, editableNode, onInsert) {
 function insertExample(editableNode, expression) {
   if (!expression) return;
   const current = editableNode.value;
-  editableNode.value = current ? current.replace(/\s+$/, '') + '\n' + expression : expression;
-  editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+  const value = current ? current.replace(/\s+$/, '') + '\n' + expression : expression;
+  setEditorValue(editableNode, value);
   scrollEditorToEnd(editableNode);
 }
 
