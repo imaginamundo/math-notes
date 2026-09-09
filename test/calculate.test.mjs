@@ -206,6 +206,15 @@ test('evaluateLines treats uppercase aggregates like lowercase', () => {
   assert.equal(evaluateLines(['10', '20', 'SUM + 1']).results[2].value, 31);
 });
 
+test('evaluateLines bounds huge ranges but allows empty ones', () => {
+  const huge = evaluateLines(['1:100000000']);
+  assert.equal(huge.results[0].type, 'error');
+  assert.match(huge.results[0].value, /limited/);
+  const empty = evaluateLines(['100:1', '5:5']);
+  assert.equal(empty.results[0].type, 'value');
+  assert.equal(empty.results[1].type, 'value');
+});
+
 test('evaluateLines sum stops at an empty line', () => {
   assert.equal(evaluateLines(['10', '', '20', 'sum']).results[3].value, 20);
 });

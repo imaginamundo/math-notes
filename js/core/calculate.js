@@ -62,7 +62,9 @@ function assertBoundedExpression(expression, scope) {
       const end = resolve(node.end, null);
       const step = resolve(node.step, 1);
       if (end !== null && step !== null) {
-        const count = Math.floor(Math.abs((end - start) / step)) + 1;
+        // Sign-aware count: a range that descends (or steps the wrong way)
+        // materialises nothing, while a genuinely long ascending one does.
+        const count = Math.max(0, Math.floor((end - start) / step) + 1);
         if (count > MAX_LIST_LENGTH) {
           throw new Error(`Ranges are limited to ${MAX_LIST_LENGTH} items`);
         }
