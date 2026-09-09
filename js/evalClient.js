@@ -90,10 +90,10 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     if (pendingUpdates === 1) setBusy(true);
     const text = editableNode.value;
     const lines = text.split('\n');
-    // Draw the input first so a slow sheet never hides what you just typed;
-    // the results fill in when the reply lands (or not at all if stale).
-    if (onTextRender) onTextRender(lines);
     try {
+      // Draw the input first so a slow sheet never hides what you just typed;
+      // the results fill in when the reply lands (or not at all if stale).
+      if (onTextRender) onTextRender(lines);
       const { data } = await requestEvaluate(lines);
       if (editableNode.value !== text) return;
       onRender(lines, data);
