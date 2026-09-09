@@ -43,7 +43,7 @@ globalThis.document = {
 };
 
 const format = (await import('../js/render/format.js')).default;
-const { renderText, patchResults } = await import('../js/render/renderInput.js');
+const { createRowRenderer } = await import('../js/render/renderInput.js');
 
 test('a line with a comment renders without throwing', () => {
   const node = format.line('1 + 1 # hello');
@@ -60,7 +60,7 @@ test('a comment-only line renders the comment', () => {
 
 test('comment rendering does not drop following lines', () => {
   const view = new El('pre');
-  renderText(view, ['1 + 1 # one', '2 + 2 # two', '3 + 3']);
+  createRowRenderer(view).renderText(['1 + 1 # one', '2 + 2 # two', '3 + 3']);
   assert.equal(view.children.length, 3);
   assert.equal(view.children[0].className, 'line-row');
   assert.equal(view.children[0].children[0]._classes.has('line'), true);
@@ -69,6 +69,7 @@ test('comment rendering does not drop following lines', () => {
 
 test('two-phase rendering fills ghost results into rows', () => {
   const view = new El('pre');
+  const renderer = createRowRenderer(view);
   const lines = ['1 + 1', 'x = 5', '2 +', ''];
   const results = [
     { type: 'value', value: 2 },
@@ -77,13 +78,13 @@ test('two-phase rendering fills ghost results into rows', () => {
     { type: 'value', value: undefined },
   ];
 
-  renderText(view, lines);
+  renderer.renderText(lines);
   const ghostsBefore = view.children
     .flatMap((row) => row.children)
     .filter((child) => child.className && child.className.includes('ghost-result'));
   assert.equal(ghostsBefore.length, 0, 'text renders with no results yet');
 
-  patchResults(view, lines, results, 0);
+  renderer.patchResults(lines, results, 0);
   const ghosts = view.children
     .flatMap((row) => row.children)
     .filter((child) => child.className && child.className.includes('ghost-result'));
@@ -140,15 +141,16 @@ test('patchResults fills an unchanged sheet that has never had results', () => {
   // earlier render was gated out as stale, the rows are still pending and the
   // results must be applied anyway — otherwise nothing ever renders them.
   const view = new El('pre');
+  const renderer = createRowRenderer(view);
   const lines = ['1 + 1', '2 + 2'];
   const results = [
     { type: 'value', value: 2 },
     { type: 'value', value: 4 },
   ];
-  renderText(view, lines);
+  renderer.renderText(lines);
   assert.equal(view.children.length, 2);
 
-  patchResults(view, lines, results, -1);
+  renderer.patchResults(lines, results, -1);
   const ghosts = view.children
     .flatMap((row) => row.children)
     .filter((child) => child.className && child.className.includes('ghost-result'));
@@ -156,7 +158,7 @@ test('patchResults fills an unchanged sheet that has never had results', () => {
 
   // Once patched, -1 really is a no-op: the rows are left untouched.
   const drawn = view.children[0];
-  patchResults(view, lines, results, -1);
+  renderer.patchResults(lines, results, -1);
   assert.equal(view.children.length, 2);
   assert.equal(view.children[0], drawn, 'the existing rows were reused');
 });
