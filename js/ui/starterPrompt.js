@@ -8,6 +8,8 @@ import storage from '../util/storage.js';
 const DISMISSED_KEY = 'math-notes-starter-dismissed';
 const GAP_AFTER_LINES = 10;
 
+export { DISMISSED_KEY };
+
 function readDismissed() {
   return storage.get(DISMISSED_KEY) === '1';
 }

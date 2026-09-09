@@ -85,5 +85,5 @@ function initCurrency(math) {
   });
 }
 
-export { registerRates, loadCached, fetchRates };
+export { registerRates, loadCached, fetchRates, STORAGE_KEY };
 export default initCurrency;

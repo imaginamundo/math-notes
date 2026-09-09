@@ -577,6 +577,7 @@ function initTabs(editableNode, onUpdate) {
   return { switchTab, restoreTab, restoreAll, openSheet, getActiveSheet, seedSheet };
 }
 
+export { STORAGE_KEY, LEGACY_KEY };
 export { createTab, closeTab, renameTab, setActiveTab, setContent, moveTab };
 export { deriveNextTabNumber };
 export default initTabs;

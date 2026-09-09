@@ -6,6 +6,8 @@ import storage from '../util/storage.js';
 const FONT_KEY = 'math-notes-font-size';
 const LEGACY_FONT_KEY = 'fontSize';
 
+export { FONT_KEY, LEGACY_FONT_KEY };
+
 function initFontControls(onChange = () => {}) {
   const fontMinusNode = document.getElementById('font-minus');
   const fontPlusNode = document.getElementById('font-plus');
