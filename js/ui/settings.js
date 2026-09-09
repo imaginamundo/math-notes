@@ -1,6 +1,7 @@
 import initModal from './modal.js';
+import storage from '../util/storage.js';
 
-const STORAGE_KEY = 'math-notes-theme';
+export const STORAGE_KEY = 'math-notes-theme';
 const RESET_KEYS = [
   STORAGE_KEY,
   'math-notes-tabs',
@@ -34,11 +35,7 @@ function syncThemeColor(id) {
 function applyTheme(id) {
   document.documentElement.dataset.theme = id;
   syncThemeColor(id);
-  try {
-    localStorage.setItem(STORAGE_KEY, id);
-  } catch {
-    // storage unavailable
-  }
+  storage.set(STORAGE_KEY, id);
 }
 
 function initSettings(contentEditableNode, tabsApi) {
@@ -89,13 +86,7 @@ function initSettings(contentEditableNode, tabsApi) {
   const resetButton = document.getElementById('reset-data-button');
   resetButton.addEventListener('click', async () => {
     if (!window.confirm('This will reset the theme, tabs and all stored data. Continue?')) return;
-    RESET_KEYS.forEach((key) => {
-      try {
-        localStorage.removeItem(key);
-      } catch {
-        // storage unavailable
-      }
-    });
+    RESET_KEYS.forEach((key) => storage.remove(key));
     try {
       const { clearSnapshots } = await import('../storage/snapshots.js');
       await clearSnapshots();

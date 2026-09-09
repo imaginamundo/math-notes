@@ -1,4 +1,5 @@
 import { CURRENCY_CODES } from './symbols.js';
+import storage from '../util/storage.js';
 
 const BASE = 'EUR';
 const API_URL = 'https://api.frankfurter.dev/v1/latest?from=' + BASE;
@@ -27,9 +28,8 @@ function registerRates(math, data) {
 }
 
 function loadCached() {
-  if (typeof localStorage === 'undefined') return null;
   try {
-    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    const parsed = JSON.parse(storage.get(STORAGE_KEY) || 'null');
     return parsed && parsed.base && parsed.rates ? parsed : null;
   } catch {
     return null;
@@ -37,11 +37,7 @@ function loadCached() {
 }
 
 function save(data) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, fetchedAt: Date.now() }));
-  } catch {
-    // storage unavailable
-  }
+  storage.set(STORAGE_KEY, JSON.stringify({ ...data, fetchedAt: Date.now() }));
 }
 
 function isFresh(data) {

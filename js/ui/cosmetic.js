@@ -1,6 +1,11 @@
+import storage from '../util/storage.js';
+
 // Applies a saved font size at startup and handles the +/-/reset buttons.
 // `onChange` is invoked after the new size is applied, so the editor can
 // re-sync its line-height and character width to the new metrics.
+const FONT_KEY = 'math-notes-font-size';
+const LEGACY_FONT_KEY = 'fontSize';
+
 function initFontControls(onChange = () => {}) {
   const fontMinusNode = document.getElementById('font-minus');
   const fontPlusNode = document.getElementById('font-plus');
@@ -13,11 +18,7 @@ function initFontControls(onChange = () => {}) {
     current: 16,
   };
   function setFontSize() {
-    try {
-      window.localStorage.setItem('math-notes-font-size', String(fontSize.current));
-    } catch {
-      // storage unavailable
-    }
+    storage.set(FONT_KEY, String(fontSize.current));
     document.documentElement.style.setProperty('--app-font-size', `${fontSize.current}px`);
     onChange();
     // Floating controls that anchor themselves to the editor metrics (the
@@ -40,25 +41,13 @@ function initFontControls(onChange = () => {}) {
     setFontSize();
   });
 
-  let saved = null;
-  let legacy = null;
-  try {
-    saved = parseInt(window.localStorage.getItem('math-notes-font-size'), 10);
-    legacy = parseInt(window.localStorage.getItem('fontSize'), 10);
-  } catch {
-    // storage unavailable
-  }
+  let saved = parseInt(storage.get(FONT_KEY), 10);
+  let legacy = parseInt(storage.get(LEGACY_FONT_KEY), 10);
   const current = saved || legacy;
   if (current) {
     fontSize.current = Math.min(fontSize.max, Math.max(fontSize.min, current));
     setFontSize();
-    if (!saved && legacy) {
-      try {
-        window.localStorage.removeItem('fontSize');
-      } catch {
-        // storage unavailable
-      }
-    }
+    if (!saved && legacy) storage.remove(LEGACY_FONT_KEY);
   }
 }
 

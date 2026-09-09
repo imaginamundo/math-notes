@@ -1,4 +1,5 @@
 import { STARTER_SHEET } from './onboarding.js';
+import storage from '../util/storage.js';
 
 // A small floating "Keep content | Clear content" control shown right after the
 // seeded Welcome sheet, so the sample content can be dismissed or emptied with
@@ -8,19 +9,11 @@ const DISMISSED_KEY = 'math-notes-starter-dismissed';
 const GAP_AFTER_LINES = 10;
 
 function readDismissed() {
-  try {
-    return localStorage.getItem(DISMISSED_KEY) === '1';
-  } catch {
-    return false;
-  }
+  return storage.get(DISMISSED_KEY) === '1';
 }
 
 function writeDismissed() {
-  try {
-    localStorage.setItem(DISMISSED_KEY, '1');
-  } catch {
-    // storage unavailable; the control simply shows again next time
-  }
+  storage.set(DISMISSED_KEY, '1');
 }
 
 function isStarterSheet(content) {

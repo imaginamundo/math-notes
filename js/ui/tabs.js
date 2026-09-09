@@ -1,6 +1,7 @@
 import { saveSnapshot, latestPerTab } from '../storage/snapshots.js';
 import { emptyHistory, recordChange, commitDraft, applyUndo, applyRedo } from '../core/history.js';
 import debounce from '../util/debounce.js';
+import storage from '../util/storage.js';
 
 /**
  * @typedef {{ id: string, name: string, content: string }} Tab
@@ -19,11 +20,7 @@ const persistDebounce = debounce(writeState, 400);
 const histories = new Map();
 
 function writeState() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // storage unavailable
-  }
+  storage.set(STORAGE_KEY, JSON.stringify(state));
 }
 
 function persist() {
@@ -96,11 +93,12 @@ let storageFailed = false;
 function loadInitialState() {
   let saved = null;
   try {
-    saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    saved = JSON.parse(storage.get(STORAGE_KEY) || 'null');
   } catch {
-    // storage unavailable or malformed, fall back to the null default
+    // malformed saved collection, fall back to the default below
     storageFailed = true;
   }
+  if (!storage.available()) storageFailed = true;
   if (saved && Array.isArray(saved.tabs) && saved.tabs.length) {
     // A stale activeId (a partial write, an old schema, a manual edit) would
     // make every subsequent setContent miss its tab and silently drop edits, so
@@ -112,13 +110,8 @@ function loadInitialState() {
       nextTabNumber: saved.nextTabNumber || saved.tabs.length + 1,
     };
   }
-  let content = '';
-  try {
-    content = localStorage.getItem(LEGACY_KEY) || '';
-    localStorage.removeItem(LEGACY_KEY);
-  } catch {
-    // storage unavailable
-  }
+  const content = storage.get(LEGACY_KEY) || '';
+  storage.remove(LEGACY_KEY);
   const tab = { id: generateId(), name: 'Tab 1', content };
   return { tabs: [tab], activeId: tab.id, nextTabNumber: 2 };
 }
