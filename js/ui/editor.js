@@ -97,8 +97,8 @@ function initEditorScroll(editableNode) {
   syncSize();
   return {
     syncSize,
-    // The font controls change --app-font-size outside the editor, which makes
-    // the cached character width and the --editor-line-height both stale.
+    // The font controls change the --app-font-scale outside the editor, which
+    // makes the cached character width and the --editor-line-height both stale.
     // Re-measure the glyphs and recompute the row metrics to match.
     refreshMetrics() {
       charWidth = 0;

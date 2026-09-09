@@ -11,8 +11,10 @@
       try {
         var t = localStorage.getItem('math-notes-theme');
         if (t) document.documentElement.dataset.theme = t;
-        var f = parseInt(localStorage.getItem('math-notes-font-size'), 10);
-        if (f) document.documentElement.style.setProperty('--app-font-size', f + 'px');
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
       } catch (e) {}
     })();
   </script>
