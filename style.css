@@ -318,7 +318,7 @@ input::placeholder {
   position: absolute;
   top: 0;
   left: var(--safe-left);
-  z-index: 0;
+  z-index: 1;
   width: var(--line-gutter);
   height: 100%;
   margin: 0;
@@ -488,7 +488,7 @@ button:hover {
    vanish into the sheet. */
 .starter-prompt {
   position: absolute;
-  z-index: 3;
+  z-index: 1;
   display: none;
   align-items: center;
   gap: 0;
@@ -583,14 +583,15 @@ button:hover {
   outline: none;
 }
 .find-match {
-  background: rgba(255, 213, 79, 0.35);
-  outline: 1px solid rgba(255, 213, 79, 0.5);
-  border-radius: 0.15em;
-  color: inherit;
+  background: rgba(255, 213, 79, 0.8);
+  color: #14161a;
+  border-radius: 0.12em;
+  outline: 1px solid rgba(255, 213, 79, 0.95);
 }
 .find-match.active {
-  background: rgba(255, 213, 79, 0.6);
-  outline: 2px solid rgba(255, 213, 79, 0.9);
+  background: #ffd54f;
+  color: #14161a;
+  outline: 2px solid #ffd54f;
 }
 /* Modal component (generic, reusable) */
 .modal {

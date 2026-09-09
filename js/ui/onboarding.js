@@ -6,22 +6,24 @@ const TABS_KEY = 'math-notes-tabs';
 // A working mini-tutorial rather than a wall of prose: every line below
 // evaluates, so the very first screen already demonstrates the app.
 const STARTER_SHEET = [
-  '# Welcome! This is a Math Notes sheet.',
-  '# Every line is evaluated and its result appears to the right.',
+  '# Welcome! Every line below is evaluated; results appear on the right.',
   '',
+  '# A label before a colon names the line; the math after it still runs:',
   'Coffee: 3.40',
   'Lunch: 12.90',
-  'Books: 24',
   'sum',
   '',
-  '# Name a value and reuse it, or refer to the line above with prev:',
+  '# Name a value with = and reuse it on a later line:',
   'people = 3',
-  'prev * 2',
+  'slices = 9',
+  'slices / people',
   '',
-  '# Units, percentages and sequences all work:',
+  '# prev is the previous result — blank lines and comments are skipped:',
+  'prev + 1',
+  '',
+  '# Units, percentages and lists work too:',
   '3 days + 4 hours in hours',
   '15% of 240',
-  '1:10',
 ].join('\n');
 
 const STARTER_NAME = 'Welcome';

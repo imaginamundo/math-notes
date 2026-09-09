@@ -2,7 +2,7 @@ import { fetchRates, loadCached } from './eval/currency.js';
 import debounce from './util/debounce.js';
 
 const EVALUATE_TIMEOUT = 10000;
-const UPDATE_DELAY = 50;
+const UPDATE_DELAY = 250;
 
 /**
  * Client for the evaluation worker. Owns the worker connection, the
@@ -10,10 +10,11 @@ const UPDATE_DELAY = 50;
  * update scheduling, and forwarding currency rates to the worker.
  *
  * @param {HTMLTextAreaElement} editableNode  Source of the current sheet text.
- * @param {(lines: string[], data: SheetResult) => void} onRender  Renders the result.
+ * @param {(lines: string[]) => void} onTextRender  Draws the typed input synchronously.
+ * @param {(lines: string[], data: SheetResult) => void} onRender  Renders the results.
  * @param {(busy: boolean) => void} [onBusy]  Notified while an evaluation is in flight.
  */
-export function createEvalClient(editableNode, onRender, onBusy) {
+export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
   let worker = null;
   let latestId = 0;
   const pending = new Map();
@@ -89,6 +90,9 @@ export function createEvalClient(editableNode, onRender, onBusy) {
     if (pendingUpdates === 1) setBusy(true);
     const text = editableNode.value;
     const lines = text.split('\n');
+    // Draw the input first so a slow sheet never hides what you just typed;
+    // the results fill in when the reply lands (or not at all if stale).
+    if (onTextRender) onTextRender(lines);
     try {
       const { data } = await requestEvaluate(lines);
       if (editableNode.value !== text) return;
