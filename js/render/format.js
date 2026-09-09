@@ -1,5 +1,5 @@
 import parseLine from '../core/parseLine.js';
-import { SYMBOL_SOURCE } from '../eval/symbols.js';
+import { SYMBOL_SOURCE } from '../core/currencySymbols.js';
 
 const RULES = {
   whitespace: /^\s+/,

@@ -1,4 +1,4 @@
-import { CURRENCY_CODES } from './symbols.js';
+import { registerCurrencyCode } from './symbols.js';
 import storage from '../util/storage.js';
 
 const BASE = 'EUR';
@@ -18,7 +18,7 @@ function registerRates(math, data) {
   ensureBaseUnit(math);
   for (const [code, perBase] of Object.entries(data.rates)) {
     if (code.toUpperCase() === BASE) continue;
-    CURRENCY_CODES.add(code.toUpperCase());
+    registerCurrencyCode(code);
     try {
       math.createUnit(code, { definition: `${1 / perBase} ${BASE}` }, { override: true });
     } catch {

@@ -1,14 +1,21 @@
-const CURRENCY_SYMBOLS = {
-  $: 'USD',
-  '€': 'EUR',
-  '£': 'GBP',
-  '¥': 'JPY',
-  '₹': 'INR',
-  '₺': 'TRY',
-  '₩': 'KRW',
-  R$: 'BRL',
-};
+import { CURRENCY_SYMBOLS, SYMBOL_SOURCE } from '../core/currencySymbols.js';
 
+const SYMBOL_AFTER_NUMBER = new RegExp(`(\\d[\\d.]*)\\s*(${SYMBOL_SOURCE})`, 'g');
+const SYMBOL_BEFORE_NUMBER = new RegExp(`(${SYMBOL_SOURCE})\\s*(\\d[\\d.]*)`, 'g');
+
+// Currency codes only become units in currency contexts (amounts and `to`/`in`
+// conversions), so bare codes used as identifiers keep their case, e.g.
+// `usd = 5` stays a variable assignment instead of `USD = 5`.
+const CODE = '[A-Za-z]{3}';
+const CODE_AFTER_NUMBER = new RegExp(`(\\d[\\d.]*)\\s*(${CODE})(?!\\w)`, 'g');
+const CODE_BEFORE_NUMBER = new RegExp(`(?<![\\w.])(${CODE})\\s*(\\d[\\d.]*)`, 'g');
+const CODE_BEFORE_TO = new RegExp(`(?<![\\w.])(${CODE})(\\s+)to\\b`, 'gi');
+const CODE_AFTER_TO = new RegExp(`\\bto(\\s+)(${CODE})(?!\\w)`, 'gi');
+const CODE_AFTER_IN = new RegExp(`\\bin(\\s+)(${CODE})(?!\\w)`, 'gi');
+
+// The codes that act as currency units, extended at runtime with whatever rates
+// are registered. Kept private behind registerCurrencyCode so no other module
+// can mutate the recognizer's vocabulary out from under it.
 const CURRENCY_CODES = new Set([
   'AUD',
   'BRL',
@@ -42,23 +49,6 @@ const CURRENCY_CODES = new Set([
   'ZAR',
 ]);
 
-const SYMBOLS = Object.keys(CURRENCY_SYMBOLS).sort((a, b) => b.length - a.length);
-const SYMBOL_SOURCE = SYMBOLS.map((symbol) => symbol.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join(
-  '|'
-);
-const SYMBOL_AFTER_NUMBER = new RegExp(`(\\d[\\d.]*)\\s*(${SYMBOL_SOURCE})`, 'g');
-const SYMBOL_BEFORE_NUMBER = new RegExp(`(${SYMBOL_SOURCE})\\s*(\\d[\\d.]*)`, 'g');
-
-// Currency codes only become units in currency contexts (amounts and `to`/`in`
-// conversions), so bare codes used as identifiers keep their case, e.g.
-// `usd = 5` stays a variable assignment instead of `USD = 5`.
-const CODE = '[A-Za-z]{3}';
-const CODE_AFTER_NUMBER = new RegExp(`(\\d[\\d.]*)\\s*(${CODE})(?!\\w)`, 'g');
-const CODE_BEFORE_NUMBER = new RegExp(`(?<![\\w.])(${CODE})\\s*(\\d[\\d.]*)`, 'g');
-const CODE_BEFORE_TO = new RegExp(`(?<![\\w.])(${CODE})(\\s+)to\\b`, 'gi');
-const CODE_AFTER_TO = new RegExp(`\\bto(\\s+)(${CODE})(?!\\w)`, 'gi');
-const CODE_AFTER_IN = new RegExp(`\\bin(\\s+)(${CODE})(?!\\w)`, 'gi');
-
 function preprocessSymbols(expression) {
   return uppercaseCurrencyCodes(
     expression
@@ -87,4 +77,8 @@ function uppercaseCode(token) {
   return CURRENCY_CODES.has(upper) ? upper : token;
 }
 
-export { CURRENCY_SYMBOLS, CURRENCY_CODES, SYMBOL_SOURCE, preprocessSymbols };
+function registerCurrencyCode(code) {
+  CURRENCY_CODES.add(code.toUpperCase());
+}
+
+export { registerCurrencyCode, preprocessSymbols };
