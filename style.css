@@ -318,7 +318,7 @@ input::placeholder {
   position: absolute;
   top: 0;
   left: var(--safe-left);
-  z-index: 0;
+  z-index: 1;
   width: var(--line-gutter);
   height: 100%;
   margin: 0;
@@ -488,7 +488,7 @@ button:hover {
    vanish into the sheet. */
 .starter-prompt {
   position: absolute;
-  z-index: 3;
+  z-index: 1;
   display: none;
   align-items: center;
   gap: 0;
