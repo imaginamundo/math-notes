@@ -127,7 +127,9 @@ function createEngine() {
   // work inside expressions too, e.g. `a = sum` or `sum * 2`.
   function substituteAggregates(parsed, sum, average) {
     const replace = (expression) =>
-      expression.replace(AGGREGATE_SUM_WORD, String(sum)).replace(AGGREGATE_AVG_WORD, String(average));
+      expression
+        .replace(AGGREGATE_SUM_WORD, String(sum))
+        .replace(AGGREGATE_AVG_WORD, String(average));
 
     if (parsed.isAssignment) {
       const rhs = replace(parsed.rhs);
