@@ -34,7 +34,9 @@ Based on [Numi](https://numi.app/).
 - **Find & replace** — press `⌘F` / `Ctrl+F` to search the active sheet with
   live match highlighting, then replace one or all matches.
 - **Line numbers** — a left gutter numbers the sheet and highlights the line
-  the caret is on.
+  the caret is on. Click a number to comment or uncomment that line.
+- **Jump to line** — press `⌘G` / `Ctrl+G` and type a line number to move the
+  caret there quickly.
 - **Text size** — the footer's − / + steps the editor text as a percentage of
   your browser's default font size (100% = your setting), so it respects
   accessibility preferences.
