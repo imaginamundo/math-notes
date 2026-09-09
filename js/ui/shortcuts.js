@@ -6,6 +6,7 @@ function initShortcuts(editableNode, requestResults, switchTab) {
   document.addEventListener('keydown', (event) => {
     const mod = event.metaKey || event.ctrlKey;
     if (!mod) return;
+    if (document.body.classList.contains('tour-open')) return;
     if (document.querySelector('dialog[open]')) return;
     const active = document.activeElement;
     if (active && active !== editableNode && active.tagName === 'INPUT') return;

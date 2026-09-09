@@ -230,6 +230,7 @@ function initTabs(editableNode, onUpdate) {
     if (!mod) return;
     const key = event.key.toLowerCase();
     if (key !== 'z' && key !== 'y') return;
+    if (document.body.classList.contains('tour-open')) return;
     const active = document.activeElement;
     if (active && active !== editableNode && active.tagName === 'INPUT') return;
     if (document.querySelector('dialog[open]')) return;
