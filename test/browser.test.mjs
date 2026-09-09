@@ -246,10 +246,7 @@ test('find marks wrap typed text and ignore ghost results', async () => {
       new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })
     )
   );
-  assert.equal(
-    await page.evaluate(() => document.querySelectorAll('#view .find-match').length),
-    0
-  );
+  assert.equal(await page.evaluate(() => document.querySelectorAll('#view .find-match').length), 0);
   const text = await page.evaluate(() =>
     [...document.querySelectorAll('#view .line')].map((line) => line.textContent).join('\n')
   );

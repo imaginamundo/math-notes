@@ -1,4 +1,4 @@
-import { test, beforeEach } from 'node:test';
+import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 // A tiny Worker stand-in that records messages and can auto-answer or be
@@ -41,11 +41,10 @@ class WorkerStub {
   }
 }
 
-let fetchCalls = 0;
-globalThis.fetch = async () => {
-  fetchCalls++;
-  return { ok: true, json: async () => ({ base: 'EUR', rates: {} }) };
-};
+globalThis.fetch = async () => ({
+  ok: true,
+  json: async () => ({ base: 'EUR', rates: {} }),
+});
 
 const editableNode = () => ({ value: '1 + 1' });
 
@@ -66,10 +65,6 @@ function setup() {
   );
   return { client, node, textRender, renders, busy };
 }
-
-beforeEach(() => {
-  fetchCalls = 0;
-});
 
 test('update renders text, evaluates and clears the busy flag', async () => {
   const { client, textRender, renders, busy } = setup();
