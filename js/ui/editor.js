@@ -85,7 +85,11 @@ function initEditorScroll(editableNode) {
   }
 
   editableNode.addEventListener('input', () => {
-    syncSize();
+    // Sizing is handled once by the composition root after it redraws the
+    // rows (js/index.js); this listener only keeps the caret visible and
+    // clears the browser's internal scroll position so the layers stay glued.
+    editableNode.scrollTop = 0;
+    editableNode.scrollLeft = 0;
     scrollCaretIntoView();
   });
   editableNode.addEventListener('keyup', scrollCaretIntoView);
