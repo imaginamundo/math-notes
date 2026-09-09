@@ -1,3 +1,5 @@
+import { scrollEditorToEnd } from '../util/scroll.js';
+
 function initIo(editableNode) {
   const exportButton = document.getElementById('export-button');
   const importButton = document.getElementById('import-button');
@@ -29,8 +31,7 @@ function initIo(editableNode) {
       }
       editableNode.value = imported;
       editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-      const scroller = editableNode.closest('.editor-scroll');
-      if (scroller) scroller.scrollTop = scroller.scrollHeight;
+      scrollEditorToEnd(editableNode);
     };
     reader.readAsText(file);
   });
