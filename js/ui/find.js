@@ -129,7 +129,7 @@ function initFind(editableNode, viewNode) {
     mark.scrollIntoView({ block: 'center', inline: 'center' });
   }
 
-  findInput.addEventListener('input', () => refresh(true));
+  findInput.addEventListener('input', () => refresh(false));
   findInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
