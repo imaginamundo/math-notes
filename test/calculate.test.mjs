@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluateLines, evaluateLine } from '../js/core/calculate.js';
+import { evaluateLines, evaluateLine, registerCurrencyRates } from '../js/core/calculate.js';
 import parseLine from '../js/core/parseLine.js';
 
 test('parseLine splits a plain expression', () => {
@@ -133,6 +133,20 @@ test('evaluateLines evaluates comparisons as values', () => {
   assert.equal(evaluateLines(['1 == 1']).results[0].value, true);
   assert.equal(evaluateLines(['1 != 2']).results[0].value, true);
   assert.equal(evaluateLines(['x = 3', 'x <= 2']).results[1].value, false);
+});
+
+test('evaluateLines recomputes conversions when rates change', () => {
+  const setRates = (usd) => registerCurrencyRates({ base: 'EUR', rates: { USD: usd } });
+  setRates(1.1);
+  const before = evaluateLines(['1 USD to EUR']);
+  assert.equal(before.startLine, 0);
+  assert.ok(Math.abs(before.results[0].value.toNumber('EUR') - 1 / 1.1) < 1e-9);
+  assert.equal(evaluateLines(['1 USD to EUR']).startLine, -1, 'cached while rates are stable');
+
+  setRates(2.2);
+  const after = evaluateLines(['1 USD to EUR']);
+  assert.equal(after.startLine, 0, 'a rate change must not be served from cache');
+  assert.ok(Math.abs(after.results[0].value.toNumber('EUR') - 1 / 2.2) < 1e-9);
 });
 
 test('evaluateLines keeps Infinity and null as results', () => {

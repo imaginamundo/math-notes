@@ -124,7 +124,12 @@ function substituteAggregates(parsed, sum, average) {
 const cache = {
   lines: [],
   results: [],
+  revision: -1,
 };
+
+// Bumped whenever evaluation semantics change without the lines changing
+// (currency rates registered), so the cache cannot serve stale results.
+let environmentRevision = 0;
 
 // Returns the index of the first line that differs, or -1 when identical.
 function findFirstDifference(previous, next) {
@@ -141,6 +146,11 @@ function findFirstDifference(previous, next) {
  * @returns {SheetResult}
  */
 function evaluateLines(lines) {
+  if (cache.revision !== environmentRevision) {
+    cache.lines = [];
+    cache.results = [];
+    cache.revision = environmentRevision;
+  }
   const startLine = findFirstDifference(cache.lines, lines);
   if (startLine === -1) {
     return { results: cache.results, total: computeTotal(cache.results), startLine };
@@ -227,6 +237,15 @@ function evaluateLines(lines) {
  */
 function registerCurrencyRates(data) {
   registerRates(math, data);
+  environmentRevision++;
+}
+
+if (typeof window !== 'undefined') {
+  // The main-thread fallback registers rates through its own currency:updated
+  // listener, so invalidate there too or cached conversions would go stale.
+  window.addEventListener('currency:updated', () => {
+    environmentRevision++;
+  });
 }
 
 export { evaluateLines, evaluateLine, registerCurrencyRates };
