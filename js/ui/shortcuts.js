@@ -1,4 +1,5 @@
 import formatResult from '../render/formatResult.js';
+import { indexOfLineAt } from '../util/text.js';
 import { copyText } from '../util/clipboard.js';
 
 function initShortcuts(editableNode, requestResults, switchTab) {
@@ -55,13 +56,4 @@ async function copyCurrentLineResult(editableNode, requestResults) {
   }
 }
 
-function indexOfLineAt(text, position) {
-  let lineIndex = 0;
-  for (let i = 0; i < text.length && i < position; i++) {
-    if (text[i] === '\n') lineIndex++;
-  }
-  return lineIndex;
-}
-
-export { indexOfLineAt };
 export default initShortcuts;
