@@ -36,8 +36,22 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
       pending.delete(event.data.id);
       callback(event.data);
     });
+    // If the worker crashes or its script fails to load, reject everything in
+    // flight and fall back to the main-thread evaluator so the app degrades
+    // gracefully instead of stalling on a 10s timeout per request.
+    worker.addEventListener('error', dropWorker);
     const cachedRates = loadCached();
     if (cachedRates) worker.postMessage({ type: 'rates', data: cachedRates });
+  }
+
+  function dropWorker() {
+    if (!worker) return;
+    worker.terminate();
+    worker = null;
+    for (const [id, callback] of pending) {
+      pending.delete(id);
+      callback({ type: 'error', message: 'The evaluation worker failed' });
+    }
   }
 
   /**
@@ -65,7 +79,20 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     const load = fallbackModule
       ? Promise.resolve(fallbackModule)
       : import('./core/calculate.js').then((mod) => (fallbackModule = mod));
-    return load.then((mod) => ({ id: 0, data: mod.evaluateLines(lines) }));
+    return withTimeout(
+      load.then((mod) => ({ id: 0, data: mod.evaluateLines(lines) })),
+      EVALUATE_TIMEOUT
+    );
+  }
+
+  // Reject when a promise does not settle in time (clears the timer so a late
+  // settlement cannot reject a caller that already moved on).
+  function withTimeout(promise, ms) {
+    let timer = null;
+    const timeout = new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error('Evaluation timed out')), ms);
+    });
+    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
   }
 
   /**
