@@ -570,6 +570,10 @@ button:hover {
 .find-bar.open {
   display: flex;
 }
+.go-to-bar {
+  right: auto;
+  left: calc(1em + var(--line-gutter) + var(--safe-left));
+}
 .find-row {
   display: flex;
   flex-wrap: wrap;

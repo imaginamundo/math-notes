@@ -70,6 +70,7 @@ people = 4
 | `Ctrl+Tab` / `Ctrl+Shift+Tab`  | Next / previous tab             |
 | `⌘1…9` / `Ctrl+1…9`            | Jump to the nth tab             |
 | `⌘F` / `Ctrl+F`                | Find & replace in the sheet     |
+| `⌘G` / `Ctrl+G`                | Jump to a line number           |
 | `⇧⌘C` / `Ctrl+Shift+C`         | Copy the current line's result  |
 | `⇧⌘S` / `Ctrl+Shift+S`         | Copy a share link               |
 | `⇧⌘L` / `Ctrl+Shift+L`         | Copy a share link (alternate)   |

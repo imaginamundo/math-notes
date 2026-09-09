@@ -278,6 +278,40 @@ test('clicking a line number comments and uncomments that line', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('Cmd+G jumps the caret to the requested line', async () => {
+  await newPage();
+  await setContent('one = 1\n\nthree = 3\n\nfive = 5');
+  await wait(150);
+
+  await page.evaluate(() =>
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'g', metaKey: true, bubbles: true, cancelable: true })
+    )
+  );
+  await wait(50);
+  assert.equal(await page.evaluate(() => Boolean(document.querySelector('.go-to-bar.open'))), true);
+
+  await page.evaluate(() => {
+    const input = document.querySelector('.go-to-input');
+    input.value = '5';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })
+    );
+  });
+  await wait(50);
+  assert.equal(
+    await page.evaluate(() => Boolean(document.querySelector('.go-to-bar.open'))),
+    false
+  );
+  const caretLine = await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    return ed.value.slice(0, ed.selectionStart).split('\n').length - 1;
+  });
+  assert.equal(caretLine, 4, 'caret moved to the start of line 5');
+  assert.deepEqual(errors, []);
+});
+
 test('a result on an overflowing line is reachable by horizontal scroll', async () => {
   await newPage();
   const longLine =
