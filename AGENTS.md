@@ -73,5 +73,6 @@ project's terminology.
   `js/storage/` persistence.
 - Guard every storage/worker call (localStorage, IndexedDB, clipboard may be
   unavailable); wrap in try/catch or `.catch(() => {})`.
-- Worker updates are async: use the debounced `scheduleUpdate`/`flushUpdate` in
-  `js/index.js`; `find` awaits `onUpdate` before applying marks.
+- Worker updates are async: use the debounced `schedule`/`update` client in
+  `js/evalClient.js`; `find` re-marks the view synchronously on input and never
+  forces an evaluation itself.

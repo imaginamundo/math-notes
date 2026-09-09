@@ -1,4 +1,4 @@
-function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
+function initFind(editableNode, viewNode) {
   const barNode = buildBar();
   const findInput = barNode.querySelector('.find-input');
   const replaceInput = barNode.querySelector('.replace-input');
@@ -24,7 +24,7 @@ function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
     );
     if (selected && !selected.includes('\n')) findInput.value = selected;
     barNode.classList.add('open');
-    refresh(true, true);
+    refresh(true);
     findInput.focus();
     findInput.select();
   }
@@ -39,18 +39,16 @@ function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
     editableNode.focus();
   }
 
-  async function refresh(renderView, scrollTo) {
+  // Matches only ever depend on the sheet text and the query, and phase-one
+  // rendering keeps the view rows current synchronously, so marking needs no
+  // worker round-trip. The view is rebuilt on the editor's input event, which
+  // is why this also runs (without scrolling) when the sheet changes.
+  function refresh(scrollTo) {
     const prevAnchor =
       activeIndex !== -1 && matches[activeIndex]
         ? matches[activeIndex].start
         : editableNode.selectionStart;
     query = findInput.value;
-    if (renderView) {
-      await onUpdate();
-      // The bar may have closed (Escape) while the worker reply was in flight;
-      // do not repaint marks for a search the user dismissed.
-      if (!barNode.classList.contains('open')) return;
-    }
     if (!query) {
       matches = [];
       activeIndex = -1;
@@ -91,7 +89,7 @@ function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
     scrollToActive();
   }
 
-  async function replaceCurrent() {
+  function replaceCurrent() {
     if (!query || activeIndex === -1) return;
     const match = matches[activeIndex];
     const replacement = replaceInput.value;
@@ -99,12 +97,11 @@ function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
       editableNode.value.slice(0, match.start) + replacement + editableNode.value.slice(match.end);
     editableNode.selectionStart = editableNode.selectionEnd = match.start + replacement.length;
     editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-    await lastRefresh;
     scrollToActive();
     replaceInput.focus();
   }
 
-  async function replaceAll() {
+  function replaceAll() {
     if (!query || !matches.length) return;
     const replacement = replaceInput.value;
     const value = editableNode.value;
@@ -118,7 +115,6 @@ function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
     editableNode.value = out;
     editableNode.selectionStart = editableNode.selectionEnd = editableNode.value.length;
     editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-    await lastRefresh;
     scrollToActive();
     replaceInput.focus();
   }
@@ -133,7 +129,7 @@ function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
     mark.scrollIntoView({ block: 'center', inline: 'center' });
   }
 
-  findInput.addEventListener('input', () => refresh(true, true));
+  findInput.addEventListener('input', () => refresh(true));
   findInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -159,18 +155,16 @@ function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
   caseButton.addEventListener('click', () => {
     caseSensitive = !caseSensitive;
     caseButton.classList.toggle('active', caseSensitive);
-    refresh(true, true);
+    refresh(true);
   });
   replaceOneButton.addEventListener('click', replaceCurrent);
   replaceAllButton.addEventListener('click', replaceAll);
 
-  let lastRefresh = Promise.resolve();
+  // The editor's own input handler has already redrawn the view rows by the
+  // time this listener runs, so rematch against the new text synchronously —
+  // no worker round-trip is needed just to keep the marks in place.
   editableNode.addEventListener('input', () => {
-    if (barNode.classList.contains('open')) {
-      lastRefresh = Promise.resolve(flushUpdate ? flushUpdate() : undefined).then(() =>
-        refresh(false, false)
-      );
-    }
+    if (barNode.classList.contains('open')) refresh(false);
   });
 
   document.addEventListener('keydown', (event) => {

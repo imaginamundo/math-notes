@@ -66,7 +66,7 @@ initSettings(contentEditableNode, tabsApi);
 initFontControls(editorScroll.refreshMetrics);
 initIo(contentEditableNode);
 initShortcuts(contentEditableNode, evalClient.requestLines, tabsApi.switchTab);
-initFind(contentEditableNode, viewNode, evalClient.update, evalClient.flush);
+initFind(contentEditableNode, viewNode);
 initLineNumbers(contentEditableNode);
 // Runs before initOnboarding, so it sees the seeded starter sheet appear.
 initStarterPrompt(contentEditableNode);
