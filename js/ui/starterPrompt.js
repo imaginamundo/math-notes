@@ -102,6 +102,7 @@ function initStarterPrompt(editableNode) {
     if (wasVisible) writeDismissed();
   });
   window.addEventListener('resize', refresh);
+  window.addEventListener('math:font-size-changed', refresh);
 
   refresh();
 }

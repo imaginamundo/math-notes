@@ -20,6 +20,9 @@ function initFontControls(onChange = () => {}) {
     }
     document.documentElement.style.setProperty('--app-font-size', `${fontSize.current}px`);
     onChange();
+    // Floating controls that anchor themselves to the editor metrics (the
+    // starter prompt) must reposition after a font change.
+    window.dispatchEvent(new Event('math:font-size-changed'));
   }
   fontMinusNode.addEventListener('click', () => {
     if (fontSize.current <= fontSize.min) return;
