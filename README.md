@@ -35,6 +35,9 @@ Based on [Numi](https://numi.app/).
   live match highlighting, then replace one or all matches.
 - **Line numbers** — a left gutter numbers the sheet and highlights the line
   the caret is on.
+- **Text size** — the footer's − / + steps the editor text as a percentage of
+  your browser's default font size (100% = your setting), so it respects
+  accessibility preferences.
 - **Auto-saved snapshots** — every tab's edits are backed up to IndexedDB and
   can be recovered from the **Settings** modal; sheets are rebuilt automatically
   if localStorage is unavailable or corrupt.
@@ -115,21 +118,15 @@ Regenerate the bundle, then minify it into the file the app loads:
 make -C js/lib
 ```
 
-### Tests
-
-The calculation pipeline is pure and covered by the Node test runner:
-
-```sh
-npm test
-```
-
 ### Architecture
 
 - `js/core/` — parsing and evaluation (`calculate.js`, `parseLine.js`,
-  `preprocess.js`, `aggregate.js`).
+  `preprocess.js`, `aggregate.js`, `history.js`).
 - `js/eval/` — mathjs extensions and preprocessors (`aliases.js`, `cssUnits.js`,
   `currency.js`, `datetime.js`, `scales.js`, `symbols.js`, `wordOperators.js`,
   `percentage.js`).
 - `js/render/` — highlighting and result rendering.
 - `js/ui/` — tabs, modals, help, recipes, settings, find & replace, line
   numbers, import/export, shortcuts and font controls.
+- `js/util/` — shared pure helpers (debounce, storage, clipboard, text, scroll,
+  sequence).

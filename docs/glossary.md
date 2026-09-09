@@ -19,13 +19,14 @@ Terms used throughout the codebase and this documentation.
   stored in IndexedDB and capped at 10 per tab.
 - **Worker** — the Web Worker (`js/worker.js`) that evaluates sheets off the
   main thread.
-- **Fallback** — main-thread evaluation used only when `Worker` is unavailable;
-  `js/core/calculate.js` is lazy-imported for it.
+- **Fallback** — main-thread evaluation used when `Worker` is unavailable or
+  dies mid-session; `js/core/calculate.js` is lazy-imported for it.
 - **Burst** — a run of edits grouped into a single undo step by the 700ms idle
   timer.
 - **Aggregate** — `sum`/`total`/`average`/`avg` keywords that combine the
   numeric lines above (stopping at a blank line).
-- **`prev`** — a scope variable holding the previous line's result.
+- **`prev`** — a scope variable holding the most recent result above the
+  current line (comments and blank lines are skipped).
 - **Preprocessors** — the regex transforms run before mathjs, in order: scales,
   symbols (currency), percentages, word operators.
 - **Currency context** — places where a 3-letter code is treated as a unit

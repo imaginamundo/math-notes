@@ -26,10 +26,14 @@ committing. Make one focused change per commit.
 
 - The editor is a transparent `<textarea>` overlaid by a styled `#view` ghost
   layer. Both share identical metrics (font, line-height, padding,
-  `white-space: pre`) and scroll position, mirrored in `js/index.js`.
+  `white-space: pre`) and sit as content-sized cells inside `.editor-scroll`,
+  so they move and scroll together (no scroll mirroring). `js/index.js` is the
+  composition root; `js/ui/editor.js` keeps the caret in view.
 - Evaluation runs in a Web Worker (`js/worker.js`) so heavy sheets never block
-  typing. `evaluateLines` in `js/core/calculate.js` is the pure engine; it
-  caches per-line results and only re-evaluates from the first changed line.
+  typing. The engine is built by `createEngine()` in `js/core/calculate.js`
+  and exported through a lazy shared instance; it caches per-line results,
+  only re-evaluates from the first changed line, and resets its cache when
+  currency rates are re-registered.
 - The worker serializes every result value to a string before posting back
   (mathjs `Unit`/`BigNumber` instances lose their prototypes in structured
   clone). The main thread renders from those strings.
@@ -58,9 +62,10 @@ project's terminology.
 4. The view is built as `.line-row` block wrappers, and `find.js`'s text walker
    (`textNodesInOrder`) counts `.line-row` boundaries as newlines so match
    offsets map to the raw text. Keep that structure.
-5. `evaluateLines` keeps a module-level cache (`cache.lines`, `cache.results`);
+5. `evaluateLines` keeps a per-engine cache (`cache.lines`, `cache.results`);
    results must stay correct across interleaved calls (the diff/recompute
-   logic).
+   logic), and the cache is reset whenever currency rates are re-registered
+   (an environment revision forces a full recompute).
 6. Aggregate blocks (`sum`/`average`/`total`) and `prev` depend on the per-line
    cache; incremental edits recompute from the first changed line.
 
@@ -68,9 +73,11 @@ project's terminology.
 
 - ES modules everywhere; no build step. One default export per `js/ui/*.js`
   init module; pure helpers are named exports and unit-tested.
-- `js/core/` evaluation, `js/eval/` mathjs extensions/preprocessors,
+- `js/core/` evaluation (including the pure undo history in `history.js`),
+  `js/eval/` mathjs extensions/preprocessors,
   `js/render/` highlighting/formatting, `js/ui/` DOM behavior,
-  `js/storage/` persistence.
+  `js/storage/` persistence, `js/util/` shared pure helpers (debounce,
+  storage, clipboard, text, scroll, sequence).
 - Guard every storage/worker call (localStorage, IndexedDB, clipboard may be
   unavailable); wrap in try/catch or `.catch(() => {})`.
 - Worker updates are async: use the debounced `schedule`/`update` client in

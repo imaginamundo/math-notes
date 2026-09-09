@@ -63,15 +63,21 @@ treats 3-letter currency codes as units in currency contexts (amounts and
 
 ### The pure engine
 
-`evaluateLines(lines)` in `js/core/calculate.js` is the pure evaluation
-pipeline: it parses each line, evaluates it against a `variables` scope (with
-`prev` and aggregate blocks), and returns `{ results, total, startLine }`.
+Evaluation is built by `createEngine()` in `js/core/calculate.js`, which wires
+up one mathjs instance (aliases, CSS/currency units) together with the
+incremental cache. A lazy shared instance is exported as the module's
+`evaluateLines`, so importing the module never constructs the mathjs bundle and
+tests or embedders can build isolated engines.
 
-It keeps a module-level cache of the last input and its per-line results.
-When called with new input, it diffs to the first changed line, rebuilds the
-variable/aggregate context up to that line from cached values, and only
-re-evaluates from there. **Invariant:** results must stay correct across any
-sequence of interleaved calls (the cache is global, not per caller).
+`evaluateLines(lines)` parses each line, evaluates it against a `variables`
+scope (with `prev` and aggregate blocks), and returns
+`{ results, total, startLine }`. Each engine keeps a per-input cache of the
+last lines and their per-line results. When called with new input, it diffs to
+the first changed line, rebuilds the variable/aggregate context up to that line
+from cached values, and only re-evaluates from there. **Invariant:** results
+must stay correct across any sequence of interleaved calls (the cache is not
+per caller). Registering new currency rates bumps an _environment revision_
+that forces a full recompute, so cached conversions never go stale.
 
 ### The worker
 
@@ -80,10 +86,13 @@ typing, and the main thread never parses the large mathjs bundle. The worker
 client lives in `js/evalClient.js`: it owns the worker connection, the
 request/reply protocol, and the debounced `schedule`/`flush` update scheduling.
 Each request posts `{ id, type: 'evaluate', lines }` and resolves when the
-worker replies. `update()` gates rendering on a dedicated render counter (not
-the message id), so a stale response is never rendered and unrelated requests
-(e.g. copy) never suppress a pending render. Every request also has a timeout
-so a dead worker can't freeze the sheet.
+worker replies. `update()` draws the typed input first (phase one) and then,
+on reply, applies the results — but only if the sheet text is still unchanged,
+so a stale reply is never rendered and two back-to-back requests for the same
+text cannot both be dropped. Every request also has a timeout so a hung worker
+can't freeze the sheet, and if the worker fails to load or crashes its
+in-flight requests are rejected and later evaluations fall back to the
+main-thread engine instead of stalling.
 
 **Serialization:** mathjs `Unit`, `BigNumber`, etc. lose their prototypes in
 structured clone. The worker therefore pre-formats every result value into a
@@ -92,9 +101,10 @@ fallback path) and strings (worker path).
 
 Currency rates are fetched on the main thread (`fetchRates` in
 `js/eval/currency.js`), cached in localStorage, and forwarded to the worker as
-`{ type: 'rates', data }`; the worker registers them on its own math instance.
-A lazy main-thread `calculate.js` import is the fallback when `Worker` is
-unavailable.
+`{ type: 'rates', data }`; the worker registers them on its own engine. A lazy
+main-thread `calculate.js` import is the fallback when `Worker` is unavailable
+or dies; its engine receives live rate updates through the same
+`currency:updated` event.
 
 ## Tabs and persistence
 
@@ -109,7 +119,10 @@ rebuilt automatically from the latest snapshot of each tab. Settings offers
 manual per-tab restore and a "restore all" action.
 
 Undo/redo is per tab, kept in memory only: edits are grouped into bursts
-(a 700ms idle timer commits the draft), each burst becoming one undo step.
+(a 700ms idle timer commits the draft), each burst becoming one undo step —
+except a burst that ends where it began, which is dropped. The pure helpers
+(`recordChange`/`commitDraft`/`applyUndo`/`applyRedo`) live in
+`js/core/history.js`, with `js/ui/tabs.js` owning only the per-tab store.
 
 ## Sharing a sheet by link
 
@@ -162,17 +175,23 @@ elements in the ghost view. `textNodesInOrder` walks the view's text nodes and
 counts `.line-row` boundaries as newlines, so global offsets in the raw text
 map correctly onto the DOM (the `<pre>` has no text for newlines). Wrapping
 runs in a single pass from the last match backwards so DOM mutations only
-touch already-processed text. Because a `content-visibility`-skipped row has no
-layout, scrolling to a match anchors on the `.line-row` box.
+touch already-processed text.
+
+Matching needs no evaluation: the view rows are already current after
+phase-one rendering, so find re-marks synchronously on input (and never forces
+a worker round-trip itself). Because matches sit inside `.line-row` boxes,
+scrolling to a match anchors on the row.
 
 ## Rendering
 
-Rendering is two-phase so typing never waits on the worker:
+Rendering is two-phase so typing never waits on the worker. `js/index.js`
+creates a row renderer once with `createRowRenderer(viewNode)`
+(`js/render/renderInput.js`), which returns renderers bound to that view:
 
-- `renderText` (`js/render/renderInput.js`) redraws the highlighted input rows
-  synchronously from the first changed line (incremental), reusing the prefix
-  DOM. It shows only the input — no placeholder — so a row without a result yet
-  is simply empty until the reply fills it.
+- `renderText` redraws the highlighted input rows synchronously from the first
+  changed line (incremental), reusing the prefix DOM. It shows only the input —
+  no placeholder — so a row without a result yet is simply empty until the
+  reply fills it.
 - `patchResults` fills in the ghost results when the evaluation reply arrives;
   an unchanged sheet (`startLine` -1) that was already patched is left
   untouched.
@@ -185,8 +204,9 @@ Rendering is two-phase so typing never waits on the worker:
 ## Line numbers
 
 A `.line-numbers` gutter (`js/ui/lineNumbers.js`) numbers every line (plus one
-phantom row for the next Enter), follows the caret, and scrolls in sync with
-the textarea. It is `aria-hidden`.
+phantom row for the next Enter), follows the caret, and mirrors the scroll
+container's vertical offset so the numbers stay glued to the text. It is
+`aria-hidden`.
 
 ## Onboarding
 
