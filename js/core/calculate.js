@@ -73,7 +73,7 @@ function assertBoundedExpression(expression, scope) {
 
 function evaluateLine(line, scope) {
   const parsed = typeof line === 'string' ? parseLine(line) : line;
-  const { code, label, rhs, isAssignment } = parsed;
+  const { code, label, isAssignment } = parsed;
   let type = isAssignment ? 'assignment' : 'value';
   let value;
   let result;
@@ -82,7 +82,10 @@ function evaluateLine(line, scope) {
     const expression = preprocess(code);
     assertBoundedExpression(expression, scope);
     result = math.evaluate(expression, scope);
-    value = rhs && math.evaluate(preprocess(rhs), scope);
+    // The assignment statement already returns the rhs value; reuse it rather
+    // than evaluating the rhs a second time, which could disagree for impure
+    // expressions (e.g. `x = unix()`).
+    value = isAssignment ? result : undefined;
   } catch (error) {
     result = error;
     value = undefined;
