@@ -37,6 +37,17 @@ test('computeMatches does not overlap matches', () => {
   ]);
 });
 
+test('computeMatches keeps offsets in the original text', () => {
+  // 'İ'.toLowerCase() grows to two code units, which used to shift every match
+  // after it. Offsets must stay aligned to the original string.
+  assert.deepEqual(computeMatches('İa', 'a', false), [{ start: 1, end: 2 }]);
+});
+
+test('computeMatches refuses newline queries', () => {
+  assert.deepEqual(computeMatches('a\nb', 'a\nb', false), []);
+  assert.deepEqual(computeMatches('a\nb', 'a', false), [{ start: 0, end: 1 }]);
+});
+
 test('nearestIndex picks the first match at or after the anchor', () => {
   const matches = computeMatches('a a a', 'a', false);
   assert.equal(nearestIndex(matches, 0), 0);

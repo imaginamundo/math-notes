@@ -45,7 +45,12 @@ function initFind(editableNode, viewNode, onUpdate, flushUpdate) {
         ? matches[activeIndex].start
         : editableNode.selectionStart;
     query = findInput.value;
-    if (renderView) await onUpdate();
+    if (renderView) {
+      await onUpdate();
+      // The bar may have closed (Escape) while the worker reply was in flight;
+      // do not repaint marks for a search the user dismissed.
+      if (!barNode.classList.contains('open')) return;
+    }
     if (!query) {
       matches = [];
       activeIndex = -1;
@@ -265,16 +270,20 @@ function button(className, label, title) {
  * @returns {Array<{ start: number, end: number }>}
  */
 function computeMatches(text, query, caseSensitive) {
-  if (!query) return [];
-  const haystack = caseSensitive ? text : text.toLowerCase();
-  const needle = caseSensitive ? query : query.toLowerCase();
+  if (!query || query.includes('\n')) return [];
   const list = [];
+  const needle = caseSensitive ? query : query.toLowerCase();
+  const qlen = query.length;
   let from = 0;
-  while (from <= text.length) {
-    const index = haystack.indexOf(needle, from);
-    if (index === -1) break;
-    list.push({ start: index, end: index + needle.length });
-    from = index + needle.length;
+  while (from + qlen <= text.length) {
+    const candidate = text.slice(from, from + qlen);
+    const hit = caseSensitive ? candidate === query : candidate.toLowerCase() === needle;
+    if (hit) {
+      list.push({ start: from, end: from + qlen });
+      from += qlen;
+    } else {
+      from++;
+    }
   }
   return list;
 }
