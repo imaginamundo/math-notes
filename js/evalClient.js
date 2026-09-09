@@ -145,7 +145,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     requestLines,
     syncRates,
     schedule: debounced.schedule,
-    flush: debounced.run,
+    flush: debounced.flush,
   };
 }
 
