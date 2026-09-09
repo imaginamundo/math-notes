@@ -101,9 +101,9 @@ function evaluateLine(line, scope) {
 
 // Matches a standalone aggregate keyword, i.e. not a mathjs function call
 // like `sum([1, 2, 3])`.
-const AGGREGATE_WORD = /\b(?:sum|total|average|avg)\b(?!\s*\()/;
-const AGGREGATE_SUM_WORD = /\b(?:sum|total)\b(?!\s*\()/g;
-const AGGREGATE_AVG_WORD = /\b(?:average|avg)\b(?!\s*\()/g;
+const AGGREGATE_WORD = /\b(?:sum|total|average|avg)\b(?!\s*\()/i;
+const AGGREGATE_SUM_WORD = /\b(?:sum|total)\b(?!\s*\()/gi;
+const AGGREGATE_AVG_WORD = /\b(?:average|avg)\b(?!\s*\()/gi;
 
 // Replace aggregate keywords in an expression with the block's values so they
 // work inside expressions too, e.g. `a = sum` or `sum * 2`.

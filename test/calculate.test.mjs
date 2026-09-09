@@ -201,6 +201,11 @@ test('evaluateLines computes average and avg from the lines above', () => {
   assert.equal(evaluateLines(['10', '20', 'avg']).results[2].value, 15);
 });
 
+test('evaluateLines treats uppercase aggregates like lowercase', () => {
+  assert.equal(evaluateLines(['10', '20', 'SUM']).results[2].value, 30);
+  assert.equal(evaluateLines(['10', '20', 'SUM + 1']).results[2].value, 31);
+});
+
 test('evaluateLines sum stops at an empty line', () => {
   assert.equal(evaluateLines(['10', '', '20', 'sum']).results[3].value, 20);
 });
