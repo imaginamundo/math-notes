@@ -65,25 +65,34 @@ contentEditableNode.addEventListener('input', () => {
 contentEditableNode.addEventListener('click', () => rowRenderer.updateActiveLine(activeLine()));
 contentEditableNode.addEventListener('keyup', () => rowRenderer.updateActiveLine(activeLine()));
 
-// Snapshot before initTabs, which persists a tab collection as it starts up.
-const onboardingState = readOnboardingState();
+// The composition root runs in a fixed order — that ordering is a contract, so
+// boot() states it explicitly rather than leaving it to line position.
+function boot() {
+  // 1. Capture the onboarding keys BEFORE initTabs persists a fresh collection.
+  const onboardingState = readOnboardingState();
 
-const tabsApi = initTabs(contentEditableNode, evalClient.update);
+  // 2. Tabs own the sheet content and evaluate whatever was restored.
+  const tabsApi = initTabs(contentEditableNode, evalClient.update);
 
-initShare(tabsApi);
-initHelpModal(contentEditableNode);
-initRecipes(contentEditableNode);
-initSettings(contentEditableNode, tabsApi);
-initFontControls(editorScroll.refreshMetrics);
-initIo(contentEditableNode);
-initShortcuts(contentEditableNode, evalClient.requestLines, tabsApi.switchTab);
-initFind(contentEditableNode, viewNode);
-initLineNumbers(contentEditableNode);
-// Runs before initOnboarding, so it sees the seeded starter sheet appear.
-initStarterPrompt(contentEditableNode);
+  // 3. Features that read or seed the active sheet.
+  initShare(tabsApi);
+  initHelpModal(contentEditableNode);
+  initRecipes(contentEditableNode);
+  initSettings(contentEditableNode, tabsApi);
+  initFontControls(editorScroll.refreshMetrics);
+  initIo(contentEditableNode);
+  initShortcuts(contentEditableNode, evalClient.requestLines, tabsApi.switchTab);
+  initFind(contentEditableNode, viewNode);
+  initLineNumbers(contentEditableNode);
 
-// Last, so every surface the tour points at is already wired.
-initOnboarding(contentEditableNode, tabsApi, onboardingState);
+  // 4. The starter prompt is wired before onboarding can seed the sheet that
+  //    it floats beneath.
+  initStarterPrompt(contentEditableNode);
+
+  // 5. The tour runs last, so every anchor it highlights already exists.
+  initOnboarding(contentEditableNode, tabsApi, onboardingState);
+}
+boot();
 
 window.addEventListener('currency:updated', (event) => {
   evalClient.syncRates(event.detail && event.detail.data);
