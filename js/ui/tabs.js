@@ -157,6 +157,26 @@ function initTabs(editableNode, onUpdate) {
     burst.run();
   }
 
+  // Commit any pending draft/snapshot for the outgoing tab and mirror its
+  // live textarea content back into the tab state before the active tab moves.
+  function leaveActiveTab() {
+    flushDraft();
+    flushSnapshot();
+    state = setContent(state, state.activeId, editableNode.value);
+  }
+
+  // Present `content` as the new active sheet: update the editor, persist,
+  // repaint, evaluate, and notify every input-driven subscriber exactly once.
+  function present(content, { focus = true } = {}) {
+    editableNode.value = content;
+    lastValue = content;
+    persist();
+    render();
+    onUpdate();
+    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+    if (focus) editableNode.focus();
+  }
+
   function setValue(value) {
     lastValue = value;
     editableNode.value = value;
@@ -269,49 +289,25 @@ function initTabs(editableNode, onUpdate) {
       editableNode.focus();
       return;
     }
-    flushDraft();
-    flushSnapshot();
-    state = setContent(state, state.activeId, editableNode.value);
+    leaveActiveTab();
     state = setActiveTab(state, id);
     const tab = state.tabs.find((entry) => entry.id === id);
-    editableNode.value = tab.content;
-    lastValue = tab.content;
-    persist();
-    render();
-    onUpdate();
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-    editableNode.focus();
+    present(tab.content);
   }
 
   function handleNew() {
-    flushDraft();
-    flushSnapshot();
-    state = setContent(state, state.activeId, editableNode.value);
+    leaveActiveTab();
     state = createTab(state, 'Tab ' + state.nextTabNumber);
-    editableNode.value = '';
-    lastValue = '';
-    persist();
-    render();
-    onUpdate();
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-    editableNode.focus();
+    present('');
   }
 
   // Open a sheet that came from outside the app (a share link) in a NEW tab.
   // It never overwrites the active tab: an import is additive by design.
   function openSheet({ name, content }) {
-    flushDraft();
-    flushSnapshot();
-    state = setContent(state, state.activeId, editableNode.value);
+    leaveActiveTab();
     state = createTab(state, name || 'Shared sheet');
     state = setContent(state, state.activeId, content || '');
-    editableNode.value = content || '';
-    lastValue = editableNode.value;
-    persist();
-    render();
-    onUpdate();
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-    editableNode.focus();
+    present(content || '');
   }
 
   function getActiveSheet() {
@@ -325,33 +321,19 @@ function initTabs(editableNode, onUpdate) {
   function seedSheet({ name, content }) {
     state = renameTab(state, state.activeId, name);
     state = setContent(state, state.activeId, content);
-    editableNode.value = content;
-    lastValue = content;
     histories.set(state.activeId, emptyHistory());
-    persist();
-    render();
-    onUpdate();
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+    present(content, { focus: false });
   }
 
   function handleClose(id) {
     const tab = state.tabs.find((entry) => entry.id === id);
     if (!tab) return;
     if (!window.confirm(`Close "${tab.name}"? Its content will be lost.`)) return;
-    flushDraft();
-    flushSnapshot();
-    if (state.activeId === id) state = setContent(state, id, editableNode.value);
+    leaveActiveTab();
     state = closeTab(state, id);
     if (!state.tabs.length) state = createTab(state, 'Tab ' + state.nextTabNumber);
     histories.delete(id);
-    const activeTab = getActiveTab();
-    editableNode.value = activeTab.content;
-    lastValue = activeTab.content;
-    persist();
-    render();
-    onUpdate();
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-    editableNode.focus();
+    present(getActiveTab().content);
   }
 
   function beginRename(id, nameNode) {
@@ -512,6 +494,7 @@ function initTabs(editableNode, onUpdate) {
   }
 
   function restoreTab(snapshot) {
+    leaveActiveTab();
     const targetId = snapshot.tabId || generateId();
     const existing = state.tabs.find((tab) => tab.id === targetId);
     state = existing
@@ -524,17 +507,11 @@ function initTabs(editableNode, onUpdate) {
     state = setActiveTab(state, targetId);
     state = { ...state, nextTabNumber: deriveNextTabNumber(state.tabs) };
     histories.set(targetId, emptyHistory());
-    const activeTab = getActiveTab();
-    editableNode.value = activeTab.content;
-    lastValue = activeTab.content;
-    persist();
-    render();
-    onUpdate();
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-    editableNode.focus();
+    present(getActiveTab().content);
   }
 
   function restoreAll(snapshots) {
+    leaveActiveTab();
     const tabs = snapshots.map((snapshot) => ({
       id: snapshot.tabId || generateId(),
       name: snapshot.name,
@@ -547,14 +524,7 @@ function initTabs(editableNode, onUpdate) {
       nextTabNumber: deriveNextTabNumber(tabs),
     };
     histories.clear();
-    const activeTab = getActiveTab();
-    editableNode.value = activeTab.content;
-    lastValue = activeTab.content;
-    persist();
-    render();
-    onUpdate();
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-    editableNode.focus();
+    present(getActiveTab().content);
   }
 
   // If localStorage is unavailable or corrupt, rebuild the collection from the
