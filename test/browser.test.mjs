@@ -219,7 +219,7 @@ test('a result on an overflowing line is reachable by horizontal scroll', async 
   const longLine =
     '1234567890 + 1234567890 + 1234567890 + 1234567890 + 1234567890 + 1234567890 + 1234567890 + 1234567890';
   await setContent(longLine + '\n5 + 5');
-  await wait(300);
+  await waitFor(() => page.evaluate(() => Boolean(document.querySelector('#view .ghost-result'))));
   const visible = await page.evaluate(async () => {
     const scroller = document.querySelector('.editor-scroll');
     scroller.scrollLeft = scroller.scrollWidth;
@@ -349,7 +349,7 @@ test('a corrupt share link reports itself instead of throwing', async () => {
 
 test('a first visit seeds the Welcome sheet and opens the tour', async () => {
   await newPage({ firstRun: true });
-  await wait(500);
+  await waitFor(() => page.evaluate(() => document.getElementById('total').textContent.length > 0));
   const state = await page.evaluate(() => ({
     tourOpen: Boolean(document.querySelector('.tour-popover')),
     step: document.querySelector('.tour-count')?.textContent,

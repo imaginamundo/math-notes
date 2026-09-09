@@ -1,4 +1,4 @@
-import renderInput from './render/renderInput.js';
+import { renderText, patchResults } from './render/renderInput.js';
 import renderTotal from './render/renderTotal.js';
 import registerServiceWorker from './registerServiceWorker.js';
 import { createEvalClient } from './evalClient.js';
@@ -24,21 +24,35 @@ const currencyStatusNode = document.getElementById('currency-status');
 const loadingIndicator = initLoadingIndicator(document.getElementById('loading'));
 
 // Evaluation runs in a Web Worker owned by the eval client, which debounces
-// updates, gates stale renders, and forwards currency rates.
+// updates, gates stale renders, and forwards currency rates. Text is rendered
+// synchronously on the main thread (phase one) so typing never waits on the
+// worker; only the results and total come back asynchronously (phase two).
+const editorScroll = initEditorScroll(contentEditableNode);
+
+function renderTextLayer(lines) {
+  renderText(viewNode, lines);
+  editorScroll.syncSize();
+}
+
+function renderResultLayer(lines, data) {
+  patchResults(viewNode, lines, data.results, data.startLine);
+  renderTotal(totalNode, data.total);
+  editorScroll.syncSize();
+}
+
 const evalClient = createEvalClient(
   contentEditableNode,
-  (lines, data) => {
-    renderInput(viewNode, lines, data.results, data.startLine);
-    renderTotal(totalNode, data.total);
-    editorScroll.syncSize();
-  },
+  renderTextLayer,
+  renderResultLayer,
   (busy) => (busy ? loadingIndicator.show() : loadingIndicator.hide())
 );
 
-// Trigger changes
-contentEditableNode.addEventListener('input', evalClient.schedule);
-
-const editorScroll = initEditorScroll(contentEditableNode);
+// Trigger changes: redraw what you typed immediately, then evaluate in the
+// worker on a debounce and fill the results in when it replies.
+contentEditableNode.addEventListener('input', () => {
+  renderTextLayer(contentEditableNode.value.split('\n'));
+  evalClient.schedule();
+});
 
 // Snapshot before initTabs, which persists a tab collection as it starts up.
 const onboardingState = readOnboardingState();

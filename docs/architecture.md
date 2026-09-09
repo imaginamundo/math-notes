@@ -85,7 +85,7 @@ so a dead worker can't freeze the sheet.
 
 **Serialization:** mathjs `Unit`, `BigNumber`, etc. lose their prototypes in
 structured clone. The worker therefore pre-formats every result value into a
-string before posting. `renderInput` must accept both numbers (main-thread
+string before posting. `patchResults` must accept both numbers (main-thread
 fallback path) and strings (worker path).
 
 Currency rates are fetched on the main thread (`fetchRates` in
@@ -165,8 +165,15 @@ layout, scrolling to a match anchors on the `.line-row` box.
 
 ## Rendering
 
-- `renderInput` (`js/render/renderInput.js`) rebuilds only the rows from the
-  first changed line (incremental), reusing the prefix DOM.
+Rendering is two-phase so typing never waits on the worker:
+
+- `renderText` (`js/render/renderInput.js`) redraws the highlighted input rows
+  synchronously from the first changed line (incremental), reusing the prefix
+  DOM. It shows only the input — no placeholder — so a row without a result yet
+  is simply empty until the reply fills it.
+- `patchResults` fills in the ghost results when the evaluation reply arrives;
+  an unchanged sheet (`startLine` -1) that was already patched is left
+  untouched.
 - `format` (`js/render/format.js`) tokenizes a line into typed spans
   (number, variable, currency, operator, comment, title).
 - `formatResult` (`js/render/formatResult.js`) formats numbers/units into

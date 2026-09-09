@@ -53,7 +53,7 @@ project's terminology.
    the textarea has `overflow: hidden` and provides no native caret scrolling.
    Don't move the layers out of the scroll container or re-enable textarea
    scrolling without restoring caret tracking.
-3. Worker results are pre-formatted strings; `renderInput`'s ghost formatting
+3. Worker results are pre-formatted strings; `patchResults`' ghost formatting
    must accept both numbers (fallback path) and strings (worker path).
 4. The view is built as `.line-row` block wrappers, and `find.js`'s text walker
    (`textNodesInOrder`) counts `.line-row` boundaries as newlines so match

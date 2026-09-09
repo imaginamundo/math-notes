@@ -8,6 +8,14 @@ class ClassList {
   add(...names) {
     names.forEach((name) => this.el._classes.add(name));
   }
+  contains(name) {
+    return (
+      this.el._classes.has(name) ||
+      String(this.el.className || '')
+        .split(/\s+/)
+        .includes(name)
+    );
+  }
 }
 class El {
   constructor(tag) {
@@ -18,8 +26,15 @@ class El {
     this.textContent = '';
   }
   appendChild(child) {
+    child._parent = this;
     this.children.push(child);
     return child;
+  }
+  remove() {
+    if (!this._parent) return;
+    const index = this._parent.children.indexOf(this);
+    if (index !== -1) this._parent.children.splice(index, 1);
+    this._parent = null;
   }
 }
 globalThis.document = {
@@ -28,7 +43,7 @@ globalThis.document = {
 };
 
 const format = (await import('../js/render/format.js')).default;
-const renderInput = (await import('../js/render/renderInput.js')).default;
+const { renderText, patchResults } = await import('../js/render/renderInput.js');
 
 test('a line with a comment renders without throwing', () => {
   const node = format.line('1 + 1 # hello');
@@ -45,29 +60,35 @@ test('a comment-only line renders the comment', () => {
 
 test('comment rendering does not drop following lines', () => {
   const view = new El('pre');
-  renderInput(view, ['1 + 1 # one', '2 + 2 # two', '3 + 3']);
+  renderText(view, ['1 + 1 # one', '2 + 2 # two', '3 + 3']);
   assert.equal(view.children.length, 3);
   assert.equal(view.children[0].className, 'line-row');
   assert.equal(view.children[0].children[0]._classes.has('line'), true);
   assert.equal(view.children[2].children[0]._classes.has('line'), true);
 });
 
-test('renderInput appends inline ghost results', () => {
+test('two-phase rendering fills ghost results into rows', () => {
   const view = new El('pre');
-  renderInput(
-    view,
-    ['1 + 1', 'x = 5', '2 +', ''],
-    [
-      { type: 'value', value: 2 },
-      { type: 'assignment', value: 5 },
-      { type: 'error', value: 'Undefined symbol x' },
-      { type: 'value', value: undefined },
-    ]
-  );
+  const lines = ['1 + 1', 'x = 5', '2 +', ''];
+  const results = [
+    { type: 'value', value: 2 },
+    { type: 'assignment', value: 5 },
+    { type: 'error', value: 'Undefined symbol x' },
+    { type: 'value', value: undefined },
+  ];
+
+  renderText(view, lines);
+  const ghostsBefore = view.children
+    .flatMap((row) => row.children)
+    .filter((child) => child.className && child.className.includes('ghost-result'));
+  assert.equal(ghostsBefore.length, 0, 'text renders with no results yet');
+
+  patchResults(view, lines, results, 0);
   const ghosts = view.children
     .flatMap((row) => row.children)
     .filter((child) => child.className && child.className.includes('ghost-result'));
   assert.equal(ghosts.length, 2);
+  assert.equal(ghosts[0].className, 'ghost-result');
   assert.equal(ghosts[0].textContent, '→ 2');
   assert.equal(ghosts[1].className, 'ghost-result error');
   assert.equal(ghosts[1].textContent, 'Undefined symbol x');
@@ -114,33 +135,28 @@ test('format.line renders colon labels exactly as typed', () => {
   }
 });
 
-test('renderInput draws an unchanged sheet that has never been drawn', () => {
+test('patchResults fills an unchanged sheet that has never had results', () => {
   // startLine === -1 means "unchanged since the last evaluation". If an
-  // earlier render was gated out as stale, the view is still empty and the
-  // rows must be drawn anyway — otherwise nothing ever renders them.
+  // earlier render was gated out as stale, the rows are still pending and the
+  // results must be applied anyway — otherwise nothing ever renders them.
   const view = new El('pre');
-  renderInput(
-    view,
-    ['1 + 1', '2 + 2'],
-    [
-      { type: 'value', value: 2 },
-      { type: 'value', value: 4 },
-    ],
-    -1
-  );
+  const lines = ['1 + 1', '2 + 2'];
+  const results = [
+    { type: 'value', value: 2 },
+    { type: 'value', value: 4 },
+  ];
+  renderText(view, lines);
   assert.equal(view.children.length, 2);
 
-  // Once drawn, -1 really is a no-op: the rows are left untouched.
+  patchResults(view, lines, results, -1);
+  const ghosts = view.children
+    .flatMap((row) => row.children)
+    .filter((child) => child.className && child.className.includes('ghost-result'));
+  assert.equal(ghosts.length, 2);
+
+  // Once patched, -1 really is a no-op: the rows are left untouched.
   const drawn = view.children[0];
-  renderInput(
-    view,
-    ['1 + 1', '2 + 2'],
-    [
-      { type: 'value', value: 2 },
-      { type: 'value', value: 4 },
-    ],
-    -1
-  );
+  patchResults(view, lines, results, -1);
   assert.equal(view.children.length, 2);
   assert.equal(view.children[0], drawn, 'the existing rows were reused');
 });
