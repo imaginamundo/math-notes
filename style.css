@@ -373,6 +373,15 @@ input::placeholder {
 }
 .line-numbers span {
   opacity: 0.55;
+  /* The gutter itself stays pointer-events: none so padding areas still pass
+     clicks through to the editor; only the number cells are interactive and
+     toggle the line's comment state. */
+  pointer-events: auto;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.line-numbers span:hover {
+  background: var(--surface-chip-hover);
 }
 .line-numbers span.active {
   opacity: 1;

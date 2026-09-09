@@ -254,6 +254,30 @@ test('find marks wrap typed text and ignore ghost results', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('clicking a line number comments and uncomments that line', async () => {
+  await newPage();
+  await setContent('1 + 1\n2 + 2\n# 3 + 3');
+  await wait(150);
+
+  const clickLine = (index) =>
+    page.evaluate((i) => document.querySelectorAll('.line-numbers span')[i].click(), index);
+
+  // Comment line 2; a line that is already a comment is left as is.
+  await clickLine(1);
+  assert.equal(await value(), '1 + 1\n# 2 + 2\n# 3 + 3');
+
+  // Uncomment line 2 again.
+  await clickLine(1);
+  assert.equal(await value(), '1 + 1\n2 + 2\n# 3 + 3');
+
+  // A double hash loses exactly one marker.
+  await setContent('## note\n5');
+  await wait(150);
+  await clickLine(0);
+  assert.equal(await value(), '# note\n5');
+  assert.deepEqual(errors, []);
+});
+
 test('a result on an overflowing line is reachable by horizontal scroll', async () => {
   await newPage();
   const longLine =
