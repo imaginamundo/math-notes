@@ -168,12 +168,15 @@
 
         <section id="help-variables" class="help-section">
           <h2>Variables</h2>
-          <p>Assign a value with <code>=</code> and reuse it on later lines. Use <code>prev</code> for the previous line's result, and <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> to aggregate the lines above until a blank line.</p>
+          <p>Assign a value with <code>=</code> and reuse it on later lines. Use <code>prev</code> for the most recent result above — it skips comments and blank lines. <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> aggregate the lines above until a blank line, which starts a new block.</p>
           <div class="help-example" data-expr="pizzas = 2&#10;pizzaPrice = 30&#10;people = 4&#10;(pizzas * pizzaPrice) / people" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">last line returns 15</span>
           </div>
           <div class="help-example" data-expr="20&#10;prev * 4" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">last line returns 80</span>
+          </div>
+          <div class="help-example" data-expr="10&#10;# a comment in between&#10;prev + 1" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">last line returns 11</span>
           </div>
           <div class="help-example" data-expr="10&#10;20&#10;sum" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">last line returns 30</span>
