@@ -137,7 +137,11 @@ body {
   margin: 0;
   background: var(--color-footer);
   color: var(--color-text);
-  font-size: var(--app-font-size, 16px);
+  /* Start from the browser's default size (the user's preferred size, for
+     accessibility) and scale it. 1rem is the root font size the user chose;
+     --app-font-scale defaults to 1 (100%). */
+  font-size: 1rem;
+  font-size: calc(1rem * var(--app-font-scale, 1));
   font-family: monospace;
   line-height: 1.65em;
 }

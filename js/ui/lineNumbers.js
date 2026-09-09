@@ -1,4 +1,4 @@
-import { indexOfLineAt } from './shortcuts.js';
+import { indexOfLineAt } from '../util/text.js';
 
 function initLineNumbers(editableNode) {
   const gutter = document.createElement('pre');

@@ -1,4 +1,4 @@
-import { indexOfLineAt } from './shortcuts.js';
+import { indexOfLineAt, startOfLine } from '../util/text.js';
 
 // With the editor layers inside a scroll container, the textarea no longer
 // scrolls natively, so the caret must be kept visible manually. The sheet is
@@ -68,10 +68,7 @@ function initEditorScroll(editableNode) {
     const pos = editableNode.selectionStart;
     if (pos === null) return;
     const lineIndex = indexOfLineAt(value, pos);
-    let lineStart = 0;
-    for (let i = 0; i < pos; i++) {
-      if (value[i] === '\n') lineStart = i + 1;
-    }
+    const lineStart = startOfLine(value, pos);
     if (!charWidth) measureCharWidth();
     const cs = getComputedStyle(editableNode);
     const x = parseFloat(cs.paddingLeft) + (pos - lineStart) * charWidth;
@@ -100,8 +97,8 @@ function initEditorScroll(editableNode) {
   syncSize();
   return {
     syncSize,
-    // The font controls change --app-font-size outside the editor, which makes
-    // the cached character width and the --editor-line-height both stale.
+    // The font controls change the --app-font-scale outside the editor, which
+    // makes the cached character width and the --editor-line-height both stale.
     // Re-measure the glyphs and recompute the row metrics to match.
     refreshMetrics() {
       charWidth = 0;

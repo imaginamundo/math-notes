@@ -1,62 +1,57 @@
-// Applies a saved font size at startup and handles the +/-/reset buttons.
-// `onChange` is invoked after the new size is applied, so the editor can
-// re-sync its line-height and character width to the new metrics.
+import storage from '../util/storage.js';
+
+// Applies a saved font scale at startup and handles the +/-/reset buttons.
+// The scale is a percentage of the browser's default font size (the user's
+// preferred size), so 100% matches their accessibility setting. `onChange` is
+// invoked after the new scale is applied, so the editor can re-sync its
+// line-height and character width to the new metrics.
+const FONT_KEY = 'math-notes-font-scale';
+const DEFAULT_SCALE = 100;
+const MIN_SCALE = 50;
+const MAX_SCALE = 200;
+const STEP = 10;
+
+export { FONT_KEY };
+
+function clampScale(value) {
+  return Math.min(MAX_SCALE, Math.max(MIN_SCALE, value));
+}
+
 function initFontControls(onChange = () => {}) {
   const fontMinusNode = document.getElementById('font-minus');
   const fontPlusNode = document.getElementById('font-plus');
   const fontResetNode = document.getElementById('font-reset');
 
-  // Change font size
-  const fontSize = {
-    min: 10,
-    max: 80,
-    current: 16,
-  };
-  function setFontSize() {
-    try {
-      window.localStorage.setItem('math-notes-font-size', String(fontSize.current));
-    } catch {
-      // storage unavailable
-    }
-    document.documentElement.style.setProperty('--app-font-size', `${fontSize.current}px`);
+  let current = DEFAULT_SCALE;
+
+  function applyScale() {
+    storage.set(FONT_KEY, String(current));
+    document.documentElement.style.setProperty('--app-font-scale', String(current / 100));
     onChange();
+    // Floating controls that anchor themselves to the editor metrics (the
+    // starter prompt) must reposition after a font change.
+    window.dispatchEvent(new Event('math:font-size-changed'));
   }
+
+  function setScale(value) {
+    current = clampScale(value);
+    applyScale();
+  }
+
   fontMinusNode.addEventListener('click', () => {
-    if (fontSize.current <= fontSize.min) return;
-    fontSize.current--;
-    setFontSize();
+    if (current > MIN_SCALE) setScale(current - STEP);
   });
 
   fontPlusNode.addEventListener('click', () => {
-    if (fontSize.current >= fontSize.max) return;
-    fontSize.current++;
-    setFontSize();
-  });
-  fontResetNode.addEventListener('click', () => {
-    fontSize.current = 16;
-    setFontSize();
+    if (current < MAX_SCALE) setScale(current + STEP);
   });
 
-  let saved = null;
-  let legacy = null;
-  try {
-    saved = parseInt(window.localStorage.getItem('math-notes-font-size'), 10);
-    legacy = parseInt(window.localStorage.getItem('fontSize'), 10);
-  } catch {
-    // storage unavailable
-  }
-  const current = saved || legacy;
-  if (current) {
-    fontSize.current = Math.min(fontSize.max, Math.max(fontSize.min, current));
-    setFontSize();
-    if (!saved && legacy) {
-      try {
-        window.localStorage.removeItem('fontSize');
-      } catch {
-        // storage unavailable
-      }
-    }
-  }
+  fontResetNode.addEventListener('click', () => {
+    setScale(DEFAULT_SCALE);
+  });
+
+  const saved = parseInt(storage.get(FONT_KEY), 10);
+  if (!Number.isNaN(saved)) setScale(saved);
 }
 
 export default initFontControls;

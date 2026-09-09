@@ -1,17 +1,24 @@
 import initModal from './modal.js';
+import storage from '../util/storage.js';
+import { ONBOARDED_KEY } from './onboarding.js';
+import { DISMISSED_KEY } from './starterPrompt.js';
+import { FONT_KEY } from './cosmetic.js';
+import { STORAGE_KEY as TABS_KEY, LEGACY_KEY as LEGACY_TABS_KEY } from './tabs.js';
+import { STORAGE_KEY as CURRENCY_KEY } from '../eval/currency.js';
 
 const STORAGE_KEY = 'math-notes-theme';
+// "Reset data" must clear exactly the keys the app's modules own, imported
+// from their owners so a rename cannot silently leave one behind.
 const RESET_KEYS = [
   STORAGE_KEY,
-  'math-notes-tabs',
-  'math-notes-currency-rates',
-  'input',
-  'math-notes-font-size',
-  'fontSize',
+  TABS_KEY,
+  LEGACY_TABS_KEY,
+  CURRENCY_KEY,
+  FONT_KEY,
   // So "Reset data" genuinely returns the app to a first run, tour included.
-  'math-notes-onboarded',
+  ONBOARDED_KEY,
   // A first run should also offer the starter-content actions again.
-  'math-notes-starter-dismissed',
+  DISMISSED_KEY,
 ];
 
 const THEMES = [
@@ -34,11 +41,7 @@ function syncThemeColor(id) {
 function applyTheme(id) {
   document.documentElement.dataset.theme = id;
   syncThemeColor(id);
-  try {
-    localStorage.setItem(STORAGE_KEY, id);
-  } catch {
-    // storage unavailable
-  }
+  storage.set(STORAGE_KEY, id);
 }
 
 function initSettings(contentEditableNode, tabsApi) {
@@ -89,13 +92,7 @@ function initSettings(contentEditableNode, tabsApi) {
   const resetButton = document.getElementById('reset-data-button');
   resetButton.addEventListener('click', async () => {
     if (!window.confirm('This will reset the theme, tabs and all stored data. Continue?')) return;
-    RESET_KEYS.forEach((key) => {
-      try {
-        localStorage.removeItem(key);
-      } catch {
-        // storage unavailable
-      }
-    });
+    RESET_KEYS.forEach((key) => storage.remove(key));
     try {
       const { clearSnapshots } = await import('../storage/snapshots.js');
       await clearSnapshots();

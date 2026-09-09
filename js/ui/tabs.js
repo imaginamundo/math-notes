@@ -1,67 +1,26 @@
 import { saveSnapshot, latestPerTab } from '../storage/snapshots.js';
+import { emptyHistory, recordChange, commitDraft, applyUndo, applyRedo } from '../core/history.js';
 import debounce from '../util/debounce.js';
+import storage from '../util/storage.js';
 
 /**
  * @typedef {{ id: string, name: string, content: string }} Tab
  * @typedef {{ tabs: Tab[], activeId: string|null, nextTabNumber: number }} TabState
- * @typedef {{ undo: string[], redo: string[], draft: string|null }} History
  */
 
 const STORAGE_KEY = 'math-notes-tabs';
 const LEGACY_KEY = 'input';
-const HISTORY_LIMIT = 100;
 const SNAPSHOT_DELAY = 2000;
 
 let state = null;
 const persistDebounce = debounce(writeState, 400);
 
-// Per-tab undo/redo history, kept in memory only (not persisted). Each entry is
-// { undo: string[], redo: string[], draft: string | null } where `draft` is the
-// value captured at the start of the current typing burst.
+// Per-tab undo/redo history, kept in memory only and never persisted. The pure
+// helpers live in js/core/history.js; this module just owns the per-tab store.
 const histories = new Map();
 
-function emptyHistory() {
-  return { undo: [], redo: [], draft: null };
-}
-
-// A new edit begins a burst: record the pre-burst value as the draft and drop
-// the redo stack (a new edit invalidates redo).
-function recordChange(entry, lastValue, newValue) {
-  if (newValue === lastValue) return entry;
-  if (entry.draft === null) {
-    return { ...entry, draft: lastValue, redo: [] };
-  }
-  return entry;
-}
-
-// End a burst: the draft becomes the undo boundary for the whole burst.
-function commitDraft(entry) {
-  if (entry.draft === null) return entry;
-  return { undo: [...entry.undo, entry.draft].slice(-HISTORY_LIMIT), redo: [], draft: null };
-}
-
-function applyUndo(entry, current) {
-  if (!entry.undo.length) return null;
-  return {
-    entry: { ...entry, undo: entry.undo.slice(0, -1), redo: [...entry.redo, current] },
-    value: entry.undo[entry.undo.length - 1],
-  };
-}
-
-function applyRedo(entry, current) {
-  if (!entry.redo.length) return null;
-  return {
-    entry: { ...entry, undo: [...entry.undo, current], redo: entry.redo.slice(0, -1) },
-    value: entry.redo[entry.redo.length - 1],
-  };
-}
-
 function writeState() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // storage unavailable
-  }
+  storage.set(STORAGE_KEY, JSON.stringify(state));
 }
 
 function persist() {
@@ -134,11 +93,12 @@ let storageFailed = false;
 function loadInitialState() {
   let saved = null;
   try {
-    saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    saved = JSON.parse(storage.get(STORAGE_KEY) || 'null');
   } catch {
-    // storage unavailable or malformed, fall back to the null default
+    // malformed saved collection, fall back to the default below
     storageFailed = true;
   }
+  if (!storage.available()) storageFailed = true;
   if (saved && Array.isArray(saved.tabs) && saved.tabs.length) {
     // A stale activeId (a partial write, an old schema, a manual edit) would
     // make every subsequent setContent miss its tab and silently drop edits, so
@@ -150,13 +110,8 @@ function loadInitialState() {
       nextTabNumber: saved.nextTabNumber || saved.tabs.length + 1,
     };
   }
-  let content = '';
-  try {
-    content = localStorage.getItem(LEGACY_KEY) || '';
-    localStorage.removeItem(LEGACY_KEY);
-  } catch {
-    // storage unavailable
-  }
+  const content = storage.get(LEGACY_KEY) || '';
+  storage.remove(LEGACY_KEY);
   const tab = { id: generateId(), name: 'Tab 1', content };
   return { tabs: [tab], activeId: tab.id, nextTabNumber: 2 };
 }
@@ -180,7 +135,7 @@ function initTabs(editableNode, onUpdate) {
   };
 
   const burst = debounce(() => {
-    histories.set(state.activeId, commitDraft(history()));
+    histories.set(state.activeId, commitDraft(history(), editableNode.value));
   }, 700);
   const snapshot = debounce(saveActiveSnapshot, SNAPSHOT_DELAY);
 
@@ -200,6 +155,26 @@ function initTabs(editableNode, onUpdate) {
 
   function flushDraft() {
     burst.run();
+  }
+
+  // Commit any pending draft/snapshot for the outgoing tab and mirror its
+  // live textarea content back into the tab state before the active tab moves.
+  function leaveActiveTab() {
+    flushDraft();
+    flushSnapshot();
+    state = setContent(state, state.activeId, editableNode.value);
+  }
+
+  // Present `content` as the new active sheet: update the editor, persist,
+  // repaint, evaluate, and notify every input-driven subscriber exactly once.
+  function present(content, { focus = true } = {}) {
+    editableNode.value = content;
+    lastValue = content;
+    persist();
+    render();
+    onUpdate();
+    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+    if (focus) editableNode.focus();
   }
 
   function setValue(value) {
@@ -314,49 +289,25 @@ function initTabs(editableNode, onUpdate) {
       editableNode.focus();
       return;
     }
-    flushDraft();
-    flushSnapshot();
-    state = setContent(state, state.activeId, editableNode.value);
+    leaveActiveTab();
     state = setActiveTab(state, id);
     const tab = state.tabs.find((entry) => entry.id === id);
-    editableNode.value = tab.content;
-    lastValue = tab.content;
-    persist();
-    render();
-    onUpdate();
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-    editableNode.focus();
+    present(tab.content);
   }
 
   function handleNew() {
-    flushDraft();
-    flushSnapshot();
-    state = setContent(state, state.activeId, editableNode.value);
+    leaveActiveTab();
     state = createTab(state, 'Tab ' + state.nextTabNumber);
-    editableNode.value = '';
-    lastValue = '';
-    persist();
-    render();
-    onUpdate();
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-    editableNode.focus();
+    present('');
   }
 
   // Open a sheet that came from outside the app (a share link) in a NEW tab.
   // It never overwrites the active tab: an import is additive by design.
   function openSheet({ name, content }) {
-    flushDraft();
-    flushSnapshot();
-    state = setContent(state, state.activeId, editableNode.value);
+    leaveActiveTab();
     state = createTab(state, name || 'Shared sheet');
     state = setContent(state, state.activeId, content || '');
-    editableNode.value = content || '';
-    lastValue = editableNode.value;
-    persist();
-    render();
-    onUpdate();
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-    editableNode.focus();
+    present(content || '');
   }
 
   function getActiveSheet() {
@@ -370,33 +321,19 @@ function initTabs(editableNode, onUpdate) {
   function seedSheet({ name, content }) {
     state = renameTab(state, state.activeId, name);
     state = setContent(state, state.activeId, content);
-    editableNode.value = content;
-    lastValue = content;
     histories.set(state.activeId, emptyHistory());
-    persist();
-    render();
-    onUpdate();
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+    present(content, { focus: false });
   }
 
   function handleClose(id) {
     const tab = state.tabs.find((entry) => entry.id === id);
     if (!tab) return;
     if (!window.confirm(`Close "${tab.name}"? Its content will be lost.`)) return;
-    flushDraft();
-    flushSnapshot();
-    if (state.activeId === id) state = setContent(state, id, editableNode.value);
+    leaveActiveTab();
     state = closeTab(state, id);
     if (!state.tabs.length) state = createTab(state, 'Tab ' + state.nextTabNumber);
     histories.delete(id);
-    const activeTab = getActiveTab();
-    editableNode.value = activeTab.content;
-    lastValue = activeTab.content;
-    persist();
-    render();
-    onUpdate();
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-    editableNode.focus();
+    present(getActiveTab().content);
   }
 
   function beginRename(id, nameNode) {
@@ -557,6 +494,7 @@ function initTabs(editableNode, onUpdate) {
   }
 
   function restoreTab(snapshot) {
+    leaveActiveTab();
     const targetId = snapshot.tabId || generateId();
     const existing = state.tabs.find((tab) => tab.id === targetId);
     state = existing
@@ -569,17 +507,11 @@ function initTabs(editableNode, onUpdate) {
     state = setActiveTab(state, targetId);
     state = { ...state, nextTabNumber: deriveNextTabNumber(state.tabs) };
     histories.set(targetId, emptyHistory());
-    const activeTab = getActiveTab();
-    editableNode.value = activeTab.content;
-    lastValue = activeTab.content;
-    persist();
-    render();
-    onUpdate();
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-    editableNode.focus();
+    present(getActiveTab().content);
   }
 
   function restoreAll(snapshots) {
+    leaveActiveTab();
     const tabs = snapshots.map((snapshot) => ({
       id: snapshot.tabId || generateId(),
       name: snapshot.name,
@@ -592,14 +524,7 @@ function initTabs(editableNode, onUpdate) {
       nextTabNumber: deriveNextTabNumber(tabs),
     };
     histories.clear();
-    const activeTab = getActiveTab();
-    editableNode.value = activeTab.content;
-    lastValue = activeTab.content;
-    persist();
-    render();
-    onUpdate();
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
-    editableNode.focus();
+    present(getActiveTab().content);
   }
 
   // If localStorage is unavailable or corrupt, rebuild the collection from the
@@ -622,7 +547,7 @@ function initTabs(editableNode, onUpdate) {
   return { switchTab, restoreTab, restoreAll, openSheet, getActiveSheet, seedSheet };
 }
 
+export { STORAGE_KEY, LEGACY_KEY };
 export { createTab, closeTab, renameTab, setActiveTab, setContent, moveTab };
 export { deriveNextTabNumber };
-export { recordChange, commitDraft, applyUndo, applyRedo };
 export default initTabs;

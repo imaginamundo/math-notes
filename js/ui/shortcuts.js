@@ -1,10 +1,12 @@
 import formatResult from '../render/formatResult.js';
+import { indexOfLineAt } from '../util/text.js';
 import { copyText } from '../util/clipboard.js';
 
 function initShortcuts(editableNode, requestResults, switchTab) {
   document.addEventListener('keydown', (event) => {
     const mod = event.metaKey || event.ctrlKey;
     if (!mod) return;
+    if (document.querySelector('dialog[open]')) return;
     const active = document.activeElement;
     if (active && active !== editableNode && active.tagName === 'INPUT') return;
     const shift = event.shiftKey;
@@ -54,13 +56,4 @@ async function copyCurrentLineResult(editableNode, requestResults) {
   }
 }
 
-function indexOfLineAt(text, position) {
-  let lineIndex = 0;
-  for (let i = 0; i < text.length && i < position; i++) {
-    if (text[i] === '\n') lineIndex++;
-  }
-  return lineIndex;
-}
-
-export { indexOfLineAt };
 export default initShortcuts;

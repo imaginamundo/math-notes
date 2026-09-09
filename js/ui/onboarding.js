@@ -1,4 +1,5 @@
 import initTour from './tour.js';
+import storage from '../util/storage.js';
 
 const ONBOARDED_KEY = 'math-notes-onboarded';
 const TABS_KEY = 'math-notes-tabs';
@@ -29,19 +30,11 @@ const STARTER_SHEET = [
 const STARTER_NAME = 'Welcome';
 
 function readStorage(key) {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
+  return storage.get(key);
 }
 
 function writeStorage(key, value) {
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    // storage unavailable; the tour simply runs again next time
-  }
+  storage.set(key, value);
 }
 
 /**

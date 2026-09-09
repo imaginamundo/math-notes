@@ -1,4 +1,4 @@
-import { renderText, patchResults } from './render/renderInput.js';
+import { createRowRenderer } from './render/renderInput.js';
 import renderTotal from './render/renderTotal.js';
 import registerServiceWorker from './registerServiceWorker.js';
 import { createEvalClient } from './evalClient.js';
@@ -28,14 +28,15 @@ const loadingIndicator = initLoadingIndicator(document.getElementById('loading')
 // synchronously on the main thread (phase one) so typing never waits on the
 // worker; only the results and total come back asynchronously (phase two).
 const editorScroll = initEditorScroll(contentEditableNode);
+const rowRenderer = createRowRenderer(viewNode);
 
 function renderTextLayer(lines) {
-  renderText(viewNode, lines);
+  rowRenderer.renderText(lines);
   editorScroll.syncSize();
 }
 
 function renderResultLayer(lines, data) {
-  patchResults(viewNode, lines, data.results, data.startLine);
+  rowRenderer.patchResults(lines, data.results, data.startLine);
   renderTotal(totalNode, data.total);
   editorScroll.syncSize();
 }
@@ -66,7 +67,7 @@ initSettings(contentEditableNode, tabsApi);
 initFontControls(editorScroll.refreshMetrics);
 initIo(contentEditableNode);
 initShortcuts(contentEditableNode, evalClient.requestLines, tabsApi.switchTab);
-initFind(contentEditableNode, viewNode, evalClient.update, evalClient.flush);
+initFind(contentEditableNode, viewNode);
 initLineNumbers(contentEditableNode);
 // Runs before initOnboarding, so it sees the seeded starter sheet appear.
 initStarterPrompt(contentEditableNode);
