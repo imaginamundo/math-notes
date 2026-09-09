@@ -21,7 +21,7 @@ function parseLine(line) {
     }
   }
 
-  const equalsIndex = code.indexOf('=');
+  const equalsIndex = findAssignmentEquals(code);
   const label = equalsIndex === -1 ? '' : code.slice(0, equalsIndex).trim();
   const rhs = equalsIndex === -1 ? '' : code.slice(equalsIndex + 1).trim();
   const isAssignment = label !== '' && rhs !== '';
@@ -30,3 +30,18 @@ function parseLine(line) {
 }
 
 export default parseLine;
+
+// An `=` is the assignment operator only when it is not part of a comparison
+// (==, >=, <=, !=): the first `=` of `==` is followed by one, and the `=` of
+// >=/<=/!= is preceded by the operator. Chained assignments (`a = b = 3`) keep
+// their later `=` inside the rhs.
+function findAssignmentEquals(code) {
+  for (let i = 0; i < code.length; i++) {
+    if (code[i] !== '=') continue;
+    const prev = code[i - 1];
+    if (prev === '=' || prev === '!' || prev === '>' || prev === '<') continue;
+    if (code[i + 1] === '=') continue;
+    return i;
+  }
+  return -1;
+}

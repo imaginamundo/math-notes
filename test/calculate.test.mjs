@@ -42,6 +42,13 @@ test('parseLine keeps chained equals in the rhs', () => {
   assert.equal(parseLine('a = b = 3').rhs, 'b = 3');
 });
 
+test('parseLine does not read comparisons as assignments', () => {
+  for (const line of ['1 == 1', '2 >= 1', '2 <= 3', '1 != 2']) {
+    assert.equal(parseLine(line).isAssignment, false, line);
+  }
+  assert.equal(parseLine('a >= b').label, '');
+});
+
 test('parseLine detects a function assignment', () => {
   const parsed = parseLine('f = f(x) = x * 2');
   assert.equal(parsed.isAssignment, true);
@@ -119,6 +126,13 @@ test('evaluateLines supports function variables', () => {
   assert.equal(results[0].type, 'assignment');
   assert.equal(results[0].value, undefined);
   assert.equal(results[1].value, 8);
+});
+
+test('evaluateLines evaluates comparisons as values', () => {
+  assert.equal(evaluateLines(['2 >= 1']).results[0].value, true);
+  assert.equal(evaluateLines(['1 == 1']).results[0].value, true);
+  assert.equal(evaluateLines(['1 != 2']).results[0].value, true);
+  assert.equal(evaluateLines(['x = 3', 'x <= 2']).results[1].value, false);
 });
 
 test('evaluateLines keeps Infinity and null as results', () => {
