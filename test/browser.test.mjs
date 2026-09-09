@@ -214,6 +214,49 @@ test('tabs can be reordered by dragging', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('find marks wrap typed text and ignore ghost results', async () => {
+  await newPage();
+  await setContent('1 + 1\nhello world\n20');
+  // Wait for ghost results (one value ghost per numeric line plus an error
+  // ghost for the unknown word) — none of them may become searchable text.
+  await waitFor(() =>
+    page.evaluate(() => document.querySelectorAll('#view .ghost-result').length === 3)
+  );
+  await page.evaluate(() =>
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'f', metaKey: true, bubbles: true, cancelable: true })
+    )
+  );
+  await page.evaluate(() => {
+    const input = document.querySelector('.find-input');
+    input.value = 'o';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await waitFor(() =>
+    page.evaluate(() => document.querySelectorAll('#view .find-match').length === 2)
+  );
+  const marks = await page.evaluate(() =>
+    [...document.querySelectorAll('#view .find-match')].map((mark) => mark.textContent)
+  );
+  assert.deepEqual(marks, ['o', 'o']);
+
+  // Closing the bar must unwrap the marks and leave the typed text intact.
+  await page.evaluate(() =>
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })
+    )
+  );
+  assert.equal(
+    await page.evaluate(() => document.querySelectorAll('#view .find-match').length),
+    0
+  );
+  const text = await page.evaluate(() =>
+    [...document.querySelectorAll('#view .line')].map((line) => line.textContent).join('\n')
+  );
+  assert.equal(text, '1 + 1\nhello world\n20');
+  assert.deepEqual(errors, []);
+});
+
 test('a result on an overflowing line is reachable by horizontal scroll', async () => {
   await newPage();
   const longLine =
