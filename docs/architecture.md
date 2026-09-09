@@ -22,10 +22,12 @@ result is **real scrollable content**: scrolling to the end of a long line
 reveals it.
 
 The grid tracks are `minmax(max-content, 1fr)`, and `js/ui/editor.js` sizes the
-textarea to `max(scrollHeight, scroller.clientHeight)` (and likewise for
-width). So for a short sheet the layers stretch to fill the whole editor area —
-a tap anywhere raises the keyboard on iOS — while for a long sheet they keep
-growing with the content, and the ghost results stay scrollable.
+layers from the measured content extent — longest line × glyph width and line
+count × line height, plus padding — only pinning an explicit pixel size once
+the content is wider or taller than the scroll container. So for a short sheet
+the layers stretch to fill the whole editor area — a tap anywhere raises the
+keyboard on iOS — while for a long sheet they keep growing with the content,
+and the ghost results stay scrollable.
 
 The textarea no longer scrolls natively, so the caret is kept in view by
 `js/ui/editor.js`, which computes the caret position from monospace column/line
