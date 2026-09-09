@@ -1,4 +1,37 @@
 import { indexOfLineAt } from '../util/text.js';
+import { setEditorValue } from './editorInput.js';
+
+// Toggle a line between code and comment: a line that does not start with a
+// '#' gets a "# " prefix; one that does loses a single leading '#' (and one
+// following space), so "## x" becomes "# x". Only the leading marker is ever
+// touched, so toggling always round-trips.
+function toggleLineComment(editableNode, index) {
+  const value = editableNode.value;
+  const lines = value.split('\n');
+  if (index < 0 || index >= lines.length) return;
+
+  const line = lines[index];
+  let nextLine;
+  if (line.startsWith('#')) {
+    nextLine = line.slice(1);
+    if (nextLine.startsWith(' ')) nextLine = nextLine.slice(1);
+  } else {
+    nextLine = '# ' + line;
+  }
+  if (nextLine === line) return;
+
+  // Keep the caret near where it was: shift it by the length the line grew or
+  // shrank at its start.
+  const delta = nextLine.length - line.length;
+  let lineStart = 0;
+  for (let i = 0; i < index; i++) lineStart = value.indexOf('\n', lineStart) + 1;
+  const caret = editableNode.selectionStart;
+  const column = Math.max(0, Math.min(caret - lineStart, line.length));
+  const nextCaret = lineStart + Math.max(0, Math.min(column + delta, nextLine.length));
+
+  lines[index] = nextLine;
+  setEditorValue(editableNode, lines.join('\n'), { start: nextCaret, end: nextCaret });
+}
 
 function initLineNumbers(editableNode) {
   const gutter = document.createElement('pre');
@@ -47,6 +80,11 @@ function initLineNumbers(editableNode) {
       gutter.scrollTop = scroller.scrollTop;
     });
   }
+  gutter.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!target || !target.dataset || target.dataset.line === undefined) return;
+    toggleLineComment(editableNode, Number(target.dataset.line));
+  });
   editableNode.addEventListener('input', render);
   editableNode.addEventListener('keyup', sync);
   editableNode.addEventListener('click', sync);

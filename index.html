@@ -50,7 +50,7 @@
       </div>
       <div class="total-row">
         <b class="total-label">total:</b>
-        <span id="total" class="total" aria-live="polite"></span>
+        <span id="total" class="total"></span>
       </div>
     </div>
     <div class="status-bar">
@@ -164,16 +164,20 @@
           <div class="help-example" data-expr="Price: 10 + 5" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 15</span>
           </div>
+          <p><b>Tip:</b> click a line's number in the left gutter to comment or uncomment that line — handy for switching a calculation off without deleting it. A line that already starts with <code>##</code> just loses one <code>#</code>.</p>
         </section>
 
         <section id="help-variables" class="help-section">
           <h2>Variables</h2>
-          <p>Assign a value with <code>=</code> and reuse it on later lines. Use <code>prev</code> for the previous line's result, and <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> to aggregate the lines above until a blank line.</p>
+          <p>Assign a value with <code>=</code> and reuse it on later lines. Use <code>prev</code> for the most recent result above — it skips comments and blank lines. <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> aggregate the lines above until a blank line, which starts a new block.</p>
           <div class="help-example" data-expr="pizzas = 2&#10;pizzaPrice = 30&#10;people = 4&#10;(pizzas * pizzaPrice) / people" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">last line returns 15</span>
           </div>
           <div class="help-example" data-expr="20&#10;prev * 4" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">last line returns 80</span>
+          </div>
+          <div class="help-example" data-expr="10&#10;# a comment in between&#10;prev + 1" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">last line returns 11</span>
           </div>
           <div class="help-example" data-expr="10&#10;20&#10;sum" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">last line returns 30</span>
@@ -462,6 +466,7 @@
               <tr><td><code>Ctrl+Tab</code><br /><code>Ctrl+⇧Tab</code></td><td>Next / previous tab</td></tr>
               <tr><td><code>⌘1…9</code><br /><code>Ctrl+1…9</code></td><td>Jump to the nth tab</td></tr>
               <tr><td><code>⌘F</code></td><td>Find &amp; replace in the active sheet</td></tr>
+              <tr><td><code>⌘G</code></td><td>Jump to a line number</td></tr>
               <tr><td><code>⇧⌘C</code></td><td>Copy the current line's result</td></tr>
               <tr><td><code>⇧⌘S</code><br /><code>⇧⌘L</code></td><td>Copy a share link for the active sheet</td></tr>
               <tr><td><code>⇧⌘E</code></td><td>Export the active sheet</td></tr>

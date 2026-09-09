@@ -204,10 +204,18 @@ function initTour(editableNode, onFinish) {
     render();
   }
 
+  const appNode = document.querySelector('.layout');
+
+  function setPageLocked(locked) {
+    document.body.classList.toggle('tour-open', locked);
+    if (appNode) appNode.inert = locked;
+  }
+
   function finish() {
     if (!open) return;
     open = false;
     clearHighlight();
+    setPageLocked(false);
     rootNode.replaceChildren();
     document.removeEventListener('keydown', onKeydown, true);
     window.removeEventListener('resize', render);
@@ -253,6 +261,7 @@ function initTour(editableNode, onFinish) {
     rootNode.replaceChildren(backdrop, popover);
     render();
     popover.focus();
+    setPageLocked(true);
     document.addEventListener('keydown', onKeydown, true);
     window.addEventListener('resize', render);
   }

@@ -1,4 +1,5 @@
 import { scrollEditorToEnd } from '../util/scroll.js';
+import { setEditorValue } from './editorInput.js';
 
 function initIo(editableNode) {
   const exportButton = document.getElementById('export-button');
@@ -29,8 +30,7 @@ function initIo(editableNode) {
       ) {
         return;
       }
-      editableNode.value = imported;
-      editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+      setEditorValue(editableNode, imported);
       scrollEditorToEnd(editableNode);
     };
     reader.readAsText(file);

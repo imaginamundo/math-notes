@@ -126,6 +126,39 @@ html[data-theme='monokai'] {
   --surface-code: #1d1e19;
 }
 
+/* Light */
+html[data-theme='light'] {
+  --color-primary: #ffffff;
+  --color-primary-dim: rgba(0, 0, 0, 0.25);
+  --color-surface: #eef0f4;
+  --color-text: #383a42;
+  --color-text-strong: #202124;
+  --color-text-muted: #6f7681;
+  --color-footer: #e3e5ea;
+  --color-variable: #e45649;
+  --color-number: #986801;
+  --color-operator: #0184bc;
+  --color-currency: #50a14f;
+  --color-title: #7f848e;
+  --color-link: #4078f2;
+  --color-link-visited: #a626a4;
+  --color-ghost: rgba(0, 0, 0, 0.45);
+  --color-ghost-error: #c92f2f;
+  --border-light: rgba(0, 0, 0, 0.14);
+  --border-faint: rgba(0, 0, 0, 0.1);
+  --border-strong: #c7ccd4;
+  --border-soft: rgba(0, 0, 0, 0.12);
+  --border-table: rgba(0, 0, 0, 0.08);
+  --surface-nav: #e3e5ea;
+  --surface-chip: #e2e5ea;
+  --surface-chip-hover: #d6dade;
+  --surface-link-hover: #d6dade;
+  --surface-code: #eceef2;
+  --border-chip: rgba(0, 0, 0, 0.12);
+  --shadow-modal: rgba(0, 0, 0, 0.2);
+  --text-over-primary: rgba(0, 0, 0, 0.72);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -340,6 +373,15 @@ input::placeholder {
 }
 .line-numbers span {
   opacity: 0.55;
+  /* The gutter itself stays pointer-events: none so padding areas still pass
+     clicks through to the editor; only the number cells are interactive and
+     toggle the line's comment state. */
+  pointer-events: auto;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.line-numbers span:hover {
+  background: var(--surface-chip-hover);
 }
 .line-numbers span.active {
   opacity: 1;
@@ -527,6 +569,10 @@ button:hover {
 }
 .find-bar.open {
   display: flex;
+}
+.go-to-bar {
+  right: auto;
+  left: calc(1em + var(--line-gutter) + var(--safe-left));
 }
 .find-row {
   display: flex;

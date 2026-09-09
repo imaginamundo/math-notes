@@ -80,6 +80,29 @@ function createRowRenderer(view) {
     dirtyFrom = null;
   }
 
+  // A caret on a row with a truncated error shows the full message on that
+  // row; every other row stays compact. Call it whenever the active line may
+  // have changed (after input/click/selection, and after patching results).
+  function updateActiveLine(index) {
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      if (!row) continue;
+      let ghost = null;
+      for (const child of row.children) {
+        if (
+          child.classList &&
+          child.classList.contains('ghost-result') &&
+          child.classList.contains('error')
+        ) {
+          ghost = child;
+          break;
+        }
+      }
+      if (!ghost || !ghost.dataset || ghost.dataset.full === undefined) continue;
+      ghost.textContent = i === index ? ghost.dataset.full : ghost.dataset.short;
+    }
+  }
+
   function patchRow(row, result) {
     let ghost = null;
     for (const child of row.children) {
@@ -99,20 +122,28 @@ function createRowRenderer(view) {
     }
     ghost.textContent = text.value;
     ghost.className = 'ghost-result' + (text.error ? ' error' : '');
+    // Remember a truncated error's full text so the UI can reveal it when the
+    // line is active (and put it in a native hover title as a bonus).
+    if (text.error && text.full !== text.value) {
+      if (ghost.dataset) {
+        ghost.dataset.short = text.value;
+        ghost.dataset.full = text.full;
+      }
+      ghost.title = text.full;
+    }
   }
 
   function ghostText(result) {
     if (!result || result.type === 'assignment' || result.value === undefined) return null;
     const error = result.type === 'error';
-    return {
-      value: error
-        ? truncate(String(result.value), 80)
-        : `→ ${truncate(formatResult(result.value), 80)}`,
-      error,
-    };
+    if (!error) {
+      return { value: `→ ${truncate(formatResult(result.value), 80)}`, error: false };
+    }
+    const full = String(result.value);
+    return { value: truncate(full, 80), error: true, full };
   }
 
-  return { renderText, patchResults };
+  return { renderText, patchResults, updateActiveLine };
 }
 
 function truncate(text, max) {
