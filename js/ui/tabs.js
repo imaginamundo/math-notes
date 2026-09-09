@@ -1,63 +1,22 @@
 import { saveSnapshot, latestPerTab } from '../storage/snapshots.js';
+import { emptyHistory, recordChange, commitDraft, applyUndo, applyRedo } from '../core/history.js';
 import debounce from '../util/debounce.js';
 
 /**
  * @typedef {{ id: string, name: string, content: string }} Tab
  * @typedef {{ tabs: Tab[], activeId: string|null, nextTabNumber: number }} TabState
- * @typedef {{ undo: string[], redo: string[], draft: string|null }} History
  */
 
 const STORAGE_KEY = 'math-notes-tabs';
 const LEGACY_KEY = 'input';
-const HISTORY_LIMIT = 100;
 const SNAPSHOT_DELAY = 2000;
 
 let state = null;
 const persistDebounce = debounce(writeState, 400);
 
-// Per-tab undo/redo history, kept in memory only (not persisted). Each entry is
-// { undo: string[], redo: string[], draft: string | null } where `draft` is the
-// value captured at the start of the current typing burst.
+// Per-tab undo/redo history, kept in memory only and never persisted. The pure
+// helpers live in js/core/history.js; this module just owns the per-tab store.
 const histories = new Map();
-
-function emptyHistory() {
-  return { undo: [], redo: [], draft: null };
-}
-
-// A new edit begins a burst: record the pre-burst value as the draft and drop
-// the redo stack (a new edit invalidates redo).
-function recordChange(entry, lastValue, newValue) {
-  if (newValue === lastValue) return entry;
-  if (entry.draft === null) {
-    return { ...entry, draft: lastValue, redo: [] };
-  }
-  return entry;
-}
-
-// End a burst: the draft becomes the undo boundary for the whole burst. A
-// burst that typed its way back to the starting value (undo would be a no-op)
-// is dropped entirely.
-function commitDraft(entry, current) {
-  if (entry.draft === null) return entry;
-  if (current === entry.draft) return { ...entry, draft: null };
-  return { undo: [...entry.undo, entry.draft].slice(-HISTORY_LIMIT), redo: [], draft: null };
-}
-
-function applyUndo(entry, current) {
-  if (!entry.undo.length) return null;
-  return {
-    entry: { ...entry, undo: entry.undo.slice(0, -1), redo: [...entry.redo, current] },
-    value: entry.undo[entry.undo.length - 1],
-  };
-}
-
-function applyRedo(entry, current) {
-  if (!entry.redo.length) return null;
-  return {
-    entry: { ...entry, undo: [...entry.undo, current], redo: entry.redo.slice(0, -1) },
-    value: entry.redo[entry.redo.length - 1],
-  };
-}
 
 function writeState() {
   try {
@@ -627,5 +586,4 @@ function initTabs(editableNode, onUpdate) {
 
 export { createTab, closeTab, renameTab, setActiveTab, setContent, moveTab };
 export { deriveNextTabNumber };
-export { recordChange, commitDraft, applyUndo, applyRedo };
 export default initTabs;

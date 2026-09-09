@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { recordChange, commitDraft, applyUndo, applyRedo } from '../js/ui/tabs.js';
+import { recordChange, commitDraft, applyUndo, applyRedo } from '../js/core/history.js';
 
 const empty = () => ({ undo: [], redo: [], draft: null });
 
