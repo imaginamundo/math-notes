@@ -4,9 +4,8 @@ import storage from '../util/storage.js';
 // `onChange` is invoked after the new size is applied, so the editor can
 // re-sync its line-height and character width to the new metrics.
 const FONT_KEY = 'math-notes-font-size';
-const LEGACY_FONT_KEY = 'fontSize';
 
-export { FONT_KEY, LEGACY_FONT_KEY };
+export { FONT_KEY };
 
 function initFontControls(onChange = () => {}) {
   const fontMinusNode = document.getElementById('font-minus');
@@ -43,13 +42,10 @@ function initFontControls(onChange = () => {}) {
     setFontSize();
   });
 
-  let saved = parseInt(storage.get(FONT_KEY), 10);
-  let legacy = parseInt(storage.get(LEGACY_FONT_KEY), 10);
-  const current = saved || legacy;
-  if (current) {
-    fontSize.current = Math.min(fontSize.max, Math.max(fontSize.min, current));
+  const saved = parseInt(storage.get(FONT_KEY), 10);
+  if (saved) {
+    fontSize.current = Math.min(fontSize.max, Math.max(fontSize.min, saved));
     setFontSize();
-    if (!saved && legacy) storage.remove(LEGACY_FONT_KEY);
   }
 }
 

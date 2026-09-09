@@ -2,7 +2,7 @@ import initModal from './modal.js';
 import storage from '../util/storage.js';
 import { ONBOARDED_KEY } from './onboarding.js';
 import { DISMISSED_KEY } from './starterPrompt.js';
-import { FONT_KEY, LEGACY_FONT_KEY } from './cosmetic.js';
+import { FONT_KEY } from './cosmetic.js';
 import { STORAGE_KEY as TABS_KEY, LEGACY_KEY as LEGACY_TABS_KEY } from './tabs.js';
 import { STORAGE_KEY as CURRENCY_KEY } from '../eval/currency.js';
 
@@ -15,7 +15,6 @@ const RESET_KEYS = [
   LEGACY_TABS_KEY,
   CURRENCY_KEY,
   FONT_KEY,
-  LEGACY_FONT_KEY,
   // So "Reset data" genuinely returns the app to a first run, tour included.
   ONBOARDED_KEY,
   // A first run should also offer the starter-content actions again.
