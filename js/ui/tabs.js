@@ -34,9 +34,12 @@ function recordChange(entry, lastValue, newValue) {
   return entry;
 }
 
-// End a burst: the draft becomes the undo boundary for the whole burst.
-function commitDraft(entry) {
+// End a burst: the draft becomes the undo boundary for the whole burst. A
+// burst that typed its way back to the starting value (undo would be a no-op)
+// is dropped entirely.
+function commitDraft(entry, current) {
   if (entry.draft === null) return entry;
+  if (current === entry.draft) return { ...entry, draft: null };
   return { undo: [...entry.undo, entry.draft].slice(-HISTORY_LIMIT), redo: [], draft: null };
 }
 
@@ -180,7 +183,7 @@ function initTabs(editableNode, onUpdate) {
   };
 
   const burst = debounce(() => {
-    histories.set(state.activeId, commitDraft(history()));
+    histories.set(state.activeId, commitDraft(history(), editableNode.value));
   }, 700);
   const snapshot = debounce(saveActiveSnapshot, SNAPSHOT_DELAY);
 

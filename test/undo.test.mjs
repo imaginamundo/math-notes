@@ -25,6 +25,13 @@ test('commitDraft turns the burst into one undo step', () => {
   assert.deepEqual(burst, { undo: ['a'], redo: [], draft: null });
 });
 
+test('commitDraft drops a burst that reverted to its start', () => {
+  // Typing then deleting back to the original value must not create a no-op
+  // undo step.
+  const burst = commitDraft(recordChange(recordChange(empty(), 'a', 'ab'), 'ab', 'a'), 'a');
+  assert.deepEqual(burst, empty());
+});
+
 test('applyUndo restores the previous value and seeds redo', () => {
   let entry = empty();
   entry = commitDraft(recordChange(entry, 'a', 'ab'));
