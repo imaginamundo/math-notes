@@ -1,5 +1,6 @@
 import format from './format.js';
 import formatResult from './formatResult.js';
+import { firstDifference, arraysEqual } from '../util/sequence.js';
 
 // Rendering is two-phase so that what you type never waits on the worker:
 // `renderText` redraws the highlighted input synchronously, and `patchResults`
@@ -14,23 +15,6 @@ function createRowRenderer(view) {
   let lines = [];
   let patched = null; // lines[] whose results are currently shown, or null
   let dirtyFrom = null; // first row whose result is still outstanding
-
-  // Index of the first differing line, or -1 when the inputs are identical.
-  function firstDifference(previous, next) {
-    const length = Math.max(previous.length, next.length);
-    for (let i = 0; i < length; i++) {
-      if (previous[i] !== next[i]) return i;
-    }
-    return -1;
-  }
-
-  function arraysEqual(a, b) {
-    if (a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i++) {
-      if (a[i] !== b[i]) return false;
-    }
-    return true;
-  }
 
   function createRow(line) {
     const row = document.createElement('div');
