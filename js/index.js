@@ -1,5 +1,6 @@
 import { createRowRenderer } from './render/renderInput.js';
 import renderTotal from './render/renderTotal.js';
+import { indexOfLineAt } from './util/text.js';
 import registerServiceWorker from './registerServiceWorker.js';
 import { createEvalClient } from './evalClient.js';
 import initHelpModal from './ui/help.js';
@@ -35,9 +36,15 @@ function renderTextLayer(lines) {
   editorScroll.syncSize();
 }
 
+// The line under the caret drives error expansion (see rowRenderer).
+function activeLine() {
+  return indexOfLineAt(contentEditableNode.value, contentEditableNode.selectionStart);
+}
+
 function renderResultLayer(lines, data) {
   rowRenderer.patchResults(lines, data.results, data.startLine);
   renderTotal(totalNode, data.total);
+  rowRenderer.updateActiveLine(activeLine());
   editorScroll.syncSize();
 }
 
@@ -52,8 +59,11 @@ const evalClient = createEvalClient(
 // worker on a debounce and fill the results in when it replies.
 contentEditableNode.addEventListener('input', () => {
   renderTextLayer(contentEditableNode.value.split('\n'));
+  rowRenderer.updateActiveLine(activeLine());
   evalClient.schedule();
 });
+contentEditableNode.addEventListener('click', () => rowRenderer.updateActiveLine(activeLine()));
+contentEditableNode.addEventListener('keyup', () => rowRenderer.updateActiveLine(activeLine()));
 
 // Snapshot before initTabs, which persists a tab collection as it starts up.
 const onboardingState = readOnboardingState();

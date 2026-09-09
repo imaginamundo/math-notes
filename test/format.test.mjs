@@ -22,6 +22,7 @@ class El {
     this.tagName = tag.toUpperCase();
     this._classes = new Set();
     this.classList = new ClassList(this);
+    this.dataset = {};
     this.children = [];
     this.textContent = '';
   }
@@ -93,6 +94,22 @@ test('two-phase rendering fills ghost results into rows', () => {
   assert.equal(ghosts[0].textContent, '→ 2');
   assert.equal(ghosts[1].className, 'ghost-result error');
   assert.equal(ghosts[1].textContent, 'Undefined symbol x');
+});
+
+test('updateActiveLine reveals a truncated error on the caret row', () => {
+  const view = new El('pre');
+  const renderer = createRowRenderer(view);
+  const longError = 'Undefined symbol something'.padEnd(120, '!');
+  renderer.renderText(['boom']);
+  renderer.patchResults(['boom'], [{ type: 'error', value: longError }], 0);
+  const ghost = view.children[0].children[1];
+  assert.ok(ghost.textContent.endsWith('…'), 'error is truncated inline');
+  assert.equal(ghost.dataset.full, longError);
+
+  renderer.updateActiveLine(0);
+  assert.equal(ghost.textContent, longError, 'the active row shows the full error');
+  renderer.updateActiveLine(-1);
+  assert.ok(ghost.textContent.endsWith('…'), 'leaving the row collapses it again');
 });
 
 test('identifiers, numbers and operators get their own classes', () => {
