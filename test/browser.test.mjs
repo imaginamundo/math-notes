@@ -322,7 +322,8 @@ test('a group shows its subtotal on the header line', async () => {
     })
   );
   const state = await page.evaluate(() => {
-    const rows = document.querySelectorAll('#view .line-row');
+    const rows = [...document.querySelectorAll('#view .line-row')].slice(0, 5);
+    const widths = rows.map((row) => Math.round(row.getBoundingClientRect().width));
     return {
       ghost: rows[0].querySelector('.ghost-result').textContent,
       header: rows[0].classList.contains('group-header'),
@@ -330,6 +331,9 @@ test('a group shows its subtotal on the header line', async () => {
       end: rows[4].classList.contains('group-end'),
       endGhost: Boolean(rows[4].querySelector('.ghost-result')),
       endColor: getComputedStyle(rows[4].querySelector('.title')).color,
+      widths,
+      topRadius: getComputedStyle(rows[0]).borderTopLeftRadius,
+      bottomRadius: getComputedStyle(rows[4]).borderBottomLeftRadius,
     };
   });
   assert.equal(state.ghost, '→ 10.1');
@@ -338,6 +342,9 @@ test('a group shows its subtotal on the header line', async () => {
   assert.equal(state.end, true);
   assert.equal(state.endGhost, false, 'the end row carries no result');
   assert.equal(state.endColor, 'rgb(154, 164, 176)', 'end matches the label colour');
+  assert.equal(new Set(state.widths).size, 1, 'the group shades as one uniform box');
+  assert.equal(state.topRadius, '4px');
+  assert.equal(state.bottomRadius, '4px');
   assert.deepEqual(errors, []);
 });
 

@@ -351,6 +351,14 @@ input::placeholder {
      alignment with the transparent textarea. */
   background: var(--color-group-bg);
 }
+.line-row.group-header {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+.line-row.group-end {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
 .ghost-result {
   margin-left: 1.5em;
   color: var(--color-ghost);

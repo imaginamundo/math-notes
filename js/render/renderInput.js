@@ -82,6 +82,7 @@ function createRowRenderer(view) {
       const row = rows[i];
       if (row) setGroupClass(row, results && results[i] ? results[i].group : undefined);
     }
+    layoutGroups();
     patched = textLines.slice();
     dirtyFrom = null;
   }
@@ -90,6 +91,37 @@ function createRowRenderer(view) {
     row.classList.toggle('group-header', group === 'header');
     row.classList.toggle('group-body', group === 'body');
     row.classList.toggle('group-end', group === 'end');
+  }
+
+  // A group shades as one box: every row in the group is widened to the widest
+  // row (including its ghost), so the background no longer hugs each line's
+  // text length. Rounded corners are drawn by CSS on the first/last row.
+  function layoutGroups() {
+    if (typeof view.offsetWidth !== 'number') return;
+    let i = 0;
+    while (i < rows.length) {
+      const first = rows[i];
+      if (!first || !first.classList.contains('group-header')) {
+        i++;
+        continue;
+      }
+      const groupRows = [];
+      while (i < rows.length) {
+        const row = rows[i];
+        if (!row) break;
+        groupRows.push(row);
+        const isEnd = row.classList.contains('group-end');
+        i++;
+        if (isEnd) break;
+      }
+      for (const row of groupRows) row.style.width = '';
+      let widest = 0;
+      for (const row of groupRows) widest = Math.max(widest, row.offsetWidth);
+      if (widest > 0) {
+        const width = `${Math.ceil(widest)}px`;
+        for (const row of groupRows) row.style.width = width;
+      }
+    }
   }
 
   // A caret on a row with a truncated error shows the full message on that
@@ -155,7 +187,7 @@ function createRowRenderer(view) {
     return { value: truncate(full, 80), error: true, full };
   }
 
-  return { renderText, patchResults, updateActiveLine };
+  return { renderText, patchResults, updateActiveLine, relayout: layoutGroups };
 }
 
 function truncate(text, max) {
