@@ -312,20 +312,32 @@ test('Cmd+G jumps the caret to the requested line', async () => {
   assert.deepEqual(errors, []);
 });
 
-test('a group shows its subtotal on the end line', async () => {
+test('a group shows its subtotal on the header line', async () => {
   await newPage();
   await setContent('Groceries:\n4.50\n3.20\n2.40\nend');
   await waitFor(() =>
     page.evaluate(() => {
       const rows = document.querySelectorAll('#view .line-row');
-      return rows[4] && Boolean(rows[4].querySelector('.ghost-result'));
+      return rows[0] && Boolean(rows[0].querySelector('.ghost-result'));
     })
   );
-  const ghost = await page.evaluate(() => {
+  const state = await page.evaluate(() => {
     const rows = document.querySelectorAll('#view .line-row');
-    return rows[4].querySelector('.ghost-result').textContent;
+    return {
+      ghost: rows[0].querySelector('.ghost-result').textContent,
+      header: rows[0].classList.contains('group-header'),
+      body: rows[1].classList.contains('group-body'),
+      end: rows[4].classList.contains('group-end'),
+      endGhost: Boolean(rows[4].querySelector('.ghost-result')),
+      endColor: getComputedStyle(rows[4].querySelector('.title')).color,
+    };
   });
-  assert.equal(ghost, '→ 10.1');
+  assert.equal(state.ghost, '→ 10.1');
+  assert.equal(state.header, true);
+  assert.equal(state.body, true);
+  assert.equal(state.end, true);
+  assert.equal(state.endGhost, false, 'the end row carries no result');
+  assert.equal(state.endColor, 'rgb(154, 164, 176)', 'end matches the label colour');
   assert.deepEqual(errors, []);
 });
 

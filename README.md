@@ -27,7 +27,8 @@ Based on [Numi](https://numi.app/).
 - **`sum` / `total` / `average` / `avg`** — aggregate the lines above (until a
   blank line), following the total's unit rule.
 - **Groups** — wrap lines in `Groceries:` … `end` to show a subtotal on the
-  closing line; the inner lines still count in the bottom total.
+  header line and shade the block; the inner lines still count in the bottom
+  total.
 - **Comments** with `#` and **labels** like `Price: 10 + 5`.
 - **Unit conversion** (`1 cm to m`) including CSS units (`px`, `em`, `point`).
 - **Currency conversion** (`100 USD to EUR`, `$5 to GBP`, `R$5 to EUR`) with

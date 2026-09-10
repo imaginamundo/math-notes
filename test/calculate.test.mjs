@@ -214,23 +214,29 @@ test('evaluateLines aggregates compatible units too', () => {
   assert.ok(Math.abs(sum.toNumber() - 1.1) < 1e-9);
 });
 
-test('a group shows its subtotal on end without double counting', () => {
+test('a group shows its subtotal on the header without double counting', () => {
   const { results, total } = evaluateLines(['Groceries:', '10', '20', 'end']);
-  assert.equal(results[3].type, 'value');
-  assert.equal(results[3].aggregate, true);
-  assert.equal(results[3].value, 30);
+  assert.equal(results[0].type, 'value');
+  assert.equal(results[0].aggregate, true);
+  assert.equal(results[0].value, 30);
+  assert.equal(results[0].group, 'header');
+  assert.equal(results[1].group, 'body');
+  assert.equal(results[3].value, undefined);
+  assert.equal(results[3].group, 'end');
   assert.equal(total, 30);
 });
 
 test('a group ignores blank lines and scopes sum to itself', () => {
   const { results } = evaluateLines(['Groceries:', '10', '', '20', 'sum', 'end']);
+  assert.equal(results[0].value, 30);
   assert.equal(results[4].value, 30);
-  assert.equal(results[5].value, 30);
+  assert.equal(results[5].value, undefined);
 });
 
 test('an unterminated header is just a label', () => {
   const { results, total } = evaluateLines(['Groceries:', '10']);
   assert.equal(results[0].value, undefined);
+  assert.equal(results[0].group, undefined);
   assert.equal(total, 10);
 });
 
@@ -239,13 +245,23 @@ test('end without an open group stays an error', () => {
 });
 
 test('a group subtotal follows the unit rules', () => {
-  const subtotal = evaluateLines(['Trip:', '10 cm', '1 m', 'end']).results[3].value;
+  const subtotal = evaluateLines(['Trip:', '10 cm', '1 m', 'end']).results[0].value;
   assert.equal(subtotal.formatUnits(), 'm');
   assert.ok(Math.abs(subtotal.toNumber() - 1.1) < 1e-9);
 });
 
 test('prev after end is the group subtotal', () => {
   assert.equal(evaluateLines(['G:', '10', '20', 'end', 'prev * 2']).results[4].value, 60);
+});
+
+test('editing or removing a group refreshes the header subtotal', () => {
+  evaluateLines(['G:', '10', '20', 'end']);
+  const edited = evaluateLines(['G:', '10', '30', 'end']).results[0];
+  assert.equal(edited.value, 40);
+
+  const removed = evaluateLines(['G:', '10', '30']).results[0];
+  assert.equal(removed.value, undefined);
+  assert.equal(removed.group, undefined);
 });
 
 test('evaluateLines ignores mixed currencies but folds plain numbers', () => {

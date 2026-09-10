@@ -177,7 +177,20 @@ function createEngine() {
       cache.results = [];
       cache.revision = environmentRevision;
     }
-    const startLine = firstDifference(cache.lines, lines);
+    const startLine = (() => {
+      let start = firstDifference(cache.lines, lines);
+      if (start === -1) return start;
+      // A group's subtotal lives on its header but depends on the lines below
+      // it, so any change inside (or removing) a group must invalidate the
+      // header too. Both the old and the new grouping are considered.
+      const groups = [...findGroups(cache.lines).byEnd.values()].concat([
+        ...findGroups(lines).byEnd.values(),
+      ]);
+      for (const group of groups) {
+        if (start > group.start && start <= group.end) start = group.start;
+      }
+      return start;
+    })();
     if (startLine === -1) {
       return { results: cache.results, total: computeTotal(cache.results), startLine };
     }
@@ -220,13 +233,14 @@ function createEngine() {
 
       const parsed = parseLine(line);
 
-      // A closing `end` row carries the group's subtotal. It is an aggregate
-      // result, so it is shown as a ghost but left out of the running total
-      // (the inner lines already count there).
+      // A closing `end` row finalises the group: the subtotal is shown on the
+      // header row (an aggregate result, so it never double counts in the
+      // running total), while the `end` row itself stays inert.
       const endGroup = groups.byEnd.get(i);
       if (endGroup) {
         const value = aggregateAbove(results, endGroup.start + 1, i, 'sum');
-        results[i] = { type: 'value', value, aggregate: true };
+        results[endGroup.start] = { type: 'value', value, aggregate: true };
+        results[i] = { type: 'value', value: undefined };
         if (value !== undefined) previousResult = value;
         continue;
       }
@@ -267,6 +281,18 @@ function createEngine() {
 
     cache.lines = lines;
     cache.results = results;
+
+    // Tag every line of a closed group so the renderer can shade it. Cleared
+    // first so a removed group cannot leave stale roles on reused results.
+    for (const result of results) {
+      if (result) delete result.group;
+    }
+    for (const [lineIndex, group] of groups.groupOfLine) {
+      const result = results[lineIndex];
+      if (!result) continue;
+      result.group =
+        lineIndex === group.start ? 'header' : lineIndex === group.end ? 'end' : 'body';
+    }
 
     return { results, total: computeTotal(results), startLine };
   }

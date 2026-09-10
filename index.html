@@ -194,12 +194,12 @@
 
         <section id="help-groups" class="help-section">
           <h2>Groups</h2>
-          <p>Open a named group with a label on its own line (like <code>Groceries:</code>) and close it with <code>end</code>. The closing line shows the group's subtotal; the inner lines still count in the bottom total. Blank lines inside are ignored, and <code>sum</code>/<code>average</code> inside a group total that group. A header with no <code>end</code> is just a label.</p>
+          <p>Open a named group with a label on its own line (like <code>Groceries:</code>) and close it with <code>end</code>. The header shows the group's subtotal and the whole group is shaded; the inner lines still count in the bottom total. Blank lines inside are ignored, and <code>sum</code>/<code>average</code> inside a group total that group. A header with no <code>end</code> is just a label.</p>
           <div class="help-example" data-expr="Groceries:&#10;4.50&#10;3.20&#10;2.40&#10;end" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">end returns 10.1</span>
+            <code></code><span class="help-returns">header shows 10.1</span>
           </div>
           <div class="help-example" data-expr="Trip:&#10;10 cm&#10;1 m&#10;end" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">end returns 1.1 m</span>
+            <code></code><span class="help-returns">header shows 1.1 m</span>
           </div>
         </section>
 

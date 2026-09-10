@@ -76,8 +76,20 @@ function createRowRenderer(view) {
       const row = rows[i];
       if (row) patchRow(row, results ? results[i] : undefined);
     }
+    // Group shading is applied to every row (not just the changed tail) so a
+    // group that disappeared above the patch point loses its background too.
+    for (let i = 0; i < textLines.length; i++) {
+      const row = rows[i];
+      if (row) setGroupClass(row, results && results[i] ? results[i].group : undefined);
+    }
     patched = textLines.slice();
     dirtyFrom = null;
+  }
+
+  function setGroupClass(row, group) {
+    row.classList.toggle('group-header', group === 'header');
+    row.classList.toggle('group-body', group === 'body');
+    row.classList.toggle('group-end', group === 'end');
   }
 
   // A caret on a row with a truncated error shows the full message on that

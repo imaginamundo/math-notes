@@ -80,10 +80,13 @@ per caller). Registering new currency rates bumps an _environment revision_
 that forces a full recompute, so cached conversions never go stale.
 
 A small structural pass (`findGroups`) pairs header lines (`Name:` with no
-expression) with `end` rows. A closed group's `end` row becomes an aggregate
-result holding the group subtotal, and aggregates inside the group use the
-group start instead of the last blank line. Groups are flat and annotation-only:
-inner lines still feed the running total.
+expression) with `end` rows. A closed group's **header** row becomes an
+aggregate result holding the group subtotal (so it is shaded and never double
+counts), the `end` row stays inert, and aggregates inside the group use the
+group start instead of the last blank line. Because the header depends on the
+lines below it, a change inside a group (or removing its `end`) invalidates the
+header. Groups are flat and annotation-only: inner lines still feed the running
+total.
 
 ### The worker
 

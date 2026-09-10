@@ -16,6 +16,11 @@ class ClassList {
         .includes(name)
     );
   }
+  toggle(name, force) {
+    const on = force === undefined ? !this.contains(name) : Boolean(force);
+    if (on) this.el._classes.add(name);
+    else this.el._classes.delete(name);
+  }
 }
 class El {
   constructor(tag) {
@@ -178,4 +183,39 @@ test('patchResults fills an unchanged sheet that has never had results', () => {
   renderer.patchResults(lines, results, -1);
   assert.equal(view.children.length, 2);
   assert.equal(view.children[0], drawn, 'the existing rows were reused');
+});
+
+test('a group end line is styled like a label', () => {
+  const node = format.line('end');
+  assert.equal(node.children[0]._classes.has('title'), true);
+  assert.equal(node.children[0].textContent, 'end');
+});
+
+test('group results add shading classes to their rows', () => {
+  const view = new El('pre');
+  const renderer = createRowRenderer(view);
+  const lines = ['Groceries:', '10', 'end'];
+  renderer.renderText(lines);
+  renderer.patchResults(
+    lines,
+    [
+      { type: 'value', value: 10, aggregate: true, group: 'header' },
+      { type: 'value', value: 10, group: 'body' },
+      { type: 'value', value: undefined, group: 'end' },
+    ],
+    0
+  );
+  assert.equal(view.children[0].classList.contains('group-header'), true);
+  assert.equal(view.children[1].classList.contains('group-body'), true);
+  assert.equal(view.children[2].classList.contains('group-end'), true);
+
+  // Losing the group clears the shading again.
+  renderer.patchResults(
+    lines,
+    [{ type: 'value', value: 10 }, { type: 'value', value: 10 }, { type: 'value' }],
+    0
+  );
+  assert.equal(view.children[0].classList.contains('group-header'), false);
+  assert.equal(view.children[1].classList.contains('group-body'), false);
+  assert.equal(view.children[2].classList.contains('group-end'), false);
 });

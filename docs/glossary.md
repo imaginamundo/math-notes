@@ -35,9 +35,9 @@ Terms used throughout the codebase and this documentation.
 - **Object** — a mathjs object literal (`{key: value}`), rendered inline as
   `{ key: value, … }`; fields are reached with `obj.key`.
 - **Group** — a named block opened by a label-only line (`Groceries:`) and
-  closed by `end`; the `end` row shows the block's subtotal (an aggregate
-  result), while the inner lines still count in the bottom total. Groups are
-  flat, and an unterminated header is just a label.
+  closed by `end`; the header shows the block's subtotal (an aggregate result)
+  and the block is shaded, while the inner lines still count in the bottom
+  total. Groups are flat, and an unterminated header is just a label.
 - **Preprocessors** — the regex transforms run before mathjs, in order: scales,
   symbols (currency), percentages, word operators.
 - **Currency context** — places where a 3-letter code is treated as a unit
