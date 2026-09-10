@@ -190,11 +190,7 @@ test('evaluateLines ignores mixed units but still sums plain numbers', () => {
 
 test('evaluateLines totals values that share a currency', () => {
   registerCurrencyRates({ base: 'EUR', rates: { BRL: 5.5 } });
-  const { total } = evaluateLines([
-    'daily = 24.8 BRL',
-    'fixed = 750 BRL',
-    '22 * daily + fixed',
-  ]);
+  const { total } = evaluateLines(['daily = 24.8 BRL', 'fixed = 750 BRL', '22 * daily + fixed']);
   assert.equal(total.isUnit, true);
   assert.equal(total.formatUnits(), 'BRL');
   assert.ok(Math.abs(total.toNumber() - (22 * 24.8 + 750)) < 1e-9);
