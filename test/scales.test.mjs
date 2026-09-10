@@ -7,25 +7,26 @@ function valueOf(line) {
   return evaluateLines([line]).results[0].value;
 }
 
-test('preprocessScales expands scale suffixes', () => {
+test('preprocessScales expands repeated k as powers of a thousand', () => {
   assert.equal(preprocessScales('2k'), '2000');
   assert.equal(preprocessScales('1.5k'), '1500');
-  assert.equal(preprocessScales('2M'), '2000000');
-  assert.equal(preprocessScales('5 thousand'), '5000');
-  assert.equal(preprocessScales('3 million'), '3000000');
-  assert.equal(preprocessScales('2 billion'), '2000000000');
+  assert.equal(preprocessScales('1kk'), '1000000');
+  assert.equal(preprocessScales('1kkk'), '1000000000');
+  assert.equal(preprocessScales('2 kk'), '2000000');
 });
 
-test('preprocessScales leaves units and letters attached', () => {
+test('preprocessScales leaves units, letters and other words alone', () => {
   assert.equal(preprocessScales('2km'), '2km');
   assert.equal(preprocessScales('2 kg'), '2 kg');
   assert.equal(preprocessScales('2 m'), '2 m');
   assert.equal(preprocessScales('2K'), '2K');
-  assert.equal(preprocessScales('1Mbytes'), '1Mbytes');
+  assert.equal(preprocessScales('5 thousand'), '5 thousand');
+  assert.equal(preprocessScales('2M'), '2M');
 });
 
 test('evaluateLines resolves scales in expressions', () => {
   assert.equal(valueOf('2k'), 2000);
   assert.equal(valueOf('1.5k + 500'), 2000);
-  assert.equal(valueOf('2M + 1'), 2000001);
+  assert.equal(valueOf('1kk + 1'), 1000001);
+  assert.equal(valueOf('2kkk'), 2000000000);
 });

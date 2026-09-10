@@ -30,7 +30,8 @@ Based on [Numi](https://numi.app/).
   live rates from the European Central Bank, cached for offline use.
 - **Percentages**: `20% of $10`, `5% on $30`, `6% off 40 EUR`,
   `$50 as a % of $100`, `5% of what is 6`.
-- **Number scales**: `2k`, `2M eur`, `5 million`.
+- **Number scales**: repeated `k` — `2k` (2,000), `1kk` (1,000,000),
+  `1kkk` (1,000,000,000).
 - **Word operators**: `8 times 9`, `2 plus 3`, `10 minus 3`, `6 multiplied by 7`.
 - **Function aliases**: `ln`, `fact`, `arcsin`, `arccos`, `arctan`, `root`.
 - **Dates**: `fromunix(1446587186)`, `unix()`.
