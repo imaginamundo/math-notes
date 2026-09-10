@@ -81,4 +81,8 @@ function registerCurrencyCode(code) {
   CURRENCY_CODES.add(code.toUpperCase());
 }
 
-export { registerCurrencyCode, preprocessSymbols };
+function isCurrencyCode(code) {
+  return CURRENCY_CODES.has(String(code).toUpperCase());
+}
+
+export { registerCurrencyCode, isCurrencyCode, preprocessSymbols };

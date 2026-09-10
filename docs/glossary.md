@@ -12,9 +12,10 @@ Terms used throughout the codebase and this documentation.
   layer. `find.js` counts `.line-row` boundaries as newlines when mapping match
   offsets onto the DOM.
 - **Total** — the running sum of numeric results shown at the bottom
-  (`renderTotal`). When every unit value shares one unit or currency, plain
-  numbers are folded into it and the total carries that unit; with several
-  different units they are ignored and only plain numbers are summed.
+  (`renderTotal`). Plain numbers fold into a single unit; compatible units
+  (e.g. `cm` + `m`) merge into the largest one present; currencies and affine
+  units (temperatures) never merge across kinds; several different kinds are
+  ignored and only plain numbers are summed.
 - **Tab** — a worksheet. `TabState` is `{ tabs, activeId, nextTabNumber }`;
   each `Tab` is `{ id, name, content }`.
 - **Snapshot** — a versioned backup of a tab (id, name, content, timestamp)
@@ -26,8 +27,9 @@ Terms used throughout the codebase and this documentation.
 - **Burst** — a run of edits grouped into a single undo step by the 700ms idle
   timer.
 - **Aggregate** — `sum`/`total`/`average`/`avg` keywords that combine the lines
-  above (stopping at a blank line). They follow the total's unit rule: one
-  shared unit is kept (plain numbers folded in), mixed units are ignored.
+  above (stopping at a blank line). They follow the total's unit rule
+  (compatible units merge into the largest present, currencies/temperatures
+  stay separate, mixed kinds are ignored).
 - **`prev`** — a scope variable holding the most recent result above the
   current line (comments and blank lines are skipped).
 - **Preprocessors** — the regex transforms run before mathjs, in order: scales,

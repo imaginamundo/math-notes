@@ -194,6 +194,43 @@ test('evaluateLines folds plain numbers into a single shared unit', () => {
   assert.equal(total.formatUnits(), 'cm');
 });
 
+test('evaluateLines merges compatible units into the largest present', () => {
+  const length = evaluateLines(['10 cm', '1 m']).total;
+  assert.equal(length.formatUnits(), 'm');
+  assert.ok(Math.abs(length.toNumber() - 1.1) < 1e-9);
+
+  const time = evaluateLines(['2 h', '30 minutes']).total;
+  assert.equal(time.formatUnits(), 'h');
+  assert.ok(Math.abs(time.toNumber() - 2.5) < 1e-9);
+
+  const mass = evaluateLines(['500 g', '2 kg', '10']).total;
+  assert.equal(mass.formatUnits(), 'kg');
+  assert.ok(Math.abs(mass.toNumber() - 12.5) < 1e-9);
+});
+
+test('evaluateLines aggregates compatible units too', () => {
+  const sum = evaluateLines(['10 cm', '1 m', 'sum']).results[2].value;
+  assert.equal(sum.formatUnits(), 'm');
+  assert.ok(Math.abs(sum.toNumber() - 1.1) < 1e-9);
+});
+
+test('evaluateLines ignores mixed currencies but folds plain numbers', () => {
+  registerCurrencyRates({ base: 'EUR', rates: { BRL: 5.5, USD: 1.1 } });
+  assert.equal(evaluateLines(['500 BRL', '10 USD']).total, null);
+  assert.equal(evaluateLines(['500 BRL', '10 USD', '10', '10']).total, 20);
+
+  const single = evaluateLines(['500 BRL', '10']).total;
+  assert.equal(single.formatUnits(), 'BRL');
+  assert.ok(Math.abs(single.toNumber() - 510) < 1e-9);
+});
+
+test('evaluateLines keeps same affine units apart from other temperatures', () => {
+  const celsius = evaluateLines(['20 degC', '5 degC']).total;
+  assert.equal(celsius.formatUnits(), 'degC');
+  assert.ok(Math.abs(celsius.toNumber() - 25) < 1e-9);
+  assert.equal(evaluateLines(['20 degC', '5 degF']).total, null);
+});
+
 test('evaluateLines totals values that share a currency', () => {
   registerCurrencyRates({ base: 'EUR', rates: { BRL: 5.5 } });
   const { total } = evaluateLines(['daily = 24.8 BRL', 'fixed = 750 BRL', '22 * daily + fixed']);
