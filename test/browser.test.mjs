@@ -350,6 +350,16 @@ test('a group shows its subtotal on the header line', async () => {
   assert.equal(state.bottomRadius, '4px');
   assert.notEqual(state.insetLeft, '0px', 'the box has breathing room on the left');
   assert.notEqual(state.insetRight, '0px', 'the box has breathing room on the right');
+
+  // Editing a body line must refresh the header subtotal above it.
+  await setContent('Groceries:\n5.50\n3.20\n2.40\nend');
+  await waitFor(() =>
+    page.evaluate(() => {
+      const header = document.querySelector('#view .line-row');
+      const ghost = header && header.querySelector('.ghost-result');
+      return ghost && ghost.textContent === '→ 11.1';
+    })
+  );
   assert.deepEqual(errors, []);
 });
 

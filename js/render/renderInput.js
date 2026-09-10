@@ -95,7 +95,13 @@ function createRowRenderer(view) {
   function patchResults(textLines, results, startLine) {
     if (rows.length === 0) return;
     if (startLine === -1 && patched && arraysEqual(patched, textLines)) return;
-    const from = dirtyFrom === null ? 0 : dirtyFrom;
+    // Patch from the earliest row that may need a new result. `dirtyFrom` is
+    // the first changed line, but the engine can start earlier — a group's
+    // subtotal lives on a header above the edited line, so it reports that
+    // header as `startLine`.
+    const textFrom = dirtyFrom === null ? 0 : dirtyFrom;
+    const resultFrom = startLine >= 0 ? startLine : 0;
+    const from = Math.min(textFrom, resultFrom);
     for (let i = from; i < textLines.length; i++) {
       const row = rows[i];
       if (row) patchRow(row, results ? results[i] : undefined);

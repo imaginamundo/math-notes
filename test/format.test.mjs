@@ -215,6 +215,37 @@ test('editing one line reuses every other row', () => {
   assert.equal(view.children[0].children[0].children[0].textContent, '9');
 });
 
+test('patchResults refreshes a group header above the edited line', () => {
+  const view = new El('pre');
+  const renderer = createRowRenderer(view);
+  const lines = ['Groceries:', '10', 'end'];
+  renderer.renderText(lines);
+  renderer.patchResults(
+    lines,
+    [
+      { type: 'value', value: 10, aggregate: true, group: 'header' },
+      { type: 'value', value: 10, group: 'body' },
+      { type: 'value', value: undefined, group: 'end' },
+    ],
+    0
+  );
+  assert.equal(view.children[0].children[1].textContent, '→ 10');
+
+  // The body changed (dirtyFrom = 1) but the engine starts at the header (0).
+  const next = ['Groceries:', '20', 'end'];
+  renderer.renderText(next);
+  renderer.patchResults(
+    next,
+    [
+      { type: 'value', value: 20, aggregate: true, group: 'header' },
+      { type: 'value', value: 20, group: 'body' },
+      { type: 'value', value: undefined, group: 'end' },
+    ],
+    0
+  );
+  assert.equal(view.children[0].children[1].textContent, '→ 20');
+});
+
 test('group results add shading classes to their rows', () => {
   const view = new El('pre');
   const renderer = createRowRenderer(view);
