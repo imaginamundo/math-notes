@@ -25,8 +25,9 @@ Terms used throughout the codebase and this documentation.
   dies mid-session; `js/core/calculate.js` is lazy-imported for it.
 - **Burst** — a run of edits grouped into a single undo step by the 700ms idle
   timer.
-- **Aggregate** — `sum`/`total`/`average`/`avg` keywords that combine the
-  numeric lines above (stopping at a blank line).
+- **Aggregate** — `sum`/`total`/`average`/`avg` keywords that combine the lines
+  above (stopping at a blank line). They follow the total's unit rule: one
+  shared unit is kept (plain numbers folded in), mixed units are ignored.
 - **`prev`** — a scope variable holding the most recent result above the
   current line (comments and blank lines are skipped).
 - **Preprocessors** — the regex transforms run before mathjs, in order: scales,

@@ -23,7 +23,7 @@ Based on [Numi](https://numi.app/).
   element (`double(1:5)`); aggregate with `sum(1:100)` or `mean(1:5)`.
 - **`prev`** — reference the previous line's result.
 - **`sum` / `total` / `average` / `avg`** — aggregate the lines above (until a
-  blank line).
+  blank line), following the total's unit rule.
 - **Comments** with `#` and **labels** like `Price: 10 + 5`.
 - **Unit conversion** (`1 cm to m`) including CSS units (`px`, `em`, `point`).
 - **Currency conversion** (`100 USD to EUR`, `$5 to GBP`, `R$5 to EUR`) with

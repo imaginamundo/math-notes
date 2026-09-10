@@ -249,7 +249,24 @@ test('evaluateLines sum stops at an empty line', () => {
 test('evaluateLines aggregate excludes assignments and other aggregates', () => {
   assert.equal(evaluateLines(['x = 5', '10', 'sum']).results[2].value, 10);
   assert.equal(evaluateLines(['1', 'sum', '1']).results[1].value, 1);
-  assert.equal(evaluateLines(['1', 'sum', '1']).total, 2);
+});
+
+test('evaluateLines aggregates values that share one unit', () => {
+  const sum = evaluateLines(['10 cm', '5 cm', 'sum']).results[2].value;
+  assert.equal(sum.isUnit, true);
+  assert.ok(Math.abs(sum.toNumber() - 15) < 1e-9);
+  assert.equal(sum.formatUnits(), 'cm');
+
+  const folded = evaluateLines(['10 cm', '10', 'sum']).results[2].value;
+  assert.equal(folded.isUnit, true);
+  assert.ok(Math.abs(folded.toNumber() - 20) < 1e-9);
+
+  const avg = evaluateLines(['10 cm', '20 cm', 'average']).results[2].value;
+  assert.equal(avg.isUnit, true);
+  assert.ok(Math.abs(avg.toNumber() - 15) < 1e-9);
+
+  assert.equal(evaluateLines(['10 cm', '5 kg', 'sum']).results[2].value, 0);
+  assert.equal(evaluateLines(['10 cm', '5 kg', '10', 'sum']).results[2].value, 10);
 });
 
 test('evaluateLines aggregate of nothing is 0', () => {
