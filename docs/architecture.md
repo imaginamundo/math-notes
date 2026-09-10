@@ -199,7 +199,9 @@ creates a row renderer once with `createRowRenderer(viewNode)`
   (number, variable, currency, operator, comment, title).
 - `formatResult` (`js/render/formatResult.js`) formats numbers/units into
   display strings (its `Intl.NumberFormat` is cached).
-- `renderTotal` shows the running total; `aria-live` announces it.
+- `renderTotal` shows the running total (a single unit/currency total when all
+  unit values agree, otherwise the plain numeric sum); `aria-live` announces
+  it after a pause.
 
 ## Line numbers
 

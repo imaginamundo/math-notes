@@ -22,8 +22,64 @@ function aggregateAbove(results, fromIndex, toIndex, mode) {
 }
 
 function computeTotal(results) {
-  const totalValues = results.filter(NUMERIC).map(({ value }) => value);
-  return totalValues.length ? totalValues.reduce((acc, cur) => acc + cur) : null;
+  let numericSum = null;
+  const unitGroups = new Map();
+
+  for (const result of results) {
+    if (result.type !== 'value' || result.aggregate) continue;
+    const value = result.value;
+
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      numericSum = (numericSum ?? 0) + value;
+      continue;
+    }
+
+    if (value && value.isUnit === true) {
+      let amount;
+      try {
+        amount = value.toNumber();
+      } catch {
+        amount = value.value;
+      }
+      if (typeof amount !== 'number' || !Number.isFinite(amount)) continue;
+
+      const key = value.formatUnits ? String(value.formatUnits()) : String(value);
+      let group = unitGroups.get(key);
+      if (!group) {
+        group = { sum: 0, sample: value, sampleAmount: amount };
+        unitGroups.set(key, group);
+      }
+      group.sum += amount;
+      // Keep a non-zero sample so the summed unit can be rescaled safely.
+      if (group.sampleAmount === 0 && amount !== 0) {
+        group.sample = value;
+        group.sampleAmount = amount;
+      }
+    }
+  }
+
+  if (unitGroups.size === 0) return numericSum;
+  // A single unit (and no plain numbers) totals in that unit. Mixed units, or a
+  // mix of units and plain numbers, fall back to the plain numeric sum — which
+  // is null when there are no plain numbers at all.
+  if (unitGroups.size === 1 && numericSum === null) {
+    return scaleUnit(unitGroups.values().next().value);
+  }
+  return numericSum;
+}
+
+// Rebuild a Unit of the same kind holding the summed amount.
+function scaleUnit(group) {
+  const { sum, sample, sampleAmount } = group;
+  if (!sample || typeof sample.multiply !== 'function') return null;
+  try {
+    if (!Number.isFinite(sampleAmount) || sampleAmount === 0) {
+      return sum === 0 ? sample.multiply(0) : null;
+    }
+    return sample.multiply(sum / sampleAmount);
+  } catch {
+    return null;
+  }
 }
 
 export { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal };

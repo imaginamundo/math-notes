@@ -9,6 +9,8 @@ Based on [Numi](https://numi.app/).
 ## Features
 
 - **Line-by-line evaluation** with an automatic total of numeric results.
+  Values sharing one unit or currency (e.g. several `BRL` amounts) total in
+  that unit; mixed units fall back to the plain numeric sum.
 - **Tabs** for separate worksheets — rename by double-clicking a tab, close with
   `×` (you're asked to confirm), add with `+`, or drag a tab to reorder it.
   Switch with `Ctrl+Tab` or `⌘1…9` / `Ctrl+1…9`. Everything is saved locally.

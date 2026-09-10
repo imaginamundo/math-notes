@@ -17,7 +17,15 @@ self.addEventListener('message', (event) => {
               ? result.value
               : formatResult(result.value),
       }));
-      self.postMessage({ id, type: 'result', results: serialized, total, startLine });
+      // The total may be a Unit (same-unit sheet) and must be serialized too.
+      const serializedTotal = total === null || total === undefined ? total : formatResult(total);
+      self.postMessage({
+        id,
+        type: 'result',
+        results: serialized,
+        total: serializedTotal,
+        startLine,
+      });
     } catch (error) {
       self.postMessage({ id, type: 'error', message: error.message });
     }

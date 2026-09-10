@@ -175,6 +175,31 @@ test('evaluateLines returns no total without value results', () => {
   assert.equal(evaluateLines(['# only a comment']).total, null);
 });
 
+test('evaluateLines totals values that share one unit', () => {
+  const total = evaluateLines(['10 cm', '5 cm']).total;
+  assert.equal(total.isUnit, true);
+  assert.ok(Math.abs(total.toNumber() - 15) < 1e-9);
+  assert.equal(total.formatUnits(), 'cm');
+});
+
+test('evaluateLines ignores mixed units but still sums plain numbers', () => {
+  assert.equal(evaluateLines(['10 cm', '5 kg']).total, null);
+  assert.equal(evaluateLines(['10 cm', '5 kg', '10', '10']).total, 20);
+  assert.equal(evaluateLines(['10 cm', '10']).total, 10);
+});
+
+test('evaluateLines totals values that share a currency', () => {
+  registerCurrencyRates({ base: 'EUR', rates: { BRL: 5.5 } });
+  const { total } = evaluateLines([
+    'daily = 24.8 BRL',
+    'fixed = 750 BRL',
+    '22 * daily + fixed',
+  ]);
+  assert.equal(total.isUnit, true);
+  assert.equal(total.formatUnits(), 'BRL');
+  assert.ok(Math.abs(total.toNumber() - (22 * 24.8 + 750)) < 1e-9);
+});
+
 test('evaluateLines resolves prev from the previous line', () => {
   const { results } = evaluateLines(['5', 'prev * 2', 'prev + 1']);
   assert.equal(results[1].value, 10);

@@ -312,6 +312,19 @@ test('Cmd+G jumps the caret to the requested line', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('the total keeps a shared unit and falls back to plain numbers', async () => {
+  await newPage();
+  await setContent('10 cm\n5 cm');
+  await waitFor(() =>
+    page.evaluate(() => document.getElementById('total').textContent.includes('cm'))
+  );
+  assert.equal(await page.evaluate(() => document.getElementById('total').textContent), '15 cm');
+
+  await setContent('10 cm\n5 kg\n10\n10');
+  await waitFor(() => page.evaluate(() => document.getElementById('total').textContent === '20'));
+  assert.deepEqual(errors, []);
+});
+
 test('a result on an overflowing line is reachable by horizontal scroll', async () => {
   await newPage();
   const longLine =

@@ -12,7 +12,9 @@ Terms used throughout the codebase and this documentation.
   layer. `find.js` counts `.line-row` boundaries as newlines when mapping match
   offsets onto the DOM.
 - **Total** — the running sum of numeric results shown at the bottom
-  (`renderTotal`).
+  (`renderTotal`). Values that all share one unit or currency total in that
+  unit; mixed units (or a mix of units and plain numbers) fall back to the
+  plain numeric sum.
 - **Tab** — a worksheet. `TabState` is `{ tabs, activeId, nextTabNumber }`;
   each `Tab` is `{ id, name, content }`.
 - **Snapshot** — a versioned backup of a tab (id, name, content, timestamp)
