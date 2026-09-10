@@ -38,6 +38,22 @@ function createRowRenderer(view) {
     }
   }
 
+  // Replace just the highlighted `.line` of a row, keeping its ghost and group
+  // classes in place, so typing inside a line never tears down the view.
+  function updateRow(index, line) {
+    const row = rows[index];
+    if (!row) {
+      const created = createRow(line);
+      view.appendChild(created);
+      rows[index] = created;
+      return;
+    }
+    const fresh = format.line(line);
+    const current = row.firstChild;
+    if (current) row.replaceChild(fresh, current);
+    else row.appendChild(fresh);
+  }
+
   /**
    * Phase one: redraw the highlighted input rows. Rows from the first changed
    * line on are rebuilt; the unchanged prefix above them is left alone,
@@ -54,7 +70,15 @@ function createRowRenderer(view) {
     }
     const start = firstDifference(lines, textLines);
     if (start === -1) return;
-    buildRows(start, textLines);
+    if (textLines.length === lines.length) {
+      // Same shape: patch only the lines whose text changed, leaving every
+      // other row (and its result/box) untouched.
+      for (let i = start; i < textLines.length; i++) {
+        if (lines[i] !== textLines[i]) updateRow(i, textLines[i]);
+      }
+    } else {
+      buildRows(start, textLines);
+    }
     lines = textLines.slice();
     patched = null;
     dirtyFrom = dirtyFrom === null ? start : Math.min(dirtyFrom, start);
@@ -71,13 +95,63 @@ function createRowRenderer(view) {
   function patchResults(textLines, results, startLine) {
     if (rows.length === 0) return;
     if (startLine === -1 && patched && arraysEqual(patched, textLines)) return;
-    const from = dirtyFrom === null ? 0 : dirtyFrom;
+    // Patch from the earliest row that may need a new result. `dirtyFrom` is
+    // the first changed line, but the engine can start earlier — a group's
+    // subtotal lives on a header above the edited line, so it reports that
+    // header as `startLine`.
+    const textFrom = dirtyFrom === null ? 0 : dirtyFrom;
+    const resultFrom = startLine >= 0 ? startLine : 0;
+    const from = Math.min(textFrom, resultFrom);
     for (let i = from; i < textLines.length; i++) {
       const row = rows[i];
       if (row) patchRow(row, results ? results[i] : undefined);
     }
+    // Group shading is applied to every row (not just the changed tail) so a
+    // group that disappeared above the patch point loses its background too.
+    for (let i = 0; i < textLines.length; i++) {
+      const row = rows[i];
+      if (row) setGroupClass(row, results && results[i] ? results[i].group : undefined);
+    }
+    layoutGroups();
     patched = textLines.slice();
     dirtyFrom = null;
+  }
+
+  function setGroupClass(row, group) {
+    row.classList.toggle('group-header', group === 'header');
+    row.classList.toggle('group-body', group === 'body');
+    row.classList.toggle('group-end', group === 'end');
+  }
+
+  // A group shades as one box: every row in the group is widened to the widest
+  // row (including its ghost), so the background no longer hugs each line's
+  // text length. Rounded corners are drawn by CSS on the first/last row.
+  function layoutGroups() {
+    if (typeof view.offsetWidth !== 'number') return;
+    let i = 0;
+    while (i < rows.length) {
+      const first = rows[i];
+      if (!first || !first.classList.contains('group-header')) {
+        i++;
+        continue;
+      }
+      const groupRows = [];
+      while (i < rows.length) {
+        const row = rows[i];
+        if (!row) break;
+        groupRows.push(row);
+        const isEnd = row.classList.contains('group-end');
+        i++;
+        if (isEnd) break;
+      }
+      for (const row of groupRows) row.style.width = '';
+      let widest = 0;
+      for (const row of groupRows) widest = Math.max(widest, row.offsetWidth);
+      if (widest > 0) {
+        const width = `${Math.ceil(widest)}px`;
+        for (const row of groupRows) row.style.width = width;
+      }
+    }
   }
 
   // A caret on a row with a truncated error shows the full message on that
@@ -143,7 +217,7 @@ function createRowRenderer(view) {
     return { value: truncate(full, 80), error: true, full };
   }
 
-  return { renderText, patchResults, updateActiveLine };
+  return { renderText, patchResults, updateActiveLine, relayout: layoutGroups };
 }
 
 function truncate(text, max) {

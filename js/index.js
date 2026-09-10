@@ -81,6 +81,7 @@ function boot() {
   initRecipes(contentEditableNode);
   initSettings(contentEditableNode, tabsApi);
   initFontControls(editorScroll.refreshMetrics);
+  window.addEventListener('math:font-size-changed', () => rowRenderer.relayout());
   initIo(contentEditableNode);
   initShortcuts(contentEditableNode, evalClient.requestLines, tabsApi.switchTab);
   initFind(contentEditableNode, viewNode);

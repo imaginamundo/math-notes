@@ -23,6 +23,10 @@ function line(text) {
   if (titleIndex !== -1) {
     wrapper.appendChild(titleWrap(rawCode.slice(0, titleIndex + 1)));
     if (titleIndex + 1 < rawCode.length) appendCode(wrapper, rawCode.slice(titleIndex + 1));
+  } else if (rawCode.trim() === 'end') {
+    // A group's closing row shares the label colour so header and end read as
+    // a matching pair.
+    wrapper.appendChild(titleWrap(rawCode));
   } else if (rawCode) {
     appendCode(wrapper, rawCode);
   }

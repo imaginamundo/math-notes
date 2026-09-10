@@ -16,6 +16,7 @@ self.addEventListener('message', (event) => {
             : result.type === 'error'
               ? result.value
               : formatResult(result.value),
+        group: result.group,
       }));
       // The total may be a Unit (same-unit sheet) and must be serialized too.
       const serializedTotal = total === null || total === undefined ? total : formatResult(total);
