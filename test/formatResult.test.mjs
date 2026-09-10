@@ -52,3 +52,19 @@ test('formatResult compacts long lists', () => {
   const out = formatResult(Array.from({ length: 100 }, (_, i) => i + 1));
   assert.match(out, /^\[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, …, 100\]$/);
 });
+
+test('formatResult renders plain objects instead of [object Object]', () => {
+  assert.equal(formatResult({ a: 1, b: 2 }), '{ a: 1, b: 2 }');
+  assert.equal(formatResult({}), '{}');
+  assert.equal(formatResult({ a: { b: 2 } }), '{ a: { b: 2 } }');
+  assert.equal(formatResult({ 'a b': 1 }), '{ "a b": 1 }');
+  assert.equal(formatResult({ d: math.unit(1, 'cm') }), '{ d: 1 cm }');
+  assert.equal(formatResult([{ a: 1 }, 2]), '[{ a: 1 }, 2]');
+});
+
+test('formatResult compacts long objects and leaves non-plain objects alone', () => {
+  const obj = Object.fromEntries(Array.from({ length: 20 }, (_, i) => [`k${i}`, i]));
+  assert.match(formatResult(obj), /^\{ k0: 0, .*…, k19: 19 \}$/);
+  const complex = math.evaluate('1 + 2i');
+  assert.equal(formatResult(complex), String(complex));
+});

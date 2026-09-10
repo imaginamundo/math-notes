@@ -32,6 +32,8 @@ Terms used throughout the codebase and this documentation.
   stay separate, mixed kinds are ignored).
 - **`prev`** — a scope variable holding the most recent result above the
   current line (comments and blank lines are skipped).
+- **Object** — a mathjs object literal (`{key: value}`), rendered inline as
+  `{ key: value, … }`; fields are reached with `obj.key`.
 - **Preprocessors** — the regex transforms run before mathjs, in order: scales,
   symbols (currency), percentages, word operators.
 - **Currency context** — places where a 3-letter code is treated as a unit
