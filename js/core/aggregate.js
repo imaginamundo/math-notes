@@ -59,24 +59,24 @@ function computeTotal(results) {
   }
 
   if (unitGroups.size === 0) return numericSum;
-  // A single unit (and no plain numbers) totals in that unit. Mixed units, or a
-  // mix of units and plain numbers, fall back to the plain numeric sum — which
-  // is null when there are no plain numbers at all.
-  if (unitGroups.size === 1 && numericSum === null) {
-    return scaleUnit(unitGroups.values().next().value);
+  // A single unit totals in that unit, and plain numbers are folded in as the
+  // same unit. Multiple units are ignored, leaving only the plain numbers.
+  if (unitGroups.size === 1) {
+    const group = unitGroups.values().next().value;
+    return scaleUnit(group, group.sum + (numericSum ?? 0));
   }
   return numericSum;
 }
 
-// Rebuild a Unit of the same kind holding the summed amount.
-function scaleUnit(group) {
-  const { sum, sample, sampleAmount } = group;
+// Rebuild a Unit of the same kind holding `amount`.
+function scaleUnit(group, amount) {
+  const { sample, sampleAmount } = group;
   if (!sample || typeof sample.multiply !== 'function') return null;
   try {
     if (!Number.isFinite(sampleAmount) || sampleAmount === 0) {
-      return sum === 0 ? sample.multiply(0) : null;
+      return amount === 0 ? sample.multiply(0) : null;
     }
-    return sample.multiply(sum / sampleAmount);
+    return sample.multiply(amount / sampleAmount);
   } catch {
     return null;
   }

@@ -185,7 +185,13 @@ test('evaluateLines totals values that share one unit', () => {
 test('evaluateLines ignores mixed units but still sums plain numbers', () => {
   assert.equal(evaluateLines(['10 cm', '5 kg']).total, null);
   assert.equal(evaluateLines(['10 cm', '5 kg', '10', '10']).total, 20);
-  assert.equal(evaluateLines(['10 cm', '10']).total, 10);
+});
+
+test('evaluateLines folds plain numbers into a single shared unit', () => {
+  const total = evaluateLines(['10 cm', '10']).total;
+  assert.equal(total.isUnit, true);
+  assert.ok(Math.abs(total.toNumber() - 20) < 1e-9);
+  assert.equal(total.formatUnits(), 'cm');
 });
 
 test('evaluateLines totals values that share a currency', () => {
