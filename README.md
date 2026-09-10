@@ -26,6 +26,8 @@ Based on [Numi](https://numi.app/).
 - **`prev`** — reference the previous line's result.
 - **`sum` / `total` / `average` / `avg`** — aggregate the lines above (until a
   blank line), following the total's unit rule.
+- **Groups** — wrap lines in `Groceries:` … `end` to show a subtotal on the
+  closing line; the inner lines still count in the bottom total.
 - **Comments** with `#` and **labels** like `Price: 10 + 5`.
 - **Unit conversion** (`1 cm to m`) including CSS units (`px`, `em`, `point`).
 - **Currency conversion** (`100 USD to EUR`, `$5 to GBP`, `R$5 to EUR`) with
@@ -91,7 +93,8 @@ The **Help** button opens the full reference with clickable examples.
 ## Reserved words
 
 `prev`, `sum`, `total`, `average` and `avg` are treated as operators, so they
-cannot be used as variable names.
+cannot be used as variable names. `end` closes a group (and is reserved by
+mathjs anyway).
 
 ## Development
 

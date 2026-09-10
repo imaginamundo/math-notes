@@ -214,6 +214,40 @@ test('evaluateLines aggregates compatible units too', () => {
   assert.ok(Math.abs(sum.toNumber() - 1.1) < 1e-9);
 });
 
+test('a group shows its subtotal on end without double counting', () => {
+  const { results, total } = evaluateLines(['Groceries:', '10', '20', 'end']);
+  assert.equal(results[3].type, 'value');
+  assert.equal(results[3].aggregate, true);
+  assert.equal(results[3].value, 30);
+  assert.equal(total, 30);
+});
+
+test('a group ignores blank lines and scopes sum to itself', () => {
+  const { results } = evaluateLines(['Groceries:', '10', '', '20', 'sum', 'end']);
+  assert.equal(results[4].value, 30);
+  assert.equal(results[5].value, 30);
+});
+
+test('an unterminated header is just a label', () => {
+  const { results, total } = evaluateLines(['Groceries:', '10']);
+  assert.equal(results[0].value, undefined);
+  assert.equal(total, 10);
+});
+
+test('end without an open group stays an error', () => {
+  assert.equal(evaluateLines(['10', 'end']).results[1].type, 'error');
+});
+
+test('a group subtotal follows the unit rules', () => {
+  const subtotal = evaluateLines(['Trip:', '10 cm', '1 m', 'end']).results[3].value;
+  assert.equal(subtotal.formatUnits(), 'm');
+  assert.ok(Math.abs(subtotal.toNumber() - 1.1) < 1e-9);
+});
+
+test('prev after end is the group subtotal', () => {
+  assert.equal(evaluateLines(['G:', '10', '20', 'end', 'prev * 2']).results[4].value, 60);
+});
+
 test('evaluateLines ignores mixed currencies but folds plain numbers', () => {
   registerCurrencyRates({ base: 'EUR', rates: { BRL: 5.5, USD: 1.1 } });
   assert.equal(evaluateLines(['500 BRL', '10 USD']).total, null);

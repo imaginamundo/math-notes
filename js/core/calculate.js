@@ -36,6 +36,30 @@ const AGGREGATE_WORD = /\b(?:sum|total|average|avg)\b(?!\s*\()/i;
 const AGGREGATE_SUM_WORD = /\b(?:sum|total)\b(?!\s*\()/gi;
 const AGGREGATE_AVG_WORD = /\b(?:average|avg)\b(?!\s*\()/gi;
 
+// A group opens with a header line (`Name:` with no expression) and closes with
+// a line whose code is exactly `end`. Groups are flat: an unterminated header is
+// just a label, and an `end` with no open group is left to the evaluator.
+function findGroups(lines) {
+  const byEnd = new Map();
+  const groupOfLine = new Map();
+  let open = null;
+  for (let i = 0; i < lines.length; i++) {
+    const parsed = parseLine(lines[i]);
+    const isHeader = parsed.title !== '' && parsed.code.trim() === '';
+    if (isHeader) {
+      open = { start: i, end: -1 };
+      continue;
+    }
+    if (open && parsed.code.trim() === 'end') {
+      open.end = i;
+      byEnd.set(i, open);
+      for (let k = open.start; k <= i; k++) groupOfLine.set(k, open);
+      open = null;
+    }
+  }
+  return { byEnd, groupOfLine };
+}
+
 /**
  * Build an isolated evaluation engine: its own mathjs instance (aliases, css
  * and currency units configured), its own incremental result cache and its own
@@ -164,6 +188,7 @@ function createEngine() {
     const variables = {};
     let previousResult;
     let lastBlankIndex = -1;
+    const groups = findGroups(lines);
 
     for (let i = 0; i < startLine; i++) {
       const line = lines[i];
@@ -195,15 +220,28 @@ function createEngine() {
 
       const parsed = parseLine(line);
 
+      // A closing `end` row carries the group's subtotal. It is an aggregate
+      // result, so it is shown as a ghost but left out of the running total
+      // (the inner lines already count there).
+      const endGroup = groups.byEnd.get(i);
+      if (endGroup) {
+        const value = aggregateAbove(results, endGroup.start + 1, i, 'sum');
+        results[i] = { type: 'value', value, aggregate: true };
+        if (value !== undefined) previousResult = value;
+        continue;
+      }
+
       if (parsed.isAssignment && AGGREGATE_KEYWORDS[parsed.label.toLowerCase()]) {
         results[i] = { type: 'error', value: `"${parsed.label}" is a reserved word` };
         continue;
       }
 
+      const group = groups.groupOfLine.get(i);
+      const blockStart = group ? group.start + 1 : lastBlankIndex + 1;
       const keyword = AGGREGATE_KEYWORDS[parsed.code.trim().toLowerCase()];
 
       if (keyword) {
-        const value = aggregateAbove(results, lastBlankIndex + 1, i, keyword);
+        const value = aggregateAbove(results, blockStart, i, keyword);
         results[i] = { type: 'value', value, aggregate: true };
         if (value !== undefined) previousResult = value;
         continue;
@@ -214,8 +252,8 @@ function createEngine() {
 
       let parsedLine = parsed;
       if (AGGREGATE_WORD.test(parsed.code)) {
-        const blockSum = aggregateAbove(results, lastBlankIndex + 1, i, 'sum');
-        const blockAvg = aggregateAbove(results, lastBlankIndex + 1, i, 'average');
+        const blockSum = aggregateAbove(results, blockStart, i, 'sum');
+        const blockAvg = aggregateAbove(results, blockStart, i, 'average');
         parsedLine = substituteAggregates(parsed, blockSum, blockAvg);
       }
 

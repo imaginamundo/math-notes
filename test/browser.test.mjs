@@ -312,6 +312,23 @@ test('Cmd+G jumps the caret to the requested line', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('a group shows its subtotal on the end line', async () => {
+  await newPage();
+  await setContent('Groceries:\n4.50\n3.20\n2.40\nend');
+  await waitFor(() =>
+    page.evaluate(() => {
+      const rows = document.querySelectorAll('#view .line-row');
+      return rows[4] && Boolean(rows[4].querySelector('.ghost-result'));
+    })
+  );
+  const ghost = await page.evaluate(() => {
+    const rows = document.querySelectorAll('#view .line-row');
+    return rows[4].querySelector('.ghost-result').textContent;
+  });
+  assert.equal(ghost, '→ 10.1');
+  assert.deepEqual(errors, []);
+});
+
 test('the total keeps a shared unit and falls back to plain numbers', async () => {
   await newPage();
   await setContent('10 cm\n5 cm');
