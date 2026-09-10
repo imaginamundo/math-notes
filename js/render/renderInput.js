@@ -38,6 +38,22 @@ function createRowRenderer(view) {
     }
   }
 
+  // Replace just the highlighted `.line` of a row, keeping its ghost and group
+  // classes in place, so typing inside a line never tears down the view.
+  function updateRow(index, line) {
+    const row = rows[index];
+    if (!row) {
+      const created = createRow(line);
+      view.appendChild(created);
+      rows[index] = created;
+      return;
+    }
+    const fresh = format.line(line);
+    const current = row.firstChild;
+    if (current) row.replaceChild(fresh, current);
+    else row.appendChild(fresh);
+  }
+
   /**
    * Phase one: redraw the highlighted input rows. Rows from the first changed
    * line on are rebuilt; the unchanged prefix above them is left alone,
@@ -54,7 +70,15 @@ function createRowRenderer(view) {
     }
     const start = firstDifference(lines, textLines);
     if (start === -1) return;
-    buildRows(start, textLines);
+    if (textLines.length === lines.length) {
+      // Same shape: patch only the lines whose text changed, leaving every
+      // other row (and its result/box) untouched.
+      for (let i = start; i < textLines.length; i++) {
+        if (lines[i] !== textLines[i]) updateRow(i, textLines[i]);
+      }
+    } else {
+      buildRows(start, textLines);
+    }
     lines = textLines.slice();
     patched = null;
     dirtyFrom = dirtyFrom === null ? start : Math.min(dirtyFrom, start);

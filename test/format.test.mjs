@@ -36,6 +36,17 @@ class El {
     this.children.push(child);
     return child;
   }
+  get firstChild() {
+    return this.children[0] || null;
+  }
+  replaceChild(newChild, oldChild) {
+    const index = this.children.indexOf(oldChild);
+    if (index === -1) return oldChild;
+    this.children[index] = newChild;
+    newChild._parent = this;
+    oldChild._parent = null;
+    return oldChild;
+  }
   remove() {
     if (!this._parent) return;
     const index = this._parent.children.indexOf(this);
@@ -189,6 +200,19 @@ test('a group end line is styled like a label', () => {
   const node = format.line('end');
   assert.equal(node.children[0]._classes.has('title'), true);
   assert.equal(node.children[0].textContent, 'end');
+});
+
+test('editing one line reuses every other row', () => {
+  const view = new El('pre');
+  const renderer = createRowRenderer(view);
+  renderer.renderText(['1 + 1', '2 + 2', '3 + 3']);
+  const unchanged = view.children[1];
+  const editedLine = view.children[0].children[0];
+
+  renderer.renderText(['9 + 9', '2 + 2', '3 + 3']);
+  assert.equal(view.children[1], unchanged, 'unchanged rows are reused');
+  assert.notEqual(view.children[0].children[0], editedLine, 'the edited line is redrawn');
+  assert.equal(view.children[0].children[0].children[0].textContent, '9');
 });
 
 test('group results add shading classes to their rows', () => {
