@@ -324,6 +324,7 @@ test('a group shows its subtotal on the header line', async () => {
   const state = await page.evaluate(() => {
     const rows = [...document.querySelectorAll('#view .line-row')].slice(0, 5);
     const widths = rows.map((row) => Math.round(row.getBoundingClientRect().width));
+    const before = (row) => getComputedStyle(row, '::before');
     return {
       ghost: rows[0].querySelector('.ghost-result').textContent,
       header: rows[0].classList.contains('group-header'),
@@ -332,8 +333,10 @@ test('a group shows its subtotal on the header line', async () => {
       endGhost: Boolean(rows[4].querySelector('.ghost-result')),
       endColor: getComputedStyle(rows[4].querySelector('.title')).color,
       widths,
-      topRadius: getComputedStyle(rows[0]).borderTopLeftRadius,
-      bottomRadius: getComputedStyle(rows[4]).borderBottomLeftRadius,
+      topRadius: before(rows[0]).borderTopLeftRadius,
+      bottomRadius: before(rows[4]).borderBottomLeftRadius,
+      insetLeft: before(rows[0]).left,
+      insetRight: before(rows[0]).right,
     };
   });
   assert.equal(state.ghost, '→ 10.1');
@@ -345,6 +348,8 @@ test('a group shows its subtotal on the header line', async () => {
   assert.equal(new Set(state.widths).size, 1, 'the group shades as one uniform box');
   assert.equal(state.topRadius, '4px');
   assert.equal(state.bottomRadius, '4px');
+  assert.notEqual(state.insetLeft, '0px', 'the box has breathing room on the left');
+  assert.notEqual(state.insetRight, '0px', 'the box has breathing room on the right');
   assert.deepEqual(errors, []);
 });
 

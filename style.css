@@ -347,15 +347,27 @@ input::placeholder {
 .line-row.group-header,
 .line-row.group-body,
 .line-row.group-end {
-  /* Background only: no padding/border, which would shift the text out of
-     alignment with the transparent textarea. */
-  background: var(--color-group-bg);
+  /* The tint is an overlay rather than the row box, so it can extend past the
+     text (breathing room) without any padding/border shifting the glyphs. */
+  position: relative;
 }
-.line-row.group-header {
+.line-row.group-header::before,
+.line-row.group-body::before,
+.line-row.group-end::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -0.5em;
+  right: -0.5em;
+  background: var(--color-group-bg);
+  z-index: -1;
+}
+.line-row.group-header::before {
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
 }
-.line-row.group-end {
+.line-row.group-end::before {
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
 }
