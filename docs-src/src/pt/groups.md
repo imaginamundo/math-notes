@@ -24,7 +24,7 @@ sum
 average
 ```
 
-```calc a última linha retorna 15
+```calc a última linha retorna 3
 10
 20
 sum
