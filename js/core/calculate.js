@@ -45,6 +45,30 @@ const AGGREGATE_WORD = /\b(?:sum|total|average|avg)\b(?!\s*\()/i;
 const AGGREGATE_SUM_WORD = /\b(?:sum|total)\b(?!\s*\()/gi;
 const AGGREGATE_AVG_WORD = /\b(?:average|avg)\b(?!\s*\()/gi;
 
+// Labels a line may not assign to: the aggregate keywords and `prev` (the docs
+// reserve them), the unconditional date keywords (rewritten before mathjs, so a
+// variable of that name could never be read back) and the whole `__` namespace,
+// which holds the engine's own helpers and the generated names multi-word
+// variables are mangled to. Checked against the raw label, before mangling, so
+// a multi-word variable (which becomes `__var_...`) is never mistaken for a
+// reserved name.
+const RESERVED_LABELS = new Set([
+  'prev',
+  'today',
+  'now',
+  'yesterday',
+  'tomorrow',
+  'christmas',
+  'halloween',
+]);
+
+function isReservedLabel(label) {
+  const lower = label.toLowerCase();
+  return (
+    AGGREGATE_KEYWORDS[lower] !== undefined || RESERVED_LABELS.has(lower) || label.startsWith('__')
+  );
+}
+
 // A group opens with a header line (`Name:` with no expression) and closes with
 // a line whose code is exactly `end`. Groups are flat: an unterminated header is
 // just a label, and an `end` with no open group is reported as an error.
@@ -391,6 +415,8 @@ function createEngine() {
       if (line.trim() === '') lastBlankIndex = i;
 
       let parsed = parseLine(line);
+      // The raw label, before mangleLines rewrote multi-word names.
+      const original = parseLine(inputLines[i]);
 
       // A closing `end` row finalises the group: the subtotal is shown on the
       // header row (an aggregate result, so it never double counts in the
@@ -440,8 +466,8 @@ function createEngine() {
         }
       }
 
-      if (parsed.isAssignment && AGGREGATE_KEYWORDS[parsed.label.toLowerCase()]) {
-        results[i] = { type: 'error', value: `"${parsed.label}" is a reserved word` };
+      if (original.isAssignment && isReservedLabel(original.label)) {
+        results[i] = { type: 'error', value: `"${original.label}" is a reserved word` };
         continue;
       }
 

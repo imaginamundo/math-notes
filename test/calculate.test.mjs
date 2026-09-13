@@ -541,6 +541,29 @@ test('evaluateLines rejects assigning to aggregate keywords', () => {
   assert.equal(results[2].value, 0);
 });
 
+test('evaluateLines rejects assigning to prev, date keywords and internals', () => {
+  const { results } = evaluateLines([
+    'prev = 5',
+    'today = 5',
+    '__rate = 5',
+    '__var_a_b = 5',
+    '3',
+    'prev',
+  ]);
+  for (const index of [0, 1, 2, 3]) {
+    assert.equal(results[index].type, 'error', `line ${index} is rejected`);
+    assert.match(results[index].value, /reserved/);
+  }
+  assert.equal(results[5].value, 3, 'prev still resolves after the errors');
+});
+
+test('a multi-word name containing a keyword is still a variable', () => {
+  const { results } = evaluateLines(['sum total = 5', 'prev x = 2', 'sum total * 2', 'prev x * 3']);
+  assert.equal(results[0].type, 'assignment');
+  assert.equal(results[2].value, 10);
+  assert.equal(results[3].value, 6);
+});
+
 test('evaluateLines supports Numi function aliases', () => {
   const { results } = evaluateLines([
     'ln(e)',

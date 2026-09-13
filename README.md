@@ -154,8 +154,13 @@ The **Help** button opens the full reference with clickable examples.
 ## Reserved words
 
 `prev`, `sum`, `total`, `average` and `avg` are treated as operators, so they
-cannot be used as variable names. `end` closes a group (and is reserved by
-mathjs anyway).
+cannot be used as variable names. The unconditional date words (`today`, `now`,
+`yesterday`, `tomorrow`, `christmas`, `halloween`) and any name starting with
+`__` (the editor's internal helpers and generated names) are reserved too.
+`end` closes a group (and mathjs reserves it anyway).
+
+Variables otherwise share one scope with mathjs names, so a variable can shadow
+a unit or function: after `m = 5`, `2 m` is `2 × m`, not two metres.
 
 ## Development
 
