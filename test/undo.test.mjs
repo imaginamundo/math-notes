@@ -1,6 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { recordChange, commitDraft, applyUndo, applyRedo } from '../js/core/history.js';
+import {
+  recordChange,
+  commitDraft,
+  applyUndo,
+  applyRedo,
+  HISTORY_BYTES,
+} from '../js/core/history.js';
 
 const empty = () => ({ undo: [], redo: [], draft: null });
 
@@ -65,4 +71,13 @@ test('a new edit after undo clears redo', () => {
   const undone = applyUndo(entry, 'abc');
   const edited = commitDraft(recordChange(undone.entry, undone.value, 'abx'));
   assert.deepEqual(edited.redo, []);
+});
+
+test('commitDraft also caps the history by total size', () => {
+  const big = 'x'.repeat(HISTORY_BYTES + 10);
+  let entry = commitDraft(recordChange(empty(), big, big + '1'));
+  assert.deepEqual(entry.undo, [big], 'a step larger than the budget is still kept');
+
+  entry = commitDraft(recordChange(entry, big + '1', big + '12'));
+  assert.deepEqual(entry.undo, [big + '1'], 'older oversized steps are dropped');
 });
