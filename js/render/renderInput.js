@@ -1,6 +1,7 @@
 import format from './format.js';
 import formatResult from './formatResult.js';
 import { firstDifference, arraysEqual } from '../util/sequence.js';
+import { collectVariableNames } from '../core/multiWordVariables.js';
 
 // Rendering is two-phase so that what you type never waits on the worker:
 // `renderText` redraws the highlighted input synchronously, and `patchResults`
@@ -13,13 +14,14 @@ import { firstDifference, arraysEqual } from '../util/sequence.js';
 function createRowRenderer(view) {
   const rows = [];
   let lines = [];
+  let variableNames = []; // multi-word names, for highlighting
   let patched = null; // lines[] whose results are currently shown, or null
   let dirtyFrom = null; // first row whose result is still outstanding
 
   function createRow(line) {
     const row = document.createElement('div');
     row.className = 'line-row';
-    row.appendChild(format.line(line));
+    row.appendChild(format.line(line, variableNames));
     return row;
   }
 
@@ -48,7 +50,7 @@ function createRowRenderer(view) {
       rows[index] = created;
       return;
     }
-    const fresh = format.line(line);
+    const fresh = format.line(line, variableNames);
     const current = row.firstChild;
     if (current) row.replaceChild(fresh, current);
     else row.appendChild(fresh);
@@ -61,6 +63,10 @@ function createRowRenderer(view) {
    * @param {string[]} textLines
    */
   function renderText(textLines) {
+    const nextNames = collectVariableNames(textLines);
+    const namesChanged = !arraysEqual(variableNames, nextNames);
+    variableNames = nextNames;
+
     if (rows.length === 0) {
       buildRows(0, textLines);
       lines = textLines.slice();
@@ -69,7 +75,21 @@ function createRowRenderer(view) {
       return;
     }
     const start = firstDifference(lines, textLines);
-    if (start === -1) return;
+    if (start === -1 && !namesChanged) return;
+
+    if (namesChanged) {
+      // A definition was added, renamed or removed: re-highlight every row so
+      // existing references pick up the new name token.
+      if (textLines.length === lines.length) {
+        for (let i = 0; i < textLines.length; i++) updateRow(i, textLines[i]);
+      } else {
+        buildRows(0, textLines);
+      }
+      lines = textLines.slice();
+      dirtyFrom = 0;
+      return;
+    }
+
     if (textLines.length === lines.length) {
       // Same shape: patch only the lines whose text changed, leaving every
       // other row (and its result/box) untouched.

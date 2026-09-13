@@ -202,6 +202,21 @@ test('a group end line is styled like a label', () => {
   assert.equal(node.children[0].textContent, 'end');
 });
 
+test('a defined multi-word variable highlights as one token', () => {
+  const node = format.line('monthly rent * 12', ['monthly rent']);
+  assert.equal(node.children[0]._classes.has('variable'), true);
+  assert.equal(node.children[0].textContent, 'monthly rent');
+});
+
+test('renderText highlights multi-word variables defined in the sheet', () => {
+  const view = new El('pre');
+  const renderer = createRowRenderer(view);
+  renderer.renderText(['monthly rent = 1500', 'monthly rent * 12']);
+  const secondLine = view.children[1].children[0];
+  assert.equal(secondLine.children[0]._classes.has('variable'), true);
+  assert.equal(secondLine.children[0].textContent, 'monthly rent');
+});
+
 test('editing one line reuses every other row', () => {
   const view = new El('pre');
   const renderer = createRowRenderer(view);

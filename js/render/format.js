@@ -1,5 +1,6 @@
 import parseLine from '../core/parseLine.js';
 import { SYMBOL_SOURCE } from '../core/currencySymbols.js';
+import { anchoredNamePattern } from '../core/multiWordVariables.js';
 
 const RULES = {
   whitespace: /^\s+/,
@@ -16,26 +17,31 @@ function createWrapper(type, text) {
   return wrapper;
 }
 
-function line(text) {
+// `names` are the multi-word variables defined in the sheet (longest first), so
+// a whole name can be highlighted as a single variable token.
+function line(text, names = []) {
   const wrapper = createWrapper('line', '');
   const { rawCode, comment: commentText, titleIndex } = parseLine(text);
+  const patterns = names.map((name) => anchoredNamePattern(name));
 
   if (titleIndex !== -1) {
     wrapper.appendChild(titleWrap(rawCode.slice(0, titleIndex + 1)));
-    if (titleIndex + 1 < rawCode.length) appendCode(wrapper, rawCode.slice(titleIndex + 1));
+    if (titleIndex + 1 < rawCode.length) {
+      appendCode(wrapper, rawCode.slice(titleIndex + 1), patterns);
+    }
   } else if (rawCode.trim() === 'end') {
     // A group's closing row shares the label colour so header and end read as
     // a matching pair.
     wrapper.appendChild(titleWrap(rawCode));
   } else if (rawCode) {
-    appendCode(wrapper, rawCode);
+    appendCode(wrapper, rawCode, patterns);
   }
   if (commentText) wrapper.appendChild(comment(commentText));
 
   return wrapper;
 }
 
-function appendCode(wrapper, code) {
+function appendCode(wrapper, code, patterns = []) {
   let rest = code;
   while (rest) {
     let match = RULES.whitespace.exec(rest);
@@ -59,6 +65,13 @@ function appendCode(wrapper, code) {
       rest = rest.slice(token.length);
       continue;
     }
+    // A defined multi-word name wins over a single identifier.
+    const nameMatch = matchName(rest, patterns);
+    if (nameMatch) {
+      wrapper.appendChild(variable(nameMatch));
+      rest = rest.slice(nameMatch.length);
+      continue;
+    }
     match = RULES.identifier.exec(rest);
     if (match) {
       const [token] = match;
@@ -76,6 +89,14 @@ function appendCode(wrapper, code) {
     wrapper.appendChild(document.createTextNode(rest[0]));
     rest = rest.slice(1);
   }
+}
+
+function matchName(text, patterns) {
+  for (const pattern of patterns) {
+    const match = pattern.exec(text);
+    if (match) return match[0];
+  }
+  return null;
 }
 
 function variable(text) {

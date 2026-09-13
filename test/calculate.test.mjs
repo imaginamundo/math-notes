@@ -142,6 +142,24 @@ test('multi-word names are not confused with word operators or aggregates', () =
   assert.equal(evaluateLines(['sum total = 5', 'sum total * 2']).results[1].value, 10);
 });
 
+test('undefined multi-word names give a phrase-level error', () => {
+  assert.equal(
+    evaluateLines(['monthly rent * 12']).results[0].value,
+    '"monthly rent" is not defined'
+  );
+  assert.equal(evaluateLines(['net price plus 5']).results[0].value, '"net price" is not defined');
+  // A forward reference is mangled, then decoded back for the message.
+  assert.equal(
+    evaluateLines(['monthly rent * 12', 'monthly rent = 1500']).results[0].value,
+    '"monthly rent" is not defined'
+  );
+});
+
+test('single unknown symbols keep the mathjs message', () => {
+  assert.equal(evaluateLines(['foo + 1']).results[0].value, 'Undefined symbol foo');
+  assert.equal(evaluateLines(['sin x']).results[0].value, 'Undefined symbol x');
+});
+
 test('multi-word variables update incrementally and vanish with their definition', () => {
   evaluateLines(['price per item = 10', 'price per item * 3']);
   const updated = evaluateLines(['price per item = 20', 'price per item * 3']);

@@ -8,6 +8,7 @@ import initDatetime from '../eval/datetime.js';
 import preprocess from './preprocess.js';
 import { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal } from './aggregate.js';
 import { firstDifference } from '../util/sequence.js';
+import { mangleLines, unmangleName } from './multiWordVariables.js';
 
 /**
  * @typedef {Object} LineResult
@@ -58,46 +59,6 @@ function findGroups(lines) {
     }
   }
   return { byEnd, groupOfLine };
-}
-
-// Multi-word variables (`monthly rent = 1500`, then `monthly rent * 12`). Each
-// name is rewritten to a single safe identifier so mathjs can store and resolve
-// it, and every occurrence in code (never in comments) is rewritten the same
-// way. Names are collected from assignment labels containing whitespace.
-function mangleName(name) {
-  return `__var_${name.replace(/_/g, '__').replace(/\s+/g, '_')}`;
-}
-
-function namePattern(name) {
-  const words = name
-    .split(' ')
-    .map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-    .join('\\s+');
-  return new RegExp(`(?<![A-Za-z0-9_])${words}(?![A-Za-z0-9_])`, 'g');
-}
-
-function collectVariableNames(lines) {
-  const names = new Set();
-  for (const line of lines) {
-    const code = line.split('#')[0];
-    const match = /^\s*([A-Za-z_][A-Za-z0-9_]*(?:\s+[A-Za-z_][A-Za-z0-9_]*)+)\s*=(?!=)/.exec(code);
-    if (match) names.add(match[1].replace(/\s+/g, ' '));
-  }
-  // Longest first so `net price` wins over a `price` defined elsewhere.
-  return [...names].sort((a, b) => b.length - a.length);
-}
-
-function mangleLines(lines) {
-  const names = collectVariableNames(lines);
-  if (!names.length) return lines;
-  return lines.map((line) => {
-    const hash = line.indexOf('#');
-    const code = hash === -1 ? line : line.slice(0, hash);
-    const comment = hash === -1 ? '' : line.slice(hash);
-    let out = code;
-    for (const name of names) out = out.replace(namePattern(name), mangleName(name));
-    return out + comment;
-  });
 }
 
 /**
@@ -175,7 +136,7 @@ function createEngine() {
       // expressions (e.g. `x = unix()`).
       value = isAssignment ? result : undefined;
     } catch (error) {
-      result = error;
+      result = friendlyError(error, code, scope);
       value = undefined;
       type = 'error';
     }
@@ -185,6 +146,39 @@ function createEngine() {
     const variable = isAssignment && value !== undefined ? { label, value } : null;
 
     return { type, result: result instanceof Error ? result.message : result, variable };
+  }
+
+  // Turn mathjs's terse "Undefined symbol x" into a phrase-level message when
+  // the unknown symbol is part of a multi-word name (`monthly rent`) or a
+  // mangled forward reference (`__var_monthly_rent`). Single unknowns keep the
+  // original message.
+  function friendlyError(error, code, scope) {
+    const message = error && error.message ? error.message : String(error);
+    const match = /^Undefined symbol ([A-Za-z_][A-Za-z0-9_]*)$/.exec(message);
+    if (!match) return message;
+    const symbol = match[1];
+
+    const original = unmangleName(symbol);
+    if (original) return `"${original}" is not defined`;
+
+    let expression = code;
+    try {
+      expression = preprocess(code);
+    } catch {
+      // keep the raw code
+    }
+    const run =
+      /(?<![A-Za-z0-9_])([A-Za-z_][A-Za-z0-9_]*(?:\s+[A-Za-z_][A-Za-z0-9_]*)+)(?![A-Za-z0-9_])/g;
+    let matchRun;
+    while ((matchRun = run.exec(expression)) !== null) {
+      const words = matchRun[1].split(/\s+/);
+      if (!words.includes(symbol)) continue;
+      const known = words.some(
+        (word) => word !== symbol && (math[word] !== undefined || word in scope)
+      );
+      if (!known) return `"${matchRun[1]}" is not defined`;
+    }
+    return message;
   }
 
   // Replace aggregate keywords in an expression with the block's values so they
