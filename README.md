@@ -4,7 +4,7 @@ An inline calculator that runs in the browser. Type calculations line by line
 and each result appears right beside it as ghost text, with an automatic
 running total.
 
-Based on [Numi](https://numi.app/).
+Based on [Numi](https://numi.app/) and [Soulver](https://soulver.app/).
 
 ## Features
 
