@@ -31,3 +31,17 @@ test('localStorage is only accessed inside util/storage.js', () => {
   }
   assert.deepEqual(offenders, []);
 });
+
+// The domain (core/eval) must not reach up into the UI: a pure module that
+// imports `ui/` can no longer be imported without a document.
+test('core and eval do not depend on the UI layer', () => {
+  const offenders = [];
+  for (const dir of ['core', 'eval']) {
+    for (const path of listJs(join(root, 'js', dir))) {
+      const rel = path.slice(root.length).replace(/^[\\/]/, '');
+      const source = readFileSync(path, 'utf8');
+      if (/from\s+['"][^'"]*\/ui\//.test(source)) offenders.push(rel);
+    }
+  }
+  assert.deepEqual(offenders, []);
+});
