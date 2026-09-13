@@ -228,17 +228,17 @@ make -C js/i18n
 
 ### Updating the documentation site
 
-The long-form documentation is authored in Markdown under `docs/src/<lang>/`,
-one file per category, with the page order in `docs/src/structure.json`. A
+The long-form documentation is authored in Markdown under `docs-src/src/<lang>/`,
+one file per category, with the page order in `docs-src/src/structure.json`. A
 ` ```calc ` fence becomes a highlighted example with **Copy** and **Open in
 Math Notes** buttons. Regenerate the committed static site after editing:
 
 ```sh
-make -C docs
+make -C docs-src
 ```
 
-The built pages live in `docs/dist/` and are published at `/docs`; `npm run dev`
-maps that URL to the build output.
+The built pages live in `docs/` and are published at `/docs`, so any static
+server rooted at the repository serves them directly.
 
 ### Architecture
 
@@ -261,6 +261,6 @@ maps that URL to the build output.
 - `js/share/` — share-link encoding (`shareLink.js`).
 - `js/util/` — shared pure helpers (debounce, storage, clipboard, text, scroll,
   sequence, compress).
-- `docs/` — the documentation site sources (`src/`), build (`build.js`),
-  generated output (`dist/`) and the developer notes (`architecture.md`,
-  `glossary.md`).
+- `docs/` — the generated documentation site (published at `/docs`).
+- `docs-src/` — its Markdown sources (`src/`), build (`build.js`) and the
+  developer notes (`architecture.md`, `glossary.md`).

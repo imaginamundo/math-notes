@@ -35,10 +35,6 @@ async function readTestFile(path) {
 const server = createServer(async (req, res) => {
   try {
     let path = decodeURIComponent(req.url.split('?')[0]);
-    // The docs are built to docs/dist but published at /docs/.
-    if (path === '/docs' || path.startsWith('/docs/')) {
-      path = '/docs/dist' + path.slice('/docs'.length);
-    }
     if (path.endsWith('/')) path += 'index.html';
     const { file, type } = await readTestFile(path);
     res.writeHead(200, { 'Content-Type': MIME[type] || 'application/octet-stream' });

@@ -1,11 +1,11 @@
 // Build the documentation site from the Markdown sources in src/. Run with
-// `make -C docs` (or `npm run build:docs`). The generated files under dist/ are
-// committed and published at /docs, like the mathjs bundle and the Help content.
+// `make -C docs-src` (or `npm run build:docs`). The generated files under the
+// top-level docs/ are committed and published at /docs, like the mathjs bundle.
 import { marked } from 'npm:marked@15';
 
 const ROOT = new URL('.', import.meta.url).pathname;
 const SRC = `${ROOT}src/`;
-const DIST = `${ROOT}dist/`;
+const DIST = new URL('../docs/', import.meta.url).pathname;
 
 // Every language that has an index.md is built; the rest are skipped, so a
 // language can be added one page at a time without breaking the build. The

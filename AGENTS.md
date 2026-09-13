@@ -20,8 +20,8 @@ no build step and is installable as a PWA.
   version in `js/lib/math.js` and `package.json`).
 - `make -C js/i18n` (or `npm run build:i18n`) — regenerate the committed
   Help/Examples content modules from the Markdown in `js/i18n/src/`.
-- `make -C docs` (or `npm run build:docs`) — regenerate the committed
-  documentation site under `docs/dist/` from the Markdown in `docs/src/`.
+- `make -C docs-src` (or `npm run build:docs`) — regenerate the committed
+  documentation site in `docs/` from the Markdown in `docs-src/src/`.
 
 Always run `npm run lint`, `npm run format:check`, and `npm test` before
 committing. Make one focused change per commit.
@@ -44,14 +44,14 @@ committing. Make one focused change per commit.
 - Per-tab state lives in `js/ui/tabs.js`; current content persists to
   localStorage, and versioned snapshots are auto-saved to IndexedDB
   (`js/storage/snapshots.js`) and recoverable from Settings.
-- A separate documentation site is generated from Markdown in `docs/src/` into
-  committed static HTML in `docs/dist/` (Deno + marked, like the Help content)
+- A separate documentation site is generated from Markdown in `docs-src/src/`
+  into committed static HTML in `docs/` (Deno + marked, like the Help content)
   and published at `/docs`. It is a multi-page, per-language site; the footer
   Documentation link (`js/ui/docsLink.js`) points at the active language, and
-  `scripts/dev.mjs` maps `/docs` to `docs/dist/`.
+  `scripts/dev.mjs` serves `docs/` directly.
 
-See `docs/architecture.md` for the full design and `docs/glossary.md` for the
-project's terminology.
+See `docs-src/architecture.md` for the full design and `docs-src/glossary.md`
+for the project's terminology.
 
 ## Invariants you must not break
 

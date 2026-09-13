@@ -528,10 +528,12 @@ baseline.
 ## Documentation site
 
 The long-form user guide lives at `/docs`, separate from the in-app Help. It is
-authored in Markdown under `docs/src/<lang>/` — one file per category, ordered by
-`docs/src/structure.json` — and rendered at **build time** by `docs/build.js`
-(Deno + marked, the same toolchain as the Help content) into committed static
-HTML in `docs/dist/`. No runtime Markdown and no backend are involved.
+authored in Markdown under `docs-src/src/<lang>/` — one file per category,
+ordered by `docs-src/src/structure.json` — and rendered at **build time** by
+`docs-src/build.js` (Deno + marked, the same toolchain as the Help content) into
+committed static HTML in `docs/`. No runtime Markdown and no backend are
+involved, and because the built site sits directly under `docs/`, any static
+server rooted at the repository serves it.
 
 The site is multi-page per category and per language: `/docs` (English),
 `/docs/pt` and `/docs/es`, each page a real HTML file with a generated sidebar,
@@ -543,10 +545,10 @@ building a share link through `js/share/shareLink.js` so the example opens in th
 app. The pages load `style.css` for the colour tokens and themes plus a dedicated
 `docs.css`.
 
-`scripts/dev.mjs` maps `/docs` to `docs/dist/` for local development, and
-`.github/workflows/publish.yml` copies `docs/dist/` to `public/docs`. The app's
+`scripts/dev.mjs` serves `docs/` directly for local development, and
+`.github/workflows/publish.yml` copies `docs/` to `public/docs`. The app's
 footer Documentation link is pointed at the active language by
 `js/ui/docsLink.js`. `test/docs.test.mjs` checks source/output parity and that
 every internal `/docs` link resolves; `test/browser.test.mjs` loads a page and
 asserts the examples are highlighted. The site is committed output: run
-`make -C docs` after editing the Markdown.
+`make -C docs-src` after editing the Markdown.

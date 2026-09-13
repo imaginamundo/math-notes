@@ -19,14 +19,10 @@ const MIME = {
   '.txt': 'text/plain',
 };
 
-// The docs build lives in docs/dist/ but is published at /docs/, so rewrite the
-// URL prefix to match the working tree.
+// The documentation site is built directly into docs/, so it is served like any
+// other directory (with a directory-index fallback below).
 function resolvePath(url) {
-  let path = decodeURIComponent(String(url).split('?')[0]);
-  if (path === '/docs' || path.startsWith('/docs/')) {
-    path = '/docs/dist' + path.slice('/docs'.length);
-  }
-  return path;
+  return decodeURIComponent(String(url).split('?')[0]);
 }
 
 // Serve a file, falling back to its directory index (`/docs/pt/` →

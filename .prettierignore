@@ -6,5 +6,5 @@ deno.lock
 js/i18n/src/
 js/i18n/help/
 js/i18n/examples/
-docs/dist/
-docs/src/**/*.md
+docs/
+docs-src/src/**/*.md
