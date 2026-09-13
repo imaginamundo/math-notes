@@ -166,3 +166,20 @@ test('the vocabulary is well formed and unique', () => {
   assert.equal(kinds.prev, 'keyword');
   assert.equal(kinds.pi, 'constant');
 });
+
+test('wordRangeAt spans non-ASCII words and tags', () => {
+  assert.deepEqual(wordRangeAt('açai', 4), {
+    start: 0,
+    end: 4,
+    text: 'açai',
+    prefix: 'açai',
+    tag: false,
+  });
+  assert.deepEqual(wordRangeAt('#aáeáãd', 7), {
+    start: 0,
+    end: 7,
+    text: '#aáeáãd',
+    prefix: '#aáeáãd',
+    tag: true,
+  });
+});

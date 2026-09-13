@@ -53,6 +53,22 @@ test('parseLine detects an assignment', () => {
   assert.equal(parsed.rhs, '2');
 });
 
+test('parseLine handles non-ASCII labels, variables and tags', () => {
+  const title = parseLine('label é isso ai:');
+  assert.equal(title.title, 'label é isso ai');
+  assert.equal(title.code, '');
+
+  const assignment = parseLine('açai = 5');
+  assert.equal(assignment.isAssignment, true);
+  assert.equal(assignment.label, 'açai');
+
+  const tagged = parseLine('picolé = 6 #aáeáãd');
+  assert.equal(tagged.label, 'picolé');
+  assert.deepEqual(tagged.tags, ['aáeáãd']);
+
+  assert.equal(parseLine('20 #aáeáãd').valid, true);
+});
+
 test('parseLine separates comments', () => {
   const parsed = parseLine('2 + 2 # my note');
   assert.equal(parsed.code, '2 + 2 ');
@@ -195,6 +211,19 @@ test('undefined multi-word names give a phrase-level error', () => {
 test('single unknown symbols keep the mathjs message', () => {
   assert.equal(evaluateLines(['foo + 1']).results[0].value, 'Undefined symbol foo');
   assert.equal(evaluateLines(['sin x']).results[0].value, 'Undefined symbol x');
+});
+
+test('non-ASCII groups, tags, names and date variables evaluate', () => {
+  const group = evaluateLines(['Grupo ç:', '10', '20', 'end', 'prev']);
+  assert.equal(group.results[0].value, 30);
+  assert.equal(group.results[4].value, 30);
+
+  assert.equal(evaluateLines(['20 #aáeáãd', '#aáeáãd * 2']).results[1].value, 40);
+  assert.equal(evaluateLines(['preço final = 10', 'preço final * 2']).results[1].value, 20);
+  assert.equal(
+    evaluateLines(['aniversário = March 4, 2025', 'weekday on aniversário']).results[1].value,
+    'Tuesday'
+  );
 });
 
 test('multi-word variables update incrementally and vanish with their definition', () => {

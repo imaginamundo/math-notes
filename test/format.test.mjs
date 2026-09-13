@@ -229,6 +229,24 @@ test('a tag-only line renders as a tag', () => {
   assert.equal(node.children[0].textContent, '#food');
 });
 
+test('non-ASCII identifiers and tags render as single tokens', () => {
+  const variable = format.line('açai = 5');
+  assert.equal(variable.children[0]._classes.has('variable'), true);
+  assert.equal(variable.children[0].textContent, 'açai');
+
+  const multi = format.line('preço final * 2', ['preço final']);
+  assert.equal(multi.children[0]._classes.has('variable'), true);
+  assert.equal(multi.children[0].textContent, 'preço final');
+
+  const tagged = format.line('20 #aáeáãd');
+  assert.equal(tagged.children[2]._classes.has('tag'), true);
+  assert.equal(tagged.children[2].textContent, '#aáeáãd');
+
+  const title = format.line('Grupo ç:');
+  assert.equal(title.children[0]._classes.has('title'), true);
+  assert.equal(title.children[0].textContent, 'Grupo ç:');
+});
+
 test('a line reference renders as one reference token', () => {
   const node = format.line('line(1) * 2');
   assert.equal(node.children[0]._classes.has('reference'), true);

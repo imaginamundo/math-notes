@@ -84,3 +84,12 @@ test('mangleLines rewrites several names in one pass', () => {
     ]
   );
 });
+
+test('non-ASCII multi-word names are collected and mangled', () => {
+  assert.deepEqual(collectVariableNames(['preço final = 10']), ['preço final']);
+  assert.deepEqual(mangleLines(['preço final = 10', 'preço final * 2']), [
+    '__var_preço_final = 10',
+    '__var_preço_final * 2',
+  ]);
+  assert.equal(unmangleName(mangleName('preço final')), 'preço final');
+});

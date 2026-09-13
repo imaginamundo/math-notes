@@ -17,6 +17,7 @@ import { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal } from './aggregate.js
 import { unitMixError } from './unitMix.js';
 import { firstDifference } from '../util/sequence.js';
 import { mangleLines, unmangleName } from './multiWordVariables.js';
+import { IDENTIFIER_SRC, TAG_NAME_SRC, WORD } from './identifiers.js';
 
 /**
  * @typedef {Object} LineResult
@@ -146,8 +147,8 @@ function substituteTags(parsed, results, index, math) {
   const values = {};
   let error = null;
 
-  const substituted = text.replace(/#([A-Za-z0-9_-]+)/g, (match, tag) => {
-    const name = `__tag_${tag.replace(/[^A-Za-z0-9_]/g, '_')}`;
+  const substituted = text.replace(new RegExp(`#(${TAG_NAME_SRC})`, 'gu'), (match, tag) => {
+    const name = `__tag_${tag.replace(/[^\p{L}\p{N}\p{M}_]/gu, '_')}`;
     if (name in values) return name;
     if (error) return match;
     const value = tagAggregate(results, [tag], index, 'sum', math);
@@ -315,7 +316,7 @@ function createEngine() {
   // original message.
   function friendlyError(error, code, scope) {
     const message = error && error.message ? error.message : String(error);
-    const match = /^Undefined symbol ([A-Za-z_][A-Za-z0-9_]*)$/.exec(message);
+    const match = new RegExp(`^Undefined symbol (${IDENTIFIER_SRC})$`, 'u').exec(message);
     if (!match) return message;
     const symbol = match[1];
 
@@ -328,8 +329,10 @@ function createEngine() {
     } catch {
       // keep the raw code
     }
-    const run =
-      /(?<![A-Za-z0-9_])([A-Za-z_][A-Za-z0-9_]*(?:\s+[A-Za-z_][A-Za-z0-9_]*)+)(?![A-Za-z0-9_])/g;
+    const run = new RegExp(
+      `(?<![${WORD}_])(${IDENTIFIER_SRC}(?:\\s+${IDENTIFIER_SRC})+)(?![${WORD}_])`,
+      'gu'
+    );
     let matchRun;
     while ((matchRun = run.exec(expression)) !== null) {
       const words = matchRun[1].split(/\s+/);

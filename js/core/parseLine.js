@@ -1,5 +1,8 @@
+import { LETTER, WORD, TAG_NAME_SRC } from './identifiers.js';
+
 // A tag is `#word` (no space); `#` followed by whitespace starts a comment.
-const TAG = /^#([A-Za-z0-9_-]+)/;
+const TAG = new RegExp(`^#(${TAG_NAME_SRC})`, 'u');
+const TITLE = new RegExp(`^[${LETTER}_][${WORD}_ ]*$`, 'u');
 
 function parseLine(line) {
   const tags = [];
@@ -50,7 +53,7 @@ function parseLine(line) {
       !clockColon &&
       candidate &&
       (codeEquals === -1 || codeEquals > colonIndex) &&
-      /^[A-Za-z_][A-Za-z0-9_ ]*$/.test(candidate)
+      TITLE.test(candidate)
     ) {
       title = candidate;
       titleIndex = colonIndex;

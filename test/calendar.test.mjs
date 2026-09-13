@@ -235,3 +235,8 @@ test('a one-digit-minute colon range is not mistaken for a clock time', () => {
   assert.equal(preprocessCalendar('5:5'), '5:5');
   assert.equal(preprocessCalendar('100:1'), '100:1');
 });
+
+test('a non-ASCII date variable resolves', () => {
+  const { results } = evaluateLines(['aniversário = March 4, 2025', 'aniversário + 2 weeks']);
+  assert.equal(formatResult(results[1].value), '18 March 2025');
+});

@@ -6,7 +6,9 @@
 // highlighter (which draws a whole name as one variable token). Pure: no mathjs
 // import.
 
-const NAME_WORDS = /^\s*([A-Za-z_][A-Za-z0-9_]*(?:\s+[A-Za-z_][A-Za-z0-9_]*)+)\s*=(?!=)/;
+import { IDENTIFIER_SRC, WORD } from './identifiers.js';
+
+const NAME_WORDS = new RegExp(`^\\s*(${IDENTIFIER_SRC}(?:\\s+${IDENTIFIER_SRC})+)\\s*=(?!=)`, 'u');
 const MANGLE_PREFIX = '__var_';
 
 function escapeRegExp(text) {
@@ -43,13 +45,13 @@ function nameSource(name) {
 }
 
 function namePattern(name, { global = true } = {}) {
-  const flags = global ? 'g' : '';
-  return new RegExp(`(?<![A-Za-z0-9_])${nameSource(name)}(?![A-Za-z0-9_])`, flags);
+  const flags = global ? 'gu' : 'u';
+  return new RegExp(`(?<![${WORD}_])${nameSource(name)}(?![${WORD}_])`, flags);
 }
 
 // Anchored form for the highlighter: matches a name at the start of the text.
 function anchoredNamePattern(name) {
-  return new RegExp(`^${nameSource(name)}(?![A-Za-z0-9_])`);
+  return new RegExp(`^${nameSource(name)}(?![${WORD}_])`, 'u');
 }
 
 function collectVariableNames(lines) {
@@ -76,8 +78,8 @@ function mangleLines(lines) {
   // One alternation (longest name first) instead of a regex per name per line,
   // so a sheet with many multi-word names stays linear in the line count.
   const pattern = new RegExp(
-    `(?<![A-Za-z0-9_])(?:${names.map(nameSource).join('|')})(?![A-Za-z0-9_])`,
-    'g'
+    `(?<![${WORD}_])(?:${names.map(nameSource).join('|')})(?![${WORD}_])`,
+    'gu'
   );
   return lines.map((line) => {
     const hash = line.indexOf('#');
