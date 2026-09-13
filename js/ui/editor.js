@@ -8,6 +8,7 @@ function initEditorScroll(editableNode) {
   if (!scroller) return {};
 
   let charWidth = 0;
+  let cachedGutterInset = null;
 
   // The textarea's intrinsic height is ~2 rows (its `rows` attribute), which
   // would shrink the grid and desync the ghost layer, so size it to its own
@@ -77,7 +78,7 @@ function initEditorScroll(editableNode) {
     // The line-number gutter is a fixed, opaque overlay on the left (it mirrors
     // only the vertical scroll), so the left inset must clear its right edge —
     // otherwise scrolling to the start of a line hides the caret behind it.
-    const leftInset = gutterRight() + margin;
+    const leftInset = gutterInset() + margin;
     if (x < scroller.scrollLeft + leftInset) scroller.scrollLeft = Math.max(0, x - leftInset);
     else if (x > scroller.scrollLeft + scroller.clientWidth - margin) {
       scroller.scrollLeft = x - scroller.clientWidth + margin;
@@ -90,13 +91,16 @@ function initEditorScroll(editableNode) {
 
   // How much of the scroller's left edge the fixed line-number gutter covers,
   // measured relative to the scroller (it is absolutely positioned beside it).
-  function gutterRight() {
-    const gutter = editableNode.closest('.input')?.querySelector('.line-numbers');
-    if (!gutter) return 0;
-    return Math.max(
-      0,
-      gutter.getBoundingClientRect().right - scroller.getBoundingClientRect().left
-    );
+  // The geometry only changes with the font, theme or viewport, so it is cached
+  // and invalidated on refreshMetrics/resize rather than measured per keystroke.
+  function gutterInset() {
+    if (cachedGutterInset === null) {
+      const gutter = editableNode.closest('.input')?.querySelector('.line-numbers');
+      cachedGutterInset = gutter
+        ? Math.max(0, gutter.getBoundingClientRect().right - scroller.getBoundingClientRect().left)
+        : 0;
+    }
+    return cachedGutterInset;
   }
 
   editableNode.addEventListener('input', () => {
@@ -111,6 +115,10 @@ function initEditorScroll(editableNode) {
   editableNode.addEventListener('click', scrollCaretIntoView);
   document.addEventListener('selectionchange', () => {
     if (document.activeElement === editableNode) scrollCaretIntoView();
+  });
+  // The gutter's width is font/viewport relative; re-measure after a resize.
+  window.addEventListener('resize', () => {
+    cachedGutterInset = null;
   });
 
   // The caret's position relative to the scroll content, so an overlay (the
@@ -140,6 +148,7 @@ function initEditorScroll(editableNode) {
     // Re-measure the glyphs and recompute the row metrics to match.
     refreshMetrics() {
       charWidth = 0;
+      cachedGutterInset = null;
       syncSize();
     },
   };
