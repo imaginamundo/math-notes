@@ -82,7 +82,8 @@ Based on [Numi](https://numi.app/).
   `week number on march 12, 2021`), workdays/weekdays (`workdays in 3 weeks`,
   `5 workdays after March 14, 2019`, `weekday on March 9, 2024` — Monday to
   Friday, holidays not counted yet) and formatting
-  (`March 12, 2023 as EEEE, MMM d, yyyy`).
+  (`March 12, 2023 as EEEE, MMM d, yyyy`). A date can be stored in a variable
+  (`start = March 4`, then `start + 2 weeks`).
 - **Timespans** — `5.5 minutes as timespan` → `5 min 30 s`,
   `72 days as timespan` → `10 weeks 2 days`, `3h 5m 10s` →
   `3 hours 5 minutes 10 seconds`, and `12.5 minutes in minutes and seconds`

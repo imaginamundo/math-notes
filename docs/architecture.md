@@ -132,7 +132,11 @@ literals (`10 June`, `2019-04-01`, `12/02/1988`), `today`/`now`/`yesterday`/
 `tomorrow`, fixed-date holidays, and the operations around them (add/subtract a
 duration, `N units after/before`, `N days from now`/`ago`, intervals, `days
 until/since/between`, date parts, and `as <pattern>`), rewriting each to a
-`__date*` helper since mathjs has no date type. Dates are JS Date objects at
+`__date*` helper since mathjs has no date type. It also rewrites the right-hand
+side of an assignment, so a date can be stored and reused (`start = March 4`,
+then `start + 2 weeks` → `__dateAdd(start, "2 weeks", 1)`); `__dateAdd` accepts
+a Date (calendar arithmetic) or a duration Unit (plain duration addition).
+Dates are JS Date objects at
 local noon (so DST never shifts a day); `formatResult` renders a date as
 `D Month [YYYY]` (the year is omitted when it is the current one) and an
 interval as `3 weeks 5 days`. Workdays/weekdays are Monday–Friday, counted or

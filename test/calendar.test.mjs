@@ -39,6 +39,28 @@ test('adding and subtracting durations from a date', () => {
   assert.equal(valueOf('2019-04-01'), '1 April 2019');
 });
 
+test('a date can be stored in a variable and reused', () => {
+  assert.equal(preprocessCalendar('start = March 4, 2025'), 'start = __date("March 4, 2025")');
+  assert.equal(preprocessCalendar('start + 2 weeks'), '__dateAdd(start, "2 weeks", 1)');
+  assert.equal(preprocessCalendar('2 weeks after start'), '__dateAdd(start, "2 weeks", 1)');
+
+  const { results } = evaluateLines([
+    'start = March 4, 2025',
+    'start',
+    'start + 2 weeks',
+    'deadline = March 4, 2025 + 6 weeks',
+    'deadline',
+  ]);
+  assert.equal(formatResult(results[1].value), '4 March 2025');
+  assert.equal(formatResult(results[2].value), '18 March 2025');
+  assert.equal(formatResult(results[4].value), '15 April 2025');
+});
+
+test('adding a duration to a duration variable still adds durations', () => {
+  const { results } = evaluateLines(['span = 2 hours', 'span + 30 minutes']);
+  assert.equal(formatResult(results[1].value), '2 hours 30 minutes');
+});
+
 test('the interval between two dates', () => {
   assert.equal(valueOf('January 10 - February 5'), '3 weeks 5 days');
   assert.equal(valueOf('3 March to 30 May'), '2 months 3 weeks 6 days');

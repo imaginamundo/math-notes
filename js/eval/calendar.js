@@ -12,6 +12,8 @@
 // intervals are a small object formatResult renders as `3 weeks 5 days`.
 // Every operation goes through a helper, since mathjs has no date type.
 
+import parseLine from '../core/parseLine.js';
+
 const MONTHS = {
   january: 1,
   jan: 1,
@@ -175,6 +177,27 @@ function applyDuration(date, parts, sign) {
   const seconds = (parts.hour || 0) * 3600 + (parts.minute || 0) * 60 + (parts.second || 0);
   if (seconds) result = new Date(result.getTime() + sign * seconds * 1000);
   return result;
+}
+
+// `__dateAdd` works on whatever the left-hand side turned out to be: a Date
+// gets calendar arithmetic, while a duration Unit keeps plain duration
+// arithmetic (`x + 30 min`). Anything else is a mistake.
+function dateAdd(math, value, duration, sign) {
+  const delta = Number(sign) < 0 ? -1 : 1;
+  if (value instanceof Date) return applyDuration(value, parseDuration(duration), delta);
+  if (value && value.isUnit === true) {
+    return math.add(value, math.multiply(delta, durationUnit(math, duration)));
+  }
+  throw new Error('A duration can only be added to a date or another duration');
+}
+
+// Build a mathjs duration Unit from a `2 weeks 3 days` style string.
+function durationUnit(math, text) {
+  let total = math.unit(0, 's');
+  for (const [name, amount] of Object.entries(parseDuration(text))) {
+    total = math.add(total, math.unit(amount, name));
+  }
+  return total;
 }
 
 const DIFF_UNITS = [
@@ -370,8 +393,7 @@ function initCalendar(math) {
   math.import(
     {
       __date: (text) => requireDate(text),
-      __dateAdd: (date, duration, sign) =>
-        applyDuration(date, parseDuration(duration), Number(sign) < 0 ? -1 : 1),
+      __dateAdd: (value, duration, sign) => dateAdd(math, value, duration, sign),
       __dateInterval: (a, b) => {
         const { a: from, b: to } = resolveInterval(a, b);
         return { type: 'calendarInterval', parts: dateDiff(from, to) };
@@ -450,9 +472,21 @@ const WORK_HOURS_BETWEEN = new RegExp(
   'i'
 );
 
+// A date held in a variable (`start = March 4`, then `start + 2 weeks`). The
+// identifier is matched after every literal date pattern, so `today + 1 week`
+// still goes through the date path.
+const IDENT = '[A-Za-z_][A-Za-z0-9_]*';
+const IDENT_DURATION = new RegExp(`^(${IDENT})\\s*([+-])\\s*(${DURATION_SRC})$`, 'i');
+const DURATION_IDENT = new RegExp(`^(${DURATION_SRC})\\s+(after|before)\\s+(${IDENT})$`, 'i');
+
 function preprocessCalendar(expression) {
   const expr = expression.trim().replace(/\bwork\s+days?\b/gi, 'workdays');
   if (!expr) return expression;
+
+  // Rewrite the right-hand side of an assignment too, so a date (or a date
+  // arithmetic expression) can be stored in a variable.
+  const parsed = parseLine(expr);
+  if (parsed.isAssignment) return `${parsed.label} = ${preprocessCalendar(parsed.rhs)}`;
 
   let m;
   if ((m = DATE_AS.exec(expr))) {
@@ -521,6 +555,16 @@ function preprocessCalendar(expression) {
 
   if ((m = DURATION_DATE.exec(expr))) {
     return `__dateAdd(__date(${JSON.stringify(m[3])}), ${JSON.stringify(m[1])}, ${
+      m[2].toLowerCase() === 'before' ? -1 : 1
+    })`;
+  }
+
+  if ((m = IDENT_DURATION.exec(expr))) {
+    return `__dateAdd(${m[1]}, ${JSON.stringify(m[3])}, ${m[2] === '-' ? -1 : 1})`;
+  }
+
+  if ((m = DURATION_IDENT.exec(expr))) {
+    return `__dateAdd(${m[3]}, ${JSON.stringify(m[1])}, ${
       m[2].toLowerCase() === 'before' ? -1 : 1
     })`;
   }
