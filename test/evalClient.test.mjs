@@ -90,17 +90,19 @@ test('flush with nothing scheduled is a no-op', async () => {
   const { client, renders } = setup();
   await client.flush();
   assert.equal(renders.length, 0);
-  assert.equal(WorkerStub.latest.sent.length, 0);
+  assert.equal(WorkerStub.latest, null, 'the worker is created lazily');
 });
 
 test('a stale reply is not rendered', async () => {
   const { client, node, renders } = setup();
+  await client.update(); // creates the worker
   const worker = WorkerStub.latest;
+  renders.length = 0;
   worker.autoReply = false;
   const pending = client.update();
   // The sheet changed while the request was in flight.
   node.value = '1 + 2';
-  worker.reply(worker.sent[0]);
+  worker.reply(worker.sent[worker.sent.length - 1]);
   await pending;
   assert.equal(renders.length, 0, 'text moved on, so the reply must be dropped');
 });
@@ -109,6 +111,9 @@ test('a crashed worker rejects in flight and falls back to the main thread', asy
   const originalError = console.error;
   console.error = () => {};
   const { client, renders, busy } = setup();
+  await client.update(); // creates the worker
+  renders.length = 0;
+  busy.length = 0;
   const worker = WorkerStub.latest;
   worker.autoReply = false;
   const pending = client.update();

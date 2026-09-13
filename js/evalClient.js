@@ -22,6 +22,7 @@ const UPDATE_DELAY = 250;
  */
 export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
   let worker = null;
+  let workerUnavailable = false;
   let latestId = 0;
   const pending = new Map();
   let fallbackModule = null;
@@ -39,9 +40,11 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     if (onBusy) onBusy(value);
   }
 
-  if (typeof Worker !== 'undefined') {
-    worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
-    worker.addEventListener('message', (event) => {
+  // The worker is created on the first evaluation rather than at import time,
+  // so loading the page does not parse the mathjs bundle until it is needed.
+  function startWorker() {
+    const created = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+    created.addEventListener('message', (event) => {
       const callback = pending.get(event.data.id);
       if (!callback) return;
       pending.delete(event.data.id);
@@ -50,31 +53,38 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     // If the worker crashes or its script fails to load, reject everything in
     // flight and fall back to the main-thread evaluator so the app degrades
     // gracefully instead of stalling on a 10s timeout per request.
-    worker.addEventListener('error', dropWorker);
-    // Seed the worker with the stored measurement system; the worker defaults
-    // to metric, so only a non-default choice needs sending.
+    created.addEventListener('error', dropWorker);
+    // Seed the worker with the stored settings; the worker defaults to the same
+    // values, so only a non-default choice needs sending.
     const measurementSystem = readMeasurementSystem();
     if (measurementSystem !== DEFAULT_MEASUREMENT_SYSTEM) {
-      worker.postMessage({ type: 'measurement', data: measurementSystem });
+      created.postMessage({ type: 'measurement', data: measurementSystem });
     }
     const precision = readDecimalPrecision();
     if (precision !== DEFAULT_PRECISION) {
-      worker.postMessage({ type: 'precision', data: precision });
+      created.postMessage({ type: 'precision', data: precision });
     }
     const totalMode = readTotalMode();
     if (totalMode !== DEFAULT_TOTAL_MODE) {
-      worker.postMessage({ type: 'total-mode', data: totalMode });
+      created.postMessage({ type: 'total-mode', data: totalMode });
     }
     const clockFormat = readClockFormat();
     if (clockFormat !== DEFAULT_CLOCK_FORMAT) {
-      worker.postMessage({ type: 'clock-format', data: clockFormat });
+      created.postMessage({ type: 'clock-format', data: clockFormat });
     }
     const cachedRates = loadCached();
-    if (cachedRates) worker.postMessage({ type: 'rates', data: cachedRates });
+    if (cachedRates) created.postMessage({ type: 'rates', data: cachedRates });
+    return created;
+  }
+
+  function ensureWorker() {
+    if (!worker && !workerUnavailable && typeof Worker !== 'undefined') worker = startWorker();
+    return worker;
   }
 
   function dropWorker() {
     if (!worker) return;
+    workerUnavailable = true;
     worker.terminate();
     worker = null;
     for (const [id, callback] of pending) {
@@ -90,7 +100,8 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
    * @returns {Promise<{ id: number, data: SheetResult }>}
    */
   function requestEvaluate(lines) {
-    if (worker) {
+    const active = ensureWorker();
+    if (active) {
       return new Promise((resolve, reject) => {
         const id = ++latestId;
         const timer = setTimeout(() => {
@@ -102,7 +113,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
           if (data.type === 'error') reject(new Error(data.message));
           else resolve({ id, data });
         });
-        worker.postMessage({ id, type: 'evaluate', lines });
+        active.postMessage({ id, type: 'evaluate', lines });
       });
     }
     const load = fallbackModule
