@@ -5,26 +5,27 @@ const ONBOARDED_KEY = 'math-notes-onboarded';
 const TABS_KEY = 'math-notes-tabs';
 
 // A working mini-tutorial rather than a wall of prose: every line below
-// evaluates, so the very first screen already demonstrates the app.
+// evaluates, so the very first screen already demonstrates the app's range —
+// variables, labels and `sum`, tags, unit durations, percentages and dates — in
+// a sheet short enough (17 lines) to fit on one screen.
 const STARTER_SHEET = [
-  '# Welcome! Every line below is evaluated; results appear on the right.',
+  '# Welcome! Every line is evaluated; the result appears on the right.',
+  'people = 4',
+  'slices = 12',
+  'slices / people',
   '',
-  '# A label before a colon names the line; the math after it still runs:',
+  '# A label names a line; `sum` totals the block above:',
   'Coffee: 3.40',
   'Lunch: 12.90',
   'sum',
   '',
-  '# Name a value with = and reuse it on a later line:',
-  'people = 3',
-  'slices = 9',
-  'slices / people',
-  '',
-  '# prev is the previous result — blank lines and comments are skipped:',
-  'prev + 1',
-  '',
-  '# Units, percentages and lists work too:',
+  '# Tags name rows; a bare #tag totals them:',
+  '20 #food',
+  '15 #food',
+  '#food',
   '3 days + 4 hours in hours',
   '15% of 240',
+  'today + 2 weeks',
 ].join('\n');
 
 const STARTER_NAME = 'Welcome';

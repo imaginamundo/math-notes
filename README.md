@@ -119,9 +119,9 @@ Based on [Numi](https://numi.app/) and [Soulver](https://soulver.app/).
   log, and is not forwarded in a `Referer` header. Opening one asks first, then
   adds a new tab — it never overwrites the sheet you already have.
 - **Onboarding** — a first visit opens with a working `Welcome` sheet instead
-  of an empty page, plus a five-step tour of the interface. The sheet offers
-  **Keep content** / **Clear content** to dismiss or empty it. Both are
-  dismissible, and **Settings → Replay tutorial** brings the tour back.
+  of an empty page: variables, labels and `sum`, tags, unit durations,
+  percentages and dates. The sheet offers **Keep content** / **Clear content**
+  to dismiss or empty it.
 - **Examples** — the **Examples** button opens ready-made sheets (bill splits,
   recipe scaling, unit prices, savings goals, interest, fuel cost, running pace,
   upload time, BMI and more) that drop into the editor with one click.
