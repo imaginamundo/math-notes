@@ -1,6 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluateLines, evaluateLine, registerCurrencyRates } from '../js/core/calculate.js';
+import {
+  evaluateLines,
+  evaluateLine,
+  createEngine,
+  registerCurrencyRates,
+} from '../js/core/calculate.js';
 import parseLine from '../js/core/parseLine.js';
 
 test('parseLine splits a plain expression', () => {
@@ -650,6 +655,15 @@ test('evaluateLines keeps aggregates correct across incremental edits', () => {
   assert.equal(results[3].value, 2);
   const { results: after } = evaluateLines(['5', '', '2', 'sum']);
   assert.equal(after[3].value, 2);
+});
+
+test('prev after a group survives an incremental append', () => {
+  // The context rebuild must leave `prev` at the group subtotal (7), not the
+  // last body value (2), when only the trailing line changed.
+  const engine = createEngine();
+  engine.evaluateLines(['5', 'G:', 'prev', '2', 'end']);
+  const { results } = engine.evaluateLines(['5', 'G:', 'prev', '2', 'end', 'prev']);
+  assert.equal(results[5].value, 7);
 });
 
 test('evaluateLines keeps function variables when resuming from a change', () => {

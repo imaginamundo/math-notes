@@ -399,6 +399,11 @@ function createEngine() {
     let previousResult;
     let lastBlankIndex = -1;
     const groups = findGroups(lines);
+    // A group header's cached value is the group subtotal, but the main loop
+    // only feeds it to `previousResult` when the matching `end` is reached, not
+    // at the header line. Mirror that here or a `prev` after the group would see
+    // the stale last body value.
+    const headerStarts = new Set([...groups.byEnd.values()].map((group) => group.start));
 
     for (let i = 0; i < startLine; i++) {
       const line = lines[i];
@@ -413,8 +418,14 @@ function createEngine() {
           : undefined;
         if (assigned !== undefined) variables[parsed.label] = assigned;
       }
+      const endGroup = groups.byEnd.get(i);
       const result = results[i];
-      if (
+      if (endGroup) {
+        // A closed group leaves `prev` at the subtotal shown on its header.
+        const header = results[endGroup.start];
+        if (header && header.value !== undefined) previousResult = header.value;
+      } else if (
+        !headerStarts.has(i) &&
         result &&
         result.type !== 'error' &&
         result.value !== undefined &&
