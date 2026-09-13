@@ -86,8 +86,13 @@ conversions stay with mathjs.
 already understands: `per`/`a`/`an` → `/`, `for a year` → `* 1 year`, `X at R`
 → `__rate(X, R)` (whichever of `X*R` / `X/R` simplifies to fewer unit factors),
 `time to upload X at R` → `X / R`, and `D in T` → `__pace` (time/distance,
-formatted as `mm:ss/km`). `formatResult` simplifies compound units before
-display, so `30 hours at 10 km/hour` shows `300 km`, not `(hours km)/hour`.
+formatted as `mm:ss/km`). `formatResult` simplifies genuinely compound units
+before display, so `30 hours at 10 km/hour` shows `300 km`, not
+`(hours km)/hour`. It leaves two shapes alone: a plain ratio (`l/km`, `GB/h`,
+`kg/m^3`) is shown as written, because simplifying can fold related dimensions
+into a surprising result (`l/km` is length², so `7 l / 100 km` would read as an
+area), and repeated same-unit factors become a power (`m * m * m` → `m^3`)
+rather than letting `simplify()` pick an arbitrary named unit (`gallon`).
 
 Currencies are units too. `formatResult` writes a single currency amount with
 its symbol from `CURRENCY_DISPLAY` in `js/core/currencySymbols.js`

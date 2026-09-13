@@ -81,6 +81,20 @@ test('formatResult keeps the written currency when a compound reduces', () => {
   assert.equal(formatResult(math.evaluate('2 h * (33 BRL / hour)')), 'R$ 66');
 });
 
+test('formatResult keeps a plain ratio as written', () => {
+  // `l/km` is area by dimension, but the user meant a rate, so it stays.
+  assert.equal(formatResult(math.evaluate('7 l / 100 km')), '0.07 l/km');
+  assert.equal(formatResult(math.evaluate('5 km / 1 l')), '5 km/l');
+  assert.equal(formatResult(math.evaluate('30 mile / gallon')), '30 mile/gallon');
+  assert.equal(formatResult(math.evaluate('5 kg / m^3')), '5 kg/m^3');
+});
+
+test('formatResult combines repeated unit factors into a power', () => {
+  assert.equal(formatResult(math.evaluate('5 m * 3 m * 2 m')), '30 m^3');
+  assert.equal(formatResult(math.evaluate('5 cm * 3 cm * 2 cm')), '30 cm^3');
+  assert.equal(formatResult(math.evaluate('5 m^2 * 2 m')), '10 m^3');
+});
+
 test('formatResult shows fractions as fractions', () => {
   assert.equal(formatResult(math.fraction(9, 16)), '9/16');
   assert.equal(formatResult(math.fraction(-9, 16)), '-9/16');

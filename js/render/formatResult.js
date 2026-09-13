@@ -160,7 +160,9 @@ function formatUnit(unit, precision) {
     return `${rate.symbol} ${formatted} per ${rate.denominator}`;
   }
   // Compound rates keep their original factors until simplified
-  // (`(hours km) / hour` -> `km`).
+  // (`(hours km) / hour` -> `km`). A plain ratio (`l/km`, `GB/h`, `kg/m^3`) is
+  // shown as written instead: simplifying it can fold related dimensions into a
+  // surprising one (`l/km` is length², so `7 l / 100 km` would read as an area).
   const simple = typeof unit.simplify === 'function' ? unit.simplify() : unit;
   const units = simple.formatUnits();
   const pace = /^min\s*\/\s*(km|mi)$/.exec(units);
@@ -173,8 +175,41 @@ function formatUnit(unit, precision) {
     const symbol = code ? CURRENCY_DISPLAY[code] : null;
     if (symbol) return formatCurrency(symbol, convertTo(unit, code), precision);
   }
-  const formatted = formatAmount(numericValue(simple), precision);
-  return `${formatted} ${cleanUnits(withCurrencySymbols(units))}`;
+  // Repeated same-unit factors read as a power (`m * m * m` -> `m^3`).
+  const power = sameUnitPower(unit);
+  if (power) return `${formatAmount(numericValue(unit), precision)} ${power}`;
+  const display = isPlainRatio(unit) ? unit : simple;
+  const formatted = formatAmount(numericValue(display), precision);
+  return `${formatted} ${cleanUnits(withCurrencySymbols(display.formatUnits()))}`;
+}
+
+// When every factor is the same unit (`m * m * m`, `m^2 * m`), combine them into
+// a single power (`m^3`). mathjs's simplify() would otherwise render `m^3` as an
+// arbitrary named volume unit (`gallon`), once the measure units exist.
+function sameUnitPower(unit) {
+  let label = null;
+  let power = 0;
+  for (const entry of unit.units) {
+    const prefix = entry.prefix && entry.prefix.name ? entry.prefix.name : '';
+    const factor = prefix + entry.unit.name;
+    if (label === null) label = factor;
+    else if (label !== factor) return null;
+    power += entry.power;
+  }
+  return label !== null && power > 1 ? `${label}^${power}` : null;
+}
+
+// A unit the user wrote as a plain ratio: at most one factor on top and one
+// below (`l/km`, `kg/m^3`, `m/s^2`). More factors than that (`(hours km)/hour`)
+// are worth simplifying, but a plain ratio is left alone.
+function isPlainRatio(unit) {
+  let numerator = 0;
+  let denominator = 0;
+  for (const entry of unit.units) {
+    if (entry.power > 0) numerator += 1;
+    else if (entry.power < 0) denominator += 1;
+  }
+  return numerator <= 1 && denominator <= 1;
 }
 
 function formatAmount(value, precision) {
