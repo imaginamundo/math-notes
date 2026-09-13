@@ -144,3 +144,9 @@ Terms used throughout the codebase and this documentation.
 - **List/range limit** — `MAX_LIST_LENGTH` (100). List literals and statically
   resolvable ranges longer than this are rejected before evaluation, so a range
   like `1:1e9` cannot allocate an unbounded array and lock up the worker.
+- **Language** — the interface language (`en`/`pt`/`es`). Stored under
+  `math-notes-language` (`js/core/language.js`); when unset it follows the system
+  language. Only the chrome is translated — the evaluator stays English.
+- **Message key** — the identifier passed to `t(key, params)`. Its `data-i18n`
+  form marks static markup in `index.html`; each `js/i18n/ui/<lang>.js`
+  dictionary must define every key.

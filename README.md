@@ -125,6 +125,9 @@ Based on [Numi](https://numi.app/) and [Soulver](https://soulver.app/).
 - **Examples** — the **Examples** button opens ready-made sheets (bill splits,
   recipe scaling, unit prices, savings goals, interest, fuel cost, running pace,
   upload time, BMI and more) that drop into the editor with one click.
+- **Languages** — the interface ships in English, Portuguese and Spanish. It
+  starts in your system language and can be changed in **Settings → Language**
+  (the calculator itself keeps English syntax).
 - **Keyboard shortcuts** (see below).
 - Offline-first PWA via a service worker.
 
@@ -215,11 +218,13 @@ make -C js/lib
 
 - `js/core/` — parsing and evaluation (`calculate.js`, `parseLine.js`,
   `preprocess.js`, `aggregate.js`, `multiWordVariables.js`, `currencySymbols.js`,
-  `tabsState.js`, `history.js`).
+  `tabsState.js`, `history.js`, `language.js`).
 - `js/eval/` — mathjs extensions and preprocessors (`aliases.js`, `cssUnits.js`,
   `currency.js`, `datetime.js`, `measures.js`, `rates.js`, `rounding.js`,
   `scales.js`, `symbols.js`, `timespan.js`, `units.js`, `wordOperators.js`,
   `percentage.js`).
+- `js/i18n/` — interface translations (runtime plus per-language `ui/`
+  dictionaries).
 - `js/render/` — highlighting and result rendering.
 - `js/ui/` — tabs, modals, help, examples, onboarding and the starter prompt,
   settings, find & replace, go-to-line, line numbers, indentation, import/export,

@@ -470,6 +470,28 @@ The flag is written **before** seeding, so a crash mid-seed cannot loop a user
 through onboarding on every reload. `RESET_KEYS` in `js/ui/settings.js`
 includes it, so "Reset data" genuinely returns the app to a first run.
 
+## Internationalization
+
+The interface ships in English, Portuguese and Spanish. The choice is a stored
+preference (`js/core/language.js`, key `math-notes-language`) that falls back to
+the system language (`navigator.languages`) when unset. `js/i18n/index.js`
+normalizes a BCP-47 tag (`pt-BR` → `pt`), exposes `t(key, params)` with
+interpolation and an English fallback, and keeps the active dictionary in
+memory.
+
+Static text is marked in `index.html` with `data-i18n` (text), `data-i18n-html`
+(markup) and `data-i18n-aria-label` / `-title` / `-placeholder` (attributes),
+which `applyTranslations()` repaints. Dynamically built UI calls `t()` and
+re-renders on `language:updated`, dispatched by `setLocale()` after it updates
+`<html lang>`, `document.title` and the static markup. Settings renders one card
+per language, with the resolved one active.
+
+Only the app chrome is translated in v1: the evaluator stays English (keywords,
+error messages and result formatting are unchanged), which also keeps the
+`js/i18n/ui` dictionaries out of the worker. `test/conventions.test.mjs` asserts
+that every `data-i18n` key in `index.html` resolves in every locale and that
+`core`/`eval` never import `js/i18n/`.
+
 ## Performance
 
 The design keeps per-keystroke work proportional to the edit, not the sheet: the
