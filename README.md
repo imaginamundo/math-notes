@@ -214,8 +214,8 @@ make -C js/lib
   `scales.js`, `symbols.js`, `timespan.js`, `units.js`, `wordOperators.js`,
   `percentage.js`).
 - `js/render/` — highlighting and result rendering.
-- `js/ui/` — tabs, modals, help, examples, onboarding and the tour, starter
-  prompt, settings, find & replace, go-to-line, line numbers, indentation,
-  import/export, sharing, shortcuts and font controls.
+- `js/ui/` — tabs, modals, help, examples, onboarding and the starter prompt,
+  settings, find & replace, go-to-line, line numbers, indentation, import/export,
+  sharing, shortcuts and font controls.
 - `js/util/` — shared pure helpers (debounce, storage, clipboard, text, scroll,
   sequence).

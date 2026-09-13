@@ -1,4 +1,3 @@
-import initTour from './tour.js';
 import storage from '../util/storage.js';
 
 const ONBOARDED_KEY = 'math-notes-onboarded';
@@ -67,8 +66,8 @@ function readOnboardingState() {
 }
 
 /**
- * Seeds the starter sheet and runs the tour on a first visit, and wires the
- * "Replay tutorial" button for every visit after that.
+ * Seeds the starter sheet on a first visit, so the opening screen demonstrates
+ * the app instead of describing it.
  *
  * @param {HTMLTextAreaElement} editableNode
  * @param {{ seedSheet: Function }} tabsApi
@@ -76,17 +75,6 @@ function readOnboardingState() {
  *   From `readOnboardingState()`, captured before `initTabs` ran.
  */
 function initOnboarding(editableNode, tabsApi, storedState) {
-  const tour = initTour(editableNode, () => writeStorage(ONBOARDED_KEY, '1'));
-
-  const replayButton = document.getElementById('replay-tour-button');
-  if (replayButton) {
-    replayButton.addEventListener('click', () => {
-      const modal = document.getElementById('settings-modal');
-      if (modal && modal.open) modal.close();
-      tour.start();
-    });
-  }
-
   const firstRun = isFirstRun({
     onboarded: storedState.onboarded,
     tabs: storedState.tabs,
@@ -95,11 +83,10 @@ function initOnboarding(editableNode, tabsApi, storedState) {
   });
   if (!firstRun) return;
 
-  // Set the flag BEFORE seeding, so a crash mid-tour cannot loop the user
+  // Set the flag BEFORE seeding, so a crash mid-seed cannot loop the user
   // through onboarding on every reload.
   writeStorage(ONBOARDED_KEY, '1');
   tabsApi.seedSheet({ name: STARTER_NAME, content: STARTER_SHEET });
-  tour.start();
 }
 
 export { isFirstRun, readOnboardingState, STARTER_SHEET, STARTER_NAME, ONBOARDED_KEY };

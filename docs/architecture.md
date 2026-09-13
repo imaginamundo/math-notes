@@ -406,7 +406,7 @@ container's vertical offset so the numbers stay glued to the text. It is
 
 ## Onboarding
 
-Two independent parts, both dismissible and both replayable.
+Two independent parts, both dismissible.
 
 **The starter sheet.** On a first run the first tab is renamed `Welcome` and
 filled with a short working sheet (`STARTER_SHEET` in `js/ui/onboarding.js`) —
@@ -419,16 +419,6 @@ content** / **Clear content** control just below the seeded sheet. It is visible
 only while the active tab still holds exactly `STARTER_SHEET` and the visitor
 has not dismissed it; either button (or editing away from the sheet) sets
 `math-notes-starter-dismissed`, so it never returns.
-
-**The tour.** `js/ui/tour.js` walks five anchors of the real UI. The highlight
-is an `outline` drawn on the anchor itself plus a raised `z-index`, not a
-cloned "spotlight" element — cheaper, and it cannot desync from what it points
-at. `nextStep` and `placeFor` are pure named exports (clamping, and flipping
-the popover when the preferred side would overflow the viewport), unit-tested
-with no DOM at all; the init module only wires events. `Esc`, the backdrop and
-`Skip tour` all dismiss; arrow keys navigate; focus is moved into the popover,
-trapped while open and restored on close; `prefers-reduced-motion` disables the
-transition.
 
 ### First-run detection has one sharp edge
 
@@ -443,7 +433,7 @@ time `initOnboarding` is called the key always exists and every visit would
 look like a return visit. `readOnboardingState()` exists for exactly that, and
 `js/index.js` calls it above `initTabs`.
 
-The flag is written **before** seeding, so a crash mid-tour cannot loop a user
+The flag is written **before** seeding, so a crash mid-seed cannot loop a user
 through onboarding on every reload. `RESET_KEYS` in `js/ui/settings.js`
 includes it, so "Reset data" genuinely returns the app to a first run.
 

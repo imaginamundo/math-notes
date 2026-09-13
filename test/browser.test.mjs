@@ -60,8 +60,8 @@ after(async () => {
   server.close();
 });
 
-// Every context is fresh, which would otherwise be a first run: the onboarding
-// tour would open over every test. `seed` lets a test opt into that.
+// Every context is fresh, which would otherwise be a first run and seed the
+// Welcome sheet over every test. `firstRun` lets a test opt into that.
 async function newPage({ firstRun = false } = {}) {
   if (context) await context.close();
   context = await browser.createBrowserContext();
@@ -795,70 +795,29 @@ test('a corrupt share link reports itself instead of throwing', async () => {
   assert.deepEqual(errors, []);
 });
 
-test('a first visit seeds the Welcome sheet and opens the tour', async () => {
+test('a first visit seeds the Welcome sheet', async () => {
   await newPage({ firstRun: true });
   await waitFor(() => page.evaluate(() => document.getElementById('total').textContent.length > 0));
   const state = await page.evaluate(() => ({
-    tourOpen: Boolean(document.querySelector('.tour-popover')),
-    step: document.querySelector('.tour-count')?.textContent,
-    highlighted: document.querySelector('.tour-highlight')?.id,
     tabName: document.querySelector('#tabs-bar .tab-name')?.textContent,
     rows: document.querySelectorAll('#view .line-row').length,
     total: document.getElementById('total').textContent,
     flag: localStorage.getItem('math-notes-onboarded'),
   }));
-  assert.equal(state.tourOpen, true);
-  assert.equal(state.step, '1 of 5');
-  assert.equal(state.highlighted, 'tabs-bar', 'the first step highlights its anchor');
   assert.equal(state.tabName, 'Welcome');
   assert.ok(state.rows > 10, `the starter sheet rendered ${state.rows} rows`);
   assert.ok(state.total.length > 0, 'the starter sheet evaluates to a total');
-  assert.equal(state.flag, '1', 'the flag is set up front, so a crash cannot loop the tour');
+  assert.equal(state.flag, '1', 'the flag is set up front, so a crash cannot loop onboarding');
   assert.deepEqual(errors, []);
 });
 
-test('the tour walks forward and back, clamped at the first step', async () => {
+test('a first-run seed is not repeated on reload', async () => {
   await newPage({ firstRun: true });
-  await wait(500);
-  const step = () => page.evaluate(() => document.querySelector('.tour-count').textContent);
-
-  assert.equal(await step(), '1 of 5');
-  assert.equal(
-    await page.evaluate(() => document.querySelector('.tour-back').disabled),
-    true,
-    'Back is disabled on the first step'
-  );
-  await page.click('.tour-next');
-  await wait(150);
-  assert.equal(await step(), '2 of 5');
-  await page.click('.tour-back');
-  await wait(150);
-  assert.equal(await step(), '1 of 5');
-
-  for (let i = 0; i < 4; i++) {
-    await page.click('.tour-next');
-    await wait(120);
-  }
-  assert.equal(await step(), '5 of 5');
-  assert.equal(await page.evaluate(() => document.querySelector('.tour-next').textContent), 'Done');
-  await page.click('.tour-next');
-  await wait(200);
-  assert.equal(await page.evaluate(() => Boolean(document.querySelector('.tour-popover'))), false);
-  assert.deepEqual(errors, []);
-});
-
-test('skipping the tour sets the flag, and a reload neither tours nor re-seeds', async () => {
-  await newPage({ firstRun: true });
-  await wait(500);
-  await page.click('.tour-skip');
-  await wait(200);
-  assert.equal(await page.evaluate(() => Boolean(document.querySelector('.tour-popover'))), false);
-  assert.equal(await page.evaluate(() => localStorage.getItem('math-notes-onboarded')), '1');
-
+  await waitFor(() => page.evaluate(() => localStorage.getItem('math-notes-onboarded') === '1'));
   const seeded = await value();
+  assert.ok(seeded.includes('Welcome!'), 'the Welcome sheet was seeded');
   await page.reload({ waitUntil: 'load' });
   await wait(600);
-  assert.equal(await page.evaluate(() => Boolean(document.querySelector('.tour-popover'))), false);
   assert.equal(await value(), seeded, 'the sheet was not seeded a second time');
   assert.equal(
     await page.evaluate(() => document.querySelectorAll('#tabs-bar [role="tab"]').length),
@@ -868,34 +827,7 @@ test('skipping the tour sets the flag, and a reload neither tours nor re-seeds',
   assert.deepEqual(errors, []);
 });
 
-test('Esc closes the tour', async () => {
-  await newPage({ firstRun: true });
-  await wait(500);
-  await page.keyboard.press('Escape');
-  await wait(200);
-  assert.equal(await page.evaluate(() => Boolean(document.querySelector('.tour-popover'))), false);
-  assert.deepEqual(errors, []);
-});
-
-test('arrow keys navigate the tour', async () => {
-  await newPage({ firstRun: true });
-  await wait(500);
-  await page.keyboard.press('ArrowRight');
-  await wait(150);
-  assert.equal(
-    await page.evaluate(() => document.querySelector('.tour-count').textContent),
-    '2 of 5'
-  );
-  await page.keyboard.press('ArrowLeft');
-  await wait(150);
-  assert.equal(
-    await page.evaluate(() => document.querySelector('.tour-count').textContent),
-    '1 of 5'
-  );
-  assert.deepEqual(errors, []);
-});
-
-test('a returning visitor with existing tabs is never seeded or toured', async () => {
+test('a returning visitor with existing tabs is never seeded', async () => {
   // Only the tabs key is set — no onboarding flag. Someone who cleared that
   // one key must not have their sheet overwritten.
   await newPageWithStorage([
@@ -909,32 +841,10 @@ test('a returning visitor with existing tabs is never seeded or toured', async (
     ],
   ]);
   await wait(500);
-  assert.equal(await page.evaluate(() => Boolean(document.querySelector('.tour-popover'))), false);
   assert.equal(await value(), 'salary = 4200\nsalary / 12', 'their sheet survived untouched');
   assert.equal(
     await page.evaluate(() => document.querySelector('#tabs-bar .tab-name').textContent),
     'My work'
-  );
-  assert.deepEqual(errors, []);
-});
-
-test('Settings offers Replay tutorial, which reopens the tour', async () => {
-  await newPage();
-  await wait(300);
-  assert.equal(await page.evaluate(() => Boolean(document.querySelector('.tour-popover'))), false);
-  await page.click('#settings-button');
-  await wait(200);
-  await page.click('#replay-tour-button');
-  await wait(300);
-  assert.equal(await page.evaluate(() => Boolean(document.querySelector('.tour-popover'))), true);
-  assert.equal(
-    await page.evaluate(() => document.getElementById('settings-modal').open),
-    false,
-    'the settings modal steps out of the way'
-  );
-  assert.equal(
-    await page.evaluate(() => document.querySelector('.tour-count').textContent),
-    '1 of 5'
   );
   assert.deepEqual(errors, []);
 });

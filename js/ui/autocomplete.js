@@ -44,10 +44,7 @@ function initAutocomplete(editableNode, editorScroll) {
   }
 
   function blocked() {
-    return (
-      document.body.classList.contains('tour-open') ||
-      Boolean(document.querySelector('dialog[open]'))
-    );
+    return Boolean(document.querySelector('dialog[open]'));
   }
 
   function entries() {

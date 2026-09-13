@@ -134,8 +134,8 @@ Terms used throughout the codebase and this documentation.
   tag, then base64url of the (usually `deflate`-compressed) sheet JSON.
 - **Import** — opening a share link. Always additive: it prompts, then adds a
   new tab; it never overwrites the active sheet.
-- **Onboarding** — the first-run experience: the seeded starter sheet plus the
-  tour (`js/ui/onboarding.js`). Gated on `math-notes-onboarded`.
+- **Onboarding** — the first-run experience: the seeded starter sheet
+  (`js/ui/onboarding.js`). Gated on `math-notes-onboarded`.
 - **Starter sheet** — the `Welcome` sheet seeded on a first run. Every line
   evaluates, so the first screen already demonstrates the app.
 - **Starter prompt** — the floating **Keep content** / **Clear content** control
@@ -144,8 +144,3 @@ Terms used throughout the codebase and this documentation.
 - **List/range limit** — `MAX_LIST_LENGTH` (100). List literals and statically
   resolvable ranges longer than this are rejected before evaluation, so a range
   like `1:1e9` cannot allocate an unbounded array and lock up the worker.
-- **Tour** — the guided walkthrough (`js/ui/tour.js`): a data-driven `STEPS`
-  array, one popover, and an `outline` ring on the anchor.
-- **Tour step** — `{ anchor, title, body, placement }`. `anchor` is a CSS
-  selector for a real element of the UI, or an array of them (e.g. the Help
-  step highlights both the Help and Examples buttons).

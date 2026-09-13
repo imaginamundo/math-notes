@@ -105,7 +105,6 @@ function initIndent(editableNode) {
   editableNode.addEventListener('keydown', (event) => {
     if (event.key !== 'Tab') return;
     if (event.metaKey || event.ctrlKey || event.altKey) return;
-    if (document.body.classList.contains('tour-open')) return;
     if (document.querySelector('dialog[open]')) return;
 
     event.preventDefault();

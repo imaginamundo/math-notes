@@ -69,7 +69,6 @@ function initGoToLine(editableNode) {
   closeNode.addEventListener('click', close);
 
   document.addEventListener('keydown', (event) => {
-    if (document.body.classList.contains('tour-open')) return;
     if (document.querySelector('dialog[open]')) return;
     const mod = event.metaKey || event.ctrlKey;
     if (!mod || event.shiftKey || event.key.toLowerCase() !== 'g') return;

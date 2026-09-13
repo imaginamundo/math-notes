@@ -104,7 +104,7 @@ function boot() {
   //    it floats beneath.
   initStarterPrompt(contentEditableNode);
 
-  // 5. The tour runs last, so every anchor it highlights already exists.
+  // 5. Onboarding seeds the starter sheet last, once everything else is wired.
   initOnboarding(contentEditableNode, tabsApi, onboardingState);
 }
 boot();
