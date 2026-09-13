@@ -48,11 +48,44 @@ function initAutocomplete(editableNode, editorScroll) {
     return Boolean(document.querySelector('dialog[open]'));
   }
 
+  // Suggestions come from every assignment and tag in the sheet, so building
+  // them means parsing every line. Cache the result and, when the text changes,
+  // rebuild only if a changed line could have added or removed one (`=` or `#`).
+  let cachedValue = null;
+  let cachedLines = null;
+  let cachedEntries = null;
+
+  function couldAffectEntries(line) {
+    return line.includes('=') || line.includes('#');
+  }
+
   function entries() {
-    const lines = sheetLines(editableNode.value);
+    const value = editableNode.value;
+    if (value === cachedValue && cachedEntries) return cachedEntries;
+
+    const lines = sheetLines(value);
+    if (cachedEntries && cachedLines && lines.length === cachedLines.length) {
+      let relevant = false;
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i] === cachedLines[i]) continue;
+        if (couldAffectEntries(lines[i]) || couldAffectEntries(cachedLines[i])) {
+          relevant = true;
+          break;
+        }
+      }
+      if (!relevant) {
+        cachedValue = value;
+        cachedLines = lines;
+        return cachedEntries;
+      }
+    }
+
     const variables = collectAssignments(lines).map((text) => ({ text, kind: 'variable' }));
     const tags = collectTags(lines).map((text) => ({ text: `#${text}`, kind: 'tag' }));
-    return [...variables, ...tags, ...VOCABULARY];
+    cachedValue = value;
+    cachedLines = lines;
+    cachedEntries = [...variables, ...tags, ...VOCABULARY];
+    return cachedEntries;
   }
 
   function refresh(force) {
