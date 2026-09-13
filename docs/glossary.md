@@ -93,9 +93,9 @@ Terms used throughout the codebase and this documentation.
   optional) as `19:12` or `7:12 pm`, with `Yesterday at`/`Tomorrow at` when not
   today. `to` wraps forward past midnight, `-` keeps both on the same day.
 - **Workday** — Monday–Friday. `js/eval/calendar.js` counts workdays in a span
-  (`10 March to 17 March in workdays`), advances a date by workdays
-  (`5 workdays after March 14`), and converts `work hours` at eight hours per
-  workday. Public holidays are not modelled yet.
+  or calendar period (`workdays in June 2026`, `10 March to 17 March in workdays`),
+  advances a date by workdays (`5 workdays after March 14`), and converts
+  `work hours` at eight hours per workday. Public holidays are not modelled yet.
 - **Rate** — a quantity per unit (`30 km/day`). mathjs supplies the arithmetic;
   `js/eval/rates.js` translates `per`/`a`/`at`/`for`, transfer time and pace,
   and `formatResult` simplifies and formats them.

@@ -483,8 +483,44 @@ function addWorkdays(date, amount) {
   return day;
 }
 
+function workdaysInMonth(text) {
+  const m = /^([a-z]+)(?:\s+(\d{4}))?$/i.exec(String(text).trim());
+  if (!m || !MONTHS[m[1].toLowerCase()]) {
+    throw new Error(`"${text}" is not a month I understand`);
+  }
+  const month = MONTHS[m[1].toLowerCase()];
+  const year = m[2] ? +m[2] : new Date().getFullYear();
+  return countWorkdays(new Date(year, month - 1, 1, 12), new Date(year, month, 1, 12));
+}
+
+function workdaysInYear(year) {
+  return countWorkdays(new Date(year, 0, 1, 12), new Date(year + 1, 0, 1, 12));
+}
+
+// `.workdays in X` names either a calendar period (`June`, `June 2026`, `2026`,
+// `this month`) or a duration from today (`3 weeks`). Returns null for a
+// duration so the caller can fall back.
+function workdaysInPeriod(text) {
+  const s = String(text).trim();
+  const now = new Date();
+  if (/^this\s+month$/i.test(s)) {
+    return workdaysInMonth(`${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}`);
+  }
+  if (/^this\s+year$/i.test(s)) return workdaysInYear(now.getFullYear());
+  const month = /^([a-z]+)(?:\s+(\d{4}))?$/i.exec(s);
+  if (month && MONTHS[month[1].toLowerCase()]) return workdaysInMonth(s);
+  const year = /^(\d{4})$/.exec(s);
+  if (year) return workdaysInYear(+year[1]);
+  return null;
+}
+
 function workdaysInDuration(text) {
+  const period = workdaysInPeriod(text);
+  if (period !== null) return period;
   const parts = parseDuration(text);
+  if (!Object.keys(parts).length) {
+    throw new Error(`"${text}" is not a period I understand`);
+  }
   const days =
     (parts.week || 0) * 7 +
     (parts.day || 0) +
@@ -495,15 +531,7 @@ function workdaysInDuration(text) {
 }
 
 function workHoursInMonth(text) {
-  const m = /^([a-z]+)(?:\s+(\d{4}))?$/i.exec(String(text).trim());
-  if (!m || !MONTHS[m[1].toLowerCase()]) {
-    throw new Error(`"${text}" is not a month I understand`);
-  }
-  const month = MONTHS[m[1].toLowerCase()];
-  const year = m[2] ? +m[2] : new Date().getFullYear();
-  return (
-    countWorkdays(new Date(year, month - 1, 1, 12), new Date(year, month, 1, 12)) * WORKDAY_HOURS
-  );
+  return workdaysInMonth(text) * WORKDAY_HOURS;
 }
 
 function initCalendar(math) {

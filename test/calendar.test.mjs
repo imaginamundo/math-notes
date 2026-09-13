@@ -88,6 +88,24 @@ test('workdays skip weekends', () => {
   assert.equal(valueOf('55h in work days'), '6.875 workdays');
 });
 
+test('workdays in a calendar period', () => {
+  assert.equal(valueOf('workdays in March 2026'), '22');
+  assert.equal(valueOf('workdays in June 2026'), '22');
+  assert.equal(valueOf('workdays in 2026'), '261');
+  assert.equal(valueOf('workdays in 2020'), '262');
+
+  const now = new Date();
+  assert.equal(valueOf('workdays in this year'), valueOf(`workdays in ${now.getFullYear()}`));
+  const monthName = new Intl.DateTimeFormat('en', { month: 'long' }).format(now);
+  assert.equal(valueOf('workdays in this month'), valueOf(`workdays in ${monthName}`));
+});
+
+test('workdays in unrecognised text is an error, not zero', () => {
+  const { results } = evaluateLines(['workdays in banana']);
+  assert.equal(results[0].type, 'error');
+  assert.match(results[0].value, /not a period/);
+});
+
 test('adding and subtracting workdays', () => {
   assert.equal(valueOf('5 workdays after March 14, 2019'), '21 March 2019');
   assert.equal(valueOf('3 workdays before March 14, 2019'), '11 March 2019');
