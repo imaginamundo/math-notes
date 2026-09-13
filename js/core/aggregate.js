@@ -1,4 +1,4 @@
-import { isCurrencyCode } from '../eval/symbols.js';
+import { isCurrencyCode } from './currencySymbols.js';
 
 const AGGREGATE_KEYWORDS = {
   sum: 'sum',

@@ -103,8 +103,11 @@ currency rate as a phrase (`100 USD/hour` → `US$ 100 per hour`,
 made the base; a compound that reduces to a currency (`2h * prev` where `prev`
 is a rate) is read back in the currency that was written. Currencies with no
 distinct symbol (CHF, ZAR, the Nordic krona) keep their ISO code so a result can
-always be typed back in; `CURRENCY_SYMBOLS` is the input map the same file
-supplies to `js/eval/symbols.js` and the highlighter.
+always be typed back in. `js/core/currencySymbols.js` owns the whole currency
+vocabulary — the symbol maps plus the live set of known codes, extended as rates
+register — so the evaluator (`js/eval/symbols.js`), the highlighter and the
+domain (`aggregate`/`unitMix`) all read one source instead of the domain
+reaching into `eval/`.
 
 Units only combine in shapes that mean something. `js/core/unitMix.js` inspects
 each line's result — simplified, with the net power per base dimension — and

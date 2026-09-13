@@ -1,4 +1,4 @@
-import { registerCurrencyCode } from './symbols.js';
+import { registerCurrencyCode } from '../core/currencySymbols.js';
 import storage from '../util/storage.js';
 
 const BASE = 'EUR';
