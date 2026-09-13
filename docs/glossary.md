@@ -147,7 +147,9 @@ Terms used throughout the codebase and this documentation.
 - **Language** — the interface language (`en`/`pt`/`es`). Stored under
   `math-notes-language` (`js/core/language.js`); when unset it follows the system
   language. Only the chrome is translated — the evaluator stays English.
-- **Message key** — the identifier passed to `t(key, params)`. Its `data-i18n`
-  form marks static markup in `index.html`; each `js/i18n/<area>/<lang>.js`
-  dictionary (`ui` for chrome, `help` for the Help/Examples prose) must define
-  every key.
+- **Message key** — the identifier passed to `t(key, params)`; its `data-i18n`
+  form marks static markup in `index.html`. Each `js/i18n/ui/<lang>.js` chrome
+  dictionary must define every chrome key.
+- **Help content** — the Help/Examples prose, authored in Markdown under
+  `js/i18n/src/` and rendered at build time into lazy-loaded modules
+  (`js/ui/helpContent.js` fetches one only when a modal opens).

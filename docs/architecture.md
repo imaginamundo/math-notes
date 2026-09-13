@@ -486,13 +486,17 @@ re-renders on `language:updated`, dispatched by `setLocale()` after it updates
 `<html lang>`, `document.title` and the static markup. Settings renders one card
 per language, with the resolved one active.
 
-Strings are split by area: `js/i18n/ui/<lang>.js` is the app chrome, and
-`js/i18n/help/<lang>.js` is the Help and Examples prose behind the `data-i18n`
-markers in the two reference modals (the English file is generated from
-`index.html`). The evaluator stays English — keywords, error messages and result
-formatting are unchanged — which also keeps the dictionaries out of the worker.
-`test/conventions.test.mjs` asserts that every `data-i18n` key in `index.html`
-resolves in every locale and that `core`/`eval` never import `js/i18n/`.
+Strings are split by area. `js/i18n/ui/<lang>.js` is the app chrome, eager and
+marked with `data-i18n` in `index.html`. The Help and Examples prose is authored
+in Markdown at `js/i18n/src/<area>.<lang>.md` and rendered at **build time**
+(`make -C js/i18n`, deno + marked, like the mathjs bundle) into the committed
+modules `js/i18n/<area>/<lang>.js`; a ` ```calc ` fence becomes a clickable
+example chip. `js/ui/helpContent.js` lazy-imports the active language only when a
+modal opens, so the prose never touches the boot path or the worker. The
+evaluator stays English — keywords, error messages and result formatting are
+unchanged. `test/conventions.test.mjs` asserts that every `data-i18n` key in
+`index.html` resolves in every locale, that the Markdown languages keep the same
+examples and section count, and that `core`/`eval` never import `js/i18n/`.
 
 ## Performance
 

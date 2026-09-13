@@ -214,6 +214,16 @@ Regenerate the bundle, then minify it into the file the app loads:
 make -C js/lib
 ```
 
+### Updating Help & Examples
+
+The Help and Examples prose is authored in Markdown under
+`js/i18n/src/<area>.<lang>.md` (a ` ```calc ` fence becomes a clickable
+example). Regenerate the committed modules after editing:
+
+```sh
+make -C js/i18n
+```
+
 ### Architecture
 
 - `js/core/` — parsing and evaluation (`calculate.js`, `parseLine.js`,
@@ -223,8 +233,9 @@ make -C js/lib
   `currency.js`, `datetime.js`, `measures.js`, `rates.js`, `rounding.js`,
   `scales.js`, `symbols.js`, `timespan.js`, `units.js`, `wordOperators.js`,
   `percentage.js`).
-- `js/i18n/` — interface translations (runtime plus per-language `ui/` chrome
-  and `help/` prose dictionaries).
+- `js/i18n/` — interface translations: the runtime, per-language `ui/` chrome
+  dictionaries, and the `src/` Markdown with its generated `help/`/`examples/`
+  content modules.
 - `js/render/` — highlighting and result rendering.
 - `js/ui/` — tabs, modals, help, examples, onboarding and the starter prompt,
   settings, find & replace, go-to-line, line numbers, indentation, import/export,
