@@ -28,14 +28,14 @@ sqrt(16)
 1000000
 ```
 
-| Operator | Function |
+| Operador | Función |
 | --- | --- |
-| `+` | Add |
-| `-` | Subtract |
-| `*` | Multiply |
-| `/` | Divide |
-| `^` | Power |
-| `%` | Remainder |
+| `+` | Sumar |
+| `-` | Restar |
+| `*` | Multiplicar |
+| `/` | Dividir |
+| `^` | Potencia |
+| `%` | Resto |
 
 Hay muchas más funciones y operadores disponibles — consulta la [documentación de mathjs](https://mathjs.org/docs/expressions/syntax.html#operators).
 
@@ -397,26 +397,26 @@ Convierte unidades con `to`, `in` o `as`. También se admiten unidades CSS: `px`
 2 em in px
 ```
 
-| Base | Unit |
+| Base | Unidad |
 | --- | --- |
-| Length | meter (m), inch (in), foot (ft), yard (yd), mile (mi), link (li), rod (rd), chain (ch), angstrom, mil |
-| Surface area | m2, sqin, sqft, sqyd, sqmi, sqrd, sqch, sqmil, acre, hectare |
-| Volume | m3, litre (l, L, lt, liter), cc, cuin, cuft, cuyd, teaspoon, tablespoon |
-| Liquid volume | minim (min), fluiddram (fldr), fluidounce (floz), gill (gi), cup (cp), pint (pt), quart (qt), gallon (gal), beerbarrel (bbl), oilbarrel (obl), hogshead, drop (gtt) |
-| Angles | rad (radian), deg (degree), grad (gradian), cycle, arcsec (arcsecond), arcmin (arcminute) |
-| Time | second (s, secs, seconds), minute (mins, minutes), hour (h, hr, hrs, hours), day (days), week (weeks), month (months), year (years), decade (decades), century (centuries), millennium (millennia) |
-| Frequency | hertz (Hz) |
-| Mass | gram(g), tonne, ton, grain (gr), dram (dr), ounce (oz), poundmass (lbm, lb, lbs), hundredweight (cwt), stick, stone |
-| Electric current | ampere (A) |
-| Temperature | kelvin (K), celsius (degC), fahrenheit (degF), rankine (degR) |
-| Amount of substance | mole (mol) |
-| Luminous intensity | candela (cd) |
-| Force | newton (N), dyne (dyn), poundforce (lbf), kip |
-| Energy | joule (J), erg, Wh, BTU, electronvolt (eV) |
-| Power | watt (W), hp |
-| Pressure | Pa, psi, atm, torr, bar, mmHg, mmH2O, cmH2O |
-| Electricity and magnetism | ampere (A), coulomb (C), watt (W), volt (V), ohm, farad (F), weber (Wb), tesla (T), henry (H), siemens (S), electronvolt (eV) |
-| Binary | bits (b), bytes (B) |
+| Longitud | meter (m), inch (in), foot (ft), yard (yd), mile (mi), link (li), rod (rd), chain (ch), angstrom, mil |
+| Área de superficie | m2, sqin, sqft, sqyd, sqmi, sqrd, sqch, sqmil, acre, hectare |
+| Volumen | m3, litre (l, L, lt, liter), cc, cuin, cuft, cuyd, teaspoon, tablespoon |
+| Volumen líquido | minim (min), fluiddram (fldr), fluidounce (floz), gill (gi), cup (cp), pint (pt), quart (qt), gallon (gal), beerbarrel (bbl), oilbarrel (obl), hogshead, drop (gtt) |
+| Ángulos | rad (radian), deg (degree), grad (gradian), cycle, arcsec (arcsecond), arcmin (arcminute) |
+| Tiempo | second (s, secs, seconds), minute (mins, minutes), hour (h, hr, hrs, hours), day (days), week (weeks), month (months), year (years), decade (decades), century (centuries), millennium (millennia) |
+| Frecuencia | hertz (Hz) |
+| Masa | gram(g), tonne, ton, grain (gr), dram (dr), ounce (oz), poundmass (lbm, lb, lbs), hundredweight (cwt), stick, stone |
+| Corriente eléctrica | ampere (A) |
+| Temperatura | kelvin (K), celsius (degC), fahrenheit (degF), rankine (degR) |
+| Cantidad de sustancia | mole (mol) |
+| Intensidad luminosa | candela (cd) |
+| Fuerza | newton (N), dyne (dyn), poundforce (lbf), kip |
+| Energía | joule (J), erg, Wh, BTU, electronvolt (eV) |
+| Potencia | watt (W), hp |
+| Presión | Pa, psi, atm, torr, bar, mmHg, mmH2O, cmH2O |
+| Electricidad y magnetismo | ampere (A), coulomb (C), watt (W), volt (V), ohm, farad (F), weber (Wb), tesla (T), henry (H), siemens (S), electronvolt (eV) |
+| Binario | bits (b), bytes (B) |
 
 Consulta la [referencia de unidades de mathjs](https://mathjs.org/docs/datatypes/units.html#reference) para la lista completa.
 
@@ -636,21 +636,21 @@ line(1) + 1h
 
 La hoja activa se puede exportar e importar desde la ventana de **Ajustes** o con los atajos de abajo.
 
-| Shortcut | Action |
+| Atajo | Acción |
 | --- | --- |
-| `⌘Z` `Ctrl+Z` | Undo the last change in the tab |
-| `⇧⌘Z` `Ctrl+Shift+Z` | Redo |
-| `Ctrl+Tab` `Ctrl+⇧Tab` | Next / previous tab |
-| `⌘1…9` `Ctrl+1…9` | Jump to the nth tab |
-| `⌘F` `Ctrl+F` | Find & replace in the active sheet |
-| `⌘G` `Ctrl+G` | Jump to a line number |
-| `Tab` | Indent the line or selection |
-| `⇧Tab` | Outdent the line or selection |
-| `⇧⌘C` `Ctrl+Shift+C` | Copy the current line's result |
-| `⇧⌘S` `⇧⌘L` | Copy a share link for the active sheet |
-| `⇧⌘E` `Ctrl+Shift+E` | Export the active sheet |
-| `⇧⌘I` `Ctrl+Shift+I` | Import a sheet |
-| `⇧⌘⌫` `Ctrl+Shift+Backspace` | Clear the active sheet |
+| `⌘Z` `Ctrl+Z` | Deshacer el último cambio en la pestaña |
+| `⇧⌘Z` `Ctrl+Shift+Z` | Rehacer |
+| `Ctrl+Tab` `Ctrl+⇧Tab` | Pestaña siguiente / anterior |
+| `⌘1…9` `Ctrl+1…9` | Ir a la enésima pestaña |
+| `⌘F` `Ctrl+F` | Buscar y reemplazar en la hoja activa |
+| `⌘G` `Ctrl+G` | Ir a un número de línea |
+| `Tab` | Indentar la línea o la selección |
+| `⇧Tab` | Desindentar la línea o la selección |
+| `⇧⌘C` `Ctrl+Shift+C` | Copiar el resultado de la línea actual |
+| `⇧⌘S` `⇧⌘L` | Copiar un enlace para compartir la hoja activa |
+| `⇧⌘E` `Ctrl+Shift+E` | Exportar la hoja activa |
+| `⇧⌘I` `Ctrl+Shift+I` | Importar una hoja |
+| `⇧⌘⌫` `Ctrl+Shift+Backspace` | Limpiar la hoja activa |
 
 ## Acerca de
 

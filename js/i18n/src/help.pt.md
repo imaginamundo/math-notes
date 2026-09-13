@@ -28,14 +28,14 @@ sqrt(16)
 1000000
 ```
 
-| Operator | Function |
+| Operador | Função |
 | --- | --- |
-| `+` | Add |
-| `-` | Subtract |
-| `*` | Multiply |
-| `/` | Divide |
-| `^` | Power |
-| `%` | Remainder |
+| `+` | Somar |
+| `-` | Subtrair |
+| `*` | Multiplicar |
+| `/` | Dividir |
+| `^` | Potência |
+| `%` | Resto |
 
 Muitas outras funções e operadores estão disponíveis — veja a [documentação do mathjs](https://mathjs.org/docs/expressions/syntax.html#operators).
 
@@ -397,26 +397,26 @@ Converta unidades com `to`, `in` ou `as`. Unidades CSS também são suportadas: 
 2 em in px
 ```
 
-| Base | Unit |
+| Base | Unidade |
 | --- | --- |
-| Length | meter (m), inch (in), foot (ft), yard (yd), mile (mi), link (li), rod (rd), chain (ch), angstrom, mil |
-| Surface area | m2, sqin, sqft, sqyd, sqmi, sqrd, sqch, sqmil, acre, hectare |
+| Comprimento | meter (m), inch (in), foot (ft), yard (yd), mile (mi), link (li), rod (rd), chain (ch), angstrom, mil |
+| Área de superfície | m2, sqin, sqft, sqyd, sqmi, sqrd, sqch, sqmil, acre, hectare |
 | Volume | m3, litre (l, L, lt, liter), cc, cuin, cuft, cuyd, teaspoon, tablespoon |
-| Liquid volume | minim (min), fluiddram (fldr), fluidounce (floz), gill (gi), cup (cp), pint (pt), quart (qt), gallon (gal), beerbarrel (bbl), oilbarrel (obl), hogshead, drop (gtt) |
-| Angles | rad (radian), deg (degree), grad (gradian), cycle, arcsec (arcsecond), arcmin (arcminute) |
-| Time | second (s, secs, seconds), minute (mins, minutes), hour (h, hr, hrs, hours), day (days), week (weeks), month (months), year (years), decade (decades), century (centuries), millennium (millennia) |
-| Frequency | hertz (Hz) |
-| Mass | gram(g), tonne, ton, grain (gr), dram (dr), ounce (oz), poundmass (lbm, lb, lbs), hundredweight (cwt), stick, stone |
-| Electric current | ampere (A) |
-| Temperature | kelvin (K), celsius (degC), fahrenheit (degF), rankine (degR) |
-| Amount of substance | mole (mol) |
-| Luminous intensity | candela (cd) |
-| Force | newton (N), dyne (dyn), poundforce (lbf), kip |
-| Energy | joule (J), erg, Wh, BTU, electronvolt (eV) |
-| Power | watt (W), hp |
-| Pressure | Pa, psi, atm, torr, bar, mmHg, mmH2O, cmH2O |
-| Electricity and magnetism | ampere (A), coulomb (C), watt (W), volt (V), ohm, farad (F), weber (Wb), tesla (T), henry (H), siemens (S), electronvolt (eV) |
-| Binary | bits (b), bytes (B) |
+| Volume líquido | minim (min), fluiddram (fldr), fluidounce (floz), gill (gi), cup (cp), pint (pt), quart (qt), gallon (gal), beerbarrel (bbl), oilbarrel (obl), hogshead, drop (gtt) |
+| Ângulos | rad (radian), deg (degree), grad (gradian), cycle, arcsec (arcsecond), arcmin (arcminute) |
+| Tempo | second (s, secs, seconds), minute (mins, minutes), hour (h, hr, hrs, hours), day (days), week (weeks), month (months), year (years), decade (decades), century (centuries), millennium (millennia) |
+| Frequência | hertz (Hz) |
+| Massa | gram(g), tonne, ton, grain (gr), dram (dr), ounce (oz), poundmass (lbm, lb, lbs), hundredweight (cwt), stick, stone |
+| Corrente elétrica | ampere (A) |
+| Temperatura | kelvin (K), celsius (degC), fahrenheit (degF), rankine (degR) |
+| Quantidade de matéria | mole (mol) |
+| Intensidade luminosa | candela (cd) |
+| Força | newton (N), dyne (dyn), poundforce (lbf), kip |
+| Energia | joule (J), erg, Wh, BTU, electronvolt (eV) |
+| Potência | watt (W), hp |
+| Pressão | Pa, psi, atm, torr, bar, mmHg, mmH2O, cmH2O |
+| Eletricidade e magnetismo | ampere (A), coulomb (C), watt (W), volt (V), ohm, farad (F), weber (Wb), tesla (T), henry (H), siemens (S), electronvolt (eV) |
+| Binário | bits (b), bytes (B) |
 
 Veja a [referência de unidades do mathjs](https://mathjs.org/docs/datatypes/units.html#reference) para a lista completa.
 
@@ -636,21 +636,21 @@ line(1) + 1h
 
 A planilha ativa pode ser exportada e importada pela janela de **Configurações** ou pelos atalhos abaixo.
 
-| Shortcut | Action |
+| Atalho | Ação |
 | --- | --- |
-| `⌘Z` `Ctrl+Z` | Undo the last change in the tab |
-| `⇧⌘Z` `Ctrl+Shift+Z` | Redo |
-| `Ctrl+Tab` `Ctrl+⇧Tab` | Next / previous tab |
-| `⌘1…9` `Ctrl+1…9` | Jump to the nth tab |
-| `⌘F` `Ctrl+F` | Find & replace in the active sheet |
-| `⌘G` `Ctrl+G` | Jump to a line number |
-| `Tab` | Indent the line or selection |
-| `⇧Tab` | Outdent the line or selection |
-| `⇧⌘C` `Ctrl+Shift+C` | Copy the current line's result |
-| `⇧⌘S` `⇧⌘L` | Copy a share link for the active sheet |
-| `⇧⌘E` `Ctrl+Shift+E` | Export the active sheet |
-| `⇧⌘I` `Ctrl+Shift+I` | Import a sheet |
-| `⇧⌘⌫` `Ctrl+Shift+Backspace` | Clear the active sheet |
+| `⌘Z` `Ctrl+Z` | Desfazer a última alteração na aba |
+| `⇧⌘Z` `Ctrl+Shift+Z` | Refazer |
+| `Ctrl+Tab` `Ctrl+⇧Tab` | Próxima / aba anterior |
+| `⌘1…9` `Ctrl+1…9` | Ir para a enésima aba |
+| `⌘F` `Ctrl+F` | Localizar e substituir na planilha ativa |
+| `⌘G` `Ctrl+G` | Ir para um número de linha |
+| `Tab` | Indentar a linha ou a seleção |
+| `⇧Tab` | Desindentar a linha ou a seleção |
+| `⇧⌘C` `Ctrl+Shift+C` | Copiar o resultado da linha atual |
+| `⇧⌘S` `⇧⌘L` | Copiar um link de compartilhamento da planilha ativa |
+| `⇧⌘E` `Ctrl+Shift+E` | Exportar a planilha ativa |
+| `⇧⌘I` `Ctrl+Shift+I` | Importar uma planilha |
+| `⇧⌘⌫` `Ctrl+Shift+Backspace` | Limpar a planilha ativa |
 
 ## Sobre
 

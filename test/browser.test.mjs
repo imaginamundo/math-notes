@@ -929,6 +929,13 @@ test('the Help content follows the language and its examples still work', async 
       () => document.querySelector('#help-modal .help-section h2')?.textContent === 'Básico'
     )
   );
+  // A table inside the section is translated too.
+  assert.equal(
+    await page.evaluate(
+      () => document.querySelector('#help-modal .help-section table th').textContent
+    ),
+    'Operador'
+  );
   // The example chips keep their (English) expressions across a swap.
   assert.equal(
     await page.evaluate(
