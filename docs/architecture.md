@@ -86,6 +86,14 @@ already understands: `per`/`a`/`an` → `/`, `for a year` → `* 1 year`, `X at 
 formatted as `mm:ss/km`). `formatResult` simplifies compound units before
 display, so `30 hours at 10 km/hour` shows `300 km`, not `(hours km)/hour`.
 
+`js/eval/timespan.js` handles durations. Consecutive time components are joined
+with `+` (mathjs would multiply them) and `m` means minutes, so `3h 5m 10s`
+evaluates as a timespan. A line that is only a timespan, `X as timespan`, and
+`X in <unit> and <unit>` return a unit in a custom `timespan` unit (1 s) so the
+duration survives arithmetic (`line(4) + 1h`), and `formatResult` renders it as
+components (`5.5 minutes as timespan` → `5 min 30 s`,
+`12.5 minutes in minutes and seconds` → `12 min 30 s`).
+
 The measurement system (`js/core/measurementSystem.js`) stores the preference
 (metric by default, US customary or Imperial; all three define a cup) and
 re-registers the volume units. Switching it dispatches `measurement:updated`;

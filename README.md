@@ -67,6 +67,11 @@ Based on [Numi](https://numi.app/).
 - **Function aliases**: `ln`, `fact`, `arcsin`, `arccos`, `arctan`, `root`; `π`
   is accepted for `pi`.
 - **Dates**: `fromunix(1446587186)`, `unix()`.
+- **Timespans** — `5.5 minutes as timespan` → `5 min 30 s`,
+  `72 days as timespan` → `10 weeks 2 days`, `3h 5m 10s` →
+  `3 hours 5 minutes 10 seconds`, and `12.5 minutes in minutes and seconds`
+  → `12 min 30 s`. A timespan is a real duration, so it can be added
+  (`line(1) + 1h`) or multiplied.
 - **Find & replace** — press `⌘F` / `Ctrl+F` to search the active sheet with
   live match highlighting, then replace one or all matches.
 - **Line numbers** — a left gutter numbers the sheet and highlights the line
@@ -170,7 +175,8 @@ make -C js/lib
   `tabsState.js`, `history.js`).
 - `js/eval/` — mathjs extensions and preprocessors (`aliases.js`, `cssUnits.js`,
   `currency.js`, `datetime.js`, `measures.js`, `rates.js`, `rounding.js`,
-  `scales.js`, `symbols.js`, `units.js`, `wordOperators.js`, `percentage.js`).
+  `scales.js`, `symbols.js`, `timespan.js`, `units.js`, `wordOperators.js`,
+  `percentage.js`).
 - `js/render/` — highlighting and result rendering.
 - `js/ui/` — tabs, modals, help, examples, onboarding and the tour, starter
   prompt, settings, find & replace, go-to-line, line numbers, indentation,

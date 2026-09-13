@@ -67,6 +67,11 @@ Terms used throughout the codebase and this documentation.
 - **Rate** — a quantity per unit (`30 km/day`). mathjs supplies the arithmetic;
   `js/eval/rates.js` translates `per`/`a`/`at`/`for`, transfer time and pace,
   and `formatResult` simplifies and formats them.
+- **Timespan** — a duration rendered as components (`5 min 30 s`,
+  `10 weeks 2 days`). Consecutive time components and `m` for minutes are
+  joined by `js/eval/timespan.js`; `as timespan` and `in <unit> and <unit>`
+  produce a unit in the custom `timespan` unit (1 s) so it survives arithmetic,
+  and `formatResult` draws the components.
 - **Rounding** — Soulver-style trailing phrases (`1/3 to 2 dp`, `5.5 rounded up`,
   `37 to nearest 10`, `0.534 to nearest 16th`) rewritten by
   `js/eval/rounding.js` to mathjs `round`/`ceil`/`floor`. Those are extended so

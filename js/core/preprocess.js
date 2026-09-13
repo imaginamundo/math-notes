@@ -4,13 +4,14 @@ import { preprocessPercent } from '../eval/percentage.js';
 import { preprocessWordOps } from '../eval/wordOperators.js';
 import { preprocessMeasures } from '../eval/measures.js';
 import { preprocessRates } from '../eval/rates.js';
+import { preprocessTimespan } from '../eval/timespan.js';
 import { preprocessRounding } from '../eval/rounding.js';
 
 // Applied in order. Measures run first so a scale-like subject (`4k video`) is
 // recognised before `scales` rewrites it. Scales before currency so `$2k`
 // expands to `2000 USD`; percentage before word operators so its `of|on|off`
-// phrases are consumed first; rates after word operators; rounding last, so it
-// wraps the normalised value.
+// phrases are consumed first; rates then timespans; rounding last, so it wraps
+// the normalised value.
 const STEPS = [
   preprocessMeasures,
   preprocessScales,
@@ -18,6 +19,7 @@ const STEPS = [
   preprocessPercent,
   preprocessWordOps,
   preprocessRates,
+  preprocessTimespan,
   preprocessRounding,
 ];
 

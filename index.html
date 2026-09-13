@@ -104,6 +104,7 @@
         <a class="modal-nav-link" href="#help-rates">Rates</a>
         <a class="modal-nav-link" href="#help-currency">Currency</a>
         <a class="modal-nav-link" href="#help-dates">Dates</a>
+        <a class="modal-nav-link" href="#help-timespans">Timespans</a>
         <a class="modal-nav-link" href="#help-shortcuts">Shortcuts</a>
         <a class="modal-nav-link" href="#help-about">About</a>
       </nav>
@@ -581,6 +582,32 @@
           </div>
           <div class="help-example" data-expr="1 month in days" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">30.4375 days</span>
+          </div>
+        </section>
+
+        <section id="help-timespans" class="help-section">
+          <h2>Timespans</h2>
+          <p>Show a duration as a timespan of components, or split it into two units. A timespan is a real duration, so it can be added and multiplied. Time units can be written short (<code>3h 5m 10s</code>) or long.</p>
+          <div class="help-example" data-expr="5.5 minutes as timespan" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">5 min 30 s</span>
+          </div>
+          <div class="help-example" data-expr="4.54 hours as timespan" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">4 hours 32 minutes 24 seconds</span>
+          </div>
+          <div class="help-example" data-expr="72 days as timespan" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">10 weeks 2 days</span>
+          </div>
+          <div class="help-example" data-expr="3h 5m 10s" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">3 hours 5 minutes 10 seconds</span>
+          </div>
+          <div class="help-example" data-expr="3h 5m 10s in seconds" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">11,110 seconds</span>
+          </div>
+          <div class="help-example" data-expr="12.5 minutes in minutes and seconds" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">12 min 30 s</span>
+          </div>
+          <div class="help-example" data-expr="5.5 minutes as timespan&#10;line(1) + 1h" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">last line: 1 hour 5 minutes 30 seconds</span>
           </div>
         </section>
 

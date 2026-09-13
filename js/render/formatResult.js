@@ -1,3 +1,5 @@
+import { formatTimespan } from '../eval/timespan.js';
+
 const numberFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 10 });
 const LIST_SHOW = 12;
 const MAX_DEPTH = 3;
@@ -69,6 +71,10 @@ function formatNumber(n) {
 }
 
 function formatUnit(unit) {
+  // A timespan is a real duration; render it as components instead of seconds.
+  if (unit.formatUnits() === 'timespan') {
+    return formatTimespan(unit.toNumber(), unit.displayParts, formatNumber);
+  }
   // Compound rates keep their original factors until simplified
   // (`(hours km) / hour` -> `km`).
   const simple = typeof unit.simplify === 'function' ? unit.simplify() : unit;

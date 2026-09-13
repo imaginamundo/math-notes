@@ -8,6 +8,7 @@ import initDatetime from '../eval/datetime.js';
 import initRounding from '../eval/rounding.js';
 import initMeasures, { applyMeasurementSystem } from '../eval/measures.js';
 import initRates from '../eval/rates.js';
+import initTimespan from '../eval/timespan.js';
 import { readMeasurementSystem } from './measurementSystem.js';
 import preprocess from './preprocess.js';
 import { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal } from './aggregate.js';
@@ -182,6 +183,7 @@ function createEngine() {
   initRounding(math);
   initMeasures(math, readMeasurementSystem());
   initRates(math);
+  initTimespan(math);
   initCurrency(math);
 
   const cache = {
