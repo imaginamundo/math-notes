@@ -72,10 +72,12 @@ definitions per measurement system. `js/eval/measures.js` matches
 dataset is required. It rewrites to `__measure(value, factor, target)`, and the
 helper tries the value against the target directly (same dimension) and then
 the factor both ways, so `300g butter in cups` and `10 cups olive oil in grams`
-both work. A known subject uses its `DEFAULT_FACTORS` factor; any other label
-(`300g feathers in cups`, or none at all: `300g in cups`) falls back to
-`DEFAULT_DENSITY`. With no subject, only differing dimensions are taken over,
-so ordinary conversions stay with mathjs.
+both work. A known subject uses its `DEFAULT_FACTORS` factor — cooking and
+material densities, fuel energy densities (`1 l petrol in kWh`) and media
+bitrates (`2 hours 4k video in GB`) — while any other label (`300g feathers in
+cups`, or none at all: `300g in cups`) falls back to `DEFAULT_DENSITY` (water).
+With no subject, only differing dimensions are taken over, so ordinary
+conversions stay with mathjs.
 
 `js/eval/rates.js` translates rate phrasing to the compound units mathjs
 already understands: `per`/`a`/`an` → `/`, `for a year` → `* 1 year`, `X at R`
@@ -85,10 +87,10 @@ formatted as `mm:ss/km`). `formatResult` simplifies compound units before
 display, so `30 hours at 10 km/hour` shows `300 km`, not `(hours km)/hour`.
 
 The measurement system (`js/core/measurementSystem.js`) stores the preference
-(metric by default) and re-registers the volume units. Switching it dispatches
-`measurement:updated`; `js/index.js` forwards the choice to the worker and the
-main-thread fallback, and the engine bumps its environment revision so cached
-results recompute.
+(metric by default, US customary or Imperial; all three define a cup) and
+re-registers the volume units. Switching it dispatches `measurement:updated`;
+`js/index.js` forwards the choice to the worker and the main-thread fallback,
+and the engine bumps its environment revision so cached results recompute.
 
 Rounding phrases (`1/3 to 2 dp`, `5.5 rounded up`, `37 to nearest 10`) are
 rewritten to mathjs `round`/`ceil`/`floor` by `js/eval/rounding.js`, whose

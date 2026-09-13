@@ -56,8 +56,9 @@ Terms used throughout the codebase and this documentation.
 - **Measure conversion** — a subject's factor bridges two dimensions
   (`300g butter in cups`, `10 cups olive oil in grams`, or the dataset-free
   `300g feathers in cups`), rewritten to `__measure` by `js/eval/measures.js`.
-  A known subject uses `DEFAULT_FACTORS`; any other label (or none) uses
-  `DEFAULT_DENSITY`.
+  `DEFAULT_FACTORS` covers cooking and material densities, fuel energy
+  densities and media bitrates; any other label (or none) uses `DEFAULT_DENSITY`
+  (water).
 - **Measurement system** — the preferred volume units
   (`js/core/measurementSystem.js`): metric (default), us, or imperial, each
   including a cup. Applied at engine build and on `measurement:updated`.

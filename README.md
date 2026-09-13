@@ -40,12 +40,14 @@ Based on [Numi](https://numi.app/).
   `sum`/`total`/`average`/`avg`, optionally `of`, before the tag) totals the
   tagged lines above, across the whole sheet.
 - **Unit conversion** (`1 cm to m`) including CSS units (`px`, `em`, `point`).
-- **Cooking & measures** — convert between volume and mass with a free-form
-  subject label: `300g butter in cups`, `2 cups flour in grams`, or even
-  `300g feathers in cups`. No dataset is required: a known subject uses its
-  density and any other label falls back to a default. Volume units follow the
-  measurement system in Settings (metric by default: `cup` = 250 ml,
-  `tbsp` = 15 ml, `tsp` = 5 ml).
+- **Cooking & measures** — convert between dimensions with a free-form,
+  optional subject label: `300g butter in cups`, `2 cups flour in grams`,
+  `300g in cups` (subject optional), or `300g feathers in cups`. Known subjects
+  supply a factor — cooking and material densities, fuel energy density
+  (`1 l petrol in kWh`) and media bitrate (`2 hours 4k video in GB`) — and any
+  other label falls back to water. Volume units follow the measurement system
+  in Settings — Metric (default), US customary or Imperial, each with a `cup`
+  (250 / 236.6 / 284.1 ml).
 - **Rates** — `per`/`a`/`at`/`for` phrasing on top of compound units:
   `10 km per day`, `30 hours at 10 km/hour`, `$24 a day for a year`,
   `time to upload 3 GB at 10 MB/s`, and pace `5 km in 25 min` → `05:00/km`.
