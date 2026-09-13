@@ -1,4 +1,4 @@
-const cacheName = 'math-notes-v29';
+const cacheName = 'math-notes-v30';
 const urlsToCache = [
   '../index.html',
   '../style.css',
@@ -69,18 +69,29 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Network-first with a cache fallback: always serve fresh assets when the
-// server is reachable, falling back to the cached copy when offline.
+// Stale-while-revalidate for same-origin GETs: a cached asset answers
+// immediately (so repeat loads are instant and offline works), while a
+// background fetch refreshes the copy for next time. Uncached requests wait on
+// the network and are cached on success.
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  if (request.method !== 'GET' || !request.url.startsWith(self.location.origin)) return;
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        if (response.ok && event.request.url.startsWith(self.location.origin)) {
+    caches.match(request).then((cached) => {
+      const network = fetch(request).then((response) => {
+        if (response && response.ok) {
           const copy = response.clone();
-          caches.open(cacheName).then((cache) => cache.put(event.request, copy));
+          caches.open(cacheName).then((cache) => cache.put(request, copy));
         }
         return response;
-      })
-      .catch(() => caches.match(event.request))
+      });
+      if (cached) {
+        // Keep the worker alive until the revalidation settles, but do not make
+        // the page wait on it.
+        event.waitUntil(network.catch(() => {}));
+        return cached;
+      }
+      return network;
+    })
   );
 });
