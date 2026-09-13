@@ -199,6 +199,12 @@ body {
   grid-template-rows: auto 1fr auto auto;
   height: 100%;
 }
+/* The UI text is authored in English and translated when the module boots; the
+   head script hides it first so a non-English visitor never sees the English
+   flash. js/i18n removes the class once the language is applied. */
+html.i18n-pending .layout {
+  visibility: hidden;
+}
 .tabs-bar {
   display: flex;
   align-items: stretch;

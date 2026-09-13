@@ -84,7 +84,11 @@ function setLocale(language, { persist = true } = {}) {
   current = normalizeLanguage(language);
   setCoreLanguage(current);
   if (persist) persistLanguage(current);
-  if (typeof document !== 'undefined') applyTranslations(document);
+  if (typeof document !== 'undefined') {
+    applyTranslations(document);
+    // The head script may have hidden the UI until the language applied.
+    document.documentElement.classList.remove('i18n-pending');
+  }
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('language:updated', { detail: current }));
   }

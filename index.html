@@ -15,6 +15,24 @@
         if (s >= 50 && s <= 200) {
           document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
         }
+        // The UI text is authored in English and translated when the module
+        // boots; hide it until then so a non-English visitor never sees the
+        // English flash. js/i18n removes the class after applying the language.
+        var preferred = localStorage.getItem('math-notes-language');
+        var tags =
+          navigator.languages && navigator.languages.length
+            ? navigator.languages
+            : [navigator.language];
+        var base = String(preferred || tags[0] || '')
+          .toLowerCase()
+          .split(/[-_]/)[0];
+        if (base === 'pt' || base === 'es') {
+          document.documentElement.classList.add('i18n-pending');
+          // Safety net: never leave the UI hidden if the module fails to load.
+          setTimeout(function () {
+            document.documentElement.classList.remove('i18n-pending');
+          }, 3000);
+        }
       } catch (e) {}
     })();
   </script>

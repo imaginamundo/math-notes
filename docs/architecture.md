@@ -484,7 +484,10 @@ Static text is marked in `index.html` with `data-i18n` (text), `data-i18n-html`
 which `applyTranslations()` repaints. Dynamically built UI calls `t()` and
 re-renders on `language:updated`, dispatched by `setLocale()` after it updates
 `<html lang>`, `document.title` and the static markup. Settings renders one card
-per language, with the resolved one active.
+per language, with the resolved one active. Because the static markup is
+authored in English, the head bootstrap adds an `i18n-pending` class (only when
+the resolved language is not English) that hides `.layout` until `setLocale`
+applies the language, so the English source never flashes.
 
 Strings are split by area. `js/i18n/ui/<lang>.js` is the app chrome, eager and
 marked with `data-i18n` in `index.html`. The Help and Examples prose is authored

@@ -948,3 +948,27 @@ test('the Help content follows the language and its examples still work', async 
   assert.equal(await value(), '1 + 1');
   assert.deepEqual(errors, []);
 });
+
+test('the UI is hidden until a non-English language is applied', async () => {
+  if (context) await context.close();
+  context = await browser.createBrowserContext();
+  page = await context.newPage();
+  errors = [];
+  page.on('pageerror', (err) => errors.push(err.message));
+  // Block the app so the language is never applied: the head script must keep
+  // the English UI hidden in the meantime, so it never flashes.
+  await page.setRequestInterception(true);
+  page.on('request', (request) => {
+    if (request.url().endsWith('/js/index.js')) request.abort();
+    else request.continue();
+  });
+  await page.evaluateOnNewDocument(() => localStorage.setItem('math-notes-language', 'pt'));
+  await page.goto(`http://localhost:${server.address().port}/`, { waitUntil: 'domcontentloaded' });
+  await wait(150);
+  const state = await page.evaluate(() => ({
+    pending: document.documentElement.classList.contains('i18n-pending'),
+    hidden: getComputedStyle(document.querySelector('.layout')).visibility === 'hidden',
+  }));
+  assert.equal(state.pending, true, 'the head script marks the pending language');
+  assert.equal(state.hidden, true, 'the English UI is hidden until the language applies');
+});
