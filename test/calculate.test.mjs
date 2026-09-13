@@ -357,8 +357,15 @@ test('an unterminated header is just a label', () => {
   assert.equal(total, 10);
 });
 
-test('end without an open group stays an error', () => {
-  assert.equal(evaluateLines(['10', 'end']).results[1].type, 'error');
+test('end without an open group shows a helpful error', () => {
+  assert.equal(
+    evaluateLines(['10', 'end']).results[1].value,
+    '"end" without a matching group header'
+  );
+  assert.equal(
+    evaluateLines(['10', 'end #food']).results[1].value,
+    '"end" without a matching group header'
+  );
 });
 
 test('a group subtotal follows the unit rules', () => {

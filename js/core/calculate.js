@@ -315,6 +315,12 @@ function createEngine() {
         continue;
       }
 
+      // An `end` row with no open group is a mistake, not an unknown symbol.
+      if (parsed.code.trim() === 'end') {
+        results[i] = { type: 'error', value: '"end" without a matching group header' };
+        continue;
+      }
+
       // Tags. A request line (`#food`, or `sum #food`) aggregates tagged value
       // rows above; otherwise the tags label this line and are stored on its
       // result for later requests.
