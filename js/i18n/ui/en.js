@@ -23,7 +23,7 @@ export default {
   'footer.share': 'Share',
   'footer.settings': 'Settings',
   'footer.examples': 'Examples',
-  'footer.docs': 'Documentation',
+  'footer.docs': 'Docs',
 
   'modal.examples': 'Examples',
   'modal.settings': 'Settings',
