@@ -10,6 +10,7 @@ import initMeasures, { applyMeasurementSystem } from '../eval/measures.js';
 import initRates from '../eval/rates.js';
 import initTimespan from '../eval/timespan.js';
 import { readMeasurementSystem } from './measurementSystem.js';
+import { readTotalMode } from './totalMode.js';
 import preprocess from './preprocess.js';
 import { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal } from './aggregate.js';
 import { firstDifference } from '../util/sequence.js';
@@ -196,6 +197,10 @@ function createEngine() {
   // (currency rates registered), so the cache cannot serve stale results.
   let environmentRevision = 0;
 
+  // Which aggregate the total bar shows. Only affects the total, not the
+  // per-line cache, so it is read fresh on each evaluation.
+  let totalMode = readTotalMode();
+
   function assertBoundedExpression(expression, scope) {
     let tree;
     try {
@@ -341,7 +346,7 @@ function createEngine() {
       return start;
     })();
     if (startLine === -1) {
-      return { results: cache.results, total: computeTotal(cache.results), startLine };
+      return { results: cache.results, total: computeTotal(cache.results, totalMode), startLine };
     }
 
     // Reuse the results of unchanged lines and rebuild the evaluation context up
@@ -497,7 +502,7 @@ function createEngine() {
         lineIndex === group.start ? 'header' : lineIndex === group.end ? 'end' : 'body';
     }
 
-    return { results, total: computeTotal(results), startLine };
+    return { results, total: computeTotal(results, totalMode), startLine };
   }
 
   function registerCurrencyRates(data) {
@@ -512,6 +517,12 @@ function createEngine() {
     environmentRevision++;
   }
 
+  // The total mode only changes how the total is aggregated, not the per-line
+  // results, so the cache stays valid.
+  function registerTotalMode(mode) {
+    totalMode = mode;
+  }
+
   if (typeof window !== 'undefined') {
     // The main-thread fallback registers rates through its own currency:updated
     // listener, so invalidate there too or cached conversions would go stale.
@@ -521,9 +532,18 @@ function createEngine() {
     window.addEventListener('measurement:updated', (event) => {
       if (event.detail) registerMeasurementSystem(event.detail);
     });
+    window.addEventListener('total-mode:updated', (event) => {
+      if (event.detail) registerTotalMode(event.detail);
+    });
   }
 
-  return { evaluateLine, evaluateLines, registerCurrencyRates, registerMeasurementSystem };
+  return {
+    evaluateLine,
+    evaluateLines,
+    registerCurrencyRates,
+    registerMeasurementSystem,
+    registerTotalMode,
+  };
 }
 
 // The default engine shared by the worker, the main-thread fallback and the
@@ -550,10 +570,15 @@ function registerMeasurementSystem(system) {
   getEngine().registerMeasurementSystem(system);
 }
 
+function registerTotalMode(mode) {
+  getEngine().registerTotalMode(mode);
+}
+
 export {
   createEngine,
   evaluateLines,
   evaluateLine,
   registerCurrencyRates,
   registerMeasurementSystem,
+  registerTotalMode,
 };

@@ -49,7 +49,11 @@
         </div>
       </div>
       <div class="total-row">
-        <b class="total-label">total:</b>
+        <select id="total-mode" class="total-mode" aria-label="Total aggregate">
+          <option value="sum">total</option>
+          <option value="average">average</option>
+          <option value="median">median</option>
+        </select>
         <span id="total" class="total"></span>
       </div>
     </div>
@@ -111,7 +115,7 @@
       <div class="modal-body">
         <section id="help-basics" class="help-section">
           <h2>Basics</h2>
-          <p>Type a calculation on any line and its result appears right beside it as a dimmed hint. Errors show inline in red. The <b>total</b> at the bottom sums all numeric results, and results are formatted with thousands separators. Results show up to 3 decimal places (<b>Settings → Decimal precision</b>); a value with more precision ends with an ellipsis, while calculations keep full precision.</p>
+          <p>Type a calculation on any line and its result appears right beside it as a dimmed hint. Errors show inline in red. The <b>total</b> at the bottom sums all numeric results — use its dropdown to switch to the <b>average</b> or <b>median</b> — and results are formatted with thousands separators. Results show up to 3 decimal places (<b>Settings → Decimal precision</b>); a value with more precision ends with an ellipsis, while calculations keep full precision.</p>
           <p>The footer's <b>−</b> / <b>+</b> change the editor text size (50–200%, with <b>Reset size</b> back to 100%). On a first visit a <b>Welcome</b> sheet demonstrates the app; use its <b>Keep content</b> / <b>Clear content</b> buttons to dismiss or empty it.</p>
           <div class="help-example" data-expr="1 + 1" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 2</span>

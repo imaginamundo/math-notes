@@ -2,6 +2,7 @@ import { fetchRates, loadCached } from './eval/currency.js';
 import { readMeasurementSystem } from './core/measurementSystem.js';
 import { DEFAULT_MEASUREMENT_SYSTEM } from './core/measures.js';
 import { DEFAULT_PRECISION, readDecimalPrecision } from './core/decimalPrecision.js';
+import { DEFAULT_TOTAL_MODE, readTotalMode } from './core/totalMode.js';
 import debounce from './util/debounce.js';
 
 const EVALUATE_TIMEOUT = 10000;
@@ -55,6 +56,10 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     const precision = readDecimalPrecision();
     if (precision !== DEFAULT_PRECISION) {
       worker.postMessage({ type: 'precision', data: precision });
+    }
+    const totalMode = readTotalMode();
+    if (totalMode !== DEFAULT_TOTAL_MODE) {
+      worker.postMessage({ type: 'total-mode', data: totalMode });
     }
     const cachedRates = loadCached();
     if (cachedRates) worker.postMessage({ type: 'rates', data: cachedRates });
@@ -167,6 +172,10 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     precisionDirty = true;
   }
 
+  function syncTotalMode(mode) {
+    if (worker && mode) worker.postMessage({ type: 'total-mode', data: mode });
+  }
+
   fetchRates();
 
   return {
@@ -175,6 +184,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     syncRates,
     syncMeasurement,
     syncPrecision,
+    syncTotalMode,
     schedule: debounced.schedule,
     flush: debounced.flush,
   };

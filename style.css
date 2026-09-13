@@ -441,8 +441,15 @@ input::placeholder {
   background: var(--color-surface);
   border-top: 1px solid var(--border-strong);
 }
-.total-label {
+.total-mode {
   margin-right: 0.75em;
+  padding: 0.2em 0.4em;
+  color: var(--color-text);
+  background: var(--surface-chip);
+  border: 1px solid var(--border-chip);
+  border-radius: 4px;
+  font: inherit;
+  cursor: pointer;
 }
 .total {
   font-weight: 700;

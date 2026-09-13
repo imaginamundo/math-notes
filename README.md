@@ -11,7 +11,8 @@ Based on [Numi](https://numi.app/).
 - **Line-by-line evaluation** with an automatic total of numeric results.
   Plain numbers fold into a single unit, compatible units (e.g. `cm` + `m`)
   merge into the largest present, and mixed currencies/units fall back to the
-  plain numeric sum.
+  plain numeric sum. The total bar's dropdown switches it between the sum,
+  average and median.
 - **Tabs** for separate worksheets — rename by double-clicking a tab, close with
   `×` (you're asked to confirm), add with `+`, or drag a tab to reorder it.
   Switch with `Ctrl+Tab` or `⌘1…9` / `Ctrl+1…9`. Everything is saved locally.

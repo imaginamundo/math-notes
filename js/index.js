@@ -17,6 +17,7 @@ import initLineNumbers from './ui/lineNumbers.js';
 import initGoToLine from './ui/goToLine.js';
 import initIndent from './ui/indent.js';
 import initStarterPrompt from './ui/starterPrompt.js';
+import initTotalMode from './ui/totalMode.js';
 import initLoadingIndicator from './ui/loading.js';
 import initEditorScroll from './ui/editor.js';
 
@@ -89,6 +90,7 @@ function boot() {
   initLineNumbers(contentEditableNode);
   initGoToLine(contentEditableNode);
   initIndent(contentEditableNode);
+  initTotalMode();
 
   // 4. The starter prompt is wired before onboarding can seed the sheet that
   //    it floats beneath.
@@ -128,6 +130,13 @@ window.addEventListener('measurement:updated', (event) => {
 // the formatting, so it needs the new value before the recompute.
 window.addEventListener('precision:updated', (event) => {
   evalClient.syncPrecision(event.detail);
+  evalClient.update();
+});
+
+// Switching the total aggregate recomputes the total (the lines are unchanged,
+// but the worker recomputes the total on every evaluation).
+window.addEventListener('total-mode:updated', (event) => {
+  evalClient.syncTotalMode(event.detail);
   evalClient.update();
 });
 

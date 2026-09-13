@@ -2,6 +2,7 @@ import {
   evaluateLines,
   registerCurrencyRates,
   registerMeasurementSystem,
+  registerTotalMode,
 } from './core/calculate.js';
 import { DEFAULT_PRECISION, normalizeDecimalPrecision } from './core/decimalPrecision.js';
 import formatResult from './render/formatResult.js';
@@ -42,6 +43,8 @@ self.addEventListener('message', (event) => {
     registerCurrencyRates(data);
   } else if (type === 'measurement') {
     registerMeasurementSystem(data);
+  } else if (type === 'total-mode') {
+    registerTotalMode(data);
   } else if (type === 'precision') {
     precision = normalizeDecimalPrecision(data);
   }

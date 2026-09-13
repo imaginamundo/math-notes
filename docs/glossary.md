@@ -16,6 +16,10 @@ Terms used throughout the codebase and this documentation.
   (e.g. `cm` + `m`) merge into the largest one present; currencies and affine
   units (temperatures) never merge across kinds; several different kinds are
   ignored and only plain numbers are summed.
+- **Total mode** — the bottom bar's dropdown: `sum` (default), `average` or
+  `median`, stored by `js/core/totalMode.js` and applied by
+  `computeTotal(results, mode)`. Only the total changes, so the line cache is
+  unaffected.
 - **Tab** — a worksheet. `TabState` is `{ tabs, activeId, nextTabNumber }`;
   each `Tab` is `{ id, name, content }`.
 - **Snapshot** — a versioned backup of a tab (id, name, content, timestamp)

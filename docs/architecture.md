@@ -294,7 +294,10 @@ creates a row renderer once with `createRowRenderer(viewNode)`
 - `renderTotal` shows the running total. It groups unit values by dimension,
   merges compatible units into the largest present (currencies and affine
   temperatures never merge), folds in plain numbers, and ignores mixed kinds;
-  `aria-live` announces the settled value after a pause.
+  `aria-live` announces the settled value after a pause. The bottom bar's
+  dropdown chooses sum, average or median (`computeTotal(results, mode)`). The
+  engine holds the mode, and since it only affects the total, the per-line
+  cache stays valid.
 
 ## Line numbers
 
