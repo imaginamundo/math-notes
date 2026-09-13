@@ -11,6 +11,14 @@ import {
   readMeasurementSystem,
   writeMeasurementSystem,
 } from '../core/measurementSystem.js';
+import {
+  STORAGE_KEY as PRECISION_KEY,
+  MIN_PRECISION,
+  MAX_PRECISION,
+  readDecimalPrecision,
+  writeDecimalPrecision,
+  normalizeDecimalPrecision,
+} from '../core/decimalPrecision.js';
 
 const STORAGE_KEY = 'math-notes-theme';
 // "Reset data" must clear exactly the keys the app's modules own, imported
@@ -22,6 +30,7 @@ const RESET_KEYS = [
   CURRENCY_KEY,
   FONT_KEY,
   MEASUREMENT_KEY,
+  PRECISION_KEY,
   // So "Reset data" genuinely returns the app to a first run, tour included.
   ONBOARDED_KEY,
   // A first run should also offer the starter-content actions again.
@@ -121,6 +130,17 @@ function initSettings(contentEditableNode, tabsApi) {
     });
   }
   renderMeasurement();
+
+  const precisionInput = document.getElementById('decimal-precision');
+  precisionInput.min = String(MIN_PRECISION);
+  precisionInput.max = String(MAX_PRECISION);
+  precisionInput.value = String(readDecimalPrecision());
+  precisionInput.addEventListener('change', () => {
+    const value = normalizeDecimalPrecision(precisionInput.value);
+    writeDecimalPrecision(value);
+    precisionInput.value = String(value);
+    window.dispatchEvent(new CustomEvent('precision:updated', { detail: value }));
+  });
 
   const resetButton = document.getElementById('reset-data-button');
   resetButton.addEventListener('click', async () => {

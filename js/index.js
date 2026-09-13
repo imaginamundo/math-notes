@@ -124,6 +124,13 @@ window.addEventListener('measurement:updated', (event) => {
   evalClient.update();
 });
 
+// Changing the display precision only reformats results, but the worker does
+// the formatting, so it needs the new value before the recompute.
+window.addEventListener('precision:updated', (event) => {
+  evalClient.syncPrecision(event.detail);
+  evalClient.update();
+});
+
 let statusTimer = null;
 function showCurrencyStatus(text) {
   currencyStatusNode.textContent = text;

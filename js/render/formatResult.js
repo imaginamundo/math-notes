@@ -1,17 +1,27 @@
 import { formatTimespan } from '../eval/timespan.js';
+import { DEFAULT_PRECISION } from '../core/decimalPrecision.js';
 
-const numberFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 10 });
+const formatters = new Map();
 const LIST_SHOW = 12;
 const MAX_DEPTH = 3;
 const IDENTIFIER_KEY = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 
-function formatResult(value) {
-  return formatValue(value, 0);
+function formatterFor(precision) {
+  let formatter = formatters.get(precision);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: precision });
+    formatters.set(precision, formatter);
+  }
+  return formatter;
 }
 
-function formatValue(value, depth) {
-  if (typeof value === 'number') return formatNumber(value);
-  if (value && value.isUnit === true) return formatUnit(value);
+function formatResult(value, precision = DEFAULT_PRECISION) {
+  return formatValue(value, 0, precision);
+}
+
+function formatValue(value, depth, precision) {
+  if (typeof value === 'number') return formatNumber(value, precision);
+  if (value && value.isUnit === true) return formatUnit(value, precision);
   // mathjs Fraction stringifies to its decimal; show the fraction instead.
   if (value && value.type === 'Fraction' && typeof value.toFraction === 'function') {
     return value.toFraction();
@@ -19,10 +29,10 @@ function formatValue(value, depth) {
   if (Array.isArray(value) || (value && value.isMatrix)) {
     if (depth >= MAX_DEPTH) return '[…]';
     const items = value.isMatrix && value.toArray ? value.toArray() : value;
-    return formatList(items, depth);
+    return formatList(items, depth, precision);
   }
   if (isPlainObject(value)) {
-    return depth >= MAX_DEPTH ? '{…}' : formatObject(value, depth);
+    return depth >= MAX_DEPTH ? '{…}' : formatObject(value, depth, precision);
   }
   return String(value);
 }
@@ -35,11 +45,15 @@ function isPlainObject(value) {
   return proto === Object.prototype || proto === null;
 }
 
-function formatObject(object, depth) {
+function formatObject(object, depth, precision) {
   const keys = Object.keys(object);
   if (!keys.length) return '{}';
   const entry = (key) =>
-    `${IDENTIFIER_KEY.test(key) ? key : JSON.stringify(key)}: ${formatValue(object[key], depth + 1)}`;
+    `${IDENTIFIER_KEY.test(key) ? key : JSON.stringify(key)}: ${formatValue(
+      object[key],
+      depth + 1,
+      precision
+    )}`;
   if (keys.length <= LIST_SHOW) return `{ ${keys.map(entry).join(', ')} }`;
   const head = keys
     .slice(0, LIST_SHOW - 1)
@@ -50,9 +64,9 @@ function formatObject(object, depth) {
 
 // Keep sequences readable: show the full list when short, otherwise the first
 // items and the last with an ellipsis in the middle.
-function formatList(items, depth) {
+function formatList(items, depth, precision) {
   if (!items.length) return '[]';
-  const item = (value) => formatValue(value, depth + 1);
+  const item = (value) => formatValue(value, depth + 1, precision);
   if (items.length <= LIST_SHOW) return `[${items.map(item).join(', ')}]`;
   const head = items
     .slice(0, LIST_SHOW - 1)
@@ -61,19 +75,27 @@ function formatList(items, depth) {
   return `[${head}, …, ${item(items[items.length - 1])}]`;
 }
 
-function formatNumber(n) {
+// Rounds to the chosen decimal places. When the value has more precision than
+// that, an ellipsis marks the display as truncated (the calculation itself
+// keeps full precision).
+function formatNumber(n, precision) {
   if (!isFinite(n)) return String(n);
   const abs = Math.abs(n);
   if (abs !== 0 && (abs >= 1e16 || abs < 1e-7)) {
     return n.toExponential(10).replace(/\.?0+e/, 'e');
   }
-  return numberFormatter.format(n);
+  const rounded = Number(n.toFixed(precision)) || 0;
+  const text = formatterFor(precision).format(rounded);
+  const tolerance = Math.max(1e-9, abs * 1e-9);
+  return Math.abs(n - rounded) > tolerance ? `${text}…` : text;
 }
 
-function formatUnit(unit) {
+function formatUnit(unit, precision) {
   // A timespan is a real duration; render it as components instead of seconds.
   if (unit.formatUnits() === 'timespan') {
-    return formatTimespan(unit.toNumber(), unit.displayParts, formatNumber);
+    return formatTimespan(unit.toNumber(), unit.displayParts, (value) =>
+      formatNumber(value, precision)
+    );
   }
   // Compound rates keep their original factors until simplified
   // (`(hours km) / hour` -> `km`).
@@ -87,7 +109,7 @@ function formatUnit(unit) {
   } catch {
     value = simple.value;
   }
-  const formatted = typeof value === 'number' ? formatNumber(value) : String(value);
+  const formatted = typeof value === 'number' ? formatNumber(value, precision) : String(value);
   return `${formatted} ${cleanUnits(units)}`;
 }
 

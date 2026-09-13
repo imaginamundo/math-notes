@@ -111,7 +111,7 @@
       <div class="modal-body">
         <section id="help-basics" class="help-section">
           <h2>Basics</h2>
-          <p>Type a calculation on any line and its result appears right beside it as a dimmed hint. Errors show inline in red. The <b>total</b> at the bottom sums all numeric results, and results are formatted with thousands separators.</p>
+          <p>Type a calculation on any line and its result appears right beside it as a dimmed hint. Errors show inline in red. The <b>total</b> at the bottom sums all numeric results, and results are formatted with thousands separators. Results show up to 3 decimal places (<b>Settings → Decimal precision</b>); a value with more precision ends with an ellipsis, while calculations keep full precision.</p>
           <p>The footer's <b>−</b> / <b>+</b> change the editor text size (50–200%, with <b>Reset size</b> back to 100%). On a first visit a <b>Welcome</b> sheet demonstrates the app; use its <b>Keep content</b> / <b>Clear content</b> buttons to dismiss or empty it.</p>
           <div class="help-example" data-expr="1 + 1" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 2</span>
@@ -781,6 +781,14 @@
         <h2>Measurement system</h2>
         <p>Used for cooking volume units. Metric is the default.</p>
         <div class="settings-measurement"></div>
+      </section>
+      <section class="help-section">
+        <h2>Decimal precision</h2>
+        <p>Decimal places shown in results. A truncated result ends with an ellipsis; calculations keep full precision.</p>
+        <label class="settings-precision">
+          Decimal places
+          <input id="decimal-precision" type="number" min="0" max="10" step="1" inputmode="numeric" />
+        </label>
       </section>
       <section class="help-section">
         <h2>Recover</h2>

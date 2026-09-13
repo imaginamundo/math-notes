@@ -924,6 +924,22 @@ code {
   border-color: var(--color-operator);
   box-shadow: inset 0 0 0 1px var(--color-operator);
 }
+/* Decimal precision picker */
+.settings-precision {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  color: var(--color-text);
+}
+.settings-precision input {
+  width: 4.5em;
+  padding: 0.35em 0.5em;
+  color: var(--color-text);
+  background: var(--surface-chip);
+  border: 1px solid var(--border-chip);
+  border-radius: 4px;
+  font: inherit;
+}
 .settings-files {
   display: flex;
   gap: 0.5em;

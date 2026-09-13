@@ -278,7 +278,12 @@ creates a row renderer once with `createRowRenderer(viewNode)`
 - `format` (`js/render/format.js`) tokenizes a line into typed spans
   (number, variable, currency, operator, comment, title).
 - `formatResult` (`js/render/formatResult.js`) formats numbers/units into
-  display strings (its `Intl.NumberFormat` is cached).
+  display strings (its `Intl.NumberFormat` is cached per precision). It rounds
+  numbers to the decimal precision (`js/core/decimalPrecision.js`, 3 by
+  default) and appends `…` when the value has more precision; this is display
+  only — the engine keeps full precision. The worker formats with the precision
+  it was sent, and a precision change forces one full re-render because the
+  sheet text itself is unchanged.
 - `renderTotal` shows the running total. It groups unit values by dimension,
   merges compatible units into the largest present (currencies and affine
   temperatures never merge), folds in plain numbers, and ignores mixed kinds;

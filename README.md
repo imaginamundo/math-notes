@@ -81,6 +81,9 @@ Based on [Numi](https://numi.app/).
 - **Text size** — the footer's − / + steps the editor text between 50% and 200%
   of your browser's default font size (100% = your setting), and **Reset size**
   returns to 100%, so it respects accessibility preferences.
+- **Decimal precision** — results show up to 3 decimal places by default
+  (**Settings → Decimal precision**). A truncated result ends with `…`; the
+  calculation itself keeps full precision.
 - **Auto-saved snapshots** — every tab's edits are backed up to IndexedDB and
   can be recovered from the **Settings** modal; sheets are rebuilt automatically
   if localStorage is unavailable or corrupt.

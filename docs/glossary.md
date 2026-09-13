@@ -72,6 +72,10 @@ Terms used throughout the codebase and this documentation.
   joined by `js/eval/timespan.js`; `as timespan` and `in <unit> and <unit>`
   produce a unit in the custom `timespan` unit (1 s) so it survives arithmetic,
   and `formatResult` draws the components.
+- **Decimal precision** — how many decimal places results show (3 by default,
+  stored by `js/core/decimalPrecision.js`). Display only: `formatResult` rounds
+  and appends `…` when the value has more precision, but the engine keeps full
+  precision.
 - **Rounding** — Soulver-style trailing phrases (`1/3 to 2 dp`, `5.5 rounded up`,
   `37 to nearest 10`, `0.534 to nearest 16th`) rewritten by
   `js/eval/rounding.js` to mathjs `round`/`ceil`/`floor`. Those are extended so

@@ -10,9 +10,12 @@ test('formatResult groups large numbers', () => {
   assert.equal(formatResult(1234567.89), '1,234,567.89');
 });
 
-test('formatResult trims long decimals', () => {
+test('formatResult trims long decimals to the precision with an ellipsis', () => {
   assert.equal(formatResult(0.1 + 0.2), '0.3');
-  assert.equal(formatResult(1 / 3), '0.3333333333');
+  assert.equal(formatResult(1 / 3), '0.333…');
+  assert.equal(formatResult(1 / 3, 10), '0.3333333333');
+  assert.equal(formatResult(1.5), '1.5');
+  assert.equal(formatResult(1234.5678, 2), '1,234.57…');
 });
 
 test('formatResult keeps integers simple', () => {
@@ -40,7 +43,7 @@ test('formatResult keeps unit prefixes', () => {
   assert.equal(formatResult(math.unit(3, 'GB')), '3 GB');
   math.createUnit('px', { definition: `${0.0254 / 96} m` });
   const converted = formatResult(math.evaluate('1 cm in px'));
-  assert.match(converted, /^37\.7952755906 px$/);
+  assert.equal(converted, '37.795… px');
 });
 
 test('formatResult shows fractions as fractions', () => {
