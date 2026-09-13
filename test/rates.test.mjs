@@ -49,6 +49,13 @@ test('evaluateLines formats pace as mm:ss', () => {
   assert.equal(formatResult(valueOf('10 mi in 55 min')), '05:30/mi');
 });
 
+test('a pace result can be used and converted', () => {
+  const { results } = evaluateLines(['5 km in 25 min', '21.1 km * prev in hours']);
+  assert.equal(results[1].type, 'value');
+  assert.equal(results[1].value.formatUnits(), 'hours');
+  approx(results[1].value.toNumber(), 1.7583333);
+});
+
 test('evaluateLines multiplies a rate by a duration', () => {
   assert.equal(formatResult(valueOf('24 km a day for a year')), '8,766 km');
 });

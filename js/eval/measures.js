@@ -48,7 +48,9 @@ function preprocessMeasures(expression) {
 }
 
 // Split `<value> <subject>` where the value ends in a unit and the subject is
-// the free-form label after it (`olive oil`). The subject may be empty.
+// the free-form label after it (`olive oil`). The subject may be empty, but it
+// must be made of label words: `21.1 km * prev` has no subject (`*` is not a
+// label), so it stays a plain calculation for mathjs.
 function splitSubject(left) {
   const words = left.trim().split(/\s+/);
   let unitIndex = -1;
@@ -61,11 +63,20 @@ function splitSubject(left) {
   if (unitIndex === -1) return null;
 
   const subjectWords = words.slice(unitIndex + 1);
+  if (!subjectWords.every(isLabelWord)) return null;
   if (subjectWords[0] && subjectWords[0].toLowerCase() === 'of') subjectWords.shift();
   return {
     value: words.slice(0, unitIndex + 1).join(' '),
     subject: subjectWords.join(' '),
   };
+}
+
+// A free-form subject word (`butter`, `olive`, `4k`): at least one letter, no
+// operators, and not itself a unit.
+const LABEL_WORD = /^[A-Za-z0-9_-]*[A-Za-z][A-Za-z0-9_-]*$/;
+
+function isLabelWord(word) {
+  return LABEL_WORD.test(word) && !isUnit(word);
 }
 
 function endsWithUnit(word) {

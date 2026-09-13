@@ -42,6 +42,11 @@ test('preprocessMeasures leaves ordinary conversions alone', () => {
   assert.equal(preprocessMeasures('2 + 2'), '2 + 2');
 });
 
+test('preprocessMeasures does not treat operators as a subject', () => {
+  assert.equal(preprocessMeasures('21.1 km * prev in hours'), '21.1 km * prev in hours');
+  assert.equal(preprocessMeasures('10 km + 5 in miles'), '10 km + 5 in miles');
+});
+
 test('evaluateLines converts with known subjects', () => {
   approx(valueOf('300g butter in cups').toNumber(), 1.3172338);
   approx(valueOf('10 cups olive oil in grams').toNumber(), 2295);
