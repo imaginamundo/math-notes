@@ -29,6 +29,8 @@ Based on [Numi](https://numi.app/).
 - **Groups** — wrap lines in `Groceries:` … `end` to show a subtotal on the
   header line and shade the block; the inner lines still count in the bottom
   total.
+- **Indentation** — `Tab` indents and `Shift+Tab` outdents the current line or
+  a multi-line selection (two spaces).
 - **Comments** with `#` and **labels** like `Price: 10 + 5`.
 - **Unit conversion** (`1 cm to m`) including CSS units (`px`, `em`, `point`).
 - **Currency conversion** (`100 USD to EUR`, `$5 to GBP`, `R$5 to EUR`) with
@@ -82,6 +84,7 @@ people = 4
 | `⌘1…9` / `Ctrl+1…9`            | Jump to the nth tab             |
 | `⌘F` / `Ctrl+F`                | Find & replace in the sheet     |
 | `⌘G` / `Ctrl+G`                | Jump to a line number           |
+| `Tab` / `Shift+Tab`            | Indent / outdent the line(s)    |
 | `⇧⌘C` / `Ctrl+Shift+C`         | Copy the current line's result  |
 | `⇧⌘S` / `Ctrl+Shift+S`         | Copy a share link               |
 | `⇧⌘L` / `Ctrl+Shift+L`         | Copy a share link (alternate)   |

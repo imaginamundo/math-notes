@@ -376,6 +376,34 @@ test('the total keeps a shared unit and falls back to plain numbers', async () =
   assert.deepEqual(errors, []);
 });
 
+test('Tab indents and Shift+Tab outdents', async () => {
+  await newPage();
+  await setContent('a\nb');
+  await page.focus('#content-editable');
+
+  // No selection: insert two spaces at the caret.
+  await page.keyboard.press('Tab');
+  assert.equal(await value(), 'a\nb  ');
+  assert.equal(
+    await page.evaluate(() => document.activeElement.id),
+    'content-editable',
+    'Tab stays trapped in the editor'
+  );
+
+  // Multi-line selection: indent every line, then outdent them again.
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.setSelectionRange(0, ed.value.length);
+  });
+  await page.keyboard.press('Tab');
+  assert.equal(await value(), '  a\n  b  ');
+  await page.keyboard.down('Shift');
+  await page.keyboard.press('Tab');
+  await page.keyboard.up('Shift');
+  assert.equal(await value(), 'a\nb  ');
+  assert.deepEqual(errors, []);
+});
+
 test('a result on an overflowing line is reachable by horizontal scroll', async () => {
   await newPage();
   const longLine =
