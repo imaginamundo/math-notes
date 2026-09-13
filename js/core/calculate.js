@@ -228,6 +228,7 @@ function createEngine() {
   const cache = {
     lines: [],
     results: [],
+    groups: findGroups([]),
     revision: -1,
   };
 
@@ -372,24 +373,24 @@ function createEngine() {
     if (cache.revision !== environmentRevision) {
       cache.lines = [];
       cache.results = [];
+      cache.groups = findGroups([]);
       cache.revision = environmentRevision;
     }
-    const startLine = (() => {
-      let start = firstDifference(cache.lines, lines);
-      if (start === -1) return start;
-      // A group's subtotal lives on its header but depends on the lines below
-      // it, so any change inside (or removing) a group must invalidate the
-      // header too. Both the old and the new grouping are considered.
-      const groups = [...findGroups(cache.lines).byEnd.values()].concat([
-        ...findGroups(lines).byEnd.values(),
-      ]);
-      for (const group of groups) {
-        if (start > group.start && start <= group.end) start = group.start;
-      }
-      return start;
-    })();
-    if (startLine === -1) {
-      return { results: cache.results, total: computeTotal(cache.results, totalMode), startLine };
+    const changed = firstDifference(cache.lines, lines);
+    if (changed === -1) {
+      return {
+        results: cache.results,
+        total: computeTotal(cache.results, totalMode),
+        startLine: -1,
+      };
+    }
+    const groups = findGroups(lines);
+    // A group's subtotal lives on its header but depends on the lines below it,
+    // so any change inside (or removing) a group must invalidate the header too.
+    // The old grouping is the cached one, so only the new lines are scanned.
+    let startLine = changed;
+    for (const group of [...cache.groups.byEnd.values(), ...groups.byEnd.values()]) {
+      if (startLine > group.start && startLine <= group.end) startLine = group.start;
     }
 
     // Reuse the results of unchanged lines and rebuild the evaluation context up
@@ -398,7 +399,6 @@ function createEngine() {
     const variables = {};
     let previousResult;
     let lastBlankIndex = -1;
-    const groups = findGroups(lines);
     // A group header's cached value is the group subtotal, but the main loop
     // only feeds it to `previousResult` when the matching `end` is reached, not
     // at the header line. Mirror that here or a `prev` after the group would see
@@ -548,6 +548,7 @@ function createEngine() {
 
     cache.lines = lines;
     cache.results = results;
+    cache.groups = groups;
 
     // Tag every line of a closed group so the renderer can shade it. Cleared
     // first so a removed group cannot leave stale roles on reused results.
