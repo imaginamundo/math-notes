@@ -21,7 +21,7 @@ function createWrapper(type, text) {
 // a whole name can be highlighted as a single variable token.
 function line(text, names = []) {
   const wrapper = createWrapper('line', '');
-  const { rawCode, tail, titleIndex } = parseLine(text);
+  const { rawCode, tail, comment: commentText, titleIndex } = parseLine(text);
   const patterns = names.map((name) => anchoredNamePattern(name));
 
   if (titleIndex !== -1) {
@@ -36,20 +36,22 @@ function line(text, names = []) {
   } else if (rawCode) {
     appendCode(wrapper, rawCode, patterns);
   }
-  if (tail) appendTail(wrapper, tail);
+  if (tail) {
+    // The comment is a suffix of the tail; render the tags/whitespace before it,
+    // then the whole comment as one span (so `### note` is a single colour).
+    const before = commentText ? tail.slice(0, tail.length - commentText.length) : tail;
+    if (before) appendTags(wrapper, before);
+    if (commentText) wrapper.appendChild(comment(commentText));
+  }
 
   return wrapper;
 }
 
-// Render the part of a line after its first `#`: tags (`.tag`), whitespace, and
-// a trailing `# comment`.
-function appendTail(wrapper, tail) {
+// Render the part of a line after its first `#`, up to any comment: tags
+// (`.tag`) and whitespace.
+function appendTags(wrapper, tail) {
   let rest = tail;
   while (rest) {
-    if (/^#(\s|$)/.test(rest)) {
-      wrapper.appendChild(comment(rest));
-      return;
-    }
     const tagMatch = /^#([A-Za-z0-9_-]+)/.exec(rest);
     if (tagMatch) {
       wrapper.appendChild(tag(tagMatch[0]));

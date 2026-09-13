@@ -75,6 +75,13 @@ test('a comment-only line renders the comment', () => {
   assert.equal(node.children[0].textContent, '# only a comment');
 });
 
+test('multiple comment hashes render as one comment span', () => {
+  const node = format.line('### a comment');
+  assert.equal(node.children.length, 1);
+  assert.equal(node.children[0]._classes.has('comment'), true);
+  assert.equal(node.children[0].textContent, '### a comment');
+});
+
 test('comment rendering does not drop following lines', () => {
   const view = new El('pre');
   createRowRenderer(view).renderText(['1 + 1 # one', '2 + 2 # two', '3 + 3']);
