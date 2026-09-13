@@ -50,10 +50,23 @@ function initLineNumbers(editableNode) {
   // Always number every line contiguously (1..N), plus one phantom line for
   // the row you'd land on after Enter, so numbering never has gaps. Rows are
   // reused across renders, so typing only adds or removes the delta.
+  function lineCount(value) {
+    let count = 1;
+    for (let i = 0; i < value.length; i++) if (value[i] === '\n') count++;
+    return count;
+  }
+
+  // Move the highlight with the caret, touching only the outgoing and incoming
+  // rows rather than every row in the sheet.
+  function setActive(index) {
+    if (rows[caretIndex]) rows[caretIndex].classList.toggle('active', caretIndex === index);
+    caretIndex = index;
+    if (rows[index]) rows[index].classList.toggle('active', true);
+  }
+
   function render() {
-    const lines = editableNode.value.split('\n');
-    caretIndex = indexOfLineAt(editableNode.value, editableNode.selectionStart);
-    const rowCount = lines.length + 1;
+    const value = editableNode.value;
+    const rowCount = lineCount(value) + 1;
     while (rows.length < rowCount) {
       const span = document.createElement('span');
       span.textContent = rows.length + 1;
@@ -68,14 +81,11 @@ function initLineNumbers(editableNode) {
       span.remove();
       if (separator && separator.nodeType === 3) separator.remove();
     }
-    rows.forEach((span, i) => span.classList.toggle('active', i === caretIndex));
+    setActive(indexOfLineAt(value, editableNode.selectionStart));
   }
 
   function sync() {
-    const index = indexOfLineAt(editableNode.value, editableNode.selectionStart);
-    if (index === caretIndex) return;
-    caretIndex = index;
-    rows.forEach((span, i) => span.classList.toggle('active', i === index));
+    setActive(indexOfLineAt(editableNode.value, editableNode.selectionStart));
   }
 
   if (scroller) {
