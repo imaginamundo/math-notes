@@ -295,7 +295,17 @@ test('a line reference shows the referenced value in place', async () => {
       return Boolean(ref && ref.classList.contains('resolved'));
     })
   );
-  const state = await page.evaluate(() => {
+
+  // Caret on line 1: the reference row is inactive, so the value stands in.
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.focus();
+    ed.selectionStart = 0;
+    ed.selectionEnd = 0;
+    ed.dispatchEvent(new Event('keyup', { bubbles: true }));
+  });
+  await wait(100);
+  const inactive = await page.evaluate(() => {
     const ref = document.querySelector('#view .reference');
     return {
       text: ref.textContent,
@@ -303,13 +313,34 @@ test('a line reference shows the referenced value in place', async () => {
       title: ref.title,
       color: getComputedStyle(ref).color,
       shown: getComputedStyle(ref, '::after').content,
+      opacity: getComputedStyle(ref, '::after').opacity,
     };
   });
-  assert.equal(state.text, 'line(1)', 'the raw token stays for offsets');
-  assert.equal(state.value, '5');
-  assert.equal(state.title, '5');
-  assert.equal(state.color, 'rgba(0, 0, 0, 0)', 'the raw token is transparent');
-  assert.equal(state.shown, '"5"', 'the value is drawn in place of the token');
+  assert.equal(inactive.text, 'line(1)', 'the raw token stays for offsets');
+  assert.equal(inactive.value, '5');
+  assert.equal(inactive.title, '5');
+  assert.equal(inactive.color, 'rgba(0, 0, 0, 0)', 'the raw token is transparent');
+  assert.equal(inactive.shown, '"5"', 'the value is drawn in place of the token');
+  assert.equal(inactive.opacity, '1');
+
+  // Caret on the reference line: the token is revealed and the value dims.
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.focus();
+    ed.selectionStart = ed.value.length;
+    ed.selectionEnd = ed.value.length;
+    ed.dispatchEvent(new Event('keyup', { bubbles: true }));
+  });
+  await wait(100);
+  const active = await page.evaluate(() => {
+    const ref = document.querySelector('#view .reference');
+    return {
+      color: getComputedStyle(ref).color,
+      opacity: getComputedStyle(ref, '::after').opacity,
+    };
+  });
+  assert.notEqual(active.color, 'rgba(0, 0, 0, 0)', 'the token is visible while editing');
+  assert.equal(active.opacity, '0.5');
   assert.deepEqual(errors, []);
 });
 

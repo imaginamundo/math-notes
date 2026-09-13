@@ -21,7 +21,8 @@ Based on [Numi](https://numi.app/).
 - **Variables and functions**: `price = 30`, `double = f(x) = x * 2`.
 - **Multi-word variables**: `monthly rent = 1500`, then `monthly rent * 12`.
 - **Line references**: `line(3)` uses the result of line 3. Only lines above
-  can be referenced.
+  can be referenced. The value shows in place of the token; while the caret is
+  on that line the raw `line(3)` reappears so it stays easy to edit.
 - **Objects**: `invoice = {subtotal: 120, tax: 12}` then reach fields with a
   dot — `invoice.subtotal + invoice.tax`.
 - **Sequences and iteration**: mathjs ranges — `1:5` makes `[1, 2, 3, 4, 5]`,

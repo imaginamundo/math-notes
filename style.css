@@ -499,6 +499,15 @@ input::placeholder {
   text-align: center;
   line-height: normal;
   color: var(--color-text);
+  opacity: 1;
+}
+/* On the line being edited, reveal the raw `line(n)` token and show the value
+   over it at half opacity, so the token stays easy to edit. */
+.line-row.active .reference.resolved {
+  color: var(--color-link);
+}
+.line-row.active .reference.resolved::after {
+  opacity: 0.5;
 }
 .title {
   color: var(--color-title);

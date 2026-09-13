@@ -157,7 +157,8 @@ their own:
 - **Line references** (`line(n)`, 1-based) inject the value of an earlier value
   row under a private `__line_n` token. A reference to the current or a later
   line, or to a row with no value, is an error; the view draws the referenced
-  value in place of the token.
+  value in place of the token, revealing the raw token (with the value at half
+  opacity over it) while the caret is on that line.
 - **Multi-word variables** (`monthly rent = 1500`) are mangled to a single
   identifier before diffing and evaluation, so assignments and references
   resolve to the same name; `friendlyError` unmangles them for the message.

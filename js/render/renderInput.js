@@ -204,12 +204,15 @@ function createRowRenderer(view) {
   }
 
   // A caret on a row with a truncated error shows the full message on that
-  // row; every other row stays compact. Call it whenever the active line may
-  // have changed (after input/click/selection, and after patching results).
+  // row; every other row stays compact. The active row is also marked so a
+  // resolved `line(n)` can reveal its raw token while editing. Call it whenever
+  // the active line may have changed (after input/click/selection, and after
+  // patching results).
   function updateActiveLine(index) {
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       if (!row) continue;
+      if (row.classList) row.classList.toggle('active', i === index);
       let ghost = null;
       for (const child of row.children) {
         if (
