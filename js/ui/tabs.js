@@ -1,5 +1,4 @@
 import { saveSnapshot, latestPerTab } from '../storage/snapshots.js';
-import { emptyHistory, recordChange, commitDraft, applyUndo, applyRedo } from '../core/history.js';
 import {
   generateId,
   createTab,
@@ -10,81 +9,44 @@ import {
   moveTab,
   deriveNextTabNumber,
 } from '../core/tabsState.js';
+import { STORAGE_KEY, LEGACY_KEY, loadTabsState, createTabsWriter } from '../storage/tabsStore.js';
+import createHistoryStore from './tabsHistory.js';
+import createTabsView from './tabsView.js';
 import debounce from '../util/debounce.js';
-import storage from '../util/storage.js';
 
-const STORAGE_KEY = 'math-notes-tabs';
-const LEGACY_KEY = 'input';
+// The tab controller: it holds the single `state`, owns activation, undo,
+// snapshots and the public sheet API, and delegates the three side concerns to
+// their own modules — persistence (storage/tabsStore.js), undo history
+// (tabsHistory.js) and the tab-bar DOM (tabsView.js).
 const SNAPSHOT_DELAY = 2000;
 
 let state = null;
-const persistDebounce = debounce(writeState, 400);
-
-// Per-tab undo/redo history, kept in memory only and never persisted. The pure
-// helpers live in js/core/history.js; this module just owns the per-tab store.
-const histories = new Map();
-
-function writeState() {
-  storage.set(STORAGE_KEY, JSON.stringify(state));
-}
-
-function persist() {
-  persistDebounce.run();
-}
-
-function schedulePersist() {
-  persistDebounce.schedule();
-}
-
-let storageFailed = false;
-
-function loadInitialState() {
-  let saved = null;
-  try {
-    saved = JSON.parse(storage.get(STORAGE_KEY) || 'null');
-  } catch {
-    // malformed saved collection, fall back to the default below
-    storageFailed = true;
-  }
-  if (!storage.available()) storageFailed = true;
-  if (saved && Array.isArray(saved.tabs) && saved.tabs.length) {
-    // A stale activeId (a partial write, an old schema, a manual edit) would
-    // make every subsequent setContent miss its tab and silently drop edits, so
-    // repair it to the first tab when it no longer points at one.
-    const hasActiveTab = saved.tabs.some((tab) => tab.id === saved.activeId);
-    return {
-      ...saved,
-      activeId: hasActiveTab ? saved.activeId : saved.tabs[0].id,
-      nextTabNumber: saved.nextTabNumber || saved.tabs.length + 1,
-    };
-  }
-  const content = storage.get(LEGACY_KEY) || '';
-  storage.remove(LEGACY_KEY);
-  const tab = { id: generateId(), name: 'Tab 1', content };
-  return { tabs: [tab], activeId: tab.id, nextTabNumber: 2 };
-}
 
 function initTabs(editableNode, onUpdate) {
   const tabBarNode = document.getElementById('tabs-bar');
-  state = loadInitialState();
-  persist();
+  const { state: loadedState, failed: storageFailed } = loadTabsState();
+  state = loadedState;
+
+  const writer = createTabsWriter(() => state);
+  const history = createHistoryStore();
+  writer.persist();
+
+  const view = createTabsView(tabBarNode, {
+    getState: () => state,
+    focusEditor: () => editableNode.focus(),
+    activate,
+    close: handleClose,
+    create: handleNew,
+    rename: handleRename,
+    reorder: handleReorder,
+    dragged: () => writer.persist(),
+  });
 
   const getActiveTab = () => state.tabs.find((tab) => tab.id === state.activeId) || state.tabs[0];
 
   let lastValue = getActiveTab().content;
 
-  const history = () => {
-    let entry = histories.get(state.activeId);
-    if (!entry) {
-      entry = emptyHistory();
-      histories.set(state.activeId, entry);
-    }
-    return entry;
-  };
-
-  const burst = debounce(() => {
-    histories.set(state.activeId, commitDraft(history(), editableNode.value));
-  }, 700);
+  const burst = debounce(() => history.commit(state.activeId, editableNode.value), 700);
   const snapshot = debounce(saveActiveSnapshot, SNAPSHOT_DELAY);
 
   function saveActiveSnapshot() {
@@ -118,8 +80,8 @@ function initTabs(editableNode, onUpdate) {
   function present(content, { focus = true } = {}) {
     editableNode.value = content;
     lastValue = content;
-    persist();
-    render();
+    writer.persist();
+    view.render();
     onUpdate();
     editableNode.dispatchEvent(new Event('input', { bubbles: true }));
     if (focus) editableNode.focus();
@@ -129,25 +91,23 @@ function initTabs(editableNode, onUpdate) {
     lastValue = value;
     editableNode.value = value;
     state = setContent(state, state.activeId, value);
-    persist();
+    writer.persist();
     scheduleSnapshot();
     editableNode.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
   function undo() {
     flushDraft();
-    const result = applyUndo(history(), lastValue);
-    if (!result) return;
-    histories.set(state.activeId, result.entry);
-    setValue(result.value);
+    const value = history.undo(state.activeId, lastValue);
+    if (value === null) return;
+    setValue(value);
   }
 
   function redo() {
     flushDraft();
-    const result = applyRedo(history(), lastValue);
-    if (!result) return;
-    histories.set(state.activeId, result.entry);
-    setValue(result.value);
+    const value = history.redo(state.activeId, lastValue);
+    if (value === null) return;
+    setValue(value);
   }
 
   editableNode.value = lastValue;
@@ -155,16 +115,15 @@ function initTabs(editableNode, onUpdate) {
   editableNode.addEventListener('input', () => {
     const value = editableNode.value;
     if (value === lastValue) return;
-    const entry = recordChange(history(), lastValue, value);
-    histories.set(state.activeId, entry);
+    history.record(state.activeId, lastValue, value);
     lastValue = value;
     burst.schedule();
     state = setContent(state, state.activeId, value);
-    schedulePersist();
+    writer.schedule();
     scheduleSnapshot();
   });
 
-  const flushPersist = () => persistDebounce.flush();
+  const flushPersist = () => writer.flush();
   const flushAll = () => {
     flushDraft();
     flushPersist();
@@ -187,50 +146,14 @@ function initTabs(editableNode, onUpdate) {
     else undo();
   });
 
-  function render() {
-    tabBarNode.innerHTML = '';
-    tabBarNode.setAttribute('role', 'tablist');
-    tabBarNode.setAttribute('aria-label', 'Worksheets');
-    state.tabs.forEach((tab) => tabBarNode.appendChild(renderTab(tab)));
-    tabBarNode.appendChild(renderNewButton());
-    const panel = document.getElementById('editor-panel');
-    if (panel) panel.setAttribute('aria-labelledby', state.activeId);
+  function handleRename(id, name) {
+    state = renameTab(state, id, name);
+    writer.persist();
   }
 
-  function renderTab(tab) {
-    const active = tab.id === state.activeId;
-    const tabNode = document.createElement('div');
-    tabNode.className = 'tab' + (active ? ' active' : '');
-    tabNode.id = tab.id;
-    tabNode.dataset.id = tab.id;
-    tabNode.setAttribute('role', 'tab');
-    tabNode.setAttribute('aria-selected', String(active));
-    tabNode.setAttribute('aria-controls', 'editor-panel');
-    tabNode.tabIndex = active ? 0 : -1;
-
-    const nameNode = document.createElement('span');
-    nameNode.className = 'tab-name';
-    nameNode.textContent = tab.name;
-    nameNode.title = 'Double-click to rename';
-
-    const closeNode = document.createElement('button');
-    closeNode.className = 'tab-close';
-    closeNode.textContent = '×';
-    closeNode.title = 'Close tab';
-    closeNode.setAttribute('aria-label', 'Close tab');
-
-    tabNode.appendChild(nameNode);
-    tabNode.appendChild(closeNode);
-    return tabNode;
-  }
-
-  function renderNewButton() {
-    const button = document.createElement('button');
-    button.className = 'tab-new';
-    button.textContent = '+';
-    button.title = 'New tab';
-    button.setAttribute('aria-label', 'New tab');
-    return button;
+  // The view has already moved the nodes; mirror the new order into the state.
+  function handleReorder(ids) {
+    state = { ...state, tabs: ids.map((id) => state.tabs.find((tab) => tab.id === id)) };
   }
 
   function activate(id) {
@@ -270,7 +193,7 @@ function initTabs(editableNode, onUpdate) {
   function seedSheet({ name, content }) {
     state = renameTab(state, state.activeId, name);
     state = setContent(state, state.activeId, content);
-    histories.set(state.activeId, emptyHistory());
+    history.reset(state.activeId);
     present(content, { focus: false });
   }
 
@@ -281,158 +204,9 @@ function initTabs(editableNode, onUpdate) {
     leaveActiveTab();
     state = closeTab(state, id);
     if (!state.tabs.length) state = createTab(state, 'Tab ' + state.nextTabNumber);
-    histories.delete(id);
+    history.remove(id);
     present(getActiveTab().content);
   }
-
-  function beginRename(id, nameNode) {
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'tab-rename';
-    input.maxLength = 30;
-    input.value = state.tabs.find((tab) => tab.id === id).name;
-    nameNode.replaceWith(input);
-    input.focus();
-    input.select();
-
-    let done = false;
-    const finish = (save) => {
-      if (done) return;
-      done = true;
-      if (save) {
-        const value = input.value.trim();
-        if (value) {
-          state = renameTab(state, id, value);
-          persist();
-        }
-      }
-      render();
-    };
-    input.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        finish(true);
-        editableNode.focus();
-      } else if (event.key === 'Escape') {
-        finish(false);
-      }
-    });
-    input.addEventListener('blur', () => finish(true));
-  }
-
-  tabBarNode.addEventListener('click', (event) => {
-    if (Date.now() - lastDragTime < 100) return;
-    const closeButton = event.target.closest('.tab-close');
-    if (closeButton) {
-      handleClose(closeButton.closest('.tab').dataset.id);
-      return;
-    }
-    const tabElement = event.target.closest('.tab');
-    if (tabElement) {
-      activate(tabElement.dataset.id);
-      return;
-    }
-    if (event.target.closest('.tab-new')) handleNew();
-  });
-
-  tabBarNode.addEventListener('dblclick', (event) => {
-    const nameElement = event.target.closest('.tab-name');
-    if (!nameElement) return;
-    beginRename(nameElement.closest('.tab').dataset.id, nameElement);
-  });
-
-  tabBarNode.addEventListener('keydown', (event) => {
-    // Don't hijack keys while the rename input is focused (typing spaces, etc.)
-    if (event.target.tagName === 'INPUT') return;
-    const tabElement = event.target.closest('.tab');
-    if (!tabElement) return;
-    const ids = state.tabs.map((tab) => tab.id);
-    const index = ids.indexOf(tabElement.dataset.id);
-    let nextIndex = -1;
-
-    if (event.key === 'ArrowRight') nextIndex = (index + 1) % ids.length;
-    else if (event.key === 'ArrowLeft') nextIndex = (index - 1 + ids.length) % ids.length;
-    else if (event.key === 'Home') nextIndex = 0;
-    else if (event.key === 'End') nextIndex = ids.length - 1;
-
-    if (nextIndex !== -1) {
-      event.preventDefault();
-      activate(ids[nextIndex]);
-      const next = tabBarNode.querySelector(`.tab[data-id="${ids[nextIndex]}"]`);
-      if (next) next.focus();
-      return;
-    }
-
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      activate(tabElement.dataset.id);
-    }
-  });
-
-  // Drag to reorder tabs: pointer down on a tab starts a candidate, a move past
-  // the threshold turns it into a drag that live-reorders the bar.
-  let drag = null;
-  let lastDragTime = 0;
-
-  function syncStateFromDom() {
-    const order = [...tabBarNode.querySelectorAll('.tab')].map((tab) => tab.dataset.id);
-    state = { ...state, tabs: order.map((id) => state.tabs.find((tab) => tab.id === id)) };
-  }
-
-  tabBarNode.addEventListener('pointerdown', (event) => {
-    if (event.pointerType === 'mouse' && event.button !== 0) return;
-    const tabElement = event.target.closest('.tab');
-    if (!tabElement || event.target.closest('.tab-close')) return;
-    drag = {
-      id: tabElement.dataset.id,
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startY: event.clientY,
-      active: false,
-    };
-  });
-
-  document.addEventListener('pointermove', (event) => {
-    if (!drag || event.pointerId !== drag.pointerId) return;
-    if (!drag.active) {
-      if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < 6) return;
-      drag.active = true;
-      const el = tabBarNode.querySelector(`.tab[data-id="${drag.id}"]`);
-      if (el) el.classList.add('dragging');
-    }
-    event.preventDefault();
-    const others = [...tabBarNode.querySelectorAll('.tab')].filter(
-      (tab) => tab.dataset.id !== drag.id
-    );
-    let target = others.length;
-    for (let i = 0; i < others.length; i++) {
-      const rect = others[i].getBoundingClientRect();
-      if (event.clientX < rect.left + rect.width / 2) {
-        target = i;
-        break;
-      }
-    }
-    const draggedEl = tabBarNode.querySelector(`.tab[data-id="${drag.id}"]`);
-    if (!draggedEl) return;
-    const anchor = others[target] || tabBarNode.querySelector('.tab-new');
-    if (draggedEl.nextSibling === anchor) return;
-    tabBarNode.insertBefore(draggedEl, anchor);
-    syncStateFromDom();
-  });
-
-  const endDrag = () => {
-    if (!drag) return;
-    if (drag.active) {
-      const el = tabBarNode.querySelector(`.tab[data-id="${drag.id}"]`);
-      if (el) el.classList.remove('dragging');
-      persist();
-      lastDragTime = Date.now();
-    }
-    drag = null;
-  };
-  document.addEventListener('pointerup', (event) => {
-    if (drag && event.pointerId === drag.pointerId) endDrag();
-  });
-  document.addEventListener('pointercancel', endDrag);
 
   function switchTab({ index, offset } = {}) {
     const ids = state.tabs.map((tab) => tab.id);
@@ -455,7 +229,7 @@ function initTabs(editableNode, onUpdate) {
         };
     state = setActiveTab(state, targetId);
     state = { ...state, nextTabNumber: deriveNextTabNumber(state.tabs) };
-    histories.set(targetId, emptyHistory());
+    history.reset(targetId);
     present(getActiveTab().content);
   }
 
@@ -472,7 +246,7 @@ function initTabs(editableNode, onUpdate) {
       activeId: tabs.length ? tabs[0].id : state.activeId,
       nextTabNumber: deriveNextTabNumber(tabs),
     };
-    histories.clear();
+    history.clear();
     present(getActiveTab().content);
   }
 
@@ -487,7 +261,7 @@ function initTabs(editableNode, onUpdate) {
     }
   }
 
-  render();
+  view.render();
   onUpdate();
   editableNode.focus();
 

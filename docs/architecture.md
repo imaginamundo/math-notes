@@ -264,11 +264,16 @@ or dies; its engine receives live rate updates through the same
 
 ## Tabs and persistence
 
-Per-tab state is a single object `{ tabs, activeId, nextTabNumber }` held in
-`js/ui/tabs.js`. Current content persists to localStorage (debounced).
-Separately, versioned **snapshots** of each tab (id, name, content, timestamp,
-capped at 10 per tab) are auto-saved to IndexedDB (`js/storage/snapshots.js`)
-on a pause in typing and on blur/tab-switch/close/pagehide.
+Per-tab state is a single object `{ tabs, activeId, nextTabNumber }` held by the
+`js/ui/tabs.js` controller. Three side concerns are separate modules:
+persistence (`js/storage/tabsStore.js` — the one-time load with legacy-key
+migration, plus a debounced writer), the per-tab undo store
+(`js/ui/tabsHistory.js`) and the tab-bar DOM (`js/ui/tabsView.js` — rendering,
+inline rename and drag-reorder, calling back into the controller). Current
+content persists to localStorage (debounced). Separately, versioned
+**snapshots** of each tab (id, name, content, timestamp, capped at 10 per tab)
+are auto-saved to IndexedDB (`js/storage/snapshots.js`) on a pause in typing and
+on blur/tab-switch/close/pagehide.
 
 If localStorage is unavailable or corrupt on load, the tab collection is
 rebuilt automatically from the latest snapshot of each tab. Settings offers
@@ -278,7 +283,7 @@ Undo/redo is per tab, kept in memory only: edits are grouped into bursts
 (a 700ms idle timer commits the draft), each burst becoming one undo step —
 except a burst that ends where it began, which is dropped. The pure helpers
 (`recordChange`/`commitDraft`/`applyUndo`/`applyRedo`) live in
-`js/core/history.js`, with `js/ui/tabs.js` owning only the per-tab store.
+`js/core/history.js`; `js/ui/tabsHistory.js` is the per-tab store around them.
 
 ## Sharing a sheet by link
 
