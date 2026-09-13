@@ -45,6 +45,10 @@ Terms used throughout the codebase and this documentation.
   the current line). The view shows the referenced value in place of the token;
   on the line being edited the raw token is revealed with the value dimmed over
   it.
+- **Autocomplete** — the caret-anchored suggestion popup
+  (`js/ui/autocomplete.js`). It completes the sheet's variables plus the curated
+  vocabulary (`js/core/vocabulary.js`: keywords, functions, constants, units);
+  the pure matching lives in `js/core/autocomplete.js`.
 - **Tag** — `#word` (no space) labels a line; `#` followed by a space is a
   comment. A line that is only tags, or `sum`/`total`/`average`/`avg` (optionally
   `of`) before the tag, is an aggregate over the tagged value rows above it

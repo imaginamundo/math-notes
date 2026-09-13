@@ -309,6 +309,28 @@ phase-one rendering, so find re-marks synchronously on input (and never forces
 a worker round-trip itself). Because matches sit inside `.line-row` boxes,
 scrolling to a match anchors on the row.
 
+## Autocomplete
+
+`js/ui/autocomplete.js` draws a caret-anchored `role="listbox"` popup inside
+`.editor-scroll`. It opens while a word of at least two letters is being typed
+and on `Ctrl`/`Cmd`+`Space`, offering the sheet's own assignments plus the
+curated vocabulary in `js/core/vocabulary.js` (keywords, functions, constants
+and the units from `core/measures.js` and `core/currencySymbols.js`).
+
+The logic is pure and unit-tested in `js/core/autocomplete.js`: `wordRangeAt`
+finds the word around the caret (leading digits stay outside it, so `300g`
+completes `g`), `suggestionsFor` ranks matches (variables and prefix matches
+first, exact matches dropped), and `applyCompletion` rewrites the range
+(functions get an opening bracket). `collectAssignments` collects variable names
+with `parseLine`.
+
+The popup is positioned from `editorScroll.caretPosition()` — the glyph and line
+metrics `js/ui/editor.js` already measures — and flips above the caret when
+there is no room below. Its keydown listener is registered before
+`js/ui/indent.js` and uses `stopImmediatePropagation`, so while it is open `Tab`
+accepts instead of indenting. Accepting goes through `setEditorValue`, so undo,
+the renderer and find all treat it as a normal edit.
+
 ## Rendering
 
 Rendering is two-phase so typing never waits on the worker. `js/index.js`

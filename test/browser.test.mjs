@@ -496,6 +496,80 @@ test('Shift+Tab keeps the selection on the same lines', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('autocomplete offers variables and functions and inserts the choice', async () => {
+  await newPage();
+
+  // Focus the editor with the caret at the end of `content`.
+  const type = (content) =>
+    page.evaluate((v) => {
+      const ed = document.getElementById('content-editable');
+      ed.focus();
+      ed.value = v;
+      ed.setSelectionRange(v.length, v.length);
+      ed.dispatchEvent(new Event('input', { bubbles: true }));
+    }, content);
+  const suggestions = () =>
+    page.evaluate(() => {
+      const node = document.getElementById('autocomplete-list');
+      if (!node || node.hidden) return [];
+      return [...node.children].map(
+        (child) => child.querySelector('.autocomplete-text').textContent
+      );
+    });
+
+  // A defined variable outranks a unit with the same prefix.
+  await type('monthly rent = 1500\nmon');
+  await waitFor(async () => (await suggestions())[0] === 'monthly rent');
+  assert.equal((await suggestions())[0], 'monthly rent');
+  await page.keyboard.press('Enter');
+  assert.equal(await value(), 'monthly rent = 1500\nmonthly rent');
+
+  // Enter accepts and a function gets its opening bracket.
+  await type('sqr');
+  await waitFor(async () => (await suggestions())[0] === 'sqrt');
+  await page.keyboard.press('Enter');
+  assert.equal(await value(), 'sqrt(');
+
+  // A number has no completable word, so the popup stays closed.
+  await type('3.5');
+  await wait(100);
+  assert.deepEqual(await suggestions(), []);
+  assert.deepEqual(errors, []);
+});
+
+test('autocomplete scrolls the highlighted option into view', async () => {
+  await newPage();
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.focus();
+    ed.value = 'co';
+    ed.setSelectionRange(2, 2);
+    ed.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await waitFor(() => page.evaluate(() => !document.getElementById('autocomplete-list').hidden));
+
+  // Force the list to overflow so the scroll-into-view path is exercised
+  // regardless of the popup's measured height.
+  await page.evaluate(() => {
+    document.getElementById('autocomplete-list').style.maxHeight = '3em';
+  });
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+
+  const state = await page.evaluate(() => {
+    const list = document.getElementById('autocomplete-list');
+    const active = list.querySelector('.autocomplete-option.active');
+    return {
+      scrollTop: list.scrollTop,
+      activeBottom: active.offsetTop + active.offsetHeight,
+      viewBottom: list.scrollTop + list.clientHeight,
+    };
+  });
+  assert.ok(state.scrollTop > 0, 'the list scrolled to follow the highlight');
+  assert.ok(state.activeBottom <= state.viewBottom + 1, 'the highlight stays in view');
+  assert.deepEqual(errors, []);
+});
+
 test('the placeholder stays hidden until the app is ready', async () => {
   await newPage();
   const state = await page.evaluate(() => {

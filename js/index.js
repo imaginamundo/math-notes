@@ -16,6 +16,7 @@ import initFind from './ui/find.js';
 import initLineNumbers from './ui/lineNumbers.js';
 import initGoToLine from './ui/goToLine.js';
 import initIndent from './ui/indent.js';
+import initAutocomplete from './ui/autocomplete.js';
 import initStarterPrompt from './ui/starterPrompt.js';
 import initTotalMode from './ui/totalMode.js';
 import initLoadingIndicator from './ui/loading.js';
@@ -89,6 +90,9 @@ function boot() {
   initFind(contentEditableNode, viewNode);
   initLineNumbers(contentEditableNode);
   initGoToLine(contentEditableNode);
+  // Before initIndent: when the popup is open it swallows Tab, so the
+  // autocomplete's keydown listener must run first.
+  initAutocomplete(contentEditableNode, editorScroll);
   initIndent(contentEditableNode);
   initTotalMode();
 
