@@ -275,6 +275,14 @@ test('clicking a line number comments and uncomments that line', async () => {
   await wait(150);
   await clickLine(0);
   assert.equal(await value(), '# note\n5');
+
+  // A tag is not a comment: toggling comments it out instead of stripping it.
+  await setContent('#food\n5');
+  await wait(150);
+  await clickLine(0);
+  assert.equal(await value(), '# #food\n5');
+  await clickLine(0);
+  assert.equal(await value(), '#food\n5');
   assert.deepEqual(errors, []);
 });
 

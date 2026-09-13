@@ -1,18 +1,21 @@
 import { indexOfLineAt } from '../util/text.js';
+import parseLine from '../core/parseLine.js';
 import { setEditorValue } from './editorInput.js';
 
-// Toggle a line between code and comment: a line that does not start with a
-// '#' gets a "# " prefix; one that does loses a single leading '#' (and one
-// following space), so "## x" becomes "# x". Only the leading marker is ever
-// touched, so toggling always round-trips.
+// Toggle a line between code and comment: a line that is not a comment gets a
+// "# " prefix; a comment loses its leading marker (and one following space), so
+// "## x" becomes "# x". A tag such as "#food" is not a comment, so toggling it
+// comments the line out to "# #food".
 function toggleLineComment(editableNode, index) {
   const value = editableNode.value;
   const lines = value.split('\n');
   if (index < 0 || index >= lines.length) return;
 
   const line = lines[index];
+  const parsed = parseLine(line);
+  const isComment = line.startsWith('#') && parsed.tags.length === 0 && parsed.comment !== '';
   let nextLine;
-  if (line.startsWith('#')) {
+  if (isComment) {
     nextLine = line.slice(1);
     if (nextLine.startsWith(' ')) nextLine = nextLine.slice(1);
   } else {
