@@ -108,6 +108,7 @@
         <a class="modal-nav-link" href="#help-rates">Rates</a>
         <a class="modal-nav-link" href="#help-currency">Currency</a>
         <a class="modal-nav-link" href="#help-dates">Dates</a>
+        <a class="modal-nav-link" href="#help-calendar">Calendar</a>
         <a class="modal-nav-link" href="#help-timespans">Timespans</a>
         <a class="modal-nav-link" href="#help-shortcuts">Shortcuts</a>
         <a class="modal-nav-link" href="#help-about">About</a>
@@ -586,6 +587,47 @@
           </div>
           <div class="help-example" data-expr="1 month in days" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">30.4375 days</span>
+          </div>
+        </section>
+
+        <section id="help-calendar" class="help-section">
+          <h2>Calendar</h2>
+          <p>Add or subtract time from a date, measure the interval between dates, and format a date with a pattern. Dates can be written as <code>10 June</code>, <code>June 10, 2023</code>, <code>2019-04-01</code> or <code>12/02/1988</code>. Workdays are Monday to Friday (public holidays are not counted yet).</p>
+          <div class="help-example" data-expr="10 June + 3 weeks" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">1 July</span>
+          </div>
+          <div class="help-example" data-expr="April 1, 2019 - 3 months 5 days" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">27 December 2018</span>
+          </div>
+          <div class="help-example" data-expr="3 weeks after March 14, 2019" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">4 April 2019</span>
+          </div>
+          <div class="help-example" data-expr="today + 3 weeks" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">three weeks from today</span>
+          </div>
+          <div class="help-example" data-expr="4 days from now" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">four days from now</span>
+          </div>
+          <div class="help-example" data-expr="January 10 - February 5" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">3 weeks 5 days</span>
+          </div>
+          <div class="help-example" data-expr="days until Christmas" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">days until 25 December</span>
+          </div>
+          <div class="help-example" data-expr="workdays in 3 weeks" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">15 workdays</span>
+          </div>
+          <div class="help-example" data-expr="10 March to 17 March in workdays" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">5 workdays</span>
+          </div>
+          <div class="help-example" data-expr="5 workdays after March 14, 2019" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">21 March 2019</span>
+          </div>
+          <div class="help-example" data-expr="weekday on March 9, 2024" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">Saturday</span>
+          </div>
+          <div class="help-example" data-expr="March 12, 2023 as EEEE, MMM d, yyyy" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">Sunday, Mar 12, 2023</span>
           </div>
         </section>
 

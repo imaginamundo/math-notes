@@ -70,6 +70,17 @@ Terms used throughout the codebase and this documentation.
 - **Measurement system** — the preferred volume units
   (`js/core/measurementSystem.js`): metric (default), us, or imperial, each
   including a cup. Applied at engine build and on `measurement:updated`.
+- **Calendar date** — a date value (`10 June`, `2019-04-01`, `today`),
+  represented as a JS `Date` at local noon. `preprocessCalendar`
+  (`js/eval/calendar.js`) rewrites date arithmetic to `__date*` helpers and
+  `formatResult` renders `D Month [YYYY]`.
+- **Calendar interval** — the span between two dates (`January 10 - February 5`
+  → `3 weeks 5 days`), a small `calendarInterval` value that `formatResult`
+  draws as years/months/weeks/days.
+- **Workday** — Monday–Friday. `js/eval/calendar.js` counts workdays in a span
+  (`10 March to 17 March in workdays`), advances a date by workdays
+  (`5 workdays after March 14`), and converts `work hours` at eight hours per
+  workday. Public holidays are not modelled yet.
 - **Rate** — a quantity per unit (`30 km/day`). mathjs supplies the arithmetic;
   `js/eval/rates.js` translates `per`/`a`/`at`/`for`, transfer time and pace,
   and `formatResult` simplifies and formats them.

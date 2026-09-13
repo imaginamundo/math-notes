@@ -101,6 +101,19 @@ unit keys and `.value` (base SI) instead of calling `.to('s')` /
 `.toNumber('s')`, which would change mathjs's preferred unit for later results
 (typing `as` mid-word once made every later duration read in attoseconds).
 
+`js/eval/calendar.js` handles dates. `preprocessCalendar` recognises date
+literals (`10 June`, `2019-04-01`, `12/02/1988`), `today`/`now`/`yesterday`/
+`tomorrow`, fixed-date holidays, and the operations around them (add/subtract a
+duration, `N units after/before`, `N days from now`/`ago`, intervals, `days
+until/since/between`, date parts, and `as <pattern>`), rewriting each to a
+`__date*` helper since mathjs has no date type. Dates are JS Date objects at
+local noon (so DST never shifts a day); `formatResult` renders a date as
+`D Month [YYYY]` (the year is omitted when it is the current one) and an
+interval as `3 weeks 5 days`. Workdays/weekdays are Monday–Friday, counted or
+advanced by `countWorkdays`/`addWorkdays` (public holidays are not modelled
+yet); `work hours` assume an eight-hour workday, and a `workday` unit (8 h) lets
+`55h in workdays` convert.
+
 The measurement system (`js/core/measurementSystem.js`) stores the preference
 (metric by default, US customary or Imperial; all three define a cup) and
 re-registers the volume units. Switching it dispatches `measurement:updated`;

@@ -9,6 +9,7 @@ import initRounding from '../eval/rounding.js';
 import initMeasures, { applyMeasurementSystem } from '../eval/measures.js';
 import initRates from '../eval/rates.js';
 import initTimespan from '../eval/timespan.js';
+import initCalendar from '../eval/calendar.js';
 import { readMeasurementSystem } from './measurementSystem.js';
 import { readTotalMode } from './totalMode.js';
 import preprocess from './preprocess.js';
@@ -185,6 +186,7 @@ function createEngine() {
   initMeasures(math, readMeasurementSystem());
   initRates(math);
   initTimespan(math);
+  initCalendar(math);
   initCurrency(math);
 
   const cache = {

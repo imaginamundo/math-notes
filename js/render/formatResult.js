@@ -1,4 +1,5 @@
 import { formatTimespan } from '../eval/timespan.js';
+import { formatDate, formatInterval } from '../eval/calendar.js';
 import { DEFAULT_PRECISION } from '../core/decimalPrecision.js';
 
 const formatters = new Map();
@@ -21,6 +22,8 @@ function formatResult(value, precision = DEFAULT_PRECISION) {
 
 function formatValue(value, depth, precision) {
   if (typeof value === 'number') return formatNumber(value, precision);
+  if (value instanceof Date) return formatDate(value);
+  if (value && value.type === 'calendarInterval') return formatInterval(value.parts);
   if (value && value.isUnit === true) return formatUnit(value, precision);
   // mathjs Fraction stringifies to its decimal; show the fraction instead.
   if (value && value.type === 'Fraction' && typeof value.toFraction === 'function') {
