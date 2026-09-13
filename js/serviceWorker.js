@@ -1,10 +1,11 @@
-const cacheName = 'math-notes-v35';
+const cacheName = 'math-notes-v36';
 const urlsToCache = [
   '../index.html',
   '../style.css',
   './core/aggregate.js',
   './core/autocomplete.js',
   './core/clockFormat.js',
+  './core/identifiers.js',
   './core/language.js',
   './i18n/index.js',
   './i18n/ui/en.js',
@@ -18,6 +19,7 @@ const urlsToCache = [
   './eval/datetime.js',
   './evalClient.js',
   './ui/autocomplete.js',
+  './render/exampleText.js',
   './render/format.js',
   './render/formatResult.js',
   './index.js',
@@ -34,6 +36,7 @@ const urlsToCache = [
   './registerServiceWorker.js',
   './ui/examples.js',
   './ui/recipes.js',
+  './ui/docsLink.js',
   './ui/onboarding.js',
   './ui/settings.js',
   './share/shareLink.js',

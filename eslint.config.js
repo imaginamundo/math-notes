@@ -10,6 +10,7 @@ export default [
       '**/*.tmp.*',
       'js/i18n/help/**',
       'js/i18n/examples/**',
+      'docs/dist/**',
     ],
   },
   js.configs.recommended,
@@ -32,10 +33,17 @@ export default [
     },
   },
   {
-    // The i18n build script runs under Deno.
-    files: ['js/i18n/build.js'],
+    // The i18n and docs build scripts run under Deno.
+    files: ['js/i18n/build.js', 'docs/build.js'],
     languageOptions: {
-      globals: { Deno: 'readonly' },
+      globals: { ...globals.node, Deno: 'readonly' },
+    },
+  },
+  {
+    // The docs enhancement script runs in the browser.
+    files: ['docs/src/docs.js'],
+    languageOptions: {
+      globals: { ...globals.browser },
     },
   },
   {

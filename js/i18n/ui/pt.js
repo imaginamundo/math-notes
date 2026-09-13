@@ -23,6 +23,7 @@ export default {
   'footer.settings': 'Configurações',
   'footer.examples': 'Exemplos',
   'footer.help': 'Ajuda',
+  'footer.docs': 'Documentação',
 
   'modal.help': 'Ajuda',
   'modal.examples': 'Exemplos',
@@ -79,6 +80,7 @@ export default {
 
   'autocomplete.label': 'Sugestões',
   'help.exampleTitle': 'Clique para adicionar ao editor',
+  'help.fullDocs': 'Documentação completa',
 
   'settings.files': 'Arquivos',
   'settings.filesBody': 'Exporte a planilha ativa como texto ou importe uma de um arquivo.',

@@ -24,6 +24,7 @@ export default {
   'footer.settings': 'Settings',
   'footer.examples': 'Examples',
   'footer.help': 'Help',
+  'footer.docs': 'Documentation',
 
   'modal.help': 'Help',
   'modal.examples': 'Examples',
@@ -80,6 +81,7 @@ export default {
 
   'autocomplete.label': 'Suggestions',
   'help.exampleTitle': 'Click to add to the editor',
+  'help.fullDocs': 'Full documentation',
 
   'settings.files': 'Files',
   'settings.filesBody': 'Export the active sheet as text or import one from a file.',

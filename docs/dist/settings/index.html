@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Settings &amp; appearance · Documentation · Math Notes</title>
+  <meta name="description" content="Open Settings from the footer. Choices are remembered in your browser and applied the next time you open the app.">
+  <link rel="canonical" href="https://math.dio.dev/docs/settings/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/settings/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/settings/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Settings &amp; appearance">
+  <meta property="og:description" content="Open Settings from the footer. Choices are remembered in your browser and applied the next time you open the app.">
+  <meta property="og:url" content="https://math.dio.dev/docs/settings/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentation</span>
+    </a>
+    <div class="doc-header-actions">
+      
+      <a class="doc-app" href="/">Open Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Documentation menu</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Documentation menu"><ul><li class="doc-nav-item"><a href="/docs/">Home</a></li><li class="doc-nav-item"><a href="/docs/getting-started/">Getting started</a></li><li class="doc-nav-item"><a href="/docs/writing-a-sheet/">Writing a sheet</a></li><li class="doc-nav-item"><a href="/docs/numbers/">Numbers &amp; operators</a></li><li class="doc-nav-item"><a href="/docs/lists/">Lists &amp; sequences</a></li><li class="doc-nav-item"><a href="/docs/groups/">Groups &amp; totals</a></li><li class="doc-nav-item"><a href="/docs/units/">Units &amp; measures</a></li><li class="doc-nav-item"><a href="/docs/money/">Money &amp; currencies</a></li><li class="doc-nav-item"><a href="/docs/dates/">Dates &amp; time</a></li><li class="doc-nav-item"><a href="/docs/files/">Files, sharing &amp; data</a></li><li class="doc-nav-item is-active"><a href="/docs/settings/" aria-current="page">Settings &amp; appearance</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">On this page</li><li><a href="#theme">Theme</a></li><li><a href="#text-size">Text size</a></li><li><a href="#decimal-precision">Decimal precision</a></li><li><a href="#clock">Clock</a></li><li><a href="#measurement-system">Measurement system</a></li><li><a href="#language">Language</a></li></ul></li><li class="doc-nav-item"><a href="/docs/app/">App &amp; platform</a></li><li class="doc-nav-item"><a href="/docs/reference/">Reference</a></li><li class="doc-nav-item"><a href="/docs/about/">About</a></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>Settings &amp; appearance</h1>
+<p>Open <strong>Settings</strong> from the footer. Choices are remembered in your browser and applied the next time you open the app.</p>
+<h2 id="theme">Theme</h2>
+<p>Choose a light or dark theme. The palette is applied through CSS variables, so every surface of the app changes together. The available themes include <strong>Dracula</strong>, <strong>Solarized Dark</strong>, <strong>Monokai</strong> and <strong>Light</strong>.</p>
+<h2 id="text-size">Text size</h2>
+<p>The footer&#39;s <strong>−</strong> / <strong>+</strong> step the editor text between 50% and 200% of your browser&#39;s default font size, with <strong>Reset size</strong> back to 100%. Because it scales from your browser&#39;s size, it respects the text size you have already chosen for accessibility.</p>
+<h2 id="decimal-precision">Decimal precision</h2>
+<p>Results show up to <strong>3 decimal places</strong> by default. Set the number of places from 0 to 10 in <strong>Settings → Decimal precision</strong>.</p>
+<p>A truncated result ends with an ellipsis (<code>…</code>); the calculation itself keeps full precision, so later lines that use the result are not affected by the display choice.</p>
+<h2 id="clock">Clock</h2>
+<p>Clock times use a 24-hour format by default. <strong>Settings → Clock</strong> switches to a 12-hour format with <code>am</code>/<code>pm</code>.</p>
+<h2 id="measurement-system">Measurement system</h2>
+<p>Cooking volume units follow <strong>Settings → Measurement system</strong> — <strong>Metric</strong> (default), <strong>US customary</strong> or <strong>Imperial</strong>. It sets <code>cup</code> to 250, 236.6 or 284.1 ml, and changes <code>tsp</code>, <code>tbsp</code>, <code>fl oz</code>, <code>pint</code>, <code>quart</code> and <code>gallon</code> with it. See <a href="/docs/units/">Units &amp; measures</a>.</p>
+<h2 id="language">Language</h2>
+<p>The interface, the in-app Help and the Examples ship in <strong>English</strong>, <strong>Portuguese</strong> and <strong>Spanish</strong>. Math Notes starts in your system language and can be changed in <strong>Settings → Language</strong>. The calculator syntax itself stays English regardless of the interface language.</p>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — a browser-based inline calculator.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

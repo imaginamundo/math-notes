@@ -159,7 +159,9 @@ people = 4
 | `⇧⌘I` / `Ctrl+Shift+I`         | Import a sheet                  |
 | `⇧⌘⌫` / `Ctrl+Shift+Backspace` | Clear the active sheet          |
 
-The **Help** button opens the full reference with clickable examples.
+The **Help** button opens the full reference with clickable examples, and the
+**Documentation** link in the footer opens the long-form user guide at
+[`/docs`](https://math.dio.dev/docs/).
 
 ## Reserved words
 
@@ -224,6 +226,20 @@ example). Regenerate the committed modules after editing:
 make -C js/i18n
 ```
 
+### Updating the documentation site
+
+The long-form documentation is authored in Markdown under `docs/src/<lang>/`,
+one file per category, with the page order in `docs/src/structure.json`. A
+` ```calc ` fence becomes a highlighted example with **Copy** and **Open in
+Math Notes** buttons. Regenerate the committed static site after editing:
+
+```sh
+make -C docs
+```
+
+The built pages live in `docs/dist/` and are published at `/docs`; `npm run dev`
+maps that URL to the build output.
+
 ### Architecture
 
 - `js/core/` — parsing and evaluation (`calculate.js`, `parseLine.js`,
@@ -245,3 +261,6 @@ make -C js/i18n
 - `js/share/` — share-link encoding (`shareLink.js`).
 - `js/util/` — shared pure helpers (debounce, storage, clipboard, text, scroll,
   sequence, compress).
+- `docs/` — the documentation site sources (`src/`), build (`build.js`),
+  generated output (`dist/`) and the developer notes (`architecture.md`,
+  `glossary.md`).

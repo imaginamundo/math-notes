@@ -1,0 +1,18 @@
+{
+  "baseUrl": "https://math.dio.dev",
+  "pages": [
+    "getting-started",
+    "writing-a-sheet",
+    "numbers",
+    "lists",
+    "groups",
+    "units",
+    "money",
+    "dates",
+    "files",
+    "settings",
+    "app",
+    "reference",
+    "about"
+  ]
+}

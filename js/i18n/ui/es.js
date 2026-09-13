@@ -23,6 +23,7 @@ export default {
   'footer.settings': 'Ajustes',
   'footer.examples': 'Ejemplos',
   'footer.help': 'Ayuda',
+  'footer.docs': 'Documentación',
 
   'modal.help': 'Ayuda',
   'modal.examples': 'Ejemplos',
@@ -80,6 +81,7 @@ export default {
 
   'autocomplete.label': 'Sugerencias',
   'help.exampleTitle': 'Haz clic para añadir al editor',
+  'help.fullDocs': 'Documentación completa',
 
   'settings.files': 'Archivos',
   'settings.filesBody': 'Exporta la hoja activa como texto o importa una desde un archivo.',

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Documentation · Math Notes</title>
+  <meta name="description" content="Math Notes is an inline calculator that runs entirely in your browser. Type calculations line by line and each result appears beside it as dimmed ghost text, with a running total at the bottom. It is inspired by Numi and Soulver.">
+  <link rel="canonical" href="https://math.dio.dev/docs/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Math Notes documentation">
+  <meta property="og:description" content="Math Notes is an inline calculator that runs entirely in your browser. Type calculations line by line and each result appears beside it as dimmed ghost text, with a running total at the bottom. It is inspired by Numi and Soulver.">
+  <meta property="og:url" content="https://math.dio.dev/docs/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentation</span>
+    </a>
+    <div class="doc-header-actions">
+      
+      <a class="doc-app" href="/">Open Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Documentation menu</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Documentation menu"><ul><li class="doc-nav-item is-active"><a href="/docs/" aria-current="page">Home</a></li><li class="doc-nav-item"><a href="/docs/getting-started/">Getting started</a></li><li class="doc-nav-item"><a href="/docs/writing-a-sheet/">Writing a sheet</a></li><li class="doc-nav-item"><a href="/docs/numbers/">Numbers &amp; operators</a></li><li class="doc-nav-item"><a href="/docs/lists/">Lists &amp; sequences</a></li><li class="doc-nav-item"><a href="/docs/groups/">Groups &amp; totals</a></li><li class="doc-nav-item"><a href="/docs/units/">Units &amp; measures</a></li><li class="doc-nav-item"><a href="/docs/money/">Money &amp; currencies</a></li><li class="doc-nav-item"><a href="/docs/dates/">Dates &amp; time</a></li><li class="doc-nav-item"><a href="/docs/files/">Files, sharing &amp; data</a></li><li class="doc-nav-item"><a href="/docs/settings/">Settings &amp; appearance</a></li><li class="doc-nav-item"><a href="/docs/app/">App &amp; platform</a></li><li class="doc-nav-item"><a href="/docs/reference/">Reference</a></li><li class="doc-nav-item"><a href="/docs/about/">About</a></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>Math Notes documentation</h1>
+<p>Math Notes is an inline calculator that runs entirely in your browser. Type calculations line by line and each result appears beside it as dimmed ghost text, with a running total at the bottom. It is inspired by <a href="https://numi.app">Numi</a> and <a href="https://soulver.app">Soulver</a>.</p>
+<p>This guide covers every feature in depth. If you want a quick reference while you work, open <strong>Help</strong> inside the app — this documentation is the long-form version.</p>
+<h2 id="how-to-read-this-guide">How to read this guide</h2>
+<p>Each page focuses on one area and builds from the simple case to the edge cases. Example blocks are real calculations: use <strong>Copy</strong> to take one away, or <strong>Open in Math Notes</strong> to try it in the app in a new tab. Nothing you open replaces the sheet you already have.</p>
+<p>Everything runs locally. Your sheets are saved in your browser&#39;s storage and are never sent to a server.</p>
+<h2 id="what-math-notes-is-not">What Math Notes is not</h2>
+<p>It is not a general-purpose programming environment and it is not a spreadsheet. It has one scope per sheet, no cell references by name, and no scripting. Its refusals are deliberate: rather than guess, it reports units that cannot be combined or a tag that has no lines as errors.</p>
+<ul class="doc-cards"><li><a href="/docs/getting-started/"><span class="doc-card-title">Getting started</span><span class="doc-card-desc">Math Notes is a sheet of lines. You write one calculation per line and the answer appears to the right of it as a dimmed hint. There is no = button and no cell grid: the sheet recalculates as you type.</span></a></li><li><a href="/docs/writing-a-sheet/"><span class="doc-card-title">Writing a sheet</span><span class="doc-card-desc">A sheet is a list of lines evaluated from top to bottom. Each line can define a value, reference something above it, or simply produce a result. Variables live in one scope per sheet and are available to every line below their definition.</span></a></li><li><a href="/docs/numbers/"><span class="doc-card-title">Numbers &amp; operators</span><span class="doc-card-desc">Math Notes evaluates expressions with the usual arithmetic operators, plus a set of word operators, number scales and rounding phrases that read like English.</span></a></li><li><a href="/docs/lists/"><span class="doc-card-title">Lists &amp; sequences</span><span class="doc-card-desc">Lists hold several values. Write one with square brackets, index it, slice it, and use mathjs functions to aggregate or transform it. Lists and ranges are capped at 100 items so a runaway sequence cannot freeze the editor.</span></a></li><li><a href="/docs/groups/"><span class="doc-card-title">Groups &amp; totals</span><span class="doc-card-desc">Math Notes aggregates in three related ways: the running total in the bottom bar, the aggregate keywords (sum, average, …) you write on a line, and named groups that show a subtotal in place.</span></a></li><li><a href="/docs/units/"><span class="doc-card-title">Units &amp; measures</span><span class="doc-card-desc">Convert between units with to, in or as, name what you are measuring to convert across dimensions, and write rates naturally.</span></a></li><li><a href="/docs/money/"><span class="doc-card-title">Money &amp; currencies</span><span class="doc-card-desc">Convert between currencies using 3-letter ISO codes or symbols. Rates come from the European Central Bank via Frankfurter and are cached locally so conversions keep working offline.</span></a></li><li><a href="/docs/dates/"><span class="doc-card-title">Dates &amp; time</span><span class="doc-card-desc">Math Notes understands calendar dates, clock times and durations. Dates can be written in several styles, stored in variables, and combined with time units.</span></a></li><li><a href="/docs/files/"><span class="doc-card-title">Files, sharing &amp; data</span><span class="doc-card-desc">Math Notes keeps your work on your device. There is no account and no server: sheets are saved in your browser, backed up in a versioned local store, and shared only when you choose to.</span></a></li><li><a href="/docs/settings/"><span class="doc-card-title">Settings &amp; appearance</span><span class="doc-card-desc">Open Settings from the footer. Choices are remembered in your browser and applied the next time you open the app.</span></a></li><li><a href="/docs/app/"><span class="doc-card-title">App &amp; platform</span><span class="doc-card-desc">Math Notes is a progressive web app: it installs like a native app, works offline, and respects your system preferences.</span></a></li><li><a href="/docs/reference/"><span class="doc-card-title">Reference</span><span class="doc-card-desc">A compact reference for the syntax. Every heading links from the sidebar for quick access.</span></a></li><li><a href="/docs/about/"><span class="doc-card-title">About</span><span class="doc-card-desc">Math Notes is a browser-based inline calculator, inspired by Numi and Soulver. Its source is open — see the GitHub repository.</span></a></li></ul>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — a browser-based inline calculator.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

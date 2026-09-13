@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Files, sharing &amp; data · Documentation · Math Notes</title>
+  <meta name="description" content="Math Notes keeps your work on your device. There is no account and no server: sheets are saved in your browser, backed up in a versioned local store, and shared only when you choose to.">
+  <link rel="canonical" href="https://math.dio.dev/docs/files/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/files/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/files/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Files, sharing &amp; data">
+  <meta property="og:description" content="Math Notes keeps your work on your device. There is no account and no server: sheets are saved in your browser, backed up in a versioned local store, and shared only when you choose to.">
+  <meta property="og:url" content="https://math.dio.dev/docs/files/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentation</span>
+    </a>
+    <div class="doc-header-actions">
+      
+      <a class="doc-app" href="/">Open Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Documentation menu</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Documentation menu"><ul><li class="doc-nav-item"><a href="/docs/">Home</a></li><li class="doc-nav-item"><a href="/docs/getting-started/">Getting started</a></li><li class="doc-nav-item"><a href="/docs/writing-a-sheet/">Writing a sheet</a></li><li class="doc-nav-item"><a href="/docs/numbers/">Numbers &amp; operators</a></li><li class="doc-nav-item"><a href="/docs/lists/">Lists &amp; sequences</a></li><li class="doc-nav-item"><a href="/docs/groups/">Groups &amp; totals</a></li><li class="doc-nav-item"><a href="/docs/units/">Units &amp; measures</a></li><li class="doc-nav-item"><a href="/docs/money/">Money &amp; currencies</a></li><li class="doc-nav-item"><a href="/docs/dates/">Dates &amp; time</a></li><li class="doc-nav-item is-active"><a href="/docs/files/" aria-current="page">Files, sharing &amp; data</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">On this page</li><li><a href="#tabs">Tabs</a></li><li><a href="#export-and-import">Export and import</a></li><li><a href="#share-links">Share links</a></li><li><a href="#auto-saved-snapshots">Auto-saved snapshots</a></li><li><a href="#reset">Reset</a></li><li><a href="#privacy">Privacy</a></li></ul></li><li class="doc-nav-item"><a href="/docs/settings/">Settings &amp; appearance</a></li><li class="doc-nav-item"><a href="/docs/app/">App &amp; platform</a></li><li class="doc-nav-item"><a href="/docs/reference/">Reference</a></li><li class="doc-nav-item"><a href="/docs/about/">About</a></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>Files, sharing &amp; data</h1>
+<p>Math Notes keeps your work on your device. There is no account and no server: sheets are saved in your browser, backed up in a versioned local store, and shared only when you choose to.</p>
+<h2 id="tabs">Tabs</h2>
+<p>Use the tabs at the top to keep separate worksheets. Every tab is saved automatically as you type.</p>
+<ul>
+<li><strong>Switch</strong> — click a tab (or use <code>←</code>/<code>→</code> once focused, or <code>Ctrl+Tab</code>).</li>
+<li><strong>Reorder</strong> — click and drag a tab to a new position.</li>
+<li><strong>Rename</strong> — double-click the tab name.</li>
+<li><strong>Close</strong> — click the <code>×</code> (you are asked to confirm).</li>
+<li><strong>Add</strong> — click the <code>+</code> tab.</li>
+</ul>
+<h2 id="export-and-import">Export and import</h2>
+<p>Use <strong>Settings → Files</strong> to download the active sheet as a text file, or load one from a file. The same actions are on <code>⇧⌘E</code> / <code>Ctrl+Shift+E</code> (export) and <code>⇧⌘I</code> / <code>Ctrl+Shift+I</code> (import).</p>
+<h2 id="share-links">Share links</h2>
+<p>The <strong>Share</strong> button copies a link that carries the active sheet inside it. Anyone who opens it is asked whether to open the sheet in a new tab; it never replaces what they already have.</p>
+<p>Nothing is uploaded. The sheet travels in the link&#39;s <code>#</code> fragment, which browsers never send to a server — it does not land in an access log and is not forwarded in a <code>Referer</code> header.</p>
+<h2 id="auto-saved-snapshots">Auto-saved snapshots</h2>
+<p>Every tab&#39;s edits are backed up to IndexedDB as versioned snapshots. Open <strong>Settings → Recover</strong> to see the history and restore a snapshot, or use <strong>Restore all from latest backup</strong> to bring back every tab. Snapshots are stored deflated to keep them small.</p>
+<p>If localStorage is unavailable or corrupt, sheets are rebuilt automatically from the backups.</p>
+<h2 id="reset">Reset</h2>
+<p><strong>Settings → Reset → Reset data</strong> clears the theme, tabs and all stored data back to their defaults. Export anything you want to keep first.</p>
+<h2 id="privacy">Privacy</h2>
+<p>Sheets stay on your device. The only network request the app makes is for currency rates, and those are cached for offline use. See <a href="/docs/about/">About</a> for the libraries involved.</p>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — a browser-based inline calculator.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

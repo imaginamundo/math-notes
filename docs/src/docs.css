@@ -1,0 +1,409 @@
+/* Documentation site theme. It loads style.css first for the shared colour
+   variables and themes, then overrides the app's global layout. */
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  height: auto;
+  min-height: 100%;
+  background: var(--color-primary);
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: calc(1rem * var(--app-font-scale, 1));
+  line-height: 1.65;
+}
+
+.doc-skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  padding: 0.5em 1em;
+  background: var(--surface-chip);
+  color: var(--color-text);
+  z-index: 10;
+}
+.doc-skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+}
+
+.doc-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1.25rem;
+  background: var(--color-footer);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.doc-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: var(--color-text-strong);
+}
+.doc-brand:hover {
+  text-decoration: none;
+  filter: none;
+}
+.doc-brand-name {
+  font-weight: 700;
+}
+.doc-brand-tag {
+  color: var(--color-text-muted);
+  font-size: 0.9em;
+}
+
+.doc-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.doc-lang {
+  display: flex;
+  gap: 0.25rem;
+}
+.doc-lang a {
+  padding: 0.15em 0.5em;
+  border-radius: 4px;
+  text-decoration: none;
+  color: var(--color-text-muted);
+  font-size: 0.9em;
+}
+.doc-lang a:hover {
+  background: var(--surface-link-hover);
+}
+.doc-lang a.is-active {
+  color: var(--color-text-strong);
+  background: var(--surface-chip);
+}
+
+.doc-app {
+  padding: 0.3em 0.75em;
+  border: 1px solid var(--border-chip);
+  border-radius: 6px;
+  background: var(--surface-chip);
+  color: var(--color-text-strong);
+  text-decoration: none;
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+.doc-app:hover {
+  background: var(--surface-chip-hover);
+  text-decoration: none;
+  filter: none;
+}
+
+.doc-layout {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  gap: 2.5rem;
+  max-width: 78rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+  align-items: start;
+}
+
+.doc-sidebar {
+  position: sticky;
+  top: 4.5rem;
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
+  font-size: 0.94em;
+}
+
+.doc-nav > ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.doc-nav-item > a {
+  display: block;
+  padding: 0.3em 0.6em;
+  border-radius: 5px;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.doc-nav-item > a:hover {
+  background: var(--surface-link-hover);
+  text-decoration: none;
+  filter: none;
+}
+.doc-nav-item.is-active > a {
+  color: var(--color-text-strong);
+  background: var(--surface-chip);
+  box-shadow: inset 2px 0 0 var(--color-operator);
+}
+.doc-nav-sub {
+  list-style: none;
+  margin: 0.2em 0 0.6em;
+  padding: 0 0 0 1em;
+  border-left: 1px solid var(--border-soft);
+}
+.doc-nav-sub a {
+  display: block;
+  padding: 0.15em 0.5em;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-size: 0.92em;
+}
+.doc-nav-sub a:hover {
+  color: var(--color-text);
+  text-decoration: none;
+}
+.doc-nav-sub-title {
+  padding: 0.3em 0.5em 0.15em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.72em;
+  color: var(--color-text-muted);
+}
+
+.doc-menu-toggle {
+  display: none;
+}
+
+.doc-main {
+  min-width: 0;
+}
+
+.doc-content {
+  max-width: 46rem;
+  font-size: 1.02rem;
+}
+.doc-content h1 {
+  margin: 0 0 0.6em;
+  font-size: 1.9em;
+  line-height: 1.25;
+  color: var(--color-text-strong);
+}
+.doc-content h2 {
+  margin: 1.8em 0 0.5em;
+  padding-bottom: 0.2em;
+  font-size: 1.3em;
+  line-height: 1.3;
+  color: var(--color-text-strong);
+  border-bottom: 1px solid var(--border-soft);
+}
+.doc-content h3 {
+  margin: 1.4em 0 0.4em;
+  font-size: 1.08em;
+  color: var(--color-text-strong);
+}
+.doc-content p,
+.doc-content li {
+  margin: 0.55em 0;
+}
+.doc-content ul,
+.doc-content ol {
+  padding-left: 1.4em;
+}
+.doc-content a {
+  color: var(--color-link);
+}
+.doc-content blockquote {
+  margin: 0.8em 0;
+  padding: 0.2em 1em;
+  border-left: 3px solid var(--border-strong);
+  color: var(--color-text-muted);
+}
+.doc-content code {
+  padding: 0.12em 0.35em;
+  background: var(--surface-code);
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+.doc-content pre {
+  margin: 0.8em 0;
+  padding: 0.8em 1em;
+  background: var(--surface-code);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  overflow-x: auto;
+}
+.doc-content pre code {
+  padding: 0;
+  background: transparent;
+  font-size: 0.9em;
+}
+.doc-content table {
+  width: 100%;
+  margin: 0.8em 0 1.2em;
+  border-collapse: collapse;
+  font-size: 0.94em;
+}
+.doc-content th,
+.doc-content td {
+  padding: 0.4em 0.7em;
+  border-bottom: 1px solid var(--border-table);
+  text-align: left;
+  vertical-align: top;
+}
+.doc-content th {
+  color: var(--color-text-strong);
+}
+.doc-content td:first-child,
+.doc-content th:first-child {
+  white-space: nowrap;
+}
+
+.doc-example {
+  margin: 1em 0;
+  border: 1px solid var(--border-chip);
+  border-radius: 8px;
+  background: var(--surface-chip);
+  overflow: hidden;
+}
+.doc-example .doc-code {
+  margin: 0;
+  padding: 0.9em 1em;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.doc-example .doc-code code {
+  font-size: 0.92em;
+  line-height: 1.6;
+}
+/* Token colours reused from the app's highlighting */
+.doc-example .variable {
+  color: var(--color-variable);
+}
+.doc-example .number {
+  color: var(--color-number);
+}
+.doc-example .operator {
+  color: var(--color-operator);
+}
+.doc-example .currency {
+  color: var(--color-currency);
+}
+.doc-example .title {
+  color: var(--color-title);
+}
+.doc-example .tag {
+  background: var(--color-tag-bg);
+  color: var(--color-tag-text);
+  border-radius: 3px;
+  padding: 0 0.25em;
+}
+.doc-example .comment {
+  color: var(--color-text-muted);
+}
+.doc-example .line {
+  white-space: pre;
+}
+
+.doc-example-result {
+  padding: 0 1em 0.3em;
+  color: var(--color-text-muted);
+  font-size: 0.85em;
+}
+
+.doc-example-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.6em 1em;
+  border-top: 1px solid var(--border-soft);
+  background: var(--surface-nav);
+}
+.doc-action {
+  padding: 0.3em 0.7em;
+  border: 1px solid var(--border-chip);
+  border-radius: 5px;
+  background: var(--surface-chip);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.85em;
+  cursor: pointer;
+}
+.doc-action:hover {
+  background: var(--surface-chip-hover);
+}
+.doc-action-primary {
+  color: var(--color-text-strong);
+  border-color: var(--color-operator);
+}
+
+.doc-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.9rem;
+  list-style: none;
+  margin: 1.4em 0 0;
+  padding: 0;
+}
+.doc-cards a {
+  display: block;
+  height: 100%;
+  padding: 0.9em 1em;
+  border: 1px solid var(--border-chip);
+  border-radius: 8px;
+  background: var(--surface-chip);
+  text-decoration: none;
+}
+.doc-cards a:hover {
+  background: var(--surface-chip-hover);
+  text-decoration: none;
+  filter: none;
+}
+.doc-card-title {
+  display: block;
+  color: var(--color-text-strong);
+  font-weight: 600;
+}
+.doc-card-desc {
+  display: block;
+  margin-top: 0.25em;
+  color: var(--color-text-muted);
+  font-size: 0.9em;
+}
+
+.doc-footer {
+  max-width: 46rem;
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-soft);
+  color: var(--color-text-muted);
+  font-size: 0.9em;
+}
+
+@media (max-width: 900px) {
+  .doc-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    padding-top: 1rem;
+  }
+  .doc-menu-toggle {
+    display: block;
+    justify-self: start;
+    padding: 0.4em 0.9em;
+    border: 1px solid var(--border-chip);
+    border-radius: 6px;
+    background: var(--surface-chip);
+    color: var(--color-text);
+    font: inherit;
+    cursor: pointer;
+  }
+  .doc-sidebar {
+    position: static;
+    max-height: none;
+    display: none;
+  }
+  .doc-sidebar.is-open {
+    display: block;
+  }
+  .doc-header {
+    flex-wrap: wrap;
+  }
+}

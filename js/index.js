@@ -5,6 +5,7 @@ import registerServiceWorker from './registerServiceWorker.js';
 import { createEvalClient } from './evalClient.js';
 import initHelpModal from './ui/help.js';
 import initRecipes from './ui/recipes.js';
+import initDocsLink from './ui/docsLink.js';
 import initSettings from './ui/settings.js';
 import initFontControls from './ui/cosmetic.js';
 import initTabs from './ui/tabs.js';
@@ -90,6 +91,7 @@ function boot() {
 
   // 3. Features that read or seed the active sheet.
   initShare(tabsApi);
+  initDocsLink();
   initHelpModal(contentEditableNode);
   initRecipes(contentEditableNode);
   initSettings(contentEditableNode, tabsApi);

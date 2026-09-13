@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Reference · Documentation · Math Notes</title>
+  <meta name="description" content="A compact reference for the syntax. Every heading links from the sidebar for quick access.">
+  <link rel="canonical" href="https://math.dio.dev/docs/reference/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/reference/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/reference/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Reference">
+  <meta property="og:description" content="A compact reference for the syntax. Every heading links from the sidebar for quick access.">
+  <meta property="og:url" content="https://math.dio.dev/docs/reference/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentation</span>
+    </a>
+    <div class="doc-header-actions">
+      
+      <a class="doc-app" href="/">Open Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Documentation menu</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Documentation menu"><ul><li class="doc-nav-item"><a href="/docs/">Home</a></li><li class="doc-nav-item"><a href="/docs/getting-started/">Getting started</a></li><li class="doc-nav-item"><a href="/docs/writing-a-sheet/">Writing a sheet</a></li><li class="doc-nav-item"><a href="/docs/numbers/">Numbers &amp; operators</a></li><li class="doc-nav-item"><a href="/docs/lists/">Lists &amp; sequences</a></li><li class="doc-nav-item"><a href="/docs/groups/">Groups &amp; totals</a></li><li class="doc-nav-item"><a href="/docs/units/">Units &amp; measures</a></li><li class="doc-nav-item"><a href="/docs/money/">Money &amp; currencies</a></li><li class="doc-nav-item"><a href="/docs/dates/">Dates &amp; time</a></li><li class="doc-nav-item"><a href="/docs/files/">Files, sharing &amp; data</a></li><li class="doc-nav-item"><a href="/docs/settings/">Settings &amp; appearance</a></li><li class="doc-nav-item"><a href="/docs/app/">App &amp; platform</a></li><li class="doc-nav-item is-active"><a href="/docs/reference/" aria-current="page">Reference</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">On this page</li><li><a href="#operators">Operators</a></li><li><a href="#word-operators">Word operators</a></li><li><a href="#keywords">Keywords</a></li><li><a href="#function-aliases">Function aliases</a></li><li><a href="#constants">Constants</a></li><li><a href="#units">Units</a></li><li><a href="#currencies">Currencies</a></li><li><a href="#calendar">Calendar</a></li><li><a href="#rounding">Rounding</a></li><li><a href="#keyboard-shortcuts">Keyboard shortcuts</a></li><li><a href="#reserved-words">Reserved words</a></li></ul></li><li class="doc-nav-item"><a href="/docs/about/">About</a></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>Reference</h1>
+<p>A compact reference for the syntax. Every heading links from the sidebar for quick access.</p>
+<h2 id="operators">Operators</h2>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>+</code> <code>-</code> <code>*</code> <code>/</code></td>
+<td>Add, subtract, multiply, divide</td>
+</tr>
+<tr>
+<td><code>^</code></td>
+<td>Power</td>
+</tr>
+<tr>
+<td><code>%</code></td>
+<td>Remainder</td>
+</tr>
+<tr>
+<td><code>!</code></td>
+<td>Factorial</td>
+</tr>
+<tr>
+<td><code>( )</code></td>
+<td>Group</td>
+</tr>
+<tr>
+<td><code>=</code></td>
+<td>Assign</td>
+</tr>
+<tr>
+<td><code>[ ]</code></td>
+<td>List or index</td>
+</tr>
+<tr>
+<td><code>:</code></td>
+<td>Range or step</td>
+</tr>
+</tbody></table>
+<h2 id="word-operators">Word operators</h2>
+<p><code>plus</code>, <code>minus</code>, <code>times</code>, <code>multiplied by</code>, <code>divided by</code>, <code>with</code>, <code>without</code>, <code>mul</code>.</p>
+<h2 id="keywords">Keywords</h2>
+<table>
+<thead>
+<tr>
+<th>Keyword</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>sum</code> <code>total</code></td>
+<td>Sum the lines above (until a blank line)</td>
+</tr>
+<tr>
+<td><code>average</code> <code>avg</code></td>
+<td>Average the lines above</td>
+</tr>
+<tr>
+<td><code>prev</code></td>
+<td>The previous result</td>
+</tr>
+<tr>
+<td><code>line(n)</code></td>
+<td>The result of line <code>n</code></td>
+</tr>
+<tr>
+<td><code>end</code></td>
+<td>Close a <a href="/docs/groups/">group</a></td>
+</tr>
+</tbody></table>
+<h2 id="function-aliases">Function aliases</h2>
+<table>
+<thead>
+<tr>
+<th>Alias</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ln(x)</code></td>
+<td>Natural logarithm</td>
+</tr>
+<tr>
+<td><code>fact(x)</code></td>
+<td>Factorial</td>
+</tr>
+<tr>
+<td><code>arcsin</code> <code>arccos</code> <code>arctan</code></td>
+<td>Inverse trigonometric functions</td>
+</tr>
+<tr>
+<td><code>root(n, x)</code></td>
+<td>The <code>x</code>-th root of <code>n</code></td>
+</tr>
+<tr>
+<td><code>fromunix(t)</code></td>
+<td>A date from a Unix timestamp</td>
+</tr>
+<tr>
+<td><code>unix()</code></td>
+<td>The current Unix timestamp</td>
+</tr>
+</tbody></table>
+<p>The standard mathjs functions (<code>sqrt</code>, <code>abs</code>, <code>round</code>, <code>ceil</code>, <code>floor</code>, <code>sin</code>, <code>cos</code>, <code>mean</code>, <code>sum</code>, <code>min</code>, <code>max</code>, <code>sort</code>, <code>concat</code>, …) are also available.</p>
+<h2 id="constants">Constants</h2>
+<p><code>pi</code>, <code>π</code>, <code>e</code>.</p>
+<h2 id="units">Units</h2>
+<p>Common families: length (<code>m</code>, <code>cm</code>, <code>km</code>, <code>in</code>, <code>ft</code>, <code>mi</code>), mass (<code>g</code>, <code>kg</code>, <code>lb</code>, <code>oz</code>), volume (<code>l</code>, <code>ml</code>, <code>cup</code>, <code>tbsp</code>), time (<code>s</code>, <code>min</code>, <code>h</code>, <code>day</code>, <code>week</code>), temperature (<code>degC</code>, <code>degF</code>, <code>K</code>), data (<code>b</code>, <code>B</code>, <code>kB</code>, <code>MB</code>, <code>GB</code>), energy (<code>J</code>, <code>Wh</code>, <code>kWh</code>, <code>BTU</code>), power (<code>W</code>, <code>hp</code>) and pressure (<code>Pa</code>, <code>psi</code>, <code>atm</code>, <code>bar</code>). The full list is on <a href="/docs/units/">Units &amp; measures</a>.</p>
+<h2 id="currencies">Currencies</h2>
+<p><code>AUD</code>, <code>BRL</code>, <code>CAD</code>, <code>CHF</code>, <code>CNY</code>, <code>CZK</code>, <code>DKK</code>, <code>EUR</code>, <code>GBP</code>, <code>HKD</code>, <code>HUF</code>, <code>IDR</code>, <code>ILS</code>, <code>INR</code>, <code>ISK</code>, <code>JPY</code>, <code>KRW</code>, <code>MXN</code>, <code>MYR</code>, <code>NOK</code>, <code>NZD</code>, <code>PHP</code>, <code>PLN</code>, <code>RON</code>, <code>SEK</code>, <code>SGD</code>, <code>THB</code>, <code>TRY</code>, <code>USD</code>, <code>ZAR</code>. See <a href="/docs/money/">Money &amp; currencies</a>.</p>
+<h2 id="calendar">Calendar</h2>
+<p>Date words <code>today</code>, <code>now</code>, <code>yesterday</code>, <code>tomorrow</code>, <code>christmas</code>, <code>halloween</code>; phrases <code>days until</code>, <code>workdays in</code>, <code>work hours in</code>, <code>weekday on</code>, <code>as &lt;pattern&gt;</code>; clock times such as <code>9:45 am</code>, <code>16:00</code>. See <a href="/docs/dates/">Dates &amp; time</a>.</p>
+<h2 id="rounding">Rounding</h2>
+<p><code>to n dp</code>, <code>to n digits</code>, <code>rounded</code>, <code>rounded up</code>, <code>rounded down</code>, <code>to nearest n</code> (including fractions such as <code>to nearest 16th</code>).</p>
+<h2 id="keyboard-shortcuts">Keyboard shortcuts</h2>
+<table>
+<thead>
+<tr>
+<th>Shortcut</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>⌘Z</code> / <code>Ctrl+Z</code></td>
+<td>Undo the last change in the tab</td>
+</tr>
+<tr>
+<td><code>⇧⌘Z</code> / <code>Ctrl+Shift+Z</code></td>
+<td>Redo</td>
+</tr>
+<tr>
+<td><code>Ctrl+Tab</code> / <code>Ctrl+Shift+Tab</code></td>
+<td>Next / previous tab</td>
+</tr>
+<tr>
+<td><code>⌘1…9</code> / <code>Ctrl+1…9</code></td>
+<td>Jump to the nth tab</td>
+</tr>
+<tr>
+<td><code>⌘F</code> / <code>Ctrl+F</code></td>
+<td>Find &amp; replace in the active sheet</td>
+</tr>
+<tr>
+<td><code>⌘G</code> / <code>Ctrl+G</code></td>
+<td>Jump to a line number</td>
+</tr>
+<tr>
+<td><code>Ctrl+Space</code></td>
+<td>Show autocomplete suggestions</td>
+</tr>
+<tr>
+<td><code>Tab</code> / <code>Shift+Tab</code></td>
+<td>Indent / outdent the line(s)</td>
+</tr>
+<tr>
+<td><code>⇧⌘C</code> / <code>Ctrl+Shift+C</code></td>
+<td>Copy the current line&#39;s result</td>
+</tr>
+<tr>
+<td><code>⇧⌘S</code> <code>⇧⌘L</code> / <code>Ctrl+Shift+S</code></td>
+<td>Copy a share link</td>
+</tr>
+<tr>
+<td><code>⇧⌘E</code> / <code>Ctrl+Shift+E</code></td>
+<td>Export the active sheet</td>
+</tr>
+<tr>
+<td><code>⇧⌘I</code> / <code>Ctrl+Shift+I</code></td>
+<td>Import a sheet</td>
+</tr>
+<tr>
+<td><code>⇧⌘⌫</code> / <code>Ctrl+Shift+Backspace</code></td>
+<td>Clear the active sheet</td>
+</tr>
+</tbody></table>
+<h2 id="reserved-words">Reserved words</h2>
+<p><code>prev</code>, <code>today</code>, <code>now</code>, <code>yesterday</code>, <code>tomorrow</code>, <code>christmas</code>, <code>halloween</code>, <code>end</code>, and any name starting with <code>__</code> cannot be used as variable names.</p>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — a browser-based inline calculator.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

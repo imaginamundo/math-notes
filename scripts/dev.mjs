@@ -19,15 +19,38 @@ const MIME = {
   '.txt': 'text/plain',
 };
 
+// The docs build lives in docs/dist/ but is published at /docs/, so rewrite the
+// URL prefix to match the working tree.
+function resolvePath(url) {
+  let path = decodeURIComponent(String(url).split('?')[0]);
+  if (path === '/docs' || path.startsWith('/docs/')) {
+    path = '/docs/dist' + path.slice('/docs'.length);
+  }
+  return path;
+}
+
+// Serve a file, falling back to its directory index (`/docs/pt/` →
+// `…/pt/index.html`) so clean URLs work like they do on GitHub Pages.
+async function readResponse(path) {
+  const resolved = join(root, normalize(path));
+  if (relative(root, resolved).startsWith('..')) throw new Error('outside root');
+  try {
+    return { file: await readFile(resolved), type: extname(resolved) };
+  } catch (error) {
+    if (error.code === 'EISDIR' || (error.code === 'ENOENT' && !extname(resolved))) {
+      return { file: await readFile(join(resolved, 'index.html')), type: '.html' };
+    }
+    throw error;
+  }
+}
+
 createServer(async (req, res) => {
   try {
-    let path = normalize(decodeURIComponent(req.url.split('?')[0]));
-    if (path === '/') path = '/index.html';
-    const resolved = join(root, path);
-    if (relative(root, resolved).startsWith('..')) throw new Error('outside root');
-    const file = await readFile(resolved);
+    let path = resolvePath(req.url);
+    if (path.endsWith('/')) path += 'index.html';
+    const { file, type } = await readResponse(path);
     res.writeHead(200, {
-      'Content-Type': MIME[extname(path)] || 'application/octet-stream',
+      'Content-Type': MIME[type] || 'application/octet-stream',
       'Cache-Control': 'no-store',
     });
     res.end(file);

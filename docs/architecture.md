@@ -522,3 +522,31 @@ baseline.
 - The tabs implement the ARIA tabs pattern (`role="tab"` /
   `role="tabpanel"` with `aria-controls` and `aria-labelledby`).
 - Icon-only buttons carry `aria-label`s (a `title` is not reliably read).
+- The documentation site is static HTML with a skip link, landmark elements and
+  a keyboard-reachable sidebar.
+
+## Documentation site
+
+The long-form user guide lives at `/docs`, separate from the in-app Help. It is
+authored in Markdown under `docs/src/<lang>/` — one file per category, ordered by
+`docs/src/structure.json` — and rendered at **build time** by `docs/build.js`
+(Deno + marked, the same toolchain as the Help content) into committed static
+HTML in `docs/dist/`. No runtime Markdown and no backend are involved.
+
+The site is multi-page per category and per language: `/docs` (English),
+`/docs/pt` and `/docs/es`, each page a real HTML file with a generated sidebar,
+breadcrumbed language switcher, canonical URL and `hreflang` alternates. A
+` ```calc ` fence becomes a `<figure class="doc-example">` carrying the raw
+expression in `data-expr`; `docs.js` colours it with the app's own highlighter
+(`js/render/format.js`) and wires **Copy** and **Open in Math Notes**, the latter
+building a share link through `js/share/shareLink.js` so the example opens in the
+app. The pages load `style.css` for the colour tokens and themes plus a dedicated
+`docs.css`.
+
+`scripts/dev.mjs` maps `/docs` to `docs/dist/` for local development, and
+`.github/workflows/publish.yml` copies `docs/dist/` to `public/docs`. The app's
+footer Documentation link is pointed at the active language by
+`js/ui/docsLink.js`. `test/docs.test.mjs` checks source/output parity and that
+every internal `/docs` link resolves; `test/browser.test.mjs` loads a page and
+asserts the examples are highlighted. The site is committed output: run
+`make -C docs` after editing the Markdown.

@@ -612,6 +612,19 @@ button:hover {
   row-gap: 0.4em;
   white-space: nowrap;
 }
+/* The Documentation link sits with the footer's buttons; give it the same
+   button surface rather than the underlined inline-link styling. */
+.actions a.docs {
+  display: inline-block;
+  padding: 0.5em 0.8em;
+  background: var(--color-primary);
+  color: var(--color-text);
+  text-decoration: none;
+}
+.actions a.docs:hover {
+  filter: brightness(1.15);
+  text-decoration: none;
+}
 .font-size {
   display: inline-flex;
   align-items: center;
@@ -842,6 +855,16 @@ button:hover {
   min-height: 0;
   padding: 0.25em 1.25em 1.25em;
   overflow-y: auto;
+}
+.modal-footer {
+  flex: 0 0 auto;
+  padding: 0.6em 1.25em;
+  border-top: 1px solid var(--border-soft);
+  background: var(--surface-nav);
+  text-align: right;
+}
+.modal-docs-link {
+  font-size: 0.9em;
 }
 .help-section h2 {
   margin: 1.2em 0 0.4em;

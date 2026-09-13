@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Lists &amp; sequences · Documentation · Math Notes</title>
+  <meta name="description" content="Lists hold several values. Write one with square brackets, index it, slice it, and use mathjs functions to aggregate or transform it. Lists and ranges are capped at 100 items so a runaway sequence cannot freeze the editor.">
+  <link rel="canonical" href="https://math.dio.dev/docs/lists/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/lists/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/lists/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Lists &amp; sequences">
+  <meta property="og:description" content="Lists hold several values. Write one with square brackets, index it, slice it, and use mathjs functions to aggregate or transform it. Lists and ranges are capped at 100 items so a runaway sequence cannot freeze the editor.">
+  <meta property="og:url" content="https://math.dio.dev/docs/lists/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentation</span>
+    </a>
+    <div class="doc-header-actions">
+      
+      <a class="doc-app" href="/">Open Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Documentation menu</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Documentation menu"><ul><li class="doc-nav-item"><a href="/docs/">Home</a></li><li class="doc-nav-item"><a href="/docs/getting-started/">Getting started</a></li><li class="doc-nav-item"><a href="/docs/writing-a-sheet/">Writing a sheet</a></li><li class="doc-nav-item"><a href="/docs/numbers/">Numbers &amp; operators</a></li><li class="doc-nav-item is-active"><a href="/docs/lists/" aria-current="page">Lists &amp; sequences</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">On this page</li><li><a href="#lists">Lists</a></li><li><a href="#sequences">Sequences</a></li><li><a href="#iteration">Iteration</a></li><li><a href="#aggregates">Aggregates</a></li></ul></li><li class="doc-nav-item"><a href="/docs/groups/">Groups &amp; totals</a></li><li class="doc-nav-item"><a href="/docs/units/">Units &amp; measures</a></li><li class="doc-nav-item"><a href="/docs/money/">Money &amp; currencies</a></li><li class="doc-nav-item"><a href="/docs/dates/">Dates &amp; time</a></li><li class="doc-nav-item"><a href="/docs/files/">Files, sharing &amp; data</a></li><li class="doc-nav-item"><a href="/docs/settings/">Settings &amp; appearance</a></li><li class="doc-nav-item"><a href="/docs/app/">App &amp; platform</a></li><li class="doc-nav-item"><a href="/docs/reference/">Reference</a></li><li class="doc-nav-item"><a href="/docs/about/">About</a></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>Lists &amp; sequences</h1>
+<p>Lists hold several values. Write one with square brackets, index it, slice it, and use mathjs functions to aggregate or transform it. Lists and ranges are capped at <strong>100 items</strong> so a runaway sequence cannot freeze the editor.</p>
+<h2 id="lists">Lists</h2>
+<p>Lists are <strong>1-indexed</strong>: <code>n[1]</code> is the first element.</p>
+<figure class="doc-example" data-expr="[1, 2, 3]"><pre class="doc-code"><code data-calc>[1, 2, 3]</code></pre><figcaption class="doc-example-result">[1, 2, 3]</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><figure class="doc-example" data-expr="n = [10, 20, 30]
+n[1]"><pre class="doc-code"><code data-calc>n = [10, 20, 30]
+n[1]</code></pre><figcaption class="doc-example-result">10</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>Slice with a range:</p>
+<figure class="doc-example" data-expr="n = [10, 20, 30, 40]
+n[2:4]"><pre class="doc-code"><code data-calc>n = [10, 20, 30, 40]
+n[2:4]</code></pre><figcaption class="doc-example-result">[20, 30, 40]</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>Assign an element:</p>
+<figure class="doc-example" data-expr="n = [10, 20, 30]
+n[2] = 99"><pre class="doc-code"><code data-calc>n = [10, 20, 30]
+n[2] = 99</code></pre><figcaption class="doc-example-result">sets the second element</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>Arithmetic is element-wise, and lists combine with the mathjs functions:</p>
+<figure class="doc-example" data-expr="[1, 2] + [3, 4]"><pre class="doc-code"><code data-calc>[1, 2] + [3, 4]</code></pre><figcaption class="doc-example-result">[4, 6]</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><figure class="doc-example" data-expr="sort([3, 1, 2])"><pre class="doc-code"><code data-calc>sort([3, 1, 2])</code></pre><figcaption class="doc-example-result">[1, 2, 3]</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><figure class="doc-example" data-expr="concat([1, 2], [3, 4])"><pre class="doc-code"><code data-calc>concat([1, 2], [3, 4])</code></pre><figcaption class="doc-example-result">[1, 2, 3, 4]</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>Matrices are lists of lists, indexed with two subscripts:</p>
+<figure class="doc-example" data-expr="m = [[1, 2], [3, 4]]
+m[2, 1]"><pre class="doc-code"><code data-calc>m = [[1, 2], [3, 4]]
+m[2, 1]</code></pre><figcaption class="doc-example-result">3</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><h2 id="sequences">Sequences</h2>
+<p>A range <code>start:end</code> makes a list of numbers, with an optional <code>:step</code>.</p>
+<figure class="doc-example" data-expr="1:5"><pre class="doc-code"><code data-calc>1:5</code></pre><figcaption class="doc-example-result">[1, 2, 3, 4, 5]</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><figure class="doc-example" data-expr="1:2:10"><pre class="doc-code"><code data-calc>1:2:10</code></pre><figcaption class="doc-example-result">[1, 3, 5, 7, 9]</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>A range can be named and indexed like any other list:</p>
+<figure class="doc-example" data-expr="n = 1:5
+n[3]"><pre class="doc-code"><code data-calc>n = 1:5
+n[3]</code></pre><figcaption class="doc-example-result">3</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><h2 id="iteration">Iteration</h2>
+<p>Calling a function with a range applies it to every element.</p>
+<figure class="doc-example" data-expr="double = f(x) = x * 2
+double(1:5)"><pre class="doc-code"><code data-calc>double = f(x) = x * 2
+double(1:5)</code></pre><figcaption class="doc-example-result">[2, 4, 6, 8, 10]</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><h2 id="aggregates">Aggregates</h2>
+<p><code>sum</code>, <code>mean</code>, <code>min</code>, <code>max</code> and the rest of the mathjs aggregate functions accept a list or a range.</p>
+<figure class="doc-example" data-expr="expenses = [1200, 80, 45]
+sum(expenses)"><pre class="doc-code"><code data-calc>expenses = [1200, 80, 45]
+sum(expenses)</code></pre><figcaption class="doc-example-result">returns 1325</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><figure class="doc-example" data-expr="sum(1:100)"><pre class="doc-code"><code data-calc>sum(1:100)</code></pre><figcaption class="doc-example-result">returns 5050</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><figure class="doc-example" data-expr="mean(1:5)"><pre class="doc-code"><code data-calc>mean(1:5)</code></pre><figcaption class="doc-example-result">returns 3</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p><code>sum</code>, <code>total</code>, <code>average</code> and <code>avg</code> also work as bare keywords on the lines above — see <a href="/docs/groups/">Groups &amp; totals</a>.</p>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — a browser-based inline calculator.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

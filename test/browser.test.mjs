@@ -20,12 +20,29 @@ const MIME = {
   '.txt': 'text/plain',
 };
 
+async function readTestFile(path) {
+  const resolved = join(root, normalize(path));
+  try {
+    return { file: await readFile(resolved), type: extname(resolved) };
+  } catch (error) {
+    if (error.code === 'EISDIR' || (error.code === 'ENOENT' && !extname(resolved))) {
+      return { file: await readFile(join(resolved, 'index.html')), type: '.html' };
+    }
+    throw error;
+  }
+}
+
 const server = createServer(async (req, res) => {
   try {
-    let path = normalize(decodeURIComponent(req.url.split('?')[0]));
-    if (path === '/') path = '/index.html';
-    res.writeHead(200, { 'Content-Type': MIME[extname(path)] || 'application/octet-stream' });
-    res.end(await readFile(join(root, path)));
+    let path = decodeURIComponent(req.url.split('?')[0]);
+    // The docs are built to docs/dist but published at /docs/.
+    if (path === '/docs' || path.startsWith('/docs/')) {
+      path = '/docs/dist' + path.slice('/docs'.length);
+    }
+    if (path.endsWith('/')) path += 'index.html';
+    const { file, type } = await readTestFile(path);
+    res.writeHead(200, { 'Content-Type': MIME[type] || 'application/octet-stream' });
+    res.end(file);
   } catch {
     res.writeHead(404);
     res.end('Not found');
@@ -971,4 +988,28 @@ test('the UI is hidden until a non-English language is applied', async () => {
   }));
   assert.equal(state.pending, true, 'the head script marks the pending language');
   assert.equal(state.hidden, true, 'the English UI is hidden until the language applies');
+});
+
+test('the documentation page renders highlighted examples and wires its actions', async () => {
+  if (context) await context.close();
+  context = await browser.createBrowserContext();
+  page = await context.newPage();
+  errors = [];
+  page.on('pageerror', (err) => errors.push(err.message));
+  await page.goto(`http://localhost:${server.address().port}/docs/getting-started/`, {
+    waitUntil: 'load',
+  });
+  await waitFor(() => page.$('.doc-example code .variable'));
+  const state = await page.evaluate(() => ({
+    examples: document.querySelectorAll('.doc-example').length,
+    variables: document.querySelectorAll('.doc-example code .variable').length,
+    copyLabels: [...document.querySelectorAll('[data-action="copy"]')].map((n) => n.textContent),
+    navLinks: document.querySelectorAll('.doc-nav a').length,
+    heading: document.querySelector('.doc-content h1').textContent,
+  }));
+  assert.ok(state.examples > 0);
+  assert.ok(state.variables > 0, 'examples are colorized with the app highlighter');
+  assert.ok(state.navLinks > 5);
+  assert.equal(state.heading, 'Getting started');
+  assert.deepEqual(errors, []);
 });
