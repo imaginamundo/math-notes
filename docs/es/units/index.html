@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Unidades &amp; medidas · Documentación · Math Notes</title>
+  <meta name="description" content="Convierte entre unidades con to, in o as, nombra lo que estás midiendo para convertir entre dimensiones, y escribe tasas de forma natural.">
+  <link rel="canonical" href="https://math.dio.dev/docs/es/units/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/units/">
+  <link rel="alternate" hreflang="pt" href="https://math.dio.dev/docs/pt/units/">
+  <link rel="alternate" hreflang="es" href="https://math.dio.dev/docs/es/units/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/units/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Unidades &amp; medidas">
+  <meta property="og:description" content="Convierte entre unidades con to, in o as, nombra lo que estás midiendo para convertir entre dimensiones, y escribe tasas de forma natural.">
+  <meta property="og:url" content="https://math.dio.dev/docs/es/units/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/es/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentación</span>
+    </a>
+    <div class="doc-header-actions">
+      <div class="doc-search" data-search-url="/docs/es/search.json" data-empty="Sin resultados">
+        <input class="doc-search-input" type="search" placeholder="Buscar en la documentación" aria-label="Buscar en la documentación" autocomplete="off" spellcheck="false">
+        <ul class="doc-search-results" role="listbox" aria-label="Buscar en la documentación" hidden></ul>
+      </div>
+      <nav class="doc-lang" aria-label="Idioma"><a href="/docs/units/" hreflang="en">English</a><a href="/docs/pt/units/" hreflang="pt">Português</a><a href="/docs/es/units/" hreflang="es" class="is-active" aria-current="page">Español</a></nav>
+      <a class="doc-app" href="/">Abrir Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Menú de la documentación</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Menú de la documentación"><ul><li class="doc-nav-item"><a href="/docs/es/">Inicio</a></li><li class="doc-nav-item"><a href="/docs/es/getting-started/">Primeros pasos</a></li><li class="doc-nav-item"><a href="/docs/es/writing-a-sheet/">Escribir una hoja</a></li><li class="doc-nav-item"><a href="/docs/es/numbers/">Números &amp; operadores</a></li><li class="doc-nav-item"><a href="/docs/es/lists/">Listas &amp; secuencias</a></li><li class="doc-nav-item"><a href="/docs/es/groups/">Grupos &amp; totales</a></li><li class="doc-nav-item is-active"><a href="/docs/es/units/" aria-current="page">Unidades &amp; medidas</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">En esta página</li><li><a href="#conversion-de-unidades">Conversión de unidades</a></li><li><a href="#sistema-de-medidas">Sistema de medidas</a></li><li><a href="#cocina-amp-medidas">Cocina &amp;amp; medidas</a></li><li><a href="#tasas">Tasas</a></li><li><a href="#la-regla-de-las-unidades">La regla de las unidades</a></li><li><a href="#referencia-de-unidades">Referencia de unidades</a></li></ul></li><li class="doc-nav-item"><a href="/docs/es/money/">Dinero &amp; monedas</a></li><li class="doc-nav-item"><a href="/docs/es/dates/">Fechas &amp; tiempo</a></li><li class="doc-nav-item"><a href="/docs/es/files/">Archivos, compartir &amp; datos</a></li><li class="doc-nav-item"><a href="/docs/es/settings/">Ajustes &amp; apariencia</a></li><li class="doc-nav-item"><a href="/docs/es/app/">App &amp; plataforma</a></li><li class="doc-nav-item"><a href="/docs/es/reference/">Referencia</a></li><li class="doc-nav-item"><a href="/docs/es/about/">Acerca de</a></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>Unidades &amp; medidas</h1>
+<p>Convierte entre unidades con <code>to</code>, <code>in</code> o <code>as</code>, nombra lo que estás midiendo para convertir entre dimensiones, y escribe tasas de forma natural.</p>
+<h2 id="conversion-de-unidades">Conversión de unidades<a class="doc-anchor" href="#conversion-de-unidades" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
+<figure class="doc-example" data-expr="1cm to m"><pre class="doc-code"><code data-calc>1cm to m</code></pre><figcaption class="doc-example-result">devuelve 0.01 m</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="2h to s"><pre class="doc-code"><code data-calc>2h to s</code></pre><figcaption class="doc-example-result">devuelve 7200 s</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="5km to m"><pre class="doc-code"><code data-calc>5km to m</code></pre><figcaption class="doc-example-result">devuelve 5000 m</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="30 degC to degF"><pre class="doc-code"><code data-calc>30 degC to degF</code></pre><figcaption class="doc-example-result">devuelve 86 degF</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="100 lb in kg"><pre class="doc-code"><code data-calc>100 lb in kg</code></pre><figcaption class="doc-example-result">devuelve 45.36 kg</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><p>También se admiten unidades CSS, para revisar un diseño:</p>
+<figure class="doc-example" data-expr="1 cm in px"><pre class="doc-code"><code data-calc>1 cm in px</code></pre><figcaption class="doc-example-result">devuelve ≈ 37.8 px</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="2 em in px"><pre class="doc-code"><code data-calc>2 em in px</code></pre><figcaption class="doc-example-result">devuelve 32 px</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><h2 id="sistema-de-medidas">Sistema de medidas<a class="doc-anchor" href="#sistema-de-medidas" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
+<p>Las unidades de volumen de cocina siguen el sistema de medidas de <strong>Ajustes → Sistema de medidas</strong> — Métrico (predeterminado), Estadounidense o Imperial. Define <code>cup</code> como 250, 236.6 o 284.1 ml, respectivamente, junto con <code>tsp</code>, <code>tbsp</code>, <code>fl oz</code>, <code>pint</code>, <code>quart</code> y <code>gallon</code>.</p>
+<h2 id="cocina-amp-medidas">Cocina &amp; medidas<a class="doc-anchor" href="#cocina-amp-medidas" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
+<p>Convierte entre dimensiones nombrando lo que estás midiendo. El sujeto es libre y opcional: un ingrediente conocido usa su densidad, un combustible su densidad energética, los medios su bitrate, y cualquier otra cosa usa un valor por defecto (agua). Escríbelo antes de <code>to</code>/<code>in</code>.</p>
+<figure class="doc-example" data-expr="300g butter in cups"><pre class="doc-code"><code data-calc>300g butter in cups</code></pre><figcaption class="doc-example-result">≈ 1.32 cups</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="2 cups flour in grams"><pre class="doc-code"><code data-calc>2 cups flour in grams</code></pre><figcaption class="doc-example-result">265 grams</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="1 cup sugar in grams"><pre class="doc-code"><code data-calc>1 cup sugar in grams</code></pre><figcaption class="doc-example-result">211.25 grams</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="300g in cups"><pre class="doc-code"><code data-calc>300g in cups</code></pre><figcaption class="doc-example-result">1.2 cups (sujeto opcional)</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="300g feathers in cups"><pre class="doc-code"><code data-calc>300g feathers in cups</code></pre><figcaption class="doc-example-result">1.2 cups (cualquier sujeto funciona)</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="1 l petrol in kWh"><pre class="doc-code"><code data-calc>1 l petrol in kWh</code></pre><figcaption class="doc-example-result">9.5 kWh</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="2 hours 4k video in GB"><pre class="doc-code"><code data-calc>2 hours 4k video in GB</code></pre><figcaption class="doc-example-result">14.4 GB</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><h2 id="tasas">Tasas<a class="doc-anchor" href="#tasas" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
+<p>Una tasa es una unidad por otra. mathjs hace la aritmética; estas frases facilitan escribir tasas. <code>per</code>, <code>a</code>, <code>an</code>, <code>at</code> y <code>for</code> se entienden todos.</p>
+<figure class="doc-example" data-expr="90 km / 3 day"><pre class="doc-code"><code data-calc>90 km / 3 day</code></pre><figcaption class="doc-example-result">30 km/day</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="30 hours at 10 km/hour"><pre class="doc-code"><code data-calc>30 hours at 10 km/hour</code></pre><figcaption class="doc-example-result">300 km</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="100 km at 10 km/hour"><pre class="doc-code"><code data-calc>100 km at 10 km/hour</code></pre><figcaption class="doc-example-result">10 hours</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="24 km a day for a year"><pre class="doc-code"><code data-calc>24 km a day for a year</code></pre><figcaption class="doc-example-result">8,766 km</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="time to upload 3 GB at 10 MB/s"><pre class="doc-code"><code data-calc>time to upload 3 GB at 10 MB/s</code></pre><figcaption class="doc-example-result">300 s</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="5 km in 25 min"><pre class="doc-code"><code data-calc>5 km in 25 min</code></pre><figcaption class="doc-example-result">05:00/km</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><h2 id="la-regla-de-las-unidades">La regla de las unidades<a class="doc-anchor" href="#la-regla-de-las-unidades" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
+<p>Las unidades solo se combinan en formas que tienen sentido. <code>kg L</code>, <code>BRL hour</code>, <code>h^2</code> y <code>m^0.5</code> se informan como errores, no como unidades combinadas extrañas. El dinero solo forma razones (<code>USD/hour</code>, <code>USD/km</code>), así que usa una tasa cuando quieras convertir una moneda a lo largo del tiempo o la distancia.</p>
+<h2 id="referencia-de-unidades">Referencia de unidades<a class="doc-anchor" href="#referencia-de-unidades" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Base</th>
+<th>Unidades</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Longitud</td>
+<td>meter (m), inch (in), foot (ft), yard (yd), mile (mi), link (li), rod (rd), chain (ch), angstrom, mil</td>
+</tr>
+<tr>
+<td>Área de superficie</td>
+<td>m2, sqin, sqft, sqyd, sqmi, sqrd, sqch, sqmil, acre, hectare</td>
+</tr>
+<tr>
+<td>Volumen</td>
+<td>m3, litre (l, L, lt, liter), cc, cuin, cuft, cuyd, teaspoon, tablespoon</td>
+</tr>
+<tr>
+<td>Volumen líquido</td>
+<td>minim (min), fluiddram (fldr), fluidounce (floz), gill (gi), cup (cp), pint (pt), quart (qt), gallon (gal), beerbarrel (bbl), oilbarrel (obl), hogshead, drop (gtt)</td>
+</tr>
+<tr>
+<td>Ángulos</td>
+<td>rad (radian), deg (degree), grad (gradian), cycle, arcsec (arcsecond), arcmin (arcminute)</td>
+</tr>
+<tr>
+<td>Tiempo</td>
+<td>second (s), minute (min), hour (h), day, week, month, year, decade, century, millennium</td>
+</tr>
+<tr>
+<td>Frecuencia</td>
+<td>hertz (Hz)</td>
+</tr>
+<tr>
+<td>Masa</td>
+<td>gram (g), tonne, ton, grain (gr), dram (dr), ounce (oz), poundmass (lbm, lb, lbs), hundredweight (cwt), stick, stone</td>
+</tr>
+<tr>
+<td>Corriente eléctrica</td>
+<td>ampere (A)</td>
+</tr>
+<tr>
+<td>Temperatura</td>
+<td>kelvin (K), celsius (degC), fahrenheit (degF), rankine (degR)</td>
+</tr>
+<tr>
+<td>Cantidad de sustancia</td>
+<td>mole (mol)</td>
+</tr>
+<tr>
+<td>Intensidad luminosa</td>
+<td>candela (cd)</td>
+</tr>
+<tr>
+<td>Fuerza</td>
+<td>newton (N), dyne (dyn), poundforce (lbf), kip</td>
+</tr>
+<tr>
+<td>Energía</td>
+<td>joule (J), erg, Wh, BTU, electronvolt (eV)</td>
+</tr>
+<tr>
+<td>Potencia</td>
+<td>watt (W), hp</td>
+</tr>
+<tr>
+<td>Presión</td>
+<td>Pa, psi, atm, torr, bar, mmHg, mmH2O, cmH2O</td>
+</tr>
+<tr>
+<td>Electricidad &amp; magnetismo</td>
+<td>coulomb (C), volt (V), ohm, farad (F), weber (Wb), tesla (T), henry (H), siemens (S)</td>
+</tr>
+<tr>
+<td>Binario</td>
+<td>bits (b), bytes (B)</td>
+</tr>
+</tbody></table>
+<p>Consulta la <a href="https://mathjs.org/docs/datatypes/units.html#reference">referencia de unidades de mathjs</a> para la lista completa. Las unidades de tiempo y temperatura también aparecen en <a href="/docs/es/dates/">fechas e intervalos de tiempo</a>.</p>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — una calculadora en línea en el navegador.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

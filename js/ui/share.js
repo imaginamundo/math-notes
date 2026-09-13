@@ -1,5 +1,6 @@
 import { buildShareUrl, decodeSheet, parseShareHash } from '../share/shareLink.js';
 import { copyText } from '../util/clipboard.js';
+import { t } from '../i18n/index.js';
 
 const STATUS_TIMEOUT = 6000;
 
@@ -41,7 +42,7 @@ function initShare(tabsApi) {
       built = null;
     }
     if (!built) {
-      showStatus("Couldn't build a link for this sheet");
+      showStatus(t('share.buildFailed'));
       return;
     }
     // Exposed so the browser test can read the built URL without needing
@@ -49,9 +50,9 @@ function initShare(tabsApi) {
     buttonNode.dataset.url = built.url;
     try {
       copyText(built.url);
-      showStatus(built.long ? "Link copied — it's long, some apps may cut it" : 'Link copied');
+      showStatus(built.long ? t('share.copiedLong') : t('share.copied'));
     } catch {
-      showStatus("Couldn't copy — the link is in the address bar");
+      showStatus(t('share.copyFailed'));
       window.location.hash = built.url.slice(built.url.indexOf('#') + 1);
     }
   }
@@ -73,13 +74,13 @@ function initShare(tabsApi) {
     }
 
     if (!sheet) {
-      showStatus("That share link couldn't be read");
+      showStatus(t('share.unreadable'));
       return;
     }
-    const name = sheet.name || 'Shared sheet';
-    if (!window.confirm(`Open the shared sheet "${name}" in a new tab?`)) return;
+    const name = sheet.name || t('share.defaultName');
+    if (!window.confirm(t('share.openConfirm', { name }))) return;
     tabsApi.openSheet({ name, content: sheet.content });
-    showStatus(`Opened "${name}"`);
+    showStatus(t('share.opened', { name }));
   }
 
   window.addEventListener('hashchange', () => {

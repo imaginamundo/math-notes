@@ -15,6 +15,24 @@
         if (s >= 50 && s <= 200) {
           document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
         }
+        // The UI text is authored in English and translated when the module
+        // boots; hide it until then so a non-English visitor never sees the
+        // English flash. js/i18n removes the class after applying the language.
+        var preferred = localStorage.getItem('math-notes-language');
+        var tags =
+          navigator.languages && navigator.languages.length
+            ? navigator.languages
+            : [navigator.language];
+        var base = String(preferred || tags[0] || '')
+          .toLowerCase()
+          .split(/[-_]/)[0];
+        if (base === 'pt' || base === 'es') {
+          document.documentElement.classList.add('i18n-pending');
+          // Safety net: never leave the UI hidden if the module fails to load.
+          setTimeout(function () {
+            document.documentElement.classList.remove('i18n-pending');
+          }, 3000);
+        }
       } catch (e) {}
     })();
   </script>
@@ -43,16 +61,16 @@
       <div id="input" class="input">
         <div class="editor-scroll">
           <div class="editor-content">
-            <textarea id="content-editable" class="content-editable" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="Calculator input" placeholder="Type your calculations…&#10;Results appear inline&#10;Press Help for everything this understands"></textarea>
+            <textarea id="content-editable" class="content-editable" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="Calculator input" data-i18n-aria-label="editor.label" placeholder="Type your calculations…&#10;Results appear inline&#10;See Documentation for everything it understands" data-i18n-placeholder="editor.placeholder"></textarea>
             <pre id="view" class="view" aria-hidden="true"></pre>
           </div>
         </div>
       </div>
       <div class="total-row">
-        <select id="total-mode" class="total-mode" aria-label="Total aggregate">
-          <option value="sum">total</option>
-          <option value="average">average</option>
-          <option value="median">median</option>
+        <select id="total-mode" class="total-mode" aria-label="Total aggregate" data-i18n-aria-label="total.label">
+          <option value="sum" data-i18n="total.sum">total</option>
+          <option value="average" data-i18n="total.average">average</option>
+          <option value="median" data-i18n="total.median">median</option>
         </select>
         <span id="total" class="total"></span>
       </div>
@@ -61,870 +79,90 @@
       <span id="currency-status" class="status" aria-live="polite"></span>
       <span id="share-status" class="status" aria-live="polite"></span>
       <span id="loading" class="status" role="status">
-        <span class="sr-only">Calculating</span>
+        <span class="sr-only" data-i18n="loading.sr">Calculating</span>
         <span class="loading-dots" aria-hidden="true"></span>
       </span>
     </div>
     <div class="footer">
       <div class="button-wrap">
         <div class="footer-start">
-          <span class="font-size" role="group" aria-label="Text size">
+          <span class="font-size" role="group" aria-label="Text size" data-i18n-aria-label="font.group">
             <span class="font-steps">
-              <button id="font-minus" aria-label="Decrease text size" title="Decrease text size">−</button>
-              <button id="font-plus" aria-label="Increase text size" title="Increase text size">+</button>
+              <button id="font-minus" aria-label="Decrease text size" data-i18n-aria-label="font.decrease" title="Decrease text size" data-i18n-title="font.decrease">−</button>
+              <button id="font-plus" aria-label="Increase text size" data-i18n-aria-label="font.increase" title="Increase text size" data-i18n-title="font.increase">+</button>
             </span>
-            <button id="font-reset">Reset size</button>
+            <button id="font-reset" data-i18n="font.reset">Reset size</button>
           </span>
-          <button id="share-button" class="share">Share</button>
+          <button id="share-button" class="share" data-i18n="footer.share">Share</button>
         </div>
         <span class="actions">
-          <button id="settings-button" class="settings">Settings</button>
-          <button id="recipes-button" class="recipes">Examples</button>
-          <button id="help-button" class="help">Help</button>
+          <button id="settings-button" class="settings" data-i18n="footer.settings">Settings</button>
+          <button id="recipes-button" class="recipes" data-i18n="footer.examples">Examples</button>
+          <a id="docs-link" class="docs" href="/docs/" data-docs-link data-i18n="footer.docs">Docs</a>
         </span>
       </div>
     </div>
   </div>
-  <dialog id="help-modal" class="modal" aria-labelledby="help-title">
-    <header class="modal-header">
-      <h1 id="help-title" class="modal-title">Help</h1>
-      <button class="modal-close" data-modal-close aria-label="Close help">×</button>
-    </header>
-      <nav class="modal-nav">
-        <a class="modal-nav-link" href="#help-basics">Basics</a>
-        <a class="modal-nav-link" href="#help-tabs">Tabs</a>
-        <a class="modal-nav-link" href="#help-comments">Comments, labels &amp; tags</a>
-        <a class="modal-nav-link" href="#help-variables">Variables</a>
-        <a class="modal-nav-link" href="#help-groups">Groups</a>
-        <a class="modal-nav-link" href="#help-functions">Functions</a>
-        <a class="modal-nav-link" href="#help-lists">Lists</a>
-        <a class="modal-nav-link" href="#help-ranges">Sequences</a>
-        <a class="modal-nav-link" href="#help-percentages">Percentages</a>
-        <a class="modal-nav-link" href="#help-rounding">Rounding</a>
-        <a class="modal-nav-link" href="#help-operators">Operators &amp; scales</a>
-        <a class="modal-nav-link" href="#help-units">Units</a>
-        <a class="modal-nav-link" href="#help-cooking">Cooking</a>
-        <a class="modal-nav-link" href="#help-rates">Rates</a>
-        <a class="modal-nav-link" href="#help-currency">Currency</a>
-        <a class="modal-nav-link" href="#help-dates">Dates</a>
-        <a class="modal-nav-link" href="#help-calendar">Calendar</a>
-        <a class="modal-nav-link" href="#help-timespans">Timespans</a>
-        <a class="modal-nav-link" href="#help-shortcuts">Shortcuts</a>
-        <a class="modal-nav-link" href="#help-about">About</a>
-      </nav>
-      <div class="modal-body">
-        <section id="help-basics" class="help-section">
-          <h2>Basics</h2>
-          <p>Type a calculation on any line and its result appears right beside it as a dimmed hint. Errors show inline in red. The <b>total</b> at the bottom sums all numeric results — use its dropdown to switch to the <b>average</b> or <b>median</b> — and results are formatted with thousands separators. Results show up to 3 decimal places (<b>Settings → Decimal precision</b>); a value with more precision ends with an ellipsis, while calculations keep full precision.</p>
-          <p>The footer's <b>−</b> / <b>+</b> change the editor text size (50–200%, with <b>Reset size</b> back to 100%). On a first visit a <b>Welcome</b> sheet demonstrates the app; use its <b>Keep content</b> / <b>Clear content</b> buttons to dismiss or empty it. As you type, a popup suggests variables, <b>#tags</b> and built-in names (or press <b>Ctrl+Space</b>): <b>↑</b>/<b>↓</b> to choose, <b>Enter</b>/<b>Tab</b> to insert, <b>Esc</b> to dismiss.</p>
-          <div class="help-example" data-expr="1 + 1" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 2</span>
-          </div>
-          <div class="help-example" data-expr="2 * 3 + 1" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 7</span>
-          </div>
-          <div class="help-example" data-expr="(4 / 2) ^ 2" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 4</span>
-          </div>
-          <div class="help-example" data-expr="sqrt(16)" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 4</span>
-          </div>
-          <div class="help-example" data-expr="10 % 3" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 1</span>
-          </div>
-          <div class="help-example" data-expr="1000000" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 1,000,000</span>
-          </div>
-          <table class="operator-table">
-            <thead>
-              <tr><th>Operator</th><th>Function</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><code>+</code></td><td>Add</td></tr>
-              <tr><td><code>-</code></td><td>Subtract</td></tr>
-              <tr><td><code>*</code></td><td>Multiply</td></tr>
-              <tr><td><code>/</code></td><td>Divide</td></tr>
-              <tr><td><code>^</code></td><td>Power</td></tr>
-              <tr><td><code>%</code></td><td>Remainder</td></tr>
-            </tbody>
-          </table>
-          <p>Many more functions and operators are available — see the <a href="https://mathjs.org/docs/expressions/syntax.html#operators" rel="noopener" target="_blank">mathjs documentation</a>.</p>
-        </section>
-
-        <section id="help-tabs" class="help-section">
-          <h2>Tabs</h2>
-          <p>Use the tabs at the top to keep separate worksheets. Every tab is saved automatically as you type.</p>
-          <ul>
-            <li><b>Switch</b> — click a tab (or use <code>←</code>/<code>→</code> once focused, or <code>Ctrl+Tab</code>).</li>
-            <li><b>Reorder</b> — click and drag a tab to a new position.</li>
-            <li><b>Rename</b> — double-click the tab name.</li>
-            <li><b>Close</b> — click the <code>×</code> (you'll be asked to confirm).</li>
-            <li><b>Add</b> — click the <code>+</code> tab.</li>
-            <li><b>Export / Import</b> — use the buttons in the <b>Settings</b> modal to download the active sheet as text or load one from a file.</li>
-            <li><b>Share</b> — the <b>Share</b> button copies a link that carries the active sheet inside it. Anyone who opens it is asked whether to open the sheet in a new tab; it never replaces what they already have. Nothing is uploaded: the sheet travels in the link's <code>#</code> fragment, which browsers never send to a server.</li>
-          </ul>
-        </section>
-
-        <section id="help-comments" class="help-section">
-          <h2>Comments, labels &amp; tags</h2>
-          <p>Everything after a <code>#</code> followed by a space is ignored (a comment). A <code>label:</code> before an expression names the line without being evaluated.</p>
-          <div class="help-example" data-expr="2 + 2 # this is a note" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 4</span>
-          </div>
-          <div class="help-example" data-expr="Price: 10 + 5" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 15</span>
-          </div>
-          <p>With no space, <code>#word</code> is a <b>tag</b>. A line that is only tags shows their total, and <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> (optionally <code>of</code>) before the tag also work. Tagged lines above are summed, wherever they are. A row with several tags is the full amount split equally between them, so each tag gets its share while the row and its group total keep the full price. Tags can also be used in calculations: <code>#food * 2</code>, <code>#food + #other</code>. Requesting a tag that has no tagged lines shows an error.</p>
-          <div class="help-example" data-expr="20 #food&#10;30 #food&#10;#food" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">last line returns 50</span>
-          </div>
-          <div class="help-example" data-expr="20 #food&#10;30 #food&#10;#food * 2" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">last line returns 100</span>
-          </div>
-          <p><b>Tip:</b> click a line's number in the left gutter to comment or uncomment that line — handy for switching a calculation off without deleting it. A line that already starts with <code>##</code> just loses one <code>#</code>.</p>
-        </section>
-
-        <section id="help-variables" class="help-section">
-          <h2>Variables</h2>
-          <p>Assign a value with <code>=</code> and reuse it on later lines. Use <code>prev</code> for the most recent result above — it skips comments and blank lines. <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> aggregate the lines above until a blank line, which starts a new block.</p>
-          <div class="help-example" data-expr="pizzas = 2&#10;pizzaPrice = 30&#10;people = 4&#10;(pizzas * pizzaPrice) / people" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">last line returns 15</span>
-          </div>
-          <div class="help-example" data-expr="20&#10;prev * 4" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">last line returns 80</span>
-          </div>
-          <div class="help-example" data-expr="10&#10;# a comment in between&#10;prev + 1" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">last line returns 11</span>
-          </div>
-          <div class="help-example" data-expr="10&#10;20&#10;sum" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">last line returns 30</span>
-          </div>
-          <div class="help-example" data-expr="4&#10;8&#10;average" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">last line returns 6</span>
-          </div>
-          <p>Objects group named values; reach a field with a dot.</p>
-          <div class="help-example" data-expr="invoice = {subtotal: 120, tax: 12}&#10;invoice.subtotal + invoice.tax" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">last line returns 132</span>
-          </div>
-          <p>Variable names can contain spaces.</p>
-          <div class="help-example" data-expr="monthly rent = 1500&#10;monthly rent * 12" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">last line returns 18,000</span>
-          </div>
-          <p>Reference the result of a line above with <code>line(n)</code>. The reference shows the value inline (the raw <code>line(n)</code> stays visible while you edit that line) and only lines above can be referenced.</p>
-          <div class="help-example" data-expr="5&#10;line(1) * 2" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">last line returns 10</span>
-          </div>
-        </section>
-
-        <section id="help-groups" class="help-section">
-          <h2>Groups</h2>
-          <p>Open a named group with a label on its own line (like <code>Groceries:</code>) and close it with <code>end</code>. The header shows the group's subtotal and the whole group is shaded as a box; the inner lines still count in the bottom total. Blank lines inside are ignored, and <code>sum</code>/<code>average</code> inside a group total that group. A header with no <code>end</code> is just a label, and an <code>end</code> with no header is an error.</p>
-          <div class="help-example" data-expr="Groceries:&#10;4.50&#10;3.20&#10;2.40&#10;end" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">header shows 10.1</span>
-          </div>
-          <div class="help-example" data-expr="Trip:&#10;10 cm&#10;1 m&#10;end" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">header shows 1.1 m</span>
-          </div>
-        </section>
-
-        <section id="help-functions" class="help-section">
-          <h2>Functions</h2>
-          <p>Store a function with <code>f(x) = …</code> and call it later. Numi-style aliases are available too: <code>ln</code>, <code>fact</code>, <code>arcsin</code>, <code>arccos</code>, <code>arctan</code>, <code>root</code>.</p>
-          <div class="help-example" data-expr="double = f(x) = x * 2&#10;double(21)" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">last line returns 42</span>
-          </div>
-          <div class="help-example" data-expr="fact(5)" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 120</span>
-          </div>
-          <div class="help-example" data-expr="ln(e)" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 1</span>
-          </div>
-          <div class="help-example" data-expr="root(8, 3)" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 2</span>
-          </div>
-        </section>
-
-        <section id="help-lists" class="help-section">
-          <h2>Lists</h2>
-          <p>Write a list with square brackets. Lists are <b>1-indexed</b>: <code>n[1]</code> is the first
-          element. Slice with a range, assign elements, do element-wise arithmetic, and combine lists with
-          the mathjs functions. Lists are capped at 100 items.</p>
-          <div class="help-example" data-expr="[1, 2, 3]" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">[1, 2, 3]</span>
-          </div>
-          <div class="help-example" data-expr="n = [10, 20, 30]&#10;n[1]" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">10 (first element)</span>
-          </div>
-          <div class="help-example" data-expr="n = [10, 20, 30, 40]&#10;n[2:4]" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">[20, 30, 40]</span>
-          </div>
-          <div class="help-example" data-expr="n = [10, 20, 30]&#10;n[2] = 99" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">sets the second element</span>
-          </div>
-          <div class="help-example" data-expr="[1, 2] + [3, 4]" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">[4, 6]</span>
-          </div>
-          <div class="help-example" data-expr="expenses = [1200, 80, 45]&#10;sum(expenses)" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">last line returns 1325</span>
-          </div>
-          <div class="help-example" data-expr="mean(1:10)" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 5.5</span>
-          </div>
-          <div class="help-example" data-expr="sort([3, 1, 2])" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">[1, 2, 3]</span>
-          </div>
-          <div class="help-example" data-expr="concat([1, 2], [3, 4])" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">[1, 2, 3, 4]</span>
-          </div>
-          <div class="help-example" data-expr="m = [[1, 2], [3, 4]]&#10;m[2, 1]" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">3</span>
-          </div>
-        </section>
-
-        <section id="help-ranges" class="help-section">
-          <h2>Sequences &amp; iteration</h2>
-          <p>A range <code>start:end</code> (with an optional <code>:step</code>) makes a list of numbers, and
-          calling a function with a range applies it to every element. Lists can be named and indexed like
-          any other variable. Ranges are capped at 100 items.</p>
-          <div class="help-example" data-expr="1:5" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">[1, 2, 3, 4, 5]</span>
-          </div>
-          <div class="help-example" data-expr="1:2:10" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">[1, 3, 5, 7, 9]</span>
-          </div>
-          <div class="help-example" data-expr="n = 1:5&#10;n[3]" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">3</span>
-          </div>
-          <div class="help-example" data-expr="double = f(x) = x * 2&#10;double(1:5)" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">[2, 4, 6, 8, 10]</span>
-          </div>
-          <div class="help-example" data-expr="sum(1:100)" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 5050</span>
-          </div>
-          <div class="help-example" data-expr="mean(1:5)" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 3</span>
-          </div>
-        </section>
-
-        <section id="help-percentages" class="help-section">
-          <h2>Percentages</h2>
-          <p>Use <code>of</code>, <code>on</code> and <code>off</code> with <code>%</code> for percentage math.</p>
-          <div class="help-example" data-expr="20% of 10" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 2</span>
-          </div>
-          <div class="help-example" data-expr="5% on 30" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 31.5</span>
-          </div>
-          <div class="help-example" data-expr="6% off 40" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 37.6</span>
-          </div>
-          <div class="help-example" data-expr="50 as a % of 100" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 50</span>
-          </div>
-          <div class="help-example" data-expr="5% of what is 6" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 120</span>
-          </div>
-        </section>
-
-        <section id="help-rounding" class="help-section">
-          <h2>Rounding</h2>
-          <p>Round a result with a phrase at the end of the line, or call <code>round</code>, <code>ceil</code> or <code>floor</code> directly. Rounding works with units and currencies too.</p>
-          <div class="help-example" data-expr="1/3 to 2 dp" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 0.33</span>
-          </div>
-          <div class="help-example" data-expr="π to 5 digits" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 3.14159</span>
-          </div>
-          <div class="help-example" data-expr="5.5 rounded" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 6</span>
-          </div>
-          <div class="help-example" data-expr="5.5 rounded up" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 6</span>
-          </div>
-          <div class="help-example" data-expr="5.5 rounded down" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 5</span>
-          </div>
-          <div class="help-example" data-expr="37 to nearest 10" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 40</span>
-          </div>
-          <div class="help-example" data-expr="$490 rounded to nearest hundred" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns US$ 500</span>
-          </div>
-          <div class="help-example" data-expr="21 rounded up to nearest 5" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 25</span>
-          </div>
-          <div class="help-example" data-expr="0.534 to nearest 16th" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 9/16</span>
-          </div>
-        </section>
-
-        <section id="help-operators" class="help-section">
-          <h2>Operators &amp; scales</h2>
-          <p>Word operators and number scales work naturally: <code>plus</code>, <code>minus</code>, <code>times</code>, <code>multiplied by</code>, <code>divided by</code>, <code>with</code>, <code>without</code> and <code>mul</code>.</p>
-          <div class="help-example" data-expr="8 times 9" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 72</span>
-          </div>
-          <div class="help-example" data-expr="2 plus 3" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 5</span>
-          </div>
-          <div class="help-example" data-expr="10 minus 3" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 7</span>
-          </div>
-          <div class="help-example" data-expr="6 multiplied by 7" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 42</span>
-          </div>
-          <div class="help-example" data-expr="10 divided by 2" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 5</span>
-          </div>
-          <div class="help-example" data-expr="2 hours with 30 minutes" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 150 minutes</span>
-          </div>
-          <div class="help-example" data-expr="2 hours without 30 minutes" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 90 minutes</span>
-          </div>
-          <div class="help-example" data-expr="3 mul 4" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 12</span>
-          </div>
-          <div class="help-example" data-expr="2k" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 2,000</span>
-          </div>
-          <div class="help-example" data-expr="1kk" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 1,000,000</span>
-          </div>
-          <div class="help-example" data-expr="1kkk" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 1,000,000,000</span>
-          </div>
-        </section>
-
-        <section id="help-units" class="help-section">
-          <h2>Unit conversion</h2>
-          <p>Convert units with <code>to</code>, <code>in</code> or <code>as</code>. CSS units are supported too: <code>px</code>, <code>em</code> and <code>point</code>. Cooking volume units follow the measurement system in <b>Settings → Measurement system</b> — Metric (default), US customary or Imperial — which sets <code>cup</code> (250 / 236.6 / 284.1 ml), <code>tsp</code>, <code>tbsp</code>, <code>fl oz</code>, <code>pint</code>, <code>quart</code> and <code>gallon</code>.</p>
-          <div class="help-example" data-expr="1cm to m" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 0.01 m</span>
-          </div>
-          <div class="help-example" data-expr="2h to s" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 7200 s</span>
-          </div>
-          <div class="help-example" data-expr="5km to m" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 5000 m</span>
-          </div>
-          <div class="help-example" data-expr="30 degC to degF" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 86 degF</span>
-          </div>
-          <div class="help-example" data-expr="100 lb in kg" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 45.36 kg</span>
-          </div>
-          <div class="help-example" data-expr="1 cm in px" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns ≈ 37.8 px</span>
-          </div>
-          <div class="help-example" data-expr="2 em in px" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 32 px</span>
-          </div>
-          <table class="units-table">
-            <thead>
-              <tr>
-                <th>Base</th>
-                <th>Unit</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Length</td>
-                <td>meter (m), inch (in), foot (ft), yard (yd), mile (mi), link (li), rod (rd), chain (ch), angstrom, mil</td>
-              </tr>
-              <tr>
-                <td>Surface<br /> area</td>
-                <td>m2, sqin, sqft, sqyd, sqmi, sqrd, sqch, sqmil, acre, hectare</td>
-              </tr>
-              <tr>
-                <td>Volume</td>
-                <td>m3, litre (l, L, lt, liter), cc, cuin, cuft, cuyd, teaspoon, tablespoon</td>
-              </tr>
-              <tr>
-                <td>Liquid<br /> volume</td>
-                <td>minim (min), fluiddram (fldr), fluidounce (floz), gill (gi), cup (cp), pint (pt), quart (qt), gallon (gal), beerbarrel (bbl), oilbarrel (obl), hogshead, drop (gtt)</td>
-              </tr>
-              <tr>
-                <td>Angles</td>
-                <td>rad (radian), deg (degree), grad (gradian), cycle, arcsec (arcsecond), arcmin (arcminute)</td>
-              </tr>
-              <tr>
-                <td>Time</td>
-                <td>second (s, secs, seconds), minute (mins, minutes), hour (h, hr, hrs, hours), day (days), week (weeks), month (months), year (years), decade (decades), century (centuries), millennium (millennia)</td>
-              </tr>
-              <tr>
-                <td>Frequency</td>
-                <td>hertz (Hz)</td>
-              </tr>
-              <tr>
-                <td>Mass</td>
-                <td>gram(g), tonne, ton, grain (gr), dram (dr), ounce (oz), poundmass (lbm, lb, lbs), hundredweight (cwt), stick, stone</td>
-              </tr>
-              <tr>
-                <td>Electric<br /> current</td>
-                <td>ampere (A)</td>
-              </tr>
-              <tr>
-                <td>Temperature</td>
-                <td>kelvin (K), celsius (degC), fahrenheit (degF), rankine (degR)</td>
-              </tr>
-              <tr>
-                <td>Amount<br/> of<br /> substance</td>
-                <td>mole (mol)</td>
-              </tr>
-              <tr>
-                <td>Luminous<br /> intensity</td>
-                <td>candela (cd)</td>
-              </tr>
-              <tr>
-                <td>Force</td>
-                <td>newton (N), dyne (dyn), poundforce (lbf), kip</td>
-              </tr>
-              <tr>
-                <td>Energy</td>
-                <td>joule (J), erg, Wh, BTU, electronvolt (eV)</td>
-              </tr>
-              <tr>
-                <td>Power</td>
-                <td>watt (W), hp</td>
-              </tr>
-              <tr>
-                <td>Pressure</td>
-                <td>Pa, psi, atm, torr, bar, mmHg, mmH2O, cmH2O</td>
-              </tr>
-              <tr>
-                <td>Electricity<br /> and<br /> magnetism</td>
-                <td>ampere (A), coulomb (C), watt (W), volt (V), ohm, farad (F), weber (Wb), tesla (T), henry (H), siemens (S), electronvolt (eV)</td>
-              </tr>
-              <tr>
-                <td>Binary</td>
-                <td>bits (b), bytes (B)</td>
-              </tr>
-            </tbody>
-          </table>
-          <p>See the <a href="https://mathjs.org/docs/datatypes/units.html#reference" rel="noopener" target="_blank">mathjs units reference</a> for the full list.</p>
-        </section>
-
-        <section id="help-cooking" class="help-section">
-          <h2>Cooking &amp; measures</h2>
-          <p>Convert between dimensions by naming what you are measuring. The subject is free-form and optional: a known ingredient uses its density, a fuel its energy density, media their bitrate, and anything else a default (water). Write it before <code>to</code>/<code>in</code>.</p>
-          <div class="help-example" data-expr="300g butter in cups" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">≈ 1.32 cups</span>
-          </div>
-          <div class="help-example" data-expr="2 cups flour in grams" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">265 grams</span>
-          </div>
-          <div class="help-example" data-expr="1 cup sugar in grams" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">211.25 grams</span>
-          </div>
-          <div class="help-example" data-expr="300g in cups" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">1.2 cups (subject optional)</span>
-          </div>
-          <div class="help-example" data-expr="300g feathers in cups" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">1.2 cups (any subject works)</span>
-          </div>
-          <div class="help-example" data-expr="1 l petrol in kWh" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">9.5 kWh</span>
-          </div>
-          <div class="help-example" data-expr="2 hours 4k video in GB" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">14.4 GB</span>
-          </div>
-        </section>
-
-        <section id="help-rates" class="help-section">
-          <h2>Rates</h2>
-          <p>A rate is one unit per another. mathjs does the arithmetic; these phrases make rates easy to write.</p>
-          <div class="help-example" data-expr="90 km / 3 day" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">30 km/day</span>
-          </div>
-          <div class="help-example" data-expr="30 hours at 10 km/hour" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">300 km</span>
-          </div>
-          <div class="help-example" data-expr="100 km at 10 km/hour" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">10 hours</span>
-          </div>
-          <div class="help-example" data-expr="24 km a day for a year" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">8,766 km</span>
-          </div>
-          <div class="help-example" data-expr="time to upload 3 GB at 10 MB/s" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">300 s</span>
-          </div>
-          <div class="help-example" data-expr="5 km in 25 min" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">05:00/km</span>
-          </div>
-        </section>
-
-        <section id="help-currency" class="help-section">
-          <h2>Currency conversion</h2>
-          <p>Convert between currencies using 3-letter ISO codes or symbols. Results are written with the currency's symbol where it has one (<code>350usd</code> becomes <code>US$ 350</code>); currencies without a symbol keep their code. Money only forms ratios (<code>USD/hour</code>, <code>USD/km</code>), so multiplying a currency by another unit (<code>BRL hour</code>) is an error — use a rate instead. Rates come from the European Central Bank (via frankfurter.dev) and are cached locally for offline use.</p>
-          <div class="help-example" data-expr="100 USD to EUR" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">converts USD to EUR</span>
-          </div>
-          <div class="help-example" data-expr="$5 to GBP" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">converts to GBP</span>
-          </div>
-          <div class="help-example" data-expr="R$5 to EUR" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">converts to EUR</span>
-          </div>
-          <div class="help-example" data-expr="50 EUR in BRL" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">converts to BRL</span>
-          </div>
-          <div class="help-example" data-expr="100 USD/hour" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">US$ 100 per hour</span>
-          </div>
-          <p><b>Supported codes:</b> <code>AUD</code>, <code>BRL</code>, <code>CAD</code>, <code>CHF</code>, <code>CNY</code>, <code>CZK</code>, <code>DKK</code>, <code>EUR</code>, <code>GBP</code>, <code>HKD</code>, <code>HUF</code>, <code>IDR</code>, <code>ILS</code>, <code>INR</code>, <code>ISK</code>, <code>JPY</code>, <code>KRW</code>, <code>MXN</code>, <code>MYR</code>, <code>NOK</code>, <code>NZD</code>, <code>PHP</code>, <code>PLN</code>, <code>RON</code>, <code>SEK</code>, <code>SGD</code>, <code>THB</code>, <code>TRY</code>, <code>USD</code>, <code>ZAR</code>.</p>
-        </section>
-
-        <section id="help-dates" class="help-section">
-          <h2>Dates</h2>
-          <p>Convert unix timestamps with <code>fromunix</code>, get the current time with <code>unix()</code>, and use date units directly.</p>
-          <div class="help-example" data-expr="fromunix(0)" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">Jan 1, 1970…</span>
-          </div>
-          <div class="help-example" data-expr="fromunix(1446587186)" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">Nov 3, 2015…</span>
-          </div>
-          <div class="help-example" data-expr="unix()" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">current timestamp</span>
-          </div>
-          <div class="help-example" data-expr="1 month in days" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">30.4375 days</span>
-          </div>
-        </section>
-
-        <section id="help-calendar" class="help-section">
-          <h2>Calendar</h2>
-          <p>Add or subtract time from a date, measure the interval between dates, and format a date with a pattern. Dates can be written as <code>10 June</code>, <code>June 10, 2023</code>, <code>2019-04-01</code> or <code>12/02/1988</code>. A date can be saved in a variable and reused (<code>start = March 4</code>, then <code>start + 2 weeks</code>). Clock times (<code>9:45 am</code>, <code>1:30</code>) add durations and measure intervals, shown in 24-hour by default (<b>Settings → Clock</b>). Workdays are Monday to Friday (public holidays are not counted yet).</p>
-          <div class="help-example" data-expr="10 June + 3 weeks" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">1 July</span>
-          </div>
-          <div class="help-example" data-expr="start = March 4, 2025&#10;start + 2 weeks" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">18 March 2025</span>
-          </div>
-          <div class="help-example" data-expr="April 1, 2019 - 3 months 5 days" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">27 December 2018</span>
-          </div>
-          <div class="help-example" data-expr="3 weeks after March 14, 2019" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">4 April 2019</span>
-          </div>
-          <div class="help-example" data-expr="today + 3 weeks" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">three weeks from today</span>
-          </div>
-          <div class="help-example" data-expr="4 days from now" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">four days from now</span>
-          </div>
-          <div class="help-example" data-expr="16:00 + 3 hours 12 minutes" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">a clock time 3¼ hours later</span>
-          </div>
-          <div class="help-example" data-expr="7:30am to 8:45pm" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">13 hours 15 minutes</span>
-          </div>
-          <div class="help-example" data-expr="now + 3 hours 15 minutes" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">a clock time 3¼ hours from now</span>
-          </div>
-          <div class="help-example" data-expr="January 10 - February 5" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">3 weeks 5 days</span>
-          </div>
-          <div class="help-example" data-expr="days until Christmas" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">days until 25 December</span>
-          </div>
-          <div class="help-example" data-expr="workdays in 3 weeks" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">15 workdays</span>
-          </div>
-          <div class="help-example" data-expr="work hours in June" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">176 work hours (8h days)</span>
-          </div>
-          <div class="help-example" data-expr="10 March to 17 March in workdays" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">5 workdays</span>
-          </div>
-          <div class="help-example" data-expr="5 workdays after March 14, 2019" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">21 March 2019</span>
-          </div>
-          <div class="help-example" data-expr="weekday on March 9, 2024" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">Saturday</span>
-          </div>
-          <div class="help-example" data-expr="March 12, 2023 as EEEE, MMM d, yyyy" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">Sunday, Mar 12, 2023</span>
-          </div>
-        </section>
-
-        <section id="help-timespans" class="help-section">
-          <h2>Timespans</h2>
-          <p>Show a duration as a timespan of components, or split it into two units. A timespan is a real duration, so it can be added and multiplied, and converted to a single unit with <code>to</code>/<code>in</code>/<code>as</code> (<code>as minutes</code>). Time units can be written short (<code>3h 5m 10s</code>) or long.</p>
-          <div class="help-example" data-expr="5.5 minutes as timespan" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">5 min 30 s</span>
-          </div>
-          <div class="help-example" data-expr="4.54 hours as timespan" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">4 hours 32 minutes 24 seconds</span>
-          </div>
-          <div class="help-example" data-expr="72 days as timespan" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">10 weeks 2 days</span>
-          </div>
-          <div class="help-example" data-expr="3h 5m 10s" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">3 hours 5 minutes 10 seconds</span>
-          </div>
-          <div class="help-example" data-expr="3h 5m 10s in seconds" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">11,110 seconds</span>
-          </div>
-          <div class="help-example" data-expr="12.5 minutes in minutes and seconds" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">12 min 30 s</span>
-          </div>
-          <div class="help-example" data-expr="5.5 minutes as timespan&#10;line(1) + 1h" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">last line: 1 hour 5 minutes 30 seconds</span>
-          </div>
-        </section>
-
-        <section id="help-shortcuts" class="help-section">
-          <h2>Shortcuts &amp; files</h2>
-          <p>The active sheet can be exported and imported from the <b>Settings</b> modal or with the shortcuts below.</p>
-          <table class="operator-table">
-            <thead>
-              <tr><th>Shortcut</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><code>⌘Z</code><br /><code>Ctrl+Z</code></td><td>Undo the last change in the tab</td></tr>
-              <tr><td><code>⇧⌘Z</code><br /><code>Ctrl+Shift+Z</code></td><td>Redo</td></tr>
-              <tr><td><code>Ctrl+Tab</code><br /><code>Ctrl+⇧Tab</code></td><td>Next / previous tab</td></tr>
-              <tr><td><code>⌘1…9</code><br /><code>Ctrl+1…9</code></td><td>Jump to the nth tab</td></tr>
-              <tr><td><code>⌘F</code><br /><code>Ctrl+F</code></td><td>Find &amp; replace in the active sheet</td></tr>
-              <tr><td><code>⌘G</code><br /><code>Ctrl+G</code></td><td>Jump to a line number</td></tr>
-              <tr><td><code>Tab</code></td><td>Indent the line or selection</td></tr>
-              <tr><td><code>⇧Tab</code></td><td>Outdent the line or selection</td></tr>
-              <tr><td><code>⇧⌘C</code><br /><code>Ctrl+Shift+C</code></td><td>Copy the current line's result</td></tr>
-              <tr><td><code>⇧⌘S</code><br /><code>⇧⌘L</code></td><td>Copy a share link for the active sheet</td></tr>
-              <tr><td><code>⇧⌘E</code><br /><code>Ctrl+Shift+E</code></td><td>Export the active sheet</td></tr>
-              <tr><td><code>⇧⌘I</code><br /><code>Ctrl+Shift+I</code></td><td>Import a sheet</td></tr>
-              <tr><td><code>⇧⌘⌫</code><br /><code>Ctrl+Shift+Backspace</code></td><td>Clear the active sheet</td></tr>
-            </tbody>
-          </table>
-        </section>
-
-        <section id="help-about" class="help-section">
-          <h2>About</h2>
-          <p>Math Notes is a browser-based inline calculator, inspired by
-            <a href="https://numi.app" rel="noopener" target="_blank">Numi</a> and
-            <a href="https://soulver.app" rel="noopener" target="_blank">Soulver</a>. Its source is
-            open — see the
-            <a href="https://github.com/imaginamundo/math-notes" rel="noopener" target="_blank">GitHub repository</a>.
-          </p>
-          <p>Calculations run on <a href="https://mathjs.org" rel="noopener" target="_blank">mathjs</a>,
-            an extensible math library for JavaScript, and currency conversion rates come from
-            the <a href="https://www.ecb.europa.eu" rel="noopener" target="_blank">European Central Bank</a>
-            via <a href="https://frankfurter.dev" rel="noopener" target="_blank">Frankfurter</a>.</p>
-          <p>Your sheets stay on your device: they are saved in your browser's storage and are
-            never sent to a server.</p>
-        </section>
-  </dialog>
-
   <dialog id="recipes-modal" class="modal" aria-labelledby="recipes-title">
     <header class="modal-header">
-      <h1 id="recipes-title" class="modal-title">Examples</h1>
-      <button class="modal-close" data-modal-close aria-label="Close examples">×</button>
+      <h1 id="recipes-title" class="modal-title" data-i18n="modal.examples">Examples</h1>
+      <button class="modal-close" data-modal-close aria-label="Close examples" data-i18n-aria-label="modal.closeExamples">×</button>
     </header>
-    <div class="modal-body">
-      <p>Ready-made calculations. Click one to add it to the editor and edit the values.</p>
-
-      <section class="help-section">
-        <h2>Restaurant payment split</h2>
-        <p>Split a bill evenly, including the tip.</p>
-        <div class="help-example" data-expr="bill = 120&#10;tip = bill * 10%&#10;people = 4&#10;(bill + tip) / people" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">last line returns 33</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Restaurant bill split with tags</h2>
-        <p>Split a bar bill between four people. Write each item's full amount and tag everyone who shared it; each tag gets an equal share, while the group total keeps the full price.</p>
-        <div class="help-example" data-expr="At the bar:&#10;potato: 20 #name1 #name2 #name3&#10;burger: 2 * 50 #name1 #name3&#10;beer: 160 #name1 #name2 #name3 #name4&#10;end&#10;&#10;#name1&#10;#name2&#10;#name3&#10;#name4" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">each #name returns a person's total</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Scale a recipe</h2>
-        <p>Scale ingredient amounts to a different number of servings, converting between volume and mass as you go.</p>
-        <div class="help-example" data-expr="scale = 6 / 4&#10;scale * 2 cups flour in grams&#10;scale * 300g butter in cups" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">397.5 g flour; ≈ 1.98 cups butter</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Hours of work</h2>
-        <p>Gross pay for a given number of hours at an hourly rate.</p>
-        <div class="help-example" data-expr="hours = 40&#10;rate = 25&#10;hours * rate" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">last line returns 1000</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Unit price comparison</h2>
-        <p>Compare two packs by their price per 100 g.</p>
-        <div class="help-example" data-expr="small = 3.99 / 500 * 100&#10;large = 6.49 / 1000 * 100" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">0.798 vs 0.649 — the large pack is cheaper</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Percentage discount</h2>
-        <p>Price after a percentage discount.</p>
-        <div class="help-example" data-expr="price = 80&#10;discount = 15%&#10;price - price * discount" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">last line returns 68</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Savings goal</h2>
-        <p>How many months to reach a goal at a fixed monthly amount.</p>
-        <div class="help-example" data-expr="goal = 5000&#10;monthly = 250&#10;goal / monthly" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">last line returns 20 months</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Simple interest</h2>
-        <p>Interest earned on a principal over a number of years.</p>
-        <div class="help-example" data-expr="principal = 1000&#10;rate = 5%&#10;years = 3&#10;principal * rate * years" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">last line returns 150</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Fuel cost for a trip</h2>
-        <p>Cost of fuel for a distance at a given consumption and price per litre.</p>
-        <div class="help-example" data-expr="distance = 300&#10;consumption = 8&#10;fuelPrice = 1.7&#10;distance / 100 * consumption * fuelPrice" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">last line returns 40.8</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Running pace</h2>
-        <p>Your pace per kilometre, then the finish time for a longer race at that pace.</p>
-        <div class="help-example" data-expr="# Pace per km&#10;5 km in 25 min&#10;# Half-marathon at that pace&#10;21.1 km * prev" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">05:00/km, then 105.5 min</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Upload time</h2>
-        <p>How long a file takes to upload at a given speed.</p>
-        <div class="help-example" data-expr="time to upload 3 GB at 10 MB/s&#10;time to upload 3 GB at 2 MB/s" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">300 s, then 1,500 s</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Body Mass Index</h2>
-        <p>BMI from weight in kg and height in metres.</p>
-        <div class="help-example" data-expr="weight = 70&#10;height = 1.75&#10;weight / height ^ 2" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">last line returns ≈ 22.86</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Age and elapsed time</h2>
-        <p>Measure the span from a date to today — first as calendar years, months and days, then as a plain day count.</p>
-        <div class="help-example" data-expr="1990-04-01 to today&#10;days since 1990-04-01" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">exact age, then total days</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Countdown to a birthday</h2>
-        <p>Days left until the next time a date comes around. Change the month and day to your own.</p>
-        <div class="help-example" data-expr="birthday = June 21&#10;days until birthday" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">days until the next 21 June</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Fuel cost with units</h2>
-        <p>The consumption and the price per litre cancel down to a total cost.</p>
-        <div class="help-example" data-expr="trip = 350 km&#10;economy = 7 l / 100 km&#10;price = 1.70 EUR/l&#10;trip * economy * price" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">€ 41.65</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Overtime pay</h2>
-        <p>Regular hours at the base rate, plus the extra hours at time and a half.</p>
-        <div class="help-example" data-expr="worked = 45&#10;rate = 25 USD/hour&#10;regular = 40 hours * rate&#10;overtime = (worked - 40) hours * rate * 1.5&#10;regular + overtime" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">US$ 1,187.5 for 40 h + 5 h overtime</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Meeting length</h2>
-        <p>Add the clock-time interval of each meeting and show the total as a timespan.</p>
-        <div class="help-example" data-expr="standup = 9:00 am to 9:15 am&#10;review = 2:00 pm to 3:30 pm&#10;standup + review as timespan" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">1 hour 45 minutes total</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Clock reminders</h2>
-        <p>Get a clock time a fixed offset after an anchor time — handy for alarms and reminders.</p>
-        <div class="help-example" data-expr="wake = 6:30 am&#10;wake + 45 minutes&#10;wake + 8 hours" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">07:15 and 14:30</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>Household budget by category</h2>
-        <p>Tag each expense with a category; a line that is only the tag totals that category, and tags add up too.</p>
-        <div class="help-example" data-expr="Budget:&#10;rent: 1200 #home&#10;utilities: 150 #home&#10;groceries: 480 #living&#10;transport: 120 #living&#10;end&#10;#home&#10;#living&#10;#home + #living" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">each #tag is a category total; the last adds them up</span>
-        </div>
-      </section>
-    </div>
+    <div class="modal-body"></div>
   </dialog>
 
   <dialog id="settings-modal" class="modal" aria-labelledby="settings-title">
     <header class="modal-header">
-      <h1 id="settings-title" class="modal-title">Settings</h1>
-      <button class="modal-close" data-modal-close aria-label="Close settings">×</button>
+      <h1 id="settings-title" class="modal-title" data-i18n="modal.settings">Settings</h1>
+      <button class="modal-close" data-modal-close aria-label="Close settings" data-i18n-aria-label="modal.closeSettings">×</button>
     </header>
     <div class="modal-body">
-      <section class="help-section">
-        <h2>Files</h2>
-        <p>Export the active sheet as text or import one from a file.</p>
+        <section class="modal-section">
+        <h2 data-i18n="settings.files">Files</h2>
+        <p data-i18n="settings.filesBody">Export the active sheet as text or import one from a file.</p>
         <div class="settings-files">
-          <button id="export-button" class="export">Export</button>
-          <button id="import-button" class="import">Import</button>
+          <button id="export-button" class="export" data-i18n="settings.export">Export</button>
+          <button id="import-button" class="import" data-i18n="settings.import">Import</button>
         </div>
       </section>
-      <section class="help-section">
-        <h2>Theme</h2>
-        <p>Choose a theme.</p>
+        <section class="modal-section">
+        <h2 data-i18n="settings.theme">Theme</h2>
+        <p data-i18n="settings.themeBody">Choose a theme.</p>
         <div class="settings-themes"></div>
       </section>
-      <section class="help-section">
-        <h2>Measurement system</h2>
-        <p>Used for cooking volume units. Metric is the default.</p>
+        <section class="modal-section">
+        <h2 data-i18n="settings.measurement">Measurement system</h2>
+        <p data-i18n="settings.measurementBody">Used for cooking volume units. Metric is the default.</p>
         <div class="settings-measurement"></div>
       </section>
-      <section class="help-section">
-        <h2>Decimal precision</h2>
-        <p>Decimal places shown in results. A truncated result ends with an ellipsis; calculations keep full precision.</p>
+        <section class="modal-section">
+        <h2 data-i18n="settings.precision">Decimal precision</h2>
+        <p data-i18n="settings.precisionBody">Decimal places shown in results. A truncated result ends with an ellipsis; calculations keep full precision.</p>
         <label class="settings-precision">
-          Decimal places
+          <span data-i18n="settings.precisionLabel">Decimal places</span>
           <input id="decimal-precision" type="number" min="0" max="10" step="1" inputmode="numeric" />
         </label>
       </section>
-      <section class="help-section">
-        <h2>Clock</h2>
-        <p>How clock times are written. 24-hour is the default.</p>
+        <section class="modal-section">
+        <h2 data-i18n="settings.clock">Clock</h2>
+        <p data-i18n="settings.clockBody">How clock times are written. 24-hour is the default.</p>
         <div class="settings-clock"></div>
       </section>
-      <section class="help-section">
-        <h2>Recover</h2>
-        <p>Auto-saved snapshots of each tab are kept in IndexedDB. Restore one to recover lost work.</p>
-        <button id="restore-all-button" class="restore-all">Restore all from latest backup</button>
+        <section class="modal-section">
+        <h2 data-i18n="settings.language">Language</h2>
+        <p data-i18n="settings.languageBody">The language of the interface. Detected from your system by default.</p>
+        <div class="settings-language"></div>
+      </section>
+        <section class="modal-section">
+        <h2 data-i18n="settings.recover">Recover</h2>
+        <p data-i18n="settings.recoverBody">Auto-saved snapshots of each tab are kept in IndexedDB. Restore one to recover lost work.</p>
+        <button id="restore-all-button" class="restore-all" data-i18n="settings.restoreAll">Restore all from latest backup</button>
         <div id="snapshot-history"></div>
       </section>
-      <section class="help-section">
-        <h2>Reset</h2>
-        <p>Reset the theme, tabs and all stored data back to their defaults.</p>
-        <button id="reset-data-button" class="reset-data">Reset data</button>
+        <section class="modal-section">
+        <h2 data-i18n="settings.reset">Reset</h2>
+        <p data-i18n="settings.resetBody">Reset the theme, tabs and all stored data back to their defaults.</p>
+        <button id="reset-data-button" class="reset-data" data-i18n="settings.resetButton">Reset data</button>
       </section>
     </div>
   </dialog>

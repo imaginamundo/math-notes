@@ -199,6 +199,12 @@ body {
   grid-template-rows: auto 1fr auto auto;
   height: 100%;
 }
+/* The UI text is authored in English and translated when the module boots; the
+   head script hides it first so a non-English visitor never sees the English
+   flash. js/i18n removes the class once the language is applied. */
+html.i18n-pending .layout {
+  visibility: hidden;
+}
 .tabs-bar {
   display: flex;
   align-items: stretch;
@@ -606,6 +612,8 @@ button:hover {
   row-gap: 0.4em;
   white-space: nowrap;
 }
+/* The Documentation link sits with the footer's buttons; give it the same
+   button surface rather than the underlined inline-link styling. */
 .font-size {
   display: inline-flex;
   align-items: center;
@@ -837,45 +845,48 @@ button:hover {
   padding: 0.25em 1.25em 1.25em;
   overflow-y: auto;
 }
-.help-section h2 {
+.modal-section h2 {
   margin: 1.2em 0 0.4em;
   font-size: 1.05em;
   color: var(--color-text);
   border-bottom: 1px solid var(--border-soft);
   padding-bottom: 0.25em;
 }
-.help-section:first-child h2 {
+.modal-section:first-child h2 {
   margin-top: 1em;
 }
-.help-section ul {
+.modal-section ul {
   margin: 0.4em 0;
   padding-left: 1.2em;
 }
-.help-section li {
+.modal-section li {
   margin: 0.2em 0;
 }
-.help-example {
+.example-chip {
   display: inline-flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 0.25em;
+  align-items: stretch;
+  gap: 0;
   margin: 0.35em 0.5em 0.35em 0;
-  padding: 0.45em 0.8em;
+  padding: 0;
   border: 1px solid var(--border-chip);
   border-radius: 6px;
   background: var(--surface-chip);
+  overflow: hidden;
   cursor: pointer;
   user-select: none;
   vertical-align: top;
 }
-.help-example:hover,
-.help-example:focus-visible {
+.example-chip:hover,
+.example-chip:focus-visible {
   border-color: var(--color-operator);
-  background: var(--surface-chip-hover);
+  filter: brightness(1.08);
   outline: none;
 }
-.help-example code {
-  background: transparent;
+/* The body mirrors the editor: the input surface with a numbered gutter. */
+.example-chip code {
+  display: block;
+  background: var(--color-primary);
   padding: 0;
   color: var(--color-text);
   white-space: pre-wrap;
@@ -883,9 +894,29 @@ button:hover {
   font-family: inherit;
   line-height: 1.4;
 }
-.help-returns {
-  font-size: 0.82em;
+.example-chip .example-line {
+  display: flex;
+}
+.example-chip .example-line-number {
+  flex: 0 0 auto;
+  min-width: 1.6em;
+  padding: 0.25em 0.5em 0.25em 0.6em;
+  background: var(--color-surface);
+  border-right: 1px solid var(--border-strong);
   color: var(--color-text-muted);
+  text-align: right;
+  user-select: none;
+}
+.example-chip .example-line-content {
+  padding: 0.25em 0.7em;
+  white-space: pre-wrap;
+}
+/* The hint reads like the editor's ghost result. */
+.example-result {
+  padding: 0.2em 0.7em;
+  background: var(--color-footer);
+  color: var(--color-ghost);
+  font-size: 0.82em;
 }
 code {
   background: var(--surface-code);
@@ -893,23 +924,23 @@ code {
   border-radius: 4px;
   padding: 0.1em 0.35em;
 }
-.help-section table {
+.modal-section table {
   width: 100%;
   border-collapse: collapse;
   margin: 0.6em 0 1em;
   font-size: 0.92em;
 }
-.help-section th,
-.help-section td {
+.modal-section th,
+.modal-section td {
   text-align: left;
   padding: 0.35em 0.6em;
   border-bottom: 1px solid var(--border-table);
   vertical-align: top;
 }
-.help-section th {
+.modal-section th {
   color: var(--color-text);
 }
-.help-section td:first-child {
+.modal-section td:first-child {
   white-space: nowrap;
   font-weight: 600;
 }
@@ -953,9 +984,10 @@ code {
   height: 1.2em;
   border-radius: 2px;
 }
-/* Measurement system picker */
+/* Measurement system, clock and language pickers */
 .settings-measurement,
-.settings-clock {
+.settings-clock,
+.settings-language {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4em;

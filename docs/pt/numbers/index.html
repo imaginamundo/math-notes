@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Números &amp; operadores · Documentação · Math Notes</title>
+  <meta name="description" content="O Math Notes avalia expressões com os operadores aritméticos usuais, além de operadores em palavras, escalas numéricas e frases de arredondamento que leem como inglês.">
+  <link rel="canonical" href="https://math.dio.dev/docs/pt/numbers/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/numbers/">
+  <link rel="alternate" hreflang="pt" href="https://math.dio.dev/docs/pt/numbers/">
+  <link rel="alternate" hreflang="es" href="https://math.dio.dev/docs/es/numbers/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/numbers/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Números &amp; operadores">
+  <meta property="og:description" content="O Math Notes avalia expressões com os operadores aritméticos usuais, além de operadores em palavras, escalas numéricas e frases de arredondamento que leem como inglês.">
+  <meta property="og:url" content="https://math.dio.dev/docs/pt/numbers/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/pt/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentação</span>
+    </a>
+    <div class="doc-header-actions">
+      <div class="doc-search" data-search-url="/docs/pt/search.json" data-empty="Sem resultados">
+        <input class="doc-search-input" type="search" placeholder="Pesquisar na documentação" aria-label="Pesquisar na documentação" autocomplete="off" spellcheck="false">
+        <ul class="doc-search-results" role="listbox" aria-label="Pesquisar na documentação" hidden></ul>
+      </div>
+      <nav class="doc-lang" aria-label="Idioma"><a href="/docs/numbers/" hreflang="en">English</a><a href="/docs/pt/numbers/" hreflang="pt" class="is-active" aria-current="page">Português</a><a href="/docs/es/numbers/" hreflang="es">Español</a></nav>
+      <a class="doc-app" href="/">Abrir o Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Menu da documentação</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Menu da documentação"><ul><li class="doc-nav-item"><a href="/docs/pt/">Início</a></li><li class="doc-nav-item"><a href="/docs/pt/getting-started/">Primeiros passos</a></li><li class="doc-nav-item"><a href="/docs/pt/writing-a-sheet/">Escrevendo uma planilha</a></li><li class="doc-nav-item is-active"><a href="/docs/pt/numbers/" aria-current="page">Números &amp; operadores</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">Nesta página</li><li><a href="#operadores">Operadores</a></li><li><a href="#operadores-em-palavras">Operadores em palavras</a></li><li><a href="#escalas-numericas">Escalas numéricas</a></li><li><a href="#porcentagens">Porcentagens</a></li><li><a href="#arredondamento">Arredondamento</a></li><li><a href="#constantes-e-funcoes">Constantes e funções</a></li></ul></li><li class="doc-nav-item"><a href="/docs/pt/lists/">Listas &amp; sequências</a></li><li class="doc-nav-item"><a href="/docs/pt/groups/">Grupos &amp; totais</a></li><li class="doc-nav-item"><a href="/docs/pt/units/">Unidades &amp; medidas</a></li><li class="doc-nav-item"><a href="/docs/pt/money/">Dinheiro &amp; moedas</a></li><li class="doc-nav-item"><a href="/docs/pt/dates/">Datas &amp; tempo</a></li><li class="doc-nav-item"><a href="/docs/pt/files/">Arquivos, compartilhamento &amp; dados</a></li><li class="doc-nav-item"><a href="/docs/pt/settings/">Configurações &amp; aparência</a></li><li class="doc-nav-item"><a href="/docs/pt/app/">App &amp; plataforma</a></li><li class="doc-nav-item"><a href="/docs/pt/reference/">Referência</a></li><li class="doc-nav-item"><a href="/docs/pt/about/">Sobre</a></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>Números &amp; operadores</h1>
+<p>O Math Notes avalia expressões com os operadores aritméticos usuais, além de operadores em palavras, escalas numéricas e frases de arredondamento que leem como inglês.</p>
+<h2 id="operadores">Operadores<a class="doc-anchor" href="#operadores" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Operador</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>+</code></td>
+<td>Somar</td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td>Subtrair</td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td>Multiplicar</td>
+</tr>
+<tr>
+<td><code>/</code></td>
+<td>Dividir</td>
+</tr>
+<tr>
+<td><code>^</code></td>
+<td>Potência</td>
+</tr>
+<tr>
+<td><code>%</code></td>
+<td>Resto</td>
+</tr>
+<tr>
+<td><code>!</code></td>
+<td>Fatorial</td>
+</tr>
+<tr>
+<td><code>( )</code></td>
+<td>Agrupar</td>
+</tr>
+</tbody></table>
+<figure class="doc-example" data-expr="(4 / 2) ^ 2"><pre class="doc-code"><code data-calc>(4 / 2) ^ 2</code></pre><figcaption class="doc-example-result">retorna 4</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="10 % 3"><pre class="doc-code"><code data-calc>10 % 3</code></pre><figcaption class="doc-example-result">retorna 1</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Muitas outras funções e operadores estão disponíveis — veja a <a href="https://mathjs.org/docs/expressions/syntax.html#operators">documentação do mathjs</a>. A <a href="/docs/pt/reference/">referência</a> lista os aliases de função que o Math Notes adiciona.</p>
+<h2 id="operadores-em-palavras">Operadores em palavras<a class="doc-anchor" href="#operadores-em-palavras" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<p>Os cálculos podem usar palavras em vez de símbolos:</p>
+<figure class="doc-example" data-expr="8 times 9"><pre class="doc-code"><code data-calc>8 times 9</code></pre><figcaption class="doc-example-result">retorna 72</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="2 plus 3"><pre class="doc-code"><code data-calc>2 plus 3</code></pre><figcaption class="doc-example-result">retorna 5</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="10 minus 3"><pre class="doc-code"><code data-calc>10 minus 3</code></pre><figcaption class="doc-example-result">retorna 7</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="6 multiplied by 7"><pre class="doc-code"><code data-calc>6 multiplied by 7</code></pre><figcaption class="doc-example-result">retorna 42</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="10 divided by 2"><pre class="doc-code"><code data-calc>10 divided by 2</code></pre><figcaption class="doc-example-result">retorna 5</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="3 mul 4"><pre class="doc-code"><code data-calc>3 mul 4</code></pre><figcaption class="doc-example-result">retorna 12</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p><code>with</code> e <code>without</code> combinam e subtraem durações:</p>
+<figure class="doc-example" data-expr="2 hours with 30 minutes"><pre class="doc-code"><code data-calc>2 hours with 30 minutes</code></pre><figcaption class="doc-example-result">retorna 150 minutes</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="2 hours without 30 minutes"><pre class="doc-code"><code data-calc>2 hours without 30 minutes</code></pre><figcaption class="doc-example-result">retorna 90 minutes</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="escalas-numericas">Escalas numéricas<a class="doc-anchor" href="#escalas-numericas" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<p>Um <code>k</code> repetido multiplica por mil: <code>2k</code> é 2.000, <code>1kk</code> é 1.000.000, <code>1kkk</code> é 1.000.000.000.</p>
+<figure class="doc-example" data-expr="2k"><pre class="doc-code"><code data-calc>2k</code></pre><figcaption class="doc-example-result">retorna 2,000</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="1kk"><pre class="doc-code"><code data-calc>1kk</code></pre><figcaption class="doc-example-result">retorna 1,000,000</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="1kkk"><pre class="doc-code"><code data-calc>1kkk</code></pre><figcaption class="doc-example-result">retorna 1,000,000,000</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="porcentagens">Porcentagens<a class="doc-anchor" href="#porcentagens" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<p>Use <code>of</code>, <code>on</code> e <code>off</code> com <code>%</code>.</p>
+<figure class="doc-example" data-expr="20% of 10"><pre class="doc-code"><code data-calc>20% of 10</code></pre><figcaption class="doc-example-result">retorna 2</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="5% on 30"><pre class="doc-code"><code data-calc>5% on 30</code></pre><figcaption class="doc-example-result">retorna 31.5</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="6% off 40"><pre class="doc-code"><code data-calc>6% off 40</code></pre><figcaption class="doc-example-result">retorna 37.6</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="50 as a % of 100"><pre class="doc-code"><code data-calc>50 as a % of 100</code></pre><figcaption class="doc-example-result">retorna 50</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="5% of what is 6"><pre class="doc-code"><code data-calc>5% of what is 6</code></pre><figcaption class="doc-example-result">retorna 120</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="arredondamento">Arredondamento<a class="doc-anchor" href="#arredondamento" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<p>Arredonde um resultado com uma frase no fim da linha, ou chame <code>round</code>, <code>ceil</code> ou <code>floor</code> diretamente. O arredondamento funciona com unidades e moedas também.</p>
+<figure class="doc-example" data-expr="1/3 to 2 dp"><pre class="doc-code"><code data-calc>1/3 to 2 dp</code></pre><figcaption class="doc-example-result">retorna 0.33</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="π to 5 digits"><pre class="doc-code"><code data-calc>π to 5 digits</code></pre><figcaption class="doc-example-result">retorna 3.14159</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="5.5 rounded"><pre class="doc-code"><code data-calc>5.5 rounded</code></pre><figcaption class="doc-example-result">retorna 6</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="5.5 rounded up"><pre class="doc-code"><code data-calc>5.5 rounded up</code></pre><figcaption class="doc-example-result">retorna 6</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="5.5 rounded down"><pre class="doc-code"><code data-calc>5.5 rounded down</code></pre><figcaption class="doc-example-result">retorna 5</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="37 to nearest 10"><pre class="doc-code"><code data-calc>37 to nearest 10</code></pre><figcaption class="doc-example-result">retorna 40</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="$490 rounded to nearest hundred"><pre class="doc-code"><code data-calc>$490 rounded to nearest hundred</code></pre><figcaption class="doc-example-result">retorna US$ 500</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="21 rounded up to nearest 5"><pre class="doc-code"><code data-calc>21 rounded up to nearest 5</code></pre><figcaption class="doc-example-result">retorna 25</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="0.534 to nearest 16th"><pre class="doc-code"><code data-calc>0.534 to nearest 16th</code></pre><figcaption class="doc-example-result">retorna 9/16</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="constantes-e-funcoes">Constantes e funções<a class="doc-anchor" href="#constantes-e-funcoes" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<p><code>pi</code> e <code>π</code> estão disponíveis, junto com as funções padrão do mathjs e estes aliases:</p>
+<table>
+<thead>
+<tr>
+<th>Alias</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ln</code></td>
+<td>Logaritmo natural</td>
+</tr>
+<tr>
+<td><code>fact</code></td>
+<td>Fatorial</td>
+</tr>
+<tr>
+<td><code>arcsin</code>, <code>arccos</code>, <code>arctan</code></td>
+<td>Funções trigonométricas inversas</td>
+</tr>
+<tr>
+<td><code>root(n, x)</code></td>
+<td>A raiz <code>x</code>-ésima de <code>n</code></td>
+</tr>
+</tbody></table>
+<figure class="doc-example" data-expr="fact(5)"><pre class="doc-code"><code data-calc>fact(5)</code></pre><figcaption class="doc-example-result">retorna 120</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="ln(e)"><pre class="doc-code"><code data-calc>ln(e)</code></pre><figcaption class="doc-example-result">retorna 1</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="root(8, 3)"><pre class="doc-code"><code data-calc>root(8, 3)</code></pre><figcaption class="doc-example-result">retorna 2</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Veja <a href="/docs/pt/lists/">Listas &amp; sequências</a> para <code>sum</code>, <code>mean</code> e as outras funções de agregação, e a <a href="/docs/pt/reference/">Referência</a> para a tabela completa.</p>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — uma calculadora em linha no navegador.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

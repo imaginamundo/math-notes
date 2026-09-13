@@ -1,4 +1,5 @@
 import parseLine from './parseLine.js';
+import { LETTER, WORD } from './identifiers.js';
 
 // Pure completion logic: find the word under the caret, rank vocabulary
 // matches, and apply a chosen completion. No DOM, so it is unit-tested
@@ -7,10 +8,11 @@ import parseLine from './parseLine.js';
 // A word starts with a letter (or underscore/µ) and continues with letters,
 // digits, underscore or µ. Leading digits keep `300g` a word for `g` without
 // swallowing the number. A tag is `#` followed by tag characters (so `-` is
-// allowed inside a tag, unlike a plain word).
-const HEAD = /[A-Za-z_µ]/;
-const TAIL = /[A-Za-z0-9_µ]/;
-const TAG_TAIL = /[A-Za-z0-9_-]/;
+// allowed inside a tag, unlike a plain word). Unicode-aware, so `açai` completes
+// as one word.
+const HEAD = new RegExp(`[${LETTER}_µ]`, 'u');
+const TAIL = new RegExp(`[${WORD}_µ]`, 'u');
+const TAG_TAIL = new RegExp(`[${WORD}_-]`, 'u');
 
 const KIND_ORDER = { variable: 0, tag: 1, keyword: 2, function: 3, constant: 4, unit: 5 };
 

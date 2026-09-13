@@ -3,8 +3,8 @@ import renderTotal from './render/renderTotal.js';
 import { indexOfLineAt, sheetLines } from './util/text.js';
 import registerServiceWorker from './registerServiceWorker.js';
 import { createEvalClient } from './evalClient.js';
-import initHelpModal from './ui/help.js';
 import initRecipes from './ui/recipes.js';
+import initDocsLink from './ui/docsLink.js';
 import initSettings from './ui/settings.js';
 import initFontControls from './ui/cosmetic.js';
 import initTabs from './ui/tabs.js';
@@ -23,6 +23,7 @@ import initLoadingIndicator from './ui/loading.js';
 import initEditorScroll from './ui/editor.js';
 import { readClockFormat, setClockFormat } from './core/clockFormat.js';
 import { readDecimalPrecision, setDecimalPrecision } from './core/decimalPrecision.js';
+import { initI18n, t } from './i18n/index.js';
 
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');
@@ -78,6 +79,9 @@ contentEditableNode.addEventListener('keyup', () => rowRenderer.updateActiveLine
 // The composition root runs in a fixed order — that ordering is a contract, so
 // boot() states it explicitly rather than leaving it to line position.
 function boot() {
+  // 0. Resolve the interface language before any module builds its UI.
+  initI18n();
+
   // 1. Capture the onboarding keys BEFORE initTabs persists a fresh collection.
   const onboardingState = readOnboardingState();
 
@@ -86,7 +90,7 @@ function boot() {
 
   // 3. Features that read or seed the active sheet.
   initShare(tabsApi);
-  initHelpModal(contentEditableNode);
+  initDocsLink();
   initRecipes(contentEditableNode);
   initSettings(contentEditableNode, tabsApi);
   initFontControls(editorScroll.refreshMetrics);
@@ -120,13 +124,15 @@ window.addEventListener('currency:updated', (event) => {
   evalClient.syncRates(event.detail && event.detail.data);
   evalClient.update();
   showCurrencyStatus(
-    event.detail && event.detail.source === 'cached' ? 'rates: cached' : 'rates: live'
+    event.detail && event.detail.source === 'cached'
+      ? t('status.ratesCached')
+      : t('status.ratesLive')
   );
 });
 
 window.addEventListener('currency:error', () => {
   evalClient.update();
-  showCurrencyStatus('exchange rates unavailable');
+  showCurrencyStatus(t('status.ratesUnavailable'));
 });
 
 // Switching measurement system re-registers the volume units in the worker and

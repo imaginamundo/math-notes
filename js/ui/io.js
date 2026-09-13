@@ -1,5 +1,6 @@
 import { scrollEditorToEnd } from '../util/scroll.js';
 import { setEditorValue } from './editorInput.js';
+import { t } from '../i18n/index.js';
 
 function initIo(editableNode) {
   const exportButton = document.getElementById('export-button');
@@ -24,10 +25,7 @@ function initIo(editableNode) {
     const reader = new FileReader();
     reader.onload = () => {
       const imported = String(reader.result).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-      if (
-        editableNode.value &&
-        !window.confirm("Importing will replace the current tab's content. Continue?")
-      ) {
+      if (editableNode.value && !window.confirm(t('io.importConfirm'))) {
         return;
       }
       setEditorValue(editableNode, imported);

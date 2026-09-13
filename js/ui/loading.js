@@ -1,7 +1,9 @@
 // A "Loading…" indicator for the status bar, shown while an evaluation is in
-// flight. The three dots cycle in place so a long sheet still feels alive
-// without the text shifting the bar's layout.
-const FRAMES = ['Loading', 'Loading.', 'Loading..', 'Loading...'];
+// flight. The dots cycle in place so a long sheet still feels alive without the
+// text shifting the bar's layout.
+import { t } from '../i18n/index.js';
+
+const FRAME_COUNT = 4;
 const FRAME_DELAY = 300;
 
 function initLoadingIndicator(rootNode) {
@@ -11,8 +13,8 @@ function initLoadingIndicator(rootNode) {
   let frame = 0;
 
   function draw() {
-    if (dotsNode) dotsNode.textContent = FRAMES[frame];
-    frame = (frame + 1) % FRAMES.length;
+    if (dotsNode) dotsNode.textContent = `${t('loading.dots')}${'.'.repeat(frame)}`;
+    frame = (frame + 1) % FRAME_COUNT;
   }
 
   function show() {

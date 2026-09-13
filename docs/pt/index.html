@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Documentação · Math Notes</title>
+  <meta name="description" content="O Math Notes é uma calculadora em linha que roda inteiramente no seu navegador. Digite os cálculos linha a linha e cada resultado aparece ao lado, como uma dica esmaecida, com um total acumulado na parte de baixo. Foi inspirada no Numi e no Soulver.">
+  <link rel="canonical" href="https://math.dio.dev/docs/pt/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/">
+  <link rel="alternate" hreflang="pt" href="https://math.dio.dev/docs/pt/">
+  <link rel="alternate" hreflang="es" href="https://math.dio.dev/docs/es/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Documentação do Math Notes">
+  <meta property="og:description" content="O Math Notes é uma calculadora em linha que roda inteiramente no seu navegador. Digite os cálculos linha a linha e cada resultado aparece ao lado, como uma dica esmaecida, com um total acumulado na parte de baixo. Foi inspirada no Numi e no Soulver.">
+  <meta property="og:url" content="https://math.dio.dev/docs/pt/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/pt/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentação</span>
+    </a>
+    <div class="doc-header-actions">
+      <div class="doc-search" data-search-url="/docs/pt/search.json" data-empty="Sem resultados">
+        <input class="doc-search-input" type="search" placeholder="Pesquisar na documentação" aria-label="Pesquisar na documentação" autocomplete="off" spellcheck="false">
+        <ul class="doc-search-results" role="listbox" aria-label="Pesquisar na documentação" hidden></ul>
+      </div>
+      <nav class="doc-lang" aria-label="Idioma"><a href="/docs/" hreflang="en">English</a><a href="/docs/pt/" hreflang="pt" class="is-active" aria-current="page">Português</a><a href="/docs/es/" hreflang="es">Español</a></nav>
+      <a class="doc-app" href="/">Abrir o Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Menu da documentação</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Menu da documentação"><ul><li class="doc-nav-item is-active"><a href="/docs/pt/" aria-current="page">Início</a></li><li class="doc-nav-item"><a href="/docs/pt/getting-started/">Primeiros passos</a></li><li class="doc-nav-item"><a href="/docs/pt/writing-a-sheet/">Escrevendo uma planilha</a></li><li class="doc-nav-item"><a href="/docs/pt/numbers/">Números &amp; operadores</a></li><li class="doc-nav-item"><a href="/docs/pt/lists/">Listas &amp; sequências</a></li><li class="doc-nav-item"><a href="/docs/pt/groups/">Grupos &amp; totais</a></li><li class="doc-nav-item"><a href="/docs/pt/units/">Unidades &amp; medidas</a></li><li class="doc-nav-item"><a href="/docs/pt/money/">Dinheiro &amp; moedas</a></li><li class="doc-nav-item"><a href="/docs/pt/dates/">Datas &amp; tempo</a></li><li class="doc-nav-item"><a href="/docs/pt/files/">Arquivos, compartilhamento &amp; dados</a></li><li class="doc-nav-item"><a href="/docs/pt/settings/">Configurações &amp; aparência</a></li><li class="doc-nav-item"><a href="/docs/pt/app/">App &amp; plataforma</a></li><li class="doc-nav-item"><a href="/docs/pt/reference/">Referência</a></li><li class="doc-nav-item"><a href="/docs/pt/about/">Sobre</a></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>Documentação do Math Notes</h1>
+<p>O Math Notes é uma calculadora em linha que roda inteiramente no seu navegador. Digite os cálculos linha a linha e cada resultado aparece ao lado, como uma dica esmaecida, com um total acumulado na parte de baixo. Foi inspirada no <a href="https://numi.app">Numi</a> e no <a href="https://soulver.app">Soulver</a>.</p>
+<p>Este guia cobre todos os recursos em detalhe. Mantenha-o aberto enquanto trabalha — é a referência completa do app.</p>
+<h2 id="como-ler-este-guia">Como ler este guia<a class="doc-anchor" href="#como-ler-este-guia" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<p>Cada página foca uma área e vai do caso simples aos casos limites. Os blocos de exemplo são cálculos reais: use <strong>Copiar</strong> para levar um deles, ou <strong>Abrir no Math Notes</strong> para experimentá-lo no app em uma nova aba. Nada do que você abrir substitui a planilha que você já tem.</p>
+<p>Tudo roda localmente. Suas planilhas ficam no armazenamento do navegador e nunca são enviadas a um servidor.</p>
+<h2 id="o-que-o-math-notes-nao-e">O que o Math Notes não é<a class="doc-anchor" href="#o-que-o-math-notes-nao-e" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<p>Não é um ambiente de programação de uso geral nem uma planilha eletrônica. Ele tem um escopo por planilha, sem referências de célula por nome e sem scripts. Suas recusas são deliberadas: em vez de adivinhar, ele reporta unidades que não podem ser combinadas ou uma tag sem linhas como erros.</p>
+<ul class="doc-cards"><li><a href="/docs/pt/getting-started/"><span class="doc-card-title">Primeiros passos</span><span class="doc-card-desc">O Math Notes é uma planilha de linhas. Você escreve um cálculo por linha e a resposta aparece à direita, como uma dica esmaecida. Não há botão = nem grade de células: a planilha recalcula enquanto você digita.</span></a></li><li><a href="/docs/pt/writing-a-sheet/"><span class="doc-card-title">Escrevendo uma planilha</span><span class="doc-card-desc">Uma planilha é uma lista de linhas avaliadas de cima para baixo. Cada linha pode definir um valor, referenciar algo acima dela, ou simplesmente produzir um resultado. As variáveis vivem em um único escopo por planilha e ficam disponíveis para toda linha abaixo da definição.</span></a></li><li><a href="/docs/pt/numbers/"><span class="doc-card-title">Números &amp; operadores</span><span class="doc-card-desc">O Math Notes avalia expressões com os operadores aritméticos usuais, além de operadores em palavras, escalas numéricas e frases de arredondamento que leem como inglês.</span></a></li><li><a href="/docs/pt/lists/"><span class="doc-card-title">Listas &amp; sequências</span><span class="doc-card-desc">Listas guardam vários valores. Escreva uma com colchetes, indexe, fatie e use as funções do mathjs para agregar ou transformar. Listas e intervalos são limitados a 100 itens para que uma sequência descontrolada não trave o editor.</span></a></li><li><a href="/docs/pt/groups/"><span class="doc-card-title">Grupos &amp; totais</span><span class="doc-card-desc">O Math Notes agrega de três formas relacionadas: o total acumulado na barra de baixo, as palavras-chave de agregação (sum, average, …) que você escreve em uma linha, e os grupos nomeados que mostram um subtotal no lugar.</span></a></li><li><a href="/docs/pt/units/"><span class="doc-card-title">Unidades &amp; medidas</span><span class="doc-card-desc">Converta entre unidades com to, in ou as, nomeie o que você está medindo para converter entre dimensões, e escreva taxas naturalmente.</span></a></li><li><a href="/docs/pt/money/"><span class="doc-card-title">Dinheiro &amp; moedas</span><span class="doc-card-desc">Converta entre moedas usando códigos ISO de 3 letras ou símbolos. As taxas vêm do Banco Central Europeu via Frankfurter e ficam em cache local para que as conversões continuem funcionando offline.</span></a></li><li><a href="/docs/pt/dates/"><span class="doc-card-title">Datas &amp; tempo</span><span class="doc-card-desc">O Math Notes entende datas de calendário, horários e durações. As datas podem ser escritas de várias formas, guardadas em variáveis e combinadas com unidades de tempo.</span></a></li><li><a href="/docs/pt/files/"><span class="doc-card-title">Arquivos, compartilhamento &amp; dados</span><span class="doc-card-desc">O Math Notes guarda seu trabalho no seu dispositivo. Não há conta nem servidor: as planilhas são salvas no navegador, copiadas em um armazenamento local versionado, e compartilhadas apenas quando você escolhe.</span></a></li><li><a href="/docs/pt/settings/"><span class="doc-card-title">Configurações &amp; aparência</span><span class="doc-card-desc">Abra Configurações no rodapé. As escolhas são lembradas no navegador e aplicadas na próxima vez que você abrir o app.</span></a></li><li><a href="/docs/pt/app/"><span class="doc-card-title">App &amp; plataforma</span><span class="doc-card-desc">O Math Notes é um progressive web app: instala como um app nativo, funciona offline e respeita as preferências do seu sistema.</span></a></li><li><a href="/docs/pt/reference/"><span class="doc-card-title">Referência</span><span class="doc-card-desc">Uma referência compacta da sintaxe. Cada título aparece na barra lateral para acesso rápido.</span></a></li><li><a href="/docs/pt/about/"><span class="doc-card-title">Sobre</span><span class="doc-card-desc">O Math Notes é uma calculadora em linha no navegador, inspirada no Numi e no Soulver. Seu código é aberto — veja o repositório no GitHub.</span></a></li></ul>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — uma calculadora em linha no navegador.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

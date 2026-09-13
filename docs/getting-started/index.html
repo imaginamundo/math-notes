@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Getting started · Documentation · Math Notes</title>
+  <meta name="description" content="Math Notes is a sheet of lines. You write one calculation per line and the answer appears to the right of it as a dimmed hint. There is no = button and no cell grid: the sheet recalculates as you type.">
+  <link rel="canonical" href="https://math.dio.dev/docs/getting-started/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/getting-started/">
+  <link rel="alternate" hreflang="pt" href="https://math.dio.dev/docs/pt/getting-started/">
+  <link rel="alternate" hreflang="es" href="https://math.dio.dev/docs/es/getting-started/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/getting-started/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Getting started">
+  <meta property="og:description" content="Math Notes is a sheet of lines. You write one calculation per line and the answer appears to the right of it as a dimmed hint. There is no = button and no cell grid: the sheet recalculates as you type.">
+  <meta property="og:url" content="https://math.dio.dev/docs/getting-started/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentation</span>
+    </a>
+    <div class="doc-header-actions">
+      <div class="doc-search" data-search-url="/docs/search.json" data-empty="No results">
+        <input class="doc-search-input" type="search" placeholder="Search the documentation" aria-label="Search the documentation" autocomplete="off" spellcheck="false">
+        <ul class="doc-search-results" role="listbox" aria-label="Search the documentation" hidden></ul>
+      </div>
+      <nav class="doc-lang" aria-label="Language"><a href="/docs/getting-started/" hreflang="en" class="is-active" aria-current="page">English</a><a href="/docs/pt/getting-started/" hreflang="pt">Português</a><a href="/docs/es/getting-started/" hreflang="es">Español</a></nav>
+      <a class="doc-app" href="/">Open Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Documentation menu</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Documentation menu"><ul><li class="doc-nav-item"><a href="/docs/">Home</a></li><li class="doc-nav-item is-active"><a href="/docs/getting-started/" aria-current="page">Getting started</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">On this page</li><li><a href="#the-screen">The screen</a></li><li><a href="#results">Results</a></li><li><a href="#editing">Editing</a></li><li><a href="#autocomplete">Autocomplete</a></li><li><a href="#first-run">First run</a></li><li><a href="#offline">Offline</a></li></ul></li><li class="doc-nav-item"><a href="/docs/writing-a-sheet/">Writing a sheet</a></li><li class="doc-nav-item"><a href="/docs/numbers/">Numbers &amp; operators</a></li><li class="doc-nav-item"><a href="/docs/lists/">Lists &amp; sequences</a></li><li class="doc-nav-item"><a href="/docs/groups/">Groups &amp; totals</a></li><li class="doc-nav-item"><a href="/docs/units/">Units &amp; measures</a></li><li class="doc-nav-item"><a href="/docs/money/">Money &amp; currencies</a></li><li class="doc-nav-item"><a href="/docs/dates/">Dates &amp; time</a></li><li class="doc-nav-item"><a href="/docs/files/">Files, sharing &amp; data</a></li><li class="doc-nav-item"><a href="/docs/settings/">Settings &amp; appearance</a></li><li class="doc-nav-item"><a href="/docs/app/">App &amp; platform</a></li><li class="doc-nav-item"><a href="/docs/reference/">Reference</a></li><li class="doc-nav-item"><a href="/docs/about/">About</a></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>Getting started</h1>
+<p>Math Notes is a sheet of lines. You write one calculation per line and the answer appears to the right of it as a dimmed hint. There is no <strong>=</strong> button and no cell grid: the sheet recalculates as you type.</p>
+<figure class="doc-example" data-expr="1 + 1"><pre class="doc-code"><code data-calc>1 + 1</code></pre><figcaption class="doc-example-result">returns 2</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><figure class="doc-example" data-expr="2 * 3 + 1"><pre class="doc-code"><code data-calc>2 * 3 + 1</code></pre><figcaption class="doc-example-result">returns 7</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>A line can be a plain number, an expression, an assignment, a comment, or a label followed by an expression. The result of the last line is also shown in the total bar at the bottom.</p>
+<h2 id="the-screen">The screen<a class="doc-anchor" href="#the-screen" aria-label="Link to this section" title="Link to this section">#</a></h2>
+<ul>
+<li>The <strong>editor</strong> is the large text area. Its ghost layer shows results, tags and errors in place.</li>
+<li>The <strong>total bar</strong> sits under the editor and aggregates the sheet. Use its dropdown to switch between <strong>total</strong>, <strong>average</strong> and <strong>median</strong>.</li>
+<li>The <strong>footer</strong> holds text-size controls and the <strong>Share</strong>, <strong>Settings</strong>, <strong>Examples</strong> and <strong>Documentation</strong> buttons.</li>
+<li>The <strong>tabs bar</strong> at the top holds separate sheets (see <a href="/docs/files/">Files, sharing &amp; data</a>).</li>
+</ul>
+<h2 id="results">Results<a class="doc-anchor" href="#results" aria-label="Link to this section" title="Link to this section">#</a></h2>
+<p>Results are formatted with thousands separators and written with the unit or currency they carry.</p>
+<figure class="doc-example" data-expr="1000000"><pre class="doc-code"><code data-calc>1000000</code></pre><figcaption class="doc-example-result">1,000,000</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><figure class="doc-example" data-expr="1cm to m"><pre class="doc-code"><code data-calc>1cm to m</code></pre><figcaption class="doc-example-result">0.01 m</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>By default a result shows up to <strong>3 decimal places</strong>. A value with more precision ends with an ellipsis, while the calculation itself keeps full precision. Change this in <strong>Settings → Decimal precision</strong> (see <a href="/docs/settings/">Settings &amp; appearance</a>).</p>
+<p>When a line cannot be evaluated, the error appears inline in red. Errors never stop the rest of the sheet from evaluating.</p>
+<h2 id="editing">Editing<a class="doc-anchor" href="#editing" aria-label="Link to this section" title="Link to this section">#</a></h2>
+<ul>
+<li><strong>Indentation</strong> — <code>Tab</code> indents the current line or a multi-line selection, <code>Shift+Tab</code> outdents it. Indentation is two spaces and does not change how a line is evaluated.</li>
+<li><strong>Comment a line</strong> — click a line&#39;s number in the left gutter to comment or uncomment it. A line that already starts with <code>##</code> just loses one <code>#</code>.</li>
+<li><strong>Line numbers</strong> — the left gutter numbers the sheet and highlights the line the caret is on.</li>
+<li><strong>Undo / redo</strong> — <code>⌘Z</code> / <code>Ctrl+Z</code> and <code>⇧⌘Z</code> / <code>Ctrl+Shift+Z</code>, with a separate history for every tab.</li>
+<li><strong>Jump to line</strong> — <code>⌘G</code> / <code>Ctrl+G</code>, then type a line number.</li>
+<li><strong>Find &amp; replace</strong> — <code>⌘F</code> / <code>Ctrl+F</code> searches the active sheet with live match highlighting, then replaces one or all matches.</li>
+<li><strong>Text size</strong> — the footer&#39;s <strong>−</strong> / <strong>+</strong> step the editor between 50% and 200% of your browser&#39;s default font size; <strong>Reset size</strong> returns to 100%.</li>
+</ul>
+<h2 id="autocomplete">Autocomplete<a class="doc-anchor" href="#autocomplete" aria-label="Link to this section" title="Link to this section">#</a></h2>
+<p>As you type, a popup suggests the sheet&#39;s variables and <code>#tags</code> plus the built-in functions, keywords, constants and units. Press <code>Ctrl+Space</code> to open it on demand. <code>↑</code>/<code>↓</code> choose, <code>Enter</code>/<code>Tab</code> insert, <code>Esc</code> dismisses.</p>
+<h2 id="first-run">First run<a class="doc-anchor" href="#first-run" aria-label="Link to this section" title="Link to this section">#</a></h2>
+<p>A first visit opens with a working <strong>Welcome</strong> sheet instead of an empty page — variables, labels, <code>sum</code>, tags, unit durations, percentages and dates. Use its <strong>Keep content</strong> / <strong>Clear content</strong> buttons to dismiss it or empty the sheet.</p>
+<h2 id="offline">Offline<a class="doc-anchor" href="#offline" aria-label="Link to this section" title="Link to this section">#</a></h2>
+<p>Math Notes is an installable PWA. After the first visit a service worker keeps the app available offline; currency rates are cached so conversions keep working too. See <a href="/docs/app/">App &amp; platform</a>.</p>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — a browser-based inline calculator.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,33 +1,41 @@
 import storage from '../util/storage.js';
+import { t } from '../i18n/index.js';
 
 const ONBOARDED_KEY = 'math-notes-onboarded';
 const TABS_KEY = 'math-notes-tabs';
 
-// A working mini-tutorial rather than a wall of prose: every line below
-// evaluates, so the very first screen already demonstrates the app's range —
-// variables, labels and `sum`, tags, unit durations, percentages and dates — in
-// a sheet short enough (17 lines) to fit on one screen.
-const STARTER_SHEET = [
-  '# Welcome! Every line is evaluated; the result appears on the right.',
-  'people = 4',
-  'slices = 12',
-  'slices / people',
-  '',
-  '# A label names a line; `sum` totals the block above:',
-  'Coffee: 3.40',
-  'Lunch: 12.90',
-  'sum',
-  '',
-  '# Tags name rows; a bare #tag totals them:',
-  '20 #food',
-  '15 #food',
-  '#food',
-  '3 days + 4 hours in hours',
-  '15% of 240',
-  'today + 2 weeks',
-].join('\n');
+// A working mini-tutorial rather than a wall of prose: every line evaluates, so
+// the very first screen demonstrates the app. The comment lines follow the
+// interface language; the expressions stay in the calculator's language.
+function starterSheet() {
+  return [
+    t('starter.welcomeComment'),
+    'people = 4',
+    'slices = 12',
+    'slices / people',
+    '',
+    t('starter.labelComment'),
+    'Coffee: 3.40',
+    'Lunch: 12.90',
+    'sum',
+    '',
+    t('starter.tagComment'),
+    '20 #food',
+    '15 #food',
+    '#food',
+    '3 days + 4 hours in hours',
+    '15% of 240',
+    'today + 2 weeks',
+  ].join('\n');
+}
 
-const STARTER_NAME = 'Welcome';
+// The exact content seeded this session, so the prompt keeps recognising it
+// even if the interface language changes afterwards.
+let seededSheet = null;
+
+function isStarterSheet(content) {
+  return content === (seededSheet === null ? starterSheet() : seededSheet);
+}
 
 function readStorage(key) {
   return storage.get(key);
@@ -86,8 +94,10 @@ function initOnboarding(editableNode, tabsApi, storedState) {
   // Set the flag BEFORE seeding, so a crash mid-seed cannot loop the user
   // through onboarding on every reload.
   writeStorage(ONBOARDED_KEY, '1');
-  tabsApi.seedSheet({ name: STARTER_NAME, content: STARTER_SHEET });
+  const sheet = starterSheet();
+  seededSheet = sheet;
+  tabsApi.seedSheet({ name: t('starter.name'), content: sheet });
 }
 
-export { isFirstRun, readOnboardingState, STARTER_SHEET, STARTER_NAME, ONBOARDED_KEY };
+export { isFirstRun, readOnboardingState, starterSheet, isStarterSheet, ONBOARDED_KEY };
 export default initOnboarding;

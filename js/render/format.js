@@ -1,15 +1,18 @@
 import parseLine from '../core/parseLine.js';
 import { SYMBOL_SOURCE } from '../core/currencySymbols.js';
 import { anchoredNamePattern } from '../core/multiWordVariables.js';
+import { IDENTIFIER_SRC, TAG_NAME_SRC } from '../core/identifiers.js';
 
 const RULES = {
   whitespace: /^\s+/,
   number: /^\d*\.?\d+(e[+-]?\d+)?/i,
   currency: new RegExp(`^(?:${SYMBOL_SOURCE})`),
-  identifier: /^[A-Za-z_][A-Za-z0-9_]*/,
+  identifier: new RegExp(`^${IDENTIFIER_SRC}`, 'u'),
   operator: /^[+\-*/^=(),%!<>]/,
   reference: /^line\s*\(\s*\d+\s*\)/,
 };
+
+const TAG_TOKEN = new RegExp(`^#(${TAG_NAME_SRC})`, 'u');
 
 function createWrapper(type, text) {
   const wrapper = document.createElement('span');
@@ -53,7 +56,7 @@ function line(text, names = []) {
 function appendTags(wrapper, tail) {
   let rest = tail;
   while (rest) {
-    const tagMatch = /^#([A-Za-z0-9_-]+)/.exec(rest);
+    const tagMatch = TAG_TOKEN.exec(rest);
     if (tagMatch) {
       wrapper.appendChild(tag(tagMatch[0]));
       rest = rest.slice(tagMatch[0].length);

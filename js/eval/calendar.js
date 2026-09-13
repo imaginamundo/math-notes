@@ -14,6 +14,7 @@
 
 import parseLine from '../core/parseLine.js';
 import { getClockFormat } from '../core/clockFormat.js';
+import { IDENTIFIER_SRC } from '../core/identifiers.js';
 
 const MONTHS = {
   january: 1,
@@ -599,7 +600,7 @@ const DATE_SRC =
   `|\\d{1,2}(?:st|nd|rd|th)?\\s+(?:${MONTH_WORD})(?:,?\\s+\\d{4})?` +
   `|\\d{4}-\\d{1,2}-\\d{1,2}|\\d{1,2}[./]\\d{1,2}[./]\\d{2,4})`;
 // A date, or a variable that holds one (`start = March 4`, then `start + 2 weeks`).
-const IDENT = '[A-Za-z_][A-Za-z0-9_]*';
+const IDENT = IDENTIFIER_SRC;
 const DATE_OR_IDENT = `(?:${DATE_SRC}|${IDENT})`;
 // Duration units, full names and the timespan shorthand (`4h 3m 5s`). The long
 // forms come first so `minutes` is not read as `m` + `inutes`.
@@ -617,12 +618,12 @@ const CLOCK_SRC =
 
 const DATE_ONLY = new RegExp(`^(${DATE_SRC})$`, 'i');
 const DATE_LITERAL = new RegExp(`^(?:${DATE_SRC})$`, 'i');
-const IDENT_ONLY = new RegExp(`^${IDENT}$`);
+const IDENT_ONLY = new RegExp(`^${IDENT}$`, 'u');
 const DATE_PAIR = new RegExp(`^(${DATE_SRC})\\s*(?:-|to)\\s*(${DATE_SRC})$`, 'i');
-const DATE_DURATION = new RegExp(`^(${DATE_OR_IDENT})\\s*([+-])\\s*(${DURATION_SRC})$`, 'i');
+const DATE_DURATION = new RegExp(`^(${DATE_OR_IDENT})\\s*([+-])\\s*(${DURATION_SRC})$`, 'iu');
 const DURATION_DATE = new RegExp(
   `^(${DURATION_SRC})\\s+(after|before)\\s+(${DATE_OR_IDENT})$`,
-  'i'
+  'iu'
 );
 const DURATION_FROM = new RegExp(`^(${DURATION_SRC})\\s+from\\s+(now|today)$`, 'i');
 const DURATION_AGO = new RegExp(`^(${DURATION_SRC})\\s+ago$`, 'i');
@@ -630,36 +631,36 @@ const DATE_AS = new RegExp(`^(${DATE_SRC})\\s+as\\s+(.+)$`, 'i');
 const DAYS_VERB = /^days\s+(until|till|since|between)\s+(.+)$/i;
 const INCLUSIVE = new RegExp(
   `^(${DATE_OR_IDENT})\\s+through\\s+(${DATE_OR_IDENT})\\s+in\\s+days?$`,
-  'i'
+  'iu'
 );
 const MIDPOINT = new RegExp(
   `^(?:midpoint|halfway)\\s+between\\s+(${DATE_OR_IDENT})\\s+and\\s+(${DATE_OR_IDENT})$`,
-  'i'
+  'iu'
 );
 const DAYS_IN_MONTH = new RegExp(`^days\\s+in\\s+(${MONTH_YEAR_SRC})$`, 'i');
 const DAYS_IN_QUARTER = /^days\s+in\s+Q([1-4])$/i;
-const DAY_NUMBER = new RegExp(`^day\\s+(?:number|of\\s+year)\\s+on\\s+(${DATE_OR_IDENT})$`, 'i');
-const DAY_OF_MONTH = new RegExp(`^day\\s+of\\s+month\\s+on\\s+(${DATE_OR_IDENT})$`, 'i');
-const WEEK_NUMBER = new RegExp(`^week\\s+number\\s+on\\s+(${DATE_OR_IDENT})$`, 'i');
+const DAY_NUMBER = new RegExp(`^day\\s+(?:number|of\\s+year)\\s+on\\s+(${DATE_OR_IDENT})$`, 'iu');
+const DAY_OF_MONTH = new RegExp(`^day\\s+of\\s+month\\s+on\\s+(${DATE_OR_IDENT})$`, 'iu');
+const WEEK_NUMBER = new RegExp(`^week\\s+number\\s+on\\s+(${DATE_OR_IDENT})$`, 'iu');
 const WEEK_OF_YEAR = /^week\s+of\s+year$/i;
-const DATE_AND_DATE = new RegExp(`^(${DATE_OR_IDENT})\\s+and\\s+(${DATE_OR_IDENT})$`, 'i');
+const DATE_AND_DATE = new RegExp(`^(${DATE_OR_IDENT})\\s+and\\s+(${DATE_OR_IDENT})$`, 'iu');
 const WORKDAYS_IN = /^workdays\s+in\s+(.+)$/i;
 const WORKDAYS_RANGE = new RegExp(
   `^(${DATE_OR_IDENT})\\s+to\\s+(${DATE_OR_IDENT})\\s+in\\s+workdays$`,
-  'i'
+  'iu'
 );
 const WORKDAYS_FROM = new RegExp(
   `^workdays\\s+from\\s+(${DATE_OR_IDENT})\\s+to\\s+(${DATE_OR_IDENT})$`,
-  'i'
+  'iu'
 );
-const ADD_WORKDAYS = new RegExp(`^(${DATE_OR_IDENT})\\s*([+-])\\s*(\\d+)\\s+workdays$`, 'i');
+const ADD_WORKDAYS = new RegExp(`^(${DATE_OR_IDENT})\\s*([+-])\\s*(\\d+)\\s+workdays$`, 'iu');
 const WORKDAYS_REL = new RegExp(
   `^(\\d+)\\s+workdays\\s+(after|before)\\s+(${DATE_OR_IDENT})$`,
-  'i'
+  'iu'
 );
 const WEEKDAY_ON = new RegExp(
   `^(?:day\\s+of\\s+the\\s+week|weekday)\\s+on\\s+(${DATE_OR_IDENT})$`,
-  'i'
+  'iu'
 );
 const WORK_HOURS_IN = /^work\s+hours\s+in\s+(.+)$/i;
 // `work hours in June [2026]` can appear inside a larger expression (`* 25 EUR`,
@@ -672,7 +673,7 @@ const WORK_HOURS_IN_PHRASE = new RegExp(
 );
 const WORK_HOURS_BETWEEN = new RegExp(
   `^work\\s+hours\\s+between\\s+(${DATE_OR_IDENT})\\s+and\\s+(${DATE_OR_IDENT})$`,
-  'i'
+  'iu'
 );
 
 const CLOCK_ONLY = new RegExp(`^(${CLOCK_SRC})$`, 'i');

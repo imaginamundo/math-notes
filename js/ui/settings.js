@@ -6,6 +6,7 @@ import { FONT_KEY } from './cosmetic.js';
 import { STORAGE_KEY as TABS_KEY, LEGACY_KEY as LEGACY_TABS_KEY } from './tabs.js';
 import { STORAGE_KEY as CURRENCY_KEY } from '../eval/currency.js';
 import { MEASUREMENT_SYSTEMS } from '../core/measures.js';
+import { SUPPORTED_LANGUAGES } from '../core/language.js';
 import {
   STORAGE_KEY as MEASUREMENT_KEY,
   readMeasurementSystem,
@@ -25,6 +26,7 @@ import {
   readClockFormat,
   writeClockFormat,
 } from '../core/clockFormat.js';
+import { t, getLocale, setLocale } from '../i18n/index.js';
 
 const STORAGE_KEY = 'math-notes-theme';
 // "Reset data" must clear exactly the keys the app's modules own, imported
@@ -51,6 +53,14 @@ const THEMES = [
   { id: 'monokai', name: 'Monokai', swatch: ['#272822', '#2d2d26', '#f8f8f2'] },
   { id: 'light', name: 'Light', swatch: ['#ffffff', '#eef0f4', '#383a42'] },
 ];
+
+const MEASUREMENT_KEYS = {
+  metric: 'measurement.metric',
+  us: 'measurement.us',
+  imperial: 'measurement.imperial',
+};
+const CLOCK_KEYS = { 24: 'clock.24', 12: 'clock.12' };
+const LANGUAGE_KEYS = { en: 'language.en', pt: 'language.pt', es: 'language.es' };
 
 function currentTheme() {
   return document.documentElement.dataset.theme || 'one-dark';
@@ -113,15 +123,12 @@ function initSettings(contentEditableNode, tabsApi) {
   }
   renderActive();
 
-  const MEASUREMENT_NAMES = { metric: 'Metric', us: 'US customary', imperial: 'Imperial' };
   const measurementNode = modal.querySelector('.settings-measurement');
   MEASUREMENT_SYSTEMS.forEach((system) => {
     const card = document.createElement('button');
     card.type = 'button';
     card.className = 'measurement-card';
     card.dataset.system = system;
-    card.textContent = MEASUREMENT_NAMES[system] || system;
-    card.title = `Use ${MEASUREMENT_NAMES[system] || system} volume units`;
     card.addEventListener('click', () => {
       writeMeasurementSystem(system);
       renderMeasurement();
@@ -149,15 +156,12 @@ function initSettings(contentEditableNode, tabsApi) {
     window.dispatchEvent(new CustomEvent('precision:updated', { detail: value }));
   });
 
-  const CLOCK_NAMES = { 24: '24-hour', 12: '12-hour' };
   const clockNode = modal.querySelector('.settings-clock');
   CLOCK_FORMATS.forEach((format) => {
     const card = document.createElement('button');
     card.type = 'button';
     card.className = 'measurement-card';
     card.dataset.format = format;
-    card.textContent = CLOCK_NAMES[format];
-    card.title = `Show clock times in ${CLOCK_NAMES[format]} format`;
     card.addEventListener('click', () => {
       writeClockFormat(format);
       renderClock();
@@ -174,9 +178,65 @@ function initSettings(contentEditableNode, tabsApi) {
   }
   renderClock();
 
+  const languageNode = modal.querySelector('.settings-language');
+  SUPPORTED_LANGUAGES.forEach((code) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'measurement-card';
+    card.dataset.lang = code;
+    card.addEventListener('click', () => {
+      setLocale(code);
+      renderLanguage();
+    });
+    languageNode.appendChild(card);
+  });
+
+  function renderLanguage() {
+    const current = getLocale();
+    languageNode.querySelectorAll('.measurement-card').forEach((card) => {
+      card.classList.toggle('active', card.dataset.lang === current);
+    });
+  }
+  renderLanguage();
+
+  // Text (and titles) that depend on the active language. Re-run on change.
+  function renderLabels() {
+    THEMES.forEach((theme) => {
+      const card = listNode.querySelector(`.theme-card[data-theme="${theme.id}"]`);
+      if (card) card.title = t('apply.theme', { name: theme.name });
+    });
+    MEASUREMENT_SYSTEMS.forEach((system) => {
+      const card = measurementNode.querySelector(`.measurement-card[data-system="${system}"]`);
+      if (card) {
+        card.textContent = t(MEASUREMENT_KEYS[system]);
+        card.title = t('apply.measurement', { name: t(MEASUREMENT_KEYS[system]) });
+      }
+    });
+    CLOCK_FORMATS.forEach((format) => {
+      const card = clockNode.querySelector(`.measurement-card[data-format="${format}"]`);
+      if (card) {
+        card.textContent = t(CLOCK_KEYS[format]);
+        card.title = t('apply.clock', { name: t(CLOCK_KEYS[format]) });
+      }
+    });
+    SUPPORTED_LANGUAGES.forEach((code) => {
+      const card = languageNode.querySelector(`.measurement-card[data-lang="${code}"]`);
+      if (card) {
+        card.textContent = t(LANGUAGE_KEYS[code]);
+        card.title = t('apply.language', { name: t(LANGUAGE_KEYS[code]) });
+      }
+    });
+  }
+  renderLabels();
+
+  window.addEventListener('language:updated', () => {
+    renderLabels();
+    renderSnapshots();
+  });
+
   const resetButton = document.getElementById('reset-data-button');
   resetButton.addEventListener('click', async () => {
-    if (!window.confirm('This will reset the theme, tabs and all stored data. Continue?')) return;
+    if (!window.confirm(t('settings.resetConfirm'))) return;
     RESET_KEYS.forEach((key) => storage.remove(key));
     try {
       const { clearSnapshots } = await import('../storage/snapshots.js');
@@ -200,7 +260,7 @@ function initSettings(contentEditableNode, tabsApi) {
     container.textContent = '';
     restoreAllButton.disabled = !snapshots.length;
     if (!snapshots.length) {
-      container.textContent = 'No snapshots yet. They appear a few seconds after you edit a tab.';
+      container.textContent = t('settings.noSnapshots');
       return;
     }
     for (const snapshot of snapshots) {
@@ -212,10 +272,10 @@ function initSettings(contentEditableNode, tabsApi) {
 
       const restore = document.createElement('button');
       restore.type = 'button';
-      restore.textContent = 'Restore';
+      restore.textContent = t('settings.restore');
       restore.addEventListener('click', () => {
         const confirm = window.confirm(
-          `Restore "${snapshot.name}" from ${timeAgo(snapshot.timestamp)}? This replaces its current content.`
+          t('settings.restoreConfirm', { name: snapshot.name, ago: timeAgo(snapshot.timestamp) })
         );
         if (confirm) tabsApi.restoreTab(snapshot);
       });
@@ -226,22 +286,19 @@ function initSettings(contentEditableNode, tabsApi) {
     }
     restoreAllButton.onclick = () => {
       if (!snapshots.length) return;
-      const confirm = window.confirm(
-        'Replace all tabs with the latest snapshot of each? This discards the current tabs.'
-      );
-      if (confirm) tabsApi.restoreAll(snapshots);
+      if (window.confirm(t('settings.restoreAllConfirm'))) tabsApi.restoreAll(snapshots);
     };
   }
 }
 
 function timeAgo(timestamp) {
   const seconds = Math.floor((Date.now() - timestamp) / 1000);
-  if (seconds < 60) return 'just now';
+  if (seconds < 60) return t('time.justNow');
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return t('time.minutesAgo', { n: minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
+  if (hours < 24) return t('time.hoursAgo', { n: hours });
+  return t('time.daysAgo', { n: Math.floor(hours / 24) });
 }
 
 export default initSettings;

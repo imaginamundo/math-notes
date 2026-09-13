@@ -1,5 +1,7 @@
 // A quick "Go to line" bar, styled like the find bar (it reuses .find-bar's
 // visuals) but anchored to the content start. Opened with Cmd/Ctrl+G.
+import { t } from '../i18n/index.js';
+
 function initGoToLine(editableNode) {
   const barNode = buildBar();
   editableNode.parentElement.appendChild(barNode);
@@ -7,6 +9,17 @@ function initGoToLine(editableNode) {
   const inputNode = barNode.querySelector('.go-to-input');
   const countNode = barNode.querySelector('.go-to-count');
   const closeNode = barNode.querySelector('.go-to-close');
+  const labelNode = barNode.querySelector('.go-to-label');
+
+  function refreshLabels() {
+    barNode.setAttribute('aria-label', t('goto.label'));
+    labelNode.textContent = t('goto.label');
+    inputNode.setAttribute('aria-label', t('goto.lineNumber'));
+    closeNode.title = t('find.close');
+    closeNode.setAttribute('aria-label', t('find.close'));
+  }
+  refreshLabels();
+  window.addEventListener('language:updated', refreshLabels);
 
   function totalLines() {
     return editableNode.value.split('\n').length;

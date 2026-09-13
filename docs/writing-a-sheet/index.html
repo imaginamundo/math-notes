@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Writing a sheet · Documentation · Math Notes</title>
+  <meta name="description" content="A sheet is a list of lines evaluated from top to bottom. Each line can define a value, reference something above it, or simply produce a result. Variables live in one scope per sheet and are available to every line below their definition.">
+  <link rel="canonical" href="https://math.dio.dev/docs/writing-a-sheet/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/writing-a-sheet/">
+  <link rel="alternate" hreflang="pt" href="https://math.dio.dev/docs/pt/writing-a-sheet/">
+  <link rel="alternate" hreflang="es" href="https://math.dio.dev/docs/es/writing-a-sheet/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/writing-a-sheet/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Writing a sheet">
+  <meta property="og:description" content="A sheet is a list of lines evaluated from top to bottom. Each line can define a value, reference something above it, or simply produce a result. Variables live in one scope per sheet and are available to every line below their definition.">
+  <meta property="og:url" content="https://math.dio.dev/docs/writing-a-sheet/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentation</span>
+    </a>
+    <div class="doc-header-actions">
+      <div class="doc-search" data-search-url="/docs/search.json" data-empty="No results">
+        <input class="doc-search-input" type="search" placeholder="Search the documentation" aria-label="Search the documentation" autocomplete="off" spellcheck="false">
+        <ul class="doc-search-results" role="listbox" aria-label="Search the documentation" hidden></ul>
+      </div>
+      <nav class="doc-lang" aria-label="Language"><a href="/docs/writing-a-sheet/" hreflang="en" class="is-active" aria-current="page">English</a><a href="/docs/pt/writing-a-sheet/" hreflang="pt">Português</a><a href="/docs/es/writing-a-sheet/" hreflang="es">Español</a></nav>
+      <a class="doc-app" href="/">Open Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Documentation menu</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Documentation menu"><ul><li class="doc-nav-item"><a href="/docs/">Home</a></li><li class="doc-nav-item"><a href="/docs/getting-started/">Getting started</a></li><li class="doc-nav-item is-active"><a href="/docs/writing-a-sheet/" aria-current="page">Writing a sheet</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">On this page</li><li><a href="#comments-and-labels">Comments and labels</a></li><li><a href="#tags">Tags</a></li><li><a href="#variables">Variables</a></li><li><a href="#objects">Objects</a></li><li><a href="#references">References</a></li><li><a href="#reserved-words">Reserved words</a></li><li><a href="#blank-lines">Blank lines</a></li></ul></li><li class="doc-nav-item"><a href="/docs/numbers/">Numbers &amp; operators</a></li><li class="doc-nav-item"><a href="/docs/lists/">Lists &amp; sequences</a></li><li class="doc-nav-item"><a href="/docs/groups/">Groups &amp; totals</a></li><li class="doc-nav-item"><a href="/docs/units/">Units &amp; measures</a></li><li class="doc-nav-item"><a href="/docs/money/">Money &amp; currencies</a></li><li class="doc-nav-item"><a href="/docs/dates/">Dates &amp; time</a></li><li class="doc-nav-item"><a href="/docs/files/">Files, sharing &amp; data</a></li><li class="doc-nav-item"><a href="/docs/settings/">Settings &amp; appearance</a></li><li class="doc-nav-item"><a href="/docs/app/">App &amp; platform</a></li><li class="doc-nav-item"><a href="/docs/reference/">Reference</a></li><li class="doc-nav-item"><a href="/docs/about/">About</a></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>Writing a sheet</h1>
+<p>A sheet is a list of lines evaluated from top to bottom. Each line can define a value, reference something above it, or simply produce a result. Variables live in one scope per sheet and are available to every line below their definition.</p>
+<h2 id="comments-and-labels">Comments and labels<a class="doc-anchor" href="#comments-and-labels" aria-label="Link to this section" title="Link to this section">#</a></h2>
+<p>Everything after a <code>#</code> followed by a space is a comment and is ignored.</p>
+<figure class="doc-example" data-expr="2 + 2 # this is a note"><pre class="doc-code"><code data-calc>2 + 2 # this is a note</code></pre><figcaption class="doc-example-result">returns 4</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>A <code>label:</code> before an expression names the line without being evaluated. This is handy for reminding yourself what a line means.</p>
+<figure class="doc-example" data-expr="Price: 10 + 5"><pre class="doc-code"><code data-calc>Price: 10 + 5</code></pre><figcaption class="doc-example-result">returns 15</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>A single <code>#</code> at the very start of a line also works as a comment.</p>
+<h2 id="tags">Tags<a class="doc-anchor" href="#tags" aria-label="Link to this section" title="Link to this section">#</a></h2>
+<p>With no space after the <code>#</code>, a word is a <strong>tag</strong> rather than a comment. Tags label lines so you can total them elsewhere.</p>
+<figure class="doc-example" data-expr="20 #food
+30 #food
+#food"><pre class="doc-code"><code data-calc>20 #food
+30 #food
+#food</code></pre><figcaption class="doc-example-result">last line returns 50</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>A line that is only tags shows their total, and <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> (optionally followed by <code>of</code>) does the same. Tagged lines are summed wherever they appear, above or below the request.</p>
+<figure class="doc-example" data-expr="20 #food
+30 #food
+#food * 2"><pre class="doc-code"><code data-calc>20 #food
+30 #food
+#food * 2</code></pre><figcaption class="doc-example-result">last line returns 100</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>Tags can be used directly in calculations: <code>#food * 2</code>, <code>#food + #other</code>. Requesting a tag with no tagged lines is reported as an error.</p>
+<p>A row with several tags is the <strong>full amount split equally</strong> between them. So <code>burger: 2 * 50 #ana #bob</code> gives each tag 50 while the row keeps its full 100.</p>
+<figure class="doc-example" data-expr="burger: 2 * 50 #ana #bob
+#ana
+#bob"><pre class="doc-code"><code data-calc>burger: 2 * 50 #ana #bob
+#ana
+#bob</code></pre><figcaption class="doc-example-result">each tag gets 50</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><h2 id="variables">Variables<a class="doc-anchor" href="#variables" aria-label="Link to this section" title="Link to this section">#</a></h2>
+<p>Assign a value with <code>=</code> and reuse it on later lines.</p>
+<figure class="doc-example" data-expr="pizzas = 2
+pizzaPrice = 30
+people = 4
+(pizzas * pizzaPrice) / people"><pre class="doc-code"><code data-calc>pizzas = 2
+pizzaPrice = 30
+people = 4
+(pizzas * pizzaPrice) / people</code></pre><figcaption class="doc-example-result">last line returns 15</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>Variable names can contain spaces. A multi-word name must be consistent: <code>monthly rent</code> is one name, not <code>monthly</code> and <code>rent</code>.</p>
+<figure class="doc-example" data-expr="monthly rent = 1500
+monthly rent * 12"><pre class="doc-code"><code data-calc>monthly rent = 1500
+monthly rent * 12</code></pre><figcaption class="doc-example-result">last line returns 18,000</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>You can store a function with <code>f(x) = …</code> and call it later.</p>
+<figure class="doc-example" data-expr="double = f(x) = x * 2
+double(21)"><pre class="doc-code"><code data-calc>double = f(x) = x * 2
+double(21)</code></pre><figcaption class="doc-example-result">last line returns 42</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><h2 id="objects">Objects<a class="doc-anchor" href="#objects" aria-label="Link to this section" title="Link to this section">#</a></h2>
+<p>An object groups named values, and a dot reaches a field.</p>
+<figure class="doc-example" data-expr="invoice = {subtotal: 120, tax: 12}
+invoice.subtotal + invoice.tax"><pre class="doc-code"><code data-calc>invoice = {subtotal: 120, tax: 12}
+invoice.subtotal + invoice.tax</code></pre><figcaption class="doc-example-result">last line returns 132</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><h2 id="references">References<a class="doc-anchor" href="#references" aria-label="Link to this section" title="Link to this section">#</a></h2>
+<p><code>line(n)</code> uses the result of line <code>n</code>. Only lines above can be referenced, and the value shows in place of the token while the caret is elsewhere (the raw <code>line(3)</code> reappears while you edit that line).</p>
+<figure class="doc-example" data-expr="5
+line(1) * 2"><pre class="doc-code"><code data-calc>5
+line(1) * 2</code></pre><figcaption class="doc-example-result">last line returns 10</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p><code>prev</code> refers to the most recent result above it. It skips comments and blank lines.</p>
+<figure class="doc-example" data-expr="20
+prev * 4"><pre class="doc-code"><code data-calc>20
+prev * 4</code></pre><figcaption class="doc-example-result">last line returns 80</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><figure class="doc-example" data-expr="10
+# a comment in between
+prev + 1"><pre class="doc-code"><code data-calc>10
+# a comment in between
+prev + 1</code></pre><figcaption class="doc-example-result">last line returns 11</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><h2 id="reserved-words">Reserved words<a class="doc-anchor" href="#reserved-words" aria-label="Link to this section" title="Link to this section">#</a></h2>
+<p>A few names cannot be used as variables:</p>
+<ul>
+<li><code>prev</code> (the previous result)</li>
+<li>the unconditional date words <code>today</code>, <code>now</code>, <code>yesterday</code>, <code>tomorrow</code>, <code>christmas</code>, <code>halloween</code></li>
+<li>any name starting with <code>__</code> (the editor&#39;s internal helpers)</li>
+<li><code>end</code> closes a group</li>
+</ul>
+<p>Variables otherwise share one scope with the built-in names, so a variable can shadow a unit or function: after <code>m = 5</code>, <code>2 m</code> is <code>2 × m</code>, not two metres. The aggregate keywords <code>sum</code>, <code>total</code>, <code>average</code> and <code>avg</code> work the same way: after <code>total = 5</code>, a later <code>total</code> line reads the variable instead of aggregating.</p>
+<h2 id="blank-lines">Blank lines<a class="doc-anchor" href="#blank-lines" aria-label="Link to this section" title="Link to this section">#</a></h2>
+<p>A blank line ends the block that <code>sum</code>, <code>average</code> and the other aggregates look at, and it separates sections of a sheet. Use it to keep aggregates scoped to the lines you mean.</p>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — a browser-based inline calculator.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

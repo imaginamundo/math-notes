@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>App &amp; plataforma · Documentação · Math Notes</title>
+  <meta name="description" content="O Math Notes é um progressive web app: instala como um app nativo, funciona offline e respeita as preferências do seu sistema.">
+  <link rel="canonical" href="https://math.dio.dev/docs/pt/app/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/app/">
+  <link rel="alternate" hreflang="pt" href="https://math.dio.dev/docs/pt/app/">
+  <link rel="alternate" hreflang="es" href="https://math.dio.dev/docs/es/app/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/app/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="App &amp; plataforma">
+  <meta property="og:description" content="O Math Notes é um progressive web app: instala como um app nativo, funciona offline e respeita as preferências do seu sistema.">
+  <meta property="og:url" content="https://math.dio.dev/docs/pt/app/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/pt/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentação</span>
+    </a>
+    <div class="doc-header-actions">
+      <div class="doc-search" data-search-url="/docs/pt/search.json" data-empty="Sem resultados">
+        <input class="doc-search-input" type="search" placeholder="Pesquisar na documentação" aria-label="Pesquisar na documentação" autocomplete="off" spellcheck="false">
+        <ul class="doc-search-results" role="listbox" aria-label="Pesquisar na documentação" hidden></ul>
+      </div>
+      <nav class="doc-lang" aria-label="Idioma"><a href="/docs/app/" hreflang="en">English</a><a href="/docs/pt/app/" hreflang="pt" class="is-active" aria-current="page">Português</a><a href="/docs/es/app/" hreflang="es">Español</a></nav>
+      <a class="doc-app" href="/">Abrir o Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Menu da documentação</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Menu da documentação"><ul><li class="doc-nav-item"><a href="/docs/pt/">Início</a></li><li class="doc-nav-item"><a href="/docs/pt/getting-started/">Primeiros passos</a></li><li class="doc-nav-item"><a href="/docs/pt/writing-a-sheet/">Escrevendo uma planilha</a></li><li class="doc-nav-item"><a href="/docs/pt/numbers/">Números &amp; operadores</a></li><li class="doc-nav-item"><a href="/docs/pt/lists/">Listas &amp; sequências</a></li><li class="doc-nav-item"><a href="/docs/pt/groups/">Grupos &amp; totais</a></li><li class="doc-nav-item"><a href="/docs/pt/units/">Unidades &amp; medidas</a></li><li class="doc-nav-item"><a href="/docs/pt/money/">Dinheiro &amp; moedas</a></li><li class="doc-nav-item"><a href="/docs/pt/dates/">Datas &amp; tempo</a></li><li class="doc-nav-item"><a href="/docs/pt/files/">Arquivos, compartilhamento &amp; dados</a></li><li class="doc-nav-item"><a href="/docs/pt/settings/">Configurações &amp; aparência</a></li><li class="doc-nav-item is-active"><a href="/docs/pt/app/" aria-current="page">App &amp; plataforma</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">Nesta página</li><li><a href="#instalar">Instalar</a></li><li><a href="#sem-conexao">Sem conexão</a></li><li><a href="#atalhos-de-teclado">Atalhos de teclado</a></li><li><a href="#acessibilidade">Acessibilidade</a></li></ul></li><li class="doc-nav-item"><a href="/docs/pt/reference/">Referência</a></li><li class="doc-nav-item"><a href="/docs/pt/about/">Sobre</a></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>App &amp; plataforma</h1>
+<p>O Math Notes é um progressive web app: instala como um app nativo, funciona offline e respeita as preferências do seu sistema.</p>
+<h2 id="instalar">Instalar<a class="doc-anchor" href="#instalar" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<p>Abra o app em um navegador moderno e use a ação <strong>Instalar</strong> ou <strong>Adicionar à tela de início</strong> do navegador. Depois de instalado, ele abre em sua própria janela, sem barra de endereço nem interface do navegador.</p>
+<h2 id="sem-conexao">Sem conexão<a class="doc-anchor" href="#sem-conexao" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<p>Um service worker mantém o app disponível offline. Depois da primeira visita, a estrutura e o código do app são servidos do cache e atualizados em segundo plano, então as visitas seguintes são instantâneas e uma conexão perdida não interrompe seu trabalho.</p>
+<p>As taxas de câmbio também ficam em cache, então as conversões continuam funcionando offline com as taxas mais recentes que o app viu.</p>
+<h2 id="atalhos-de-teclado">Atalhos de teclado<a class="doc-anchor" href="#atalhos-de-teclado" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<p>Toda ação tem um atalho; a lista completa está na <a href="/docs/pt/reference/">Referência</a>. Os mais comuns:</p>
+<table>
+<thead>
+<tr>
+<th>Atalho</th>
+<th>Ação</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>⌘Z</code> <code>Ctrl+Z</code></td>
+<td>Desfazer</td>
+</tr>
+<tr>
+<td><code>⇧⌘Z</code> <code>Ctrl+Shift+Z</code></td>
+<td>Refazer</td>
+</tr>
+<tr>
+<td><code>⌘F</code> <code>Ctrl+F</code></td>
+<td>Localizar e substituir</td>
+</tr>
+<tr>
+<td><code>⌘G</code> <code>Ctrl+G</code></td>
+<td>Ir para uma linha</td>
+</tr>
+<tr>
+<td><code>Ctrl+Space</code></td>
+<td>Autocompletar</td>
+</tr>
+<tr>
+<td><code>Tab</code> <code>Shift+Tab</code></td>
+<td>Indentar / desindentar</td>
+</tr>
+<tr>
+<td><code>⇧⌘C</code> <code>Ctrl+Shift+C</code></td>
+<td>Copiar o resultado da linha atual</td>
+</tr>
+<tr>
+<td><code>⇧⌘S</code> <code>Ctrl+Shift+S</code></td>
+<td>Copiar um link de compartilhamento</td>
+</tr>
+</tbody></table>
+<h2 id="acessibilidade">Acessibilidade<a class="doc-anchor" href="#acessibilidade" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<ul>
+<li>O controle de tamanho do texto parte do tamanho padrão do navegador, então honra sua preferência de sistema.</li>
+<li>O editor tem um rótulo acessível, a barra de status anuncia o estado com <code>aria-live</code>, e as janelas são elementos <code>&lt;dialog&gt;</code> nativos com cabeçalho rotulado e botão de fechar alcançável pelo teclado.</li>
+<li>A agregação da barra de total é um <code>&lt;select&gt;</code> rotulado.</li>
+<li>A documentação que você está lendo é HTML estático com link de pular para o conteúdo, marcos e uma barra lateral alcançável pelo teclado.</li>
+</ul>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — uma calculadora em linha no navegador.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

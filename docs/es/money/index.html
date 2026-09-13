@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Dinero &amp; monedas · Documentación · Math Notes</title>
+  <meta name="description" content="Convierte entre monedas usando códigos ISO de 3 letras o símbolos. Las tasas vienen del Banco Central Europeo vía Frankfurter y se guardan en caché local para que las conversiones sigan funcionando sin conexión.">
+  <link rel="canonical" href="https://math.dio.dev/docs/es/money/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/money/">
+  <link rel="alternate" hreflang="pt" href="https://math.dio.dev/docs/pt/money/">
+  <link rel="alternate" hreflang="es" href="https://math.dio.dev/docs/es/money/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/money/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Dinero &amp; monedas">
+  <meta property="og:description" content="Convierte entre monedas usando códigos ISO de 3 letras o símbolos. Las tasas vienen del Banco Central Europeo vía Frankfurter y se guardan en caché local para que las conversiones sigan funcionando sin conexión.">
+  <meta property="og:url" content="https://math.dio.dev/docs/es/money/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/es/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentación</span>
+    </a>
+    <div class="doc-header-actions">
+      <div class="doc-search" data-search-url="/docs/es/search.json" data-empty="Sin resultados">
+        <input class="doc-search-input" type="search" placeholder="Buscar en la documentación" aria-label="Buscar en la documentación" autocomplete="off" spellcheck="false">
+        <ul class="doc-search-results" role="listbox" aria-label="Buscar en la documentación" hidden></ul>
+      </div>
+      <nav class="doc-lang" aria-label="Idioma"><a href="/docs/money/" hreflang="en">English</a><a href="/docs/pt/money/" hreflang="pt">Português</a><a href="/docs/es/money/" hreflang="es" class="is-active" aria-current="page">Español</a></nav>
+      <a class="doc-app" href="/">Abrir Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Menú de la documentación</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Menú de la documentación"><ul><li class="doc-nav-item"><a href="/docs/es/">Inicio</a></li><li class="doc-nav-item"><a href="/docs/es/getting-started/">Primeros pasos</a></li><li class="doc-nav-item"><a href="/docs/es/writing-a-sheet/">Escribir una hoja</a></li><li class="doc-nav-item"><a href="/docs/es/numbers/">Números &amp; operadores</a></li><li class="doc-nav-item"><a href="/docs/es/lists/">Listas &amp; secuencias</a></li><li class="doc-nav-item"><a href="/docs/es/groups/">Grupos &amp; totales</a></li><li class="doc-nav-item"><a href="/docs/es/units/">Unidades &amp; medidas</a></li><li class="doc-nav-item is-active"><a href="/docs/es/money/" aria-current="page">Dinero &amp; monedas</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">En esta página</li><li><a href="#convertir">Convertir</a></li><li><a href="#como-se-escriben-los-resultados">Cómo se escriben los resultados</a></li><li><a href="#el-dinero-solo-forma-razones">El dinero solo forma razones</a></li><li><a href="#codigos-admitidos">Códigos admitidos</a></li></ul></li><li class="doc-nav-item"><a href="/docs/es/dates/">Fechas &amp; tiempo</a></li><li class="doc-nav-item"><a href="/docs/es/files/">Archivos, compartir &amp; datos</a></li><li class="doc-nav-item"><a href="/docs/es/settings/">Ajustes &amp; apariencia</a></li><li class="doc-nav-item"><a href="/docs/es/app/">App &amp; plataforma</a></li><li class="doc-nav-item"><a href="/docs/es/reference/">Referencia</a></li><li class="doc-nav-item"><a href="/docs/es/about/">Acerca de</a></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>Dinero &amp; monedas</h1>
+<p>Convierte entre monedas usando códigos ISO de 3 letras o símbolos. Las tasas vienen del <a href="https://www.ecb.europa.eu">Banco Central Europeo</a> vía <a href="https://frankfurter.dev">Frankfurter</a> y se guardan en caché local para que las conversiones sigan funcionando sin conexión.</p>
+<h2 id="convertir">Convertir<a class="doc-anchor" href="#convertir" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
+<figure class="doc-example" data-expr="100 USD to EUR"><pre class="doc-code"><code data-calc>100 USD to EUR</code></pre><figcaption class="doc-example-result">convierte USD a EUR</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="$5 to GBP"><pre class="doc-code"><code data-calc>$5 to GBP</code></pre><figcaption class="doc-example-result">convierte a GBP</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="R$5 to EUR"><pre class="doc-code"><code data-calc>R$5 to EUR</code></pre><figcaption class="doc-example-result">convierte a EUR</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="50 EUR in BRL"><pre class="doc-code"><code data-calc>50 EUR in BRL</code></pre><figcaption class="doc-example-result">convierte a BRL</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><h2 id="como-se-escriben-los-resultados">Cómo se escriben los resultados<a class="doc-anchor" href="#como-se-escriben-los-resultados" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
+<p>Los resultados usan el símbolo de la moneda cuando lo tienen (<code>350usd</code> pasa a <code>US$ 350</code>); las monedas sin símbolo conservan su código ISO. Una tasa se lee como una frase: <code>100 USD/hour</code> pasa a <code>US$ 100 per hour</code>.</p>
+<figure class="doc-example" data-expr="100 USD/hour"><pre class="doc-code"><code data-calc>100 USD/hour</code></pre><figcaption class="doc-example-result">US$ 100 per hour</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><h2 id="el-dinero-solo-forma-razones">El dinero solo forma razones<a class="doc-anchor" href="#el-dinero-solo-forma-razones" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
+<p>Una moneda se puede dividir por otra unidad para formar una tasa (<code>USD/hour</code>, <code>USD/km</code>, <code>USD/kg</code>), pero no se puede multiplicar por una unidad no relacionada. <code>BRL hour</code> se informa como error, no como una unidad combinada extraña — usa una tasa.</p>
+<h2 id="codigos-admitidos">Códigos admitidos<a class="doc-anchor" href="#codigos-admitidos" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
+<p><code>AUD</code>, <code>BRL</code>, <code>CAD</code>, <code>CHF</code>, <code>CNY</code>, <code>CZK</code>, <code>DKK</code>, <code>EUR</code>, <code>GBP</code>, <code>HKD</code>, <code>HUF</code>, <code>IDR</code>, <code>ILS</code>, <code>INR</code>, <code>ISK</code>, <code>JPY</code>, <code>KRW</code>, <code>MXN</code>, <code>MYR</code>, <code>NOK</code>, <code>NZD</code>, <code>PHP</code>, <code>PLN</code>, <code>RON</code>, <code>SEK</code>, <code>SGD</code>, <code>THB</code>, <code>TRY</code>, <code>USD</code>, <code>ZAR</code>.</p>
+<p>Para los símbolos de moneda que reconoce la app, escribe un símbolo como <code>$</code>, <code>€</code>, <code>£</code> o <code>R$</code> y deja que la app sugiera el código correspondiente.</p>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — una calculadora en línea en el navegador.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,15 +1,51 @@
 import { scrollEditorToEnd } from '../util/scroll.js';
 import { setEditorValue } from './editorInput.js';
+import { indentGroupBodies } from '../render/exampleText.js';
+import format from '../render/format.js';
+import { collectVariableNames } from '../core/multiWordVariables.js';
+import { t } from '../i18n/index.js';
 
-// Wires up clickable example chips: fills the <code> from data-expr, inserts
-// the expression into the editor on click/Enter/Space, then runs onInsert.
+// Render an example into the chip's <code>, reusing the app's highlighter so the
+// tokens carry the same colours as the editor. Multi-line examples also get a
+// numbered gutter, like the editor's, so blocks (groups) read clearly; a
+// one-line example keeps a lone content row with no number.
+function renderCode(codeNode, expr) {
+  const lines = expr.split('\n');
+  const names = collectVariableNames(lines);
+  const numbered = lines.length > 1;
+  codeNode.textContent = '';
+  lines.forEach((line, index) => {
+    const row = document.createElement('span');
+    row.className = 'example-line';
+    if (numbered) {
+      const gutter = document.createElement('span');
+      gutter.className = 'example-line-number';
+      gutter.setAttribute('aria-hidden', 'true');
+      gutter.textContent = String(index + 1);
+      row.appendChild(gutter);
+    }
+    const content = document.createElement('span');
+    content.className = 'example-line-content';
+    content.appendChild(format.line(line, names));
+    row.appendChild(content);
+    codeNode.appendChild(row);
+  });
+}
+
+// Wires up clickable example chips: fills the <code> from data-expr (with group
+// bodies indented and highlighted), inserts the expression into the editor on
+// click/Enter/Space, then runs onInsert.
 function initExamples(containerNode, editableNode, onInsert) {
-  containerNode.querySelectorAll('.help-example').forEach((example) => {
+  const title = t('example.addTitle');
+  containerNode.querySelectorAll('.example-chip').forEach((example) => {
+    const expr = indentGroupBodies(example.dataset.expr);
     const codeNode = example.querySelector('code');
-    if (codeNode) codeNode.textContent = example.dataset.expr;
+    if (codeNode) renderCode(codeNode, expr);
+    example.title = title;
+    example.setAttribute('aria-label', title);
 
     const run = () => {
-      insertExample(editableNode, example.dataset.expr);
+      insertExample(editableNode, expr);
       if (onInsert) onInsert();
     };
     example.addEventListener('click', run);

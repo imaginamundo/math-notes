@@ -6,6 +6,7 @@ import {
   VOLUME_UNITS,
   DEFAULT_MEASUREMENT_SYSTEM,
 } from '../core/measures.js';
+import { LETTER, WORD } from '../core/identifiers.js';
 
 // Generic subject labels: `300g butter in cups`, `300g in cups`, or even
 // `300g feathers in cups`. The subject is free-form — no dataset required. A
@@ -71,9 +72,9 @@ function splitSubject(left) {
   };
 }
 
-// A free-form subject word (`butter`, `olive`, `4k`): at least one letter, no
-// operators, and not itself a unit.
-const LABEL_WORD = /^[A-Za-z0-9_-]*[A-Za-z][A-Za-z0-9_-]*$/;
+// A free-form subject word (`butter`, `olive`, `4k`, `açúcar`): at least one
+// letter, no operators, and not itself a unit.
+const LABEL_WORD = new RegExp(`^[${WORD}_-]*[${LETTER}][${WORD}_-]*$`, 'u');
 
 function isLabelWord(word) {
   return LABEL_WORD.test(word) && !isUnit(word);

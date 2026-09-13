@@ -8,6 +8,7 @@ import {
 import { VOCABULARY } from '../core/vocabulary.js';
 import { setEditorValue } from './editorInput.js';
 import { sheetLines } from '../util/text.js';
+import { t } from '../i18n/index.js';
 
 // A caret-anchored suggestion popup. It opens while a word is being typed (at
 // least MIN_PREFIX characters) and on Ctrl/Cmd+Space, completes variables and
@@ -29,9 +30,12 @@ function initAutocomplete(editableNode, editorScroll) {
   popup.className = 'autocomplete';
   popup.id = 'autocomplete-list';
   popup.setAttribute('role', 'listbox');
-  popup.setAttribute('aria-label', 'Suggestions');
+  popup.setAttribute('aria-label', t('autocomplete.label'));
   popup.hidden = true;
   scroller.appendChild(popup);
+  window.addEventListener('language:updated', () =>
+    popup.setAttribute('aria-label', t('autocomplete.label'))
+  );
 
   let items = [];
   let activeIndex = 0;

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Referência · Documentação · Math Notes</title>
+  <meta name="description" content="Uma referência compacta da sintaxe. Cada título aparece na barra lateral para acesso rápido.">
+  <link rel="canonical" href="https://math.dio.dev/docs/pt/reference/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/reference/">
+  <link rel="alternate" hreflang="pt" href="https://math.dio.dev/docs/pt/reference/">
+  <link rel="alternate" hreflang="es" href="https://math.dio.dev/docs/es/reference/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/reference/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Referência">
+  <meta property="og:description" content="Uma referência compacta da sintaxe. Cada título aparece na barra lateral para acesso rápido.">
+  <meta property="og:url" content="https://math.dio.dev/docs/pt/reference/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/pt/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentação</span>
+    </a>
+    <div class="doc-header-actions">
+      <div class="doc-search" data-search-url="/docs/pt/search.json" data-empty="Sem resultados">
+        <input class="doc-search-input" type="search" placeholder="Pesquisar na documentação" aria-label="Pesquisar na documentação" autocomplete="off" spellcheck="false">
+        <ul class="doc-search-results" role="listbox" aria-label="Pesquisar na documentação" hidden></ul>
+      </div>
+      <nav class="doc-lang" aria-label="Idioma"><a href="/docs/reference/" hreflang="en">English</a><a href="/docs/pt/reference/" hreflang="pt" class="is-active" aria-current="page">Português</a><a href="/docs/es/reference/" hreflang="es">Español</a></nav>
+      <a class="doc-app" href="/">Abrir o Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Menu da documentação</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Menu da documentação"><ul><li class="doc-nav-item"><a href="/docs/pt/">Início</a></li><li class="doc-nav-item"><a href="/docs/pt/getting-started/">Primeiros passos</a></li><li class="doc-nav-item"><a href="/docs/pt/writing-a-sheet/">Escrevendo uma planilha</a></li><li class="doc-nav-item"><a href="/docs/pt/numbers/">Números &amp; operadores</a></li><li class="doc-nav-item"><a href="/docs/pt/lists/">Listas &amp; sequências</a></li><li class="doc-nav-item"><a href="/docs/pt/groups/">Grupos &amp; totais</a></li><li class="doc-nav-item"><a href="/docs/pt/units/">Unidades &amp; medidas</a></li><li class="doc-nav-item"><a href="/docs/pt/money/">Dinheiro &amp; moedas</a></li><li class="doc-nav-item"><a href="/docs/pt/dates/">Datas &amp; tempo</a></li><li class="doc-nav-item"><a href="/docs/pt/files/">Arquivos, compartilhamento &amp; dados</a></li><li class="doc-nav-item"><a href="/docs/pt/settings/">Configurações &amp; aparência</a></li><li class="doc-nav-item"><a href="/docs/pt/app/">App &amp; plataforma</a></li><li class="doc-nav-item is-active"><a href="/docs/pt/reference/" aria-current="page">Referência</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">Nesta página</li><li><a href="#operadores">Operadores</a></li><li><a href="#operadores-em-palavras">Operadores em palavras</a></li><li><a href="#palavras-chave">Palavras-chave</a></li><li><a href="#aliases-de-funcao">Aliases de função</a></li><li><a href="#constantes">Constantes</a></li><li><a href="#unidades">Unidades</a></li><li><a href="#moedas">Moedas</a></li><li><a href="#calendario">Calendário</a></li><li><a href="#arredondamento">Arredondamento</a></li><li><a href="#atalhos-de-teclado">Atalhos de teclado</a></li><li><a href="#palavras-reservadas">Palavras reservadas</a></li></ul></li><li class="doc-nav-item"><a href="/docs/pt/about/">Sobre</a></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>Referência</h1>
+<p>Uma referência compacta da sintaxe. Cada título aparece na barra lateral para acesso rápido.</p>
+<h2 id="operadores">Operadores<a class="doc-anchor" href="#operadores" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Operador</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>+</code> <code>-</code> <code>*</code> <code>/</code></td>
+<td>Somar, subtrair, multiplicar, dividir</td>
+</tr>
+<tr>
+<td><code>^</code></td>
+<td>Potência</td>
+</tr>
+<tr>
+<td><code>%</code></td>
+<td>Resto</td>
+</tr>
+<tr>
+<td><code>!</code></td>
+<td>Fatorial</td>
+</tr>
+<tr>
+<td><code>( )</code></td>
+<td>Agrupar</td>
+</tr>
+<tr>
+<td><code>=</code></td>
+<td>Atribuir</td>
+</tr>
+<tr>
+<td><code>[ ]</code></td>
+<td>Lista ou índice</td>
+</tr>
+<tr>
+<td><code>:</code></td>
+<td>Intervalo ou passo</td>
+</tr>
+</tbody></table>
+<h2 id="operadores-em-palavras">Operadores em palavras<a class="doc-anchor" href="#operadores-em-palavras" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<p><code>plus</code>, <code>minus</code>, <code>times</code>, <code>multiplied by</code>, <code>divided by</code>, <code>with</code>, <code>without</code>, <code>mul</code>.</p>
+<h2 id="palavras-chave">Palavras-chave<a class="doc-anchor" href="#palavras-chave" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Palavra-chave</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>sum</code> <code>total</code></td>
+<td>Somar as linhas acima (até uma linha em branco)</td>
+</tr>
+<tr>
+<td><code>average</code> <code>avg</code></td>
+<td>Calcular a média das linhas acima</td>
+</tr>
+<tr>
+<td><code>prev</code></td>
+<td>O resultado anterior</td>
+</tr>
+<tr>
+<td><code>line(n)</code></td>
+<td>O resultado da linha <code>n</code></td>
+</tr>
+<tr>
+<td><code>end</code></td>
+<td>Fechar um <a href="/docs/pt/groups/">grupo</a></td>
+</tr>
+</tbody></table>
+<h2 id="aliases-de-funcao">Aliases de função<a class="doc-anchor" href="#aliases-de-funcao" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Alias</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ln(x)</code></td>
+<td>Logaritmo natural</td>
+</tr>
+<tr>
+<td><code>fact(x)</code></td>
+<td>Fatorial</td>
+</tr>
+<tr>
+<td><code>arcsin</code> <code>arccos</code> <code>arctan</code></td>
+<td>Funções trigonométricas inversas</td>
+</tr>
+<tr>
+<td><code>root(n, x)</code></td>
+<td>A raiz <code>x</code>-ésima de <code>n</code></td>
+</tr>
+<tr>
+<td><code>fromunix(t)</code></td>
+<td>Uma data a partir de um timestamp Unix</td>
+</tr>
+<tr>
+<td><code>unix()</code></td>
+<td>O timestamp Unix atual</td>
+</tr>
+</tbody></table>
+<p>As funções padrão do mathjs (<code>sqrt</code>, <code>abs</code>, <code>round</code>, <code>ceil</code>, <code>floor</code>, <code>sin</code>, <code>cos</code>, <code>mean</code>, <code>sum</code>, <code>min</code>, <code>max</code>, <code>sort</code>, <code>concat</code>, …) também estão disponíveis.</p>
+<h2 id="constantes">Constantes<a class="doc-anchor" href="#constantes" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<p><code>pi</code>, <code>π</code>, <code>e</code>.</p>
+<h2 id="unidades">Unidades<a class="doc-anchor" href="#unidades" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<p>Famílias comuns: comprimento (<code>m</code>, <code>cm</code>, <code>km</code>, <code>in</code>, <code>ft</code>, <code>mi</code>), massa (<code>g</code>, <code>kg</code>, <code>lb</code>, <code>oz</code>), volume (<code>l</code>, <code>ml</code>, <code>cup</code>, <code>tbsp</code>), tempo (<code>s</code>, <code>min</code>, <code>h</code>, <code>day</code>, <code>week</code>), temperatura (<code>degC</code>, <code>degF</code>, <code>K</code>), dados (<code>b</code>, <code>B</code>, <code>kB</code>, <code>MB</code>, <code>GB</code>), energia (<code>J</code>, <code>Wh</code>, <code>kWh</code>, <code>BTU</code>), potência (<code>W</code>, <code>hp</code>) e pressão (<code>Pa</code>, <code>psi</code>, <code>atm</code>, <code>bar</code>). A lista completa está em <a href="/docs/pt/units/">Unidades &amp; medidas</a>.</p>
+<h2 id="moedas">Moedas<a class="doc-anchor" href="#moedas" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<p><code>AUD</code>, <code>BRL</code>, <code>CAD</code>, <code>CHF</code>, <code>CNY</code>, <code>CZK</code>, <code>DKK</code>, <code>EUR</code>, <code>GBP</code>, <code>HKD</code>, <code>HUF</code>, <code>IDR</code>, <code>ILS</code>, <code>INR</code>, <code>ISK</code>, <code>JPY</code>, <code>KRW</code>, <code>MXN</code>, <code>MYR</code>, <code>NOK</code>, <code>NZD</code>, <code>PHP</code>, <code>PLN</code>, <code>RON</code>, <code>SEK</code>, <code>SGD</code>, <code>THB</code>, <code>TRY</code>, <code>USD</code>, <code>ZAR</code>. Veja <a href="/docs/pt/money/">Dinheiro &amp; moedas</a>.</p>
+<h2 id="calendario">Calendário<a class="doc-anchor" href="#calendario" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<p>Palavras de data <code>today</code>, <code>now</code>, <code>yesterday</code>, <code>tomorrow</code>, <code>christmas</code>, <code>halloween</code>; frases <code>days until</code>, <code>workdays in</code>, <code>work hours in</code>, <code>weekday on</code>, <code>as &lt;padrão&gt;</code>; horários como <code>9:45 am</code>, <code>16:00</code>. Veja <a href="/docs/pt/dates/">Datas &amp; tempo</a>.</p>
+<h2 id="arredondamento">Arredondamento<a class="doc-anchor" href="#arredondamento" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<p><code>to n dp</code>, <code>to n digits</code>, <code>rounded</code>, <code>rounded up</code>, <code>rounded down</code>, <code>to nearest n</code> (incluindo frações como <code>to nearest 16th</code>).</p>
+<h2 id="atalhos-de-teclado">Atalhos de teclado<a class="doc-anchor" href="#atalhos-de-teclado" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Atalho</th>
+<th>Ação</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>⌘Z</code> / <code>Ctrl+Z</code></td>
+<td>Desfazer a última alteração na aba</td>
+</tr>
+<tr>
+<td><code>⇧⌘Z</code> / <code>Ctrl+Shift+Z</code></td>
+<td>Refazer</td>
+</tr>
+<tr>
+<td><code>Ctrl+Tab</code> / <code>Ctrl+Shift+Tab</code></td>
+<td>Próxima / aba anterior</td>
+</tr>
+<tr>
+<td><code>⌘1…9</code> / <code>Ctrl+1…9</code></td>
+<td>Ir para a enésima aba</td>
+</tr>
+<tr>
+<td><code>⌘F</code> / <code>Ctrl+F</code></td>
+<td>Localizar e substituir na planilha ativa</td>
+</tr>
+<tr>
+<td><code>⌘G</code> / <code>Ctrl+G</code></td>
+<td>Ir para um número de linha</td>
+</tr>
+<tr>
+<td><code>Ctrl+Space</code></td>
+<td>Mostrar sugestões de autocompletar</td>
+</tr>
+<tr>
+<td><code>Tab</code> / <code>Shift+Tab</code></td>
+<td>Indentar / desindentar a(s) linha(s)</td>
+</tr>
+<tr>
+<td><code>⇧⌘C</code> / <code>Ctrl+Shift+C</code></td>
+<td>Copiar o resultado da linha atual</td>
+</tr>
+<tr>
+<td><code>⇧⌘S</code> <code>⇧⌘L</code> / <code>Ctrl+Shift+S</code></td>
+<td>Copiar um link de compartilhamento</td>
+</tr>
+<tr>
+<td><code>⇧⌘E</code> / <code>Ctrl+Shift+E</code></td>
+<td>Exportar a planilha ativa</td>
+</tr>
+<tr>
+<td><code>⇧⌘I</code> / <code>Ctrl+Shift+I</code></td>
+<td>Importar uma planilha</td>
+</tr>
+<tr>
+<td><code>⇧⌘⌫</code> / <code>Ctrl+Shift+Backspace</code></td>
+<td>Limpar a planilha ativa</td>
+</tr>
+</tbody></table>
+<h2 id="palavras-reservadas">Palavras reservadas<a class="doc-anchor" href="#palavras-reservadas" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+<p><code>prev</code>, <code>today</code>, <code>now</code>, <code>yesterday</code>, <code>tomorrow</code>, <code>christmas</code>, <code>halloween</code>, <code>end</code>, e qualquer nome que comece com <code>__</code> não podem ser usados como variáveis.</p>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — uma calculadora em linha no navegador.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

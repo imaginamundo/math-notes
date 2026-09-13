@@ -1,5 +1,6 @@
 import { clearMarks, applyMarks } from '../render/marks.js';
 import { setEditorValue } from './editorInput.js';
+import { t } from '../i18n/index.js';
 
 function initFind(editableNode, viewNode) {
   const barNode = buildBar();
@@ -12,6 +13,28 @@ function initFind(editableNode, viewNode) {
   const closeButton = barNode.querySelector('.find-close');
   const replaceOneButton = barNode.querySelector('.replace-one');
   const replaceAllButton = barNode.querySelector('.replace-all');
+
+  function label(node, text) {
+    node.title = text;
+    node.setAttribute('aria-label', text);
+  }
+
+  function refreshLabels() {
+    findInput.placeholder = t('find.placeholder');
+    findInput.setAttribute('aria-label', t('find.placeholder'));
+    label(caseButton, t('find.matchCase'));
+    label(prevButton, t('find.previous'));
+    label(nextButton, t('find.next'));
+    label(closeButton, t('find.close'));
+    replaceInput.placeholder = t('find.replacePlaceholder');
+    replaceInput.setAttribute('aria-label', t('find.replacePlaceholder'));
+    replaceOneButton.textContent = t('find.replace');
+    label(replaceOneButton, t('find.replaceHint'));
+    replaceAllButton.textContent = t('find.all');
+    label(replaceAllButton, t('find.replaceAll'));
+  }
+  refreshLabels();
+  window.addEventListener('language:updated', refreshLabels);
 
   editableNode.parentElement.appendChild(barNode);
 
