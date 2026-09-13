@@ -177,7 +177,17 @@ test('snapshots are saved to IndexedDB and recover corrupt localStorage', async 
         req.onsuccess = () => res(req.result);
         req.onerror = () => rej(req.error);
       });
-      return all.some((s) => s.content.includes('total = 42'));
+      // Snapshots may be stored deflated, so decode before checking the text.
+      const decode = async (snapshot) => {
+        if (!snapshot.compressed) return snapshot.content;
+        const base64 = snapshot.content.replace(/-/g, '+').replace(/_/g, '/');
+        const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+        const bytes = Uint8Array.from(atob(padded), (c) => c.charCodeAt(0));
+        const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'));
+        return new TextDecoder().decode(await new Response(stream).arrayBuffer());
+      };
+      const texts = await Promise.all(all.map(decode));
+      return texts.some((text) => text.includes('total = 42'));
     })
   );
   await page.evaluate(() => localStorage.setItem('math-notes-tabs', '{not json'));
