@@ -67,3 +67,20 @@ test('mangleLines rewrites code but leaves comments alone', () => {
     '__var_net_price + price',
   ]);
 });
+
+test('mangleLines rewrites several names in one pass', () => {
+  assert.deepEqual(
+    mangleLines([
+      'net price = 1',
+      'gross income = 2',
+      'gross income + net price',
+      'net   price * 10',
+    ]),
+    [
+      '__var_net_price = 1',
+      '__var_gross_income = 2',
+      '__var_gross_income + __var_net_price',
+      '__var_net_price * 10',
+    ]
+  );
+});
