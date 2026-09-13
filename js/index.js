@@ -15,6 +15,7 @@ import initShortcuts from './ui/shortcuts.js';
 import initFind from './ui/find.js';
 import initLineNumbers from './ui/lineNumbers.js';
 import initGoToLine from './ui/goToLine.js';
+import initIndent from './ui/indent.js';
 import initStarterPrompt from './ui/starterPrompt.js';
 import initLoadingIndicator from './ui/loading.js';
 import initEditorScroll from './ui/editor.js';
@@ -87,6 +88,7 @@ function boot() {
   initFind(contentEditableNode, viewNode);
   initLineNumbers(contentEditableNode);
   initGoToLine(contentEditableNode);
+  initIndent(contentEditableNode);
 
   // 4. The starter prompt is wired before onboarding can seed the sheet that
   //    it floats beneath.
