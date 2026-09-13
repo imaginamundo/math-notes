@@ -454,6 +454,26 @@ input::placeholder {
 .tag {
   color: var(--color-link);
 }
+.reference {
+  color: var(--color-link);
+}
+.reference.resolved {
+  color: transparent;
+  background: var(--color-footer);
+  border-radius: 3px;
+  position: relative;
+}
+.reference.resolved::after {
+  content: attr(data-value);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: center;
+  line-height: normal;
+  color: var(--color-text);
+}
 .title {
   color: var(--color-title);
 }

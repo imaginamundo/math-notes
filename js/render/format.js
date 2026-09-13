@@ -8,6 +8,7 @@ const RULES = {
   currency: new RegExp(`^(?:${SYMBOL_SOURCE})`),
   identifier: /^[A-Za-z_][A-Za-z0-9_]*/,
   operator: /^[+\-*/^=(),%!<>]/,
+  reference: /^line\s*\(\s*\d+\s*\)/,
 };
 
 function createWrapper(type, text) {
@@ -93,6 +94,14 @@ function appendCode(wrapper, code, patterns = []) {
       rest = rest.slice(token.length);
       continue;
     }
+    // A line reference wins over the identifier/number/operator tokens inside.
+    match = RULES.reference.exec(rest);
+    if (match) {
+      const [token] = match;
+      wrapper.appendChild(reference(token));
+      rest = rest.slice(token.length);
+      continue;
+    }
     // A defined multi-word name wins over a single identifier.
     const nameMatch = matchName(rest, patterns);
     if (nameMatch) {
@@ -151,8 +160,12 @@ function tag(text) {
   return createWrapper('tag', text);
 }
 
+function reference(text) {
+  return createWrapper('reference', text);
+}
+
 function titleWrap(text) {
   return createWrapper('title', text);
 }
 
-export default { line, variable, number, currency, operator, comment, tag };
+export default { line, variable, number, currency, operator, comment, tag, reference };
