@@ -1,7 +1,7 @@
 // Progressive enhancement for the documentation pages. The content and
 // navigation are fully rendered at build time; this only adds the app's syntax
-// colours, copy buttons, "Open in Math Notes" links, the mobile menu and the
-// sidebar scroll-spy.
+// colours, copy buttons, "Open in Math Notes" links, the mobile menu, the
+// sidebar scroll-spy and the static client-side search.
 import format from '/js/render/format.js';
 import { collectVariableNames } from '/js/core/multiWordVariables.js';
 import { buildShareUrl } from '/js/share/shareLink.js';
@@ -126,9 +126,146 @@ function wireScrollSpy() {
   update();
 }
 
+// Static client-side search over the per-language `search.json` the build emits
+// next to the pages. The index is fetched lazily the first time it is needed,
+// so it never touches the initial render. Matching is accent- and
+// case-insensitive over each section's title and text.
+function wireSearch() {
+  const box = document.querySelector('.doc-search');
+  if (!box) return;
+  const input = box.querySelector('.doc-search-input');
+  const results = box.querySelector('.doc-search-results');
+  if (!input || !results) return;
+  const emptyMessage = box.dataset.empty || 'No results';
+
+  let loading = null;
+  let index = [];
+  let items = [];
+  let active = -1;
+
+  const normalize = (value) =>
+    value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+
+  function loadIndex() {
+    if (!loading) {
+      loading = fetch(box.dataset.searchUrl)
+        .then((response) => (response.ok ? response.json() : []))
+        .then((entries) => {
+          index = entries.map((entry) => ({
+            ...entry,
+            heading: entry.title,
+            titleNorm: normalize(entry.title),
+            haystack: normalize(`${entry.title} ${entry.text}`),
+          }));
+          return index;
+        })
+        .catch(() => []);
+    }
+    return loading;
+  }
+
+  function clear() {
+    results.hidden = true;
+    results.textContent = '';
+    items = [];
+    active = -1;
+  }
+
+  function render() {
+    results.textContent = '';
+    if (!items.length) {
+      const item = document.createElement('li');
+      item.className = 'doc-search-empty';
+      item.textContent = emptyMessage;
+      results.appendChild(item);
+      results.hidden = false;
+      return;
+    }
+    items.forEach((entry, position) => {
+      const item = document.createElement('li');
+      const link = document.createElement('a');
+      link.className = 'doc-search-result';
+      link.href = entry.anchor ? `${entry.url}#${entry.anchor}` : entry.url;
+      const title = document.createElement('span');
+      title.className = 'doc-search-title';
+      title.textContent = entry.heading;
+      const page = document.createElement('span');
+      page.className = 'doc-search-page';
+      page.textContent = entry.page;
+      link.append(title, page);
+      if (position === active) link.classList.add('is-active');
+      item.appendChild(link);
+      results.appendChild(item);
+    });
+    results.hidden = false;
+  }
+
+  function move(step) {
+    if (!items.length) return;
+    active = (active + step + items.length) % items.length;
+    [...results.querySelectorAll('.doc-search-result')].forEach((link, position) =>
+      link.classList.toggle('is-active', position === active)
+    );
+    const current = results.querySelector('.doc-search-result.is-active');
+    if (current) current.scrollIntoView({ block: 'nearest' });
+  }
+
+  function search(query) {
+    const needle = normalize(query.trim());
+    if (!needle) {
+      clear();
+      return;
+    }
+    const matches = [];
+    for (const entry of index) {
+      if (!entry.haystack.includes(needle)) continue;
+      // Title matches rank above body matches; shorter titles break ties.
+      matches.push({ entry, rank: entry.titleNorm.includes(needle) ? 0 : 1 });
+    }
+    matches.sort((a, b) => a.rank - b.rank || a.entry.heading.length - b.entry.heading.length);
+    items = matches.slice(0, 12).map((match) => match.entry);
+    active = items.length ? 0 : -1;
+    render();
+  }
+
+  input.addEventListener('focus', () => {
+    loadIndex();
+  });
+  input.addEventListener('input', () => {
+    const value = input.value;
+    loadIndex().then(() => {
+      if (input.value === value) search(value);
+    });
+  });
+  input.addEventListener('keydown', (event) => {
+    if (results.hidden) return;
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      move(1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      move(-1);
+    } else if (event.key === 'Enter' && active >= 0) {
+      event.preventDefault();
+      const link = results.querySelectorAll('.doc-search-result')[active];
+      if (link) window.location.assign(link.href);
+    } else if (event.key === 'Escape') {
+      input.value = '';
+      clear();
+    }
+  });
+  document.addEventListener('click', (event) => {
+    if (!box.contains(event.target)) clear();
+  });
+}
+
 for (const figure of document.querySelectorAll('.doc-example')) wireExample(figure);
 wireMenu();
 wireScrollSpy();
+wireSearch();
 
 // The app's service worker lives at the site root (scope `/`), so it also keeps
 // the documentation available offline once it has been visited.

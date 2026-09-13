@@ -47,6 +47,19 @@ test('the generated site has a page for every language and structure entry', () 
   assert.ok(existsSync(join(docs, 'docs.js')));
 });
 
+test('every language ships a usable client-side search index', () => {
+  for (const lang of availableLangs()) {
+    const file = join(docs, prefixFor(lang), 'search.json');
+    assert.ok(existsSync(file), `missing ${prefixFor(lang)}search.json`);
+    const entries = JSON.parse(readFileSync(file, 'utf8'));
+    assert.ok(entries.length > 0, `${lang} search index is empty`);
+    assert.ok(
+      entries.every((entry) => entry.title && entry.page && entry.url),
+      `${lang} search entries must carry a title, page and url`
+    );
+  }
+});
+
 test('generated pages carry navigation, examples and language metadata', () => {
   const landing = readFileSync(join(docs, 'index.html'), 'utf8');
   assert.match(landing, /class="doc-nav"/);

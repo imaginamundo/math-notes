@@ -1055,3 +1055,21 @@ test('the documentation headings anchor and the sidebar tracks scrolling', async
   assert.equal(scrolled, 'Editing', 'the sidebar highlights the section in view');
   assert.deepEqual(errors, []);
 });
+
+test('the documentation search filters the generated index', async () => {
+  await newPage();
+  await page.goto(`http://localhost:${server.address().port}/docs/groups/`, {
+    waitUntil: 'load',
+  });
+  await page.type('.doc-search-input', 'aggregate keywords');
+  await waitFor(() => page.$('.doc-search-result'));
+
+  const first = await page.$eval(
+    '.doc-search-result .doc-search-title',
+    (node) => node.textContent
+  );
+  assert.equal(first, 'Aggregate keywords');
+  const href = await page.$eval('.doc-search-result', (node) => node.getAttribute('href'));
+  assert.equal(href, '/docs/groups/#aggregate-keywords');
+  assert.deepEqual(errors, []);
+});

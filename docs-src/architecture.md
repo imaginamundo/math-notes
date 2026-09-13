@@ -558,6 +558,14 @@ building a share link through `js/share/shareLink.js` so the example opens in th
 app. The pages load `style.css` for the colour tokens and themes plus a dedicated
 `docs.css`.
 
+The build also emits a per-language search index (`docs/search.json`,
+`docs/pt/search.json`, `docs/es/search.json`): one entry per page and per h2,
+with a plain-text body capped at 600 characters and a link to the page or
+section anchor. The header search box in `docs.js` fetches the index lazily on
+first use and does an accent- and case-insensitive substring match, ranking
+title matches first — so search stays client-side with no backend and no runtime
+Markdown.
+
 `scripts/dev.mjs` serves `docs/` directly for local development, and
 `.github/workflows/publish.yml` copies `docs/` to `public/docs`. The app's
 footer Documentation link is pointed at the active language by

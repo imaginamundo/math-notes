@@ -28,6 +28,8 @@ const UI = {
     footer: 'Math Notes — a browser-based inline calculator.',
     guide: 'User guide',
     anchor: 'Link to this section',
+    search: 'Search the documentation',
+    searchEmpty: 'No results',
   },
   pt: {
     htmlLang: 'pt',
@@ -44,6 +46,8 @@ const UI = {
     footer: 'Math Notes — uma calculadora em linha no navegador.',
     guide: 'Guia de utilização',
     anchor: 'Link para esta secção',
+    search: 'Pesquisar na documentação',
+    searchEmpty: 'Sem resultados',
   },
   es: {
     htmlLang: 'es',
@@ -60,6 +64,8 @@ const UI = {
     footer: 'Math Notes — una calculadora en línea en el navegador.',
     guide: 'Guía de uso',
     anchor: 'Enlace a esta sección',
+    search: 'Buscar en la documentación',
+    searchEmpty: 'Sin resultados',
   },
 };
 
@@ -163,6 +169,51 @@ function descriptionOf(md) {
       .trim();
   }
   return '';
+}
+
+// Flatten Markdown to plain text for the search index: drop fences, images and
+// link URLs, keep the readable words, and cap each section so the index stays
+// small. The search itself is a substring match over title + text.
+function plainText(md) {
+  return md
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/`([^`]*)`/g, '$1')
+    .replace(/^#{1,6}\s+/gm, ' ')
+    .replace(/^\s*[-*+]\s+/gm, ' ')
+    .replace(/[*_>|]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// One index entry per page and per h2 section, so a result points at the exact
+// part of the page it came from.
+function searchEntries(lang, slug, md, pageTitle, toc) {
+  const ui = UI[lang];
+  const url = docPath(lang, slug);
+  const entries = [];
+  const parts = md.split(/^## /m);
+  const preamble = plainText(parts.shift().replace(/^#\s+.+$/m, ' '));
+  if (preamble) {
+    entries.push({
+      title: slug ? pageTitle : ui.docs,
+      page: pageTitle,
+      url,
+      anchor: '',
+      text: preamble.slice(0, 600),
+    });
+  }
+  toc.forEach((section, index) => {
+    entries.push({
+      title: section.text,
+      page: pageTitle,
+      url,
+      anchor: section.id,
+      text: plainText(parts[index] || '').slice(0, 600),
+    });
+  });
+  return entries;
 }
 
 function docPath(lang, slug) {
@@ -275,6 +326,10 @@ function pageHtml(lang, slug, page) {
       <span class="doc-brand-tag">${escapeHtml(ui.docs)}</span>
     </a>
     <div class="doc-header-actions">
+      <div class="doc-search" data-search-url="${docPath(lang, '')}search.json" data-empty="${escapeAttr(ui.searchEmpty)}">
+        <input class="doc-search-input" type="search" placeholder="${escapeAttr(ui.search)}" aria-label="${escapeAttr(ui.search)}" autocomplete="off" spellcheck="false">
+        <ul class="doc-search-results" role="listbox" aria-label="${escapeAttr(ui.search)}" hidden></ul>
+      </div>
       ${langSwitchHtml(lang, slug)}
       <a class="doc-app" href="/">${escapeHtml(ui.app)}</a>
     </div>
@@ -317,18 +372,22 @@ const LANGS_AVAILABLE = LANGS.filter((lang) => {
 if (!LANGS_AVAILABLE.length) throw new Error('No documentation sources found in src/');
 
 const content = {};
+const searchIndex = {};
 for (const lang of LANGS_AVAILABLE) {
   content[lang] = {};
+  searchIndex[lang] = [];
   for (const slug of ['', ...PAGES]) {
     const file = slug ? `${SRC}${lang}/${slug}.md` : `${SRC}${lang}/index.md`;
     const md = Deno.readTextFileSync(file);
+    const title = titleOf(md, slug || UI[lang].docs);
     const { html, toc } = renderMarkdown(md, UI[lang]);
     content[lang][slug] = {
-      title: titleOf(md, slug || UI[lang].docs),
+      title,
       description: descriptionOf(md),
       html: localizeLinks(html, lang),
       toc,
     };
+    searchIndex[lang].push(...searchEntries(lang, slug, md, title, toc));
   }
 }
 
@@ -354,6 +413,10 @@ try {
 }
 
 for (const lang of LANGS_AVAILABLE) {
+  write(
+    `${DIST}${docPath(lang, '').replace('/docs/', '')}search.json`,
+    JSON.stringify(searchIndex[lang])
+  );
   for (const slug of ['', ...PAGES]) {
     write(
       `${DIST}${docPath(lang, slug).replace('/docs/', '')}index.html`,
