@@ -4,14 +4,7 @@ import globals from 'globals';
 
 export default [
   {
-    ignores: [
-      'js/lib/**',
-      'node_modules/**',
-      '**/*.tmp.*',
-      'js/i18n/help/**',
-      'js/i18n/examples/**',
-      'docs/**',
-    ],
+    ignores: ['js/lib/**', 'node_modules/**', '**/*.tmp.*', 'js/i18n/examples/**', 'docs/**'],
   },
   js.configs.recommended,
   {

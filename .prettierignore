@@ -4,7 +4,6 @@ index.html
 package-lock.json
 deno.lock
 js/i18n/src/
-js/i18n/help/
 js/i18n/examples/
 docs/
 docs-src/src/**/*.md

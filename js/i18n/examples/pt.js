@@ -5,97 +5,97 @@ export default {
     {
       "id": "examples-dividir-a-conta-do-restaurante",
       "nav": "Dividir a conta do restaurante",
-      "html": "<p>Divida uma conta igualmente, incluindo a gorjeta.</p>\n<div class=\"help-example\" data-expr=\"bill = 120\ntip = bill * 10%\npeople = 4\n(bill + tip) / people\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">a última linha retorna 33</span></div>"
+      "html": "<p>Divida uma conta igualmente, incluindo a gorjeta.</p>\n<div class=\"example-chip\" data-expr=\"bill = 120\ntip = bill * 10%\npeople = 4\n(bill + tip) / people\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">a última linha retorna 33</span></div>"
     },
     {
       "id": "examples-dividir-a-conta-do-bar-com-tags",
       "nav": "Dividir a conta do bar com tags",
-      "html": "<p>Divida uma conta de bar entre quatro pessoas. Escreva o valor total de cada item e marque todos que o compartilharam; cada tag recebe uma parte igual, enquanto o total do grupo mantém o preço cheio.</p>\n<div class=\"help-example\" data-expr=\"At the bar:\npotato: 20 #name1 #name2 #name3\nburger: 2 * 50 #name1 #name3\nbeer: 160 #name1 #name2 #name3 #name4\nend\n\n#name1\n#name2\n#name3\n#name4\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">cada #nome retorna o total de uma pessoa</span></div>"
+      "html": "<p>Divida uma conta de bar entre quatro pessoas. Escreva o valor total de cada item e marque todos que o compartilharam; cada tag recebe uma parte igual, enquanto o total do grupo mantém o preço cheio.</p>\n<div class=\"example-chip\" data-expr=\"At the bar:\npotato: 20 #name1 #name2 #name3\nburger: 2 * 50 #name1 #name3\nbeer: 160 #name1 #name2 #name3 #name4\nend\n\n#name1\n#name2\n#name3\n#name4\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">cada #nome retorna o total de uma pessoa</span></div>"
     },
     {
       "id": "examples-escalar-uma-receita",
       "nav": "Escalar uma receita",
-      "html": "<p>Escale as quantidades dos ingredientes para um número diferente de porções, convertendo entre volume e massa no caminho.</p>\n<div class=\"help-example\" data-expr=\"scale = 6 / 4\nscale * 2 cups flour in grams\nscale * 300g butter in cups\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">397.5 g de farinha; ≈ 1.98 cups de manteiga</span></div>"
+      "html": "<p>Escale as quantidades dos ingredientes para um número diferente de porções, convertendo entre volume e massa no caminho.</p>\n<div class=\"example-chip\" data-expr=\"scale = 6 / 4\nscale * 2 cups flour in grams\nscale * 300g butter in cups\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">397.5 g de farinha; ≈ 1.98 cups de manteiga</span></div>"
     },
     {
       "id": "examples-horas-de-trabalho",
       "nav": "Horas de trabalho",
-      "html": "<p>Pagamento bruto por um número de horas a um valor por hora.</p>\n<div class=\"help-example\" data-expr=\"hours = 40\nrate = 25\nhours * rate\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">a última linha retorna 1000</span></div>"
+      "html": "<p>Pagamento bruto por um número de horas a um valor por hora.</p>\n<div class=\"example-chip\" data-expr=\"hours = 40\nrate = 25\nhours * rate\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">a última linha retorna 1000</span></div>"
     },
     {
       "id": "examples-comparacao-de-preco-por-unidade",
       "nav": "Comparação de preço por unidade",
-      "html": "<p>Compare dois pacotes pelo preço por 100 g.</p>\n<div class=\"help-example\" data-expr=\"small = 3.99 / 500 * 100\nlarge = 6.49 / 1000 * 100\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">0.798 vs 0.649 — o pacote grande é mais barato</span></div>"
+      "html": "<p>Compare dois pacotes pelo preço por 100 g.</p>\n<div class=\"example-chip\" data-expr=\"small = 3.99 / 500 * 100\nlarge = 6.49 / 1000 * 100\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">0.798 vs 0.649 — o pacote grande é mais barato</span></div>"
     },
     {
       "id": "examples-desconto-percentual",
       "nav": "Desconto percentual",
-      "html": "<p>Preço após um desconto percentual.</p>\n<div class=\"help-example\" data-expr=\"price = 80\ndiscount = 15%\nprice - price * discount\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">a última linha retorna 68</span></div>"
+      "html": "<p>Preço após um desconto percentual.</p>\n<div class=\"example-chip\" data-expr=\"price = 80\ndiscount = 15%\nprice - price * discount\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">a última linha retorna 68</span></div>"
     },
     {
       "id": "examples-meta-de-poupanca",
       "nav": "Meta de poupança",
-      "html": "<p>Quantos meses para atingir uma meta com um valor mensal fixo.</p>\n<div class=\"help-example\" data-expr=\"goal = 5000\nmonthly = 250\ngoal / monthly\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">a última linha retorna 20 months</span></div>"
+      "html": "<p>Quantos meses para atingir uma meta com um valor mensal fixo.</p>\n<div class=\"example-chip\" data-expr=\"goal = 5000\nmonthly = 250\ngoal / monthly\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">a última linha retorna 20 months</span></div>"
     },
     {
       "id": "examples-juros-simples",
       "nav": "Juros simples",
-      "html": "<p>Juros ganhos sobre um principal ao longo de alguns anos.</p>\n<div class=\"help-example\" data-expr=\"principal = 1000\nrate = 5%\nyears = 3\nprincipal * rate * years\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">a última linha retorna 150</span></div>"
+      "html": "<p>Juros ganhos sobre um principal ao longo de alguns anos.</p>\n<div class=\"example-chip\" data-expr=\"principal = 1000\nrate = 5%\nyears = 3\nprincipal * rate * years\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">a última linha retorna 150</span></div>"
     },
     {
       "id": "examples-custo-de-combustivel-de-uma-viagem",
       "nav": "Custo de combustível de uma viagem",
-      "html": "<p>Custo do combustível para uma distância, dado o consumo e o preço por litro.</p>\n<div class=\"help-example\" data-expr=\"distance = 300\nconsumption = 8\nfuelPrice = 1.7\ndistance / 100 * consumption * fuelPrice\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">a última linha retorna 40.8</span></div>"
+      "html": "<p>Custo do combustível para uma distância, dado o consumo e o preço por litro.</p>\n<div class=\"example-chip\" data-expr=\"distance = 300\nconsumption = 8\nfuelPrice = 1.7\ndistance / 100 * consumption * fuelPrice\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">a última linha retorna 40.8</span></div>"
     },
     {
       "id": "examples-ritmo-de-corrida",
       "nav": "Ritmo de corrida",
-      "html": "<p>Seu ritmo por quilômetro e, depois, o tempo de chegada para uma corrida mais longa nesse ritmo.</p>\n<div class=\"help-example\" data-expr=\"# Pace per km\n5 km in 25 min\n# Half-marathon at that pace\n21.1 km * prev\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">05:00/km, depois 105.5 min</span></div>"
+      "html": "<p>Seu ritmo por quilômetro e, depois, o tempo de chegada para uma corrida mais longa nesse ritmo.</p>\n<div class=\"example-chip\" data-expr=\"# Pace per km\n5 km in 25 min\n# Half-marathon at that pace\n21.1 km * prev\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">05:00/km, depois 105.5 min</span></div>"
     },
     {
       "id": "examples-tempo-de-upload",
       "nav": "Tempo de upload",
-      "html": "<p>Quanto tempo um arquivo leva para subir a uma determinada velocidade.</p>\n<div class=\"help-example\" data-expr=\"time to upload 3 GB at 10 MB/s\ntime to upload 3 GB at 2 MB/s\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">300 s, depois 1,500 s</span></div>"
+      "html": "<p>Quanto tempo um arquivo leva para subir a uma determinada velocidade.</p>\n<div class=\"example-chip\" data-expr=\"time to upload 3 GB at 10 MB/s\ntime to upload 3 GB at 2 MB/s\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">300 s, depois 1,500 s</span></div>"
     },
     {
       "id": "examples-indice-de-massa-corporal",
       "nav": "Índice de Massa Corporal",
-      "html": "<p>IMC a partir do peso em kg e da altura em metros.</p>\n<div class=\"help-example\" data-expr=\"weight = 70\nheight = 1.75\nweight / height ^ 2\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">a última linha retorna ≈ 22.86</span></div>"
+      "html": "<p>IMC a partir do peso em kg e da altura em metros.</p>\n<div class=\"example-chip\" data-expr=\"weight = 70\nheight = 1.75\nweight / height ^ 2\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">a última linha retorna ≈ 22.86</span></div>"
     },
     {
       "id": "examples-idade-e-tempo-decorrido",
       "nav": "Idade e tempo decorrido",
-      "html": "<p>Meça o intervalo de uma data até hoje — primeiro em anos, meses e dias, depois em número de dias.</p>\n<div class=\"help-example\" data-expr=\"1990-04-01 to today\ndays since 1990-04-01\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">idade exata, depois total de dias</span></div>"
+      "html": "<p>Meça o intervalo de uma data até hoje — primeiro em anos, meses e dias, depois em número de dias.</p>\n<div class=\"example-chip\" data-expr=\"1990-04-01 to today\ndays since 1990-04-01\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">idade exata, depois total de dias</span></div>"
     },
     {
       "id": "examples-contagem-regressiva-para-um-aniversario",
       "nav": "Contagem regressiva para um aniversário",
-      "html": "<p>Dias até a próxima vez que uma data acontece. Mude o mês e o dia para os seus.</p>\n<div class=\"help-example\" data-expr=\"birthday = June 21\ndays until birthday\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">dias até o próximo 21 June</span></div>"
+      "html": "<p>Dias até a próxima vez que uma data acontece. Mude o mês e o dia para os seus.</p>\n<div class=\"example-chip\" data-expr=\"birthday = June 21\ndays until birthday\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">dias até o próximo 21 June</span></div>"
     },
     {
       "id": "examples-custo-de-combustivel-com-unidades",
       "nav": "Custo de combustível com unidades",
-      "html": "<p>O consumo e o preço por litro se cancelam até um custo total.</p>\n<div class=\"help-example\" data-expr=\"trip = 350 km\neconomy = 7 l / 100 km\nprice = 1.70 EUR/l\ntrip * economy * price\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">€ 41.65</span></div>"
+      "html": "<p>O consumo e o preço por litro se cancelam até um custo total.</p>\n<div class=\"example-chip\" data-expr=\"trip = 350 km\neconomy = 7 l / 100 km\nprice = 1.70 EUR/l\ntrip * economy * price\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">€ 41.65</span></div>"
     },
     {
       "id": "examples-pagamento-de-horas-extras",
       "nav": "Pagamento de horas extras",
-      "html": "<p>Horas normais pelo valor base, mais as horas extras a 1,5 vez.</p>\n<div class=\"help-example\" data-expr=\"worked = 45\nrate = 25 USD/hour\nregular = 40 hours * rate\novertime = (worked - 40) hours * rate * 1.5\nregular + overtime\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">US$ 1,187.5 por 40 h + 5 h extras</span></div>"
+      "html": "<p>Horas normais pelo valor base, mais as horas extras a 1,5 vez.</p>\n<div class=\"example-chip\" data-expr=\"worked = 45\nrate = 25 USD/hour\nregular = 40 hours * rate\novertime = (worked - 40) hours * rate * 1.5\nregular + overtime\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">US$ 1,187.5 por 40 h + 5 h extras</span></div>"
     },
     {
       "id": "examples-duracao-da-reuniao",
       "nav": "Duração da reunião",
-      "html": "<p>Some o intervalo de horário de cada reunião e mostre o total como um timespan.</p>\n<div class=\"help-example\" data-expr=\"standup = 9:00 am to 9:15 am\nreview = 2:00 pm to 3:30 pm\nstandup + review as timespan\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">1 hour 45 minutes no total</span></div>"
+      "html": "<p>Some o intervalo de horário de cada reunião e mostre o total como um timespan.</p>\n<div class=\"example-chip\" data-expr=\"standup = 9:00 am to 9:15 am\nreview = 2:00 pm to 3:30 pm\nstandup + review as timespan\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">1 hour 45 minutes no total</span></div>"
     },
     {
       "id": "examples-lembretes-de-horario",
       "nav": "Lembretes de horário",
-      "html": "<p>Obtenha um horário um deslocamento fixo após um horário âncora — útil para alarmes e lembretes.</p>\n<div class=\"help-example\" data-expr=\"wake = 6:30 am\nwake + 45 minutes\nwake + 8 hours\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">07:15 e 14:30</span></div>"
+      "html": "<p>Obtenha um horário um deslocamento fixo após um horário âncora — útil para alarmes e lembretes.</p>\n<div class=\"example-chip\" data-expr=\"wake = 6:30 am\nwake + 45 minutes\nwake + 8 hours\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">07:15 e 14:30</span></div>"
     },
     {
       "id": "examples-orcamento-domestico-por-categoria",
       "nav": "Orçamento doméstico por categoria",
-      "html": "<p>Marque cada despesa com uma categoria; uma linha que contém apenas a tag soma essa categoria, e as tags também se somam.</p>\n<div class=\"help-example\" data-expr=\"Budget:\nrent: 1200 #home\nutilities: 150 #home\ngroceries: 480 #living\ntransport: 120 #living\nend\n#home\n#living\n#home + #living\" tabindex=\"0\" role=\"button\"><code></code><span class=\"help-returns\">cada #tag é um total de categoria; a última soma tudo</span></div>"
+      "html": "<p>Marque cada despesa com uma categoria; uma linha que contém apenas a tag soma essa categoria, e as tags também se somam.</p>\n<div class=\"example-chip\" data-expr=\"Budget:\nrent: 1200 #home\nutilities: 150 #home\ngroceries: 480 #living\ntransport: 120 #living\nend\n#home\n#living\n#home + #living\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">cada #tag é um total de categoria; a última soma tudo</span></div>"
     }
   ]
 };

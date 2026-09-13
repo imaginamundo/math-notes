@@ -923,7 +923,7 @@ test('Settings switches the interface language and remembers it', async () => {
   assert.deepEqual(errors, []);
 });
 
-test('the Help content follows the language and its examples still work', async () => {
+test('the Examples content follows the language and its examples still work', async () => {
   await newPage();
   await page.click('#settings-button');
   await wait(150);
@@ -933,46 +933,46 @@ test('the Help content follows the language and its examples still work', async 
   await wait(150);
 
   assert.equal(
-    await page.evaluate(() => document.getElementById('help-button').textContent),
-    'Ayuda'
+    await page.evaluate(() => document.getElementById('recipes-button').textContent),
+    'Ejemplos'
   );
-  await page.click('#help-button');
+  await page.click('#recipes-button');
   await waitFor(() =>
     page.evaluate(
-      () => document.querySelector('#help-modal .help-section h2')?.textContent === 'Básico'
+      () =>
+        document.querySelector('#recipes-modal .modal-section h2')?.textContent ===
+        'Dividir la cuenta del restaurante'
     )
   );
-  // A table inside the section is translated too.
-  assert.equal(
-    await page.evaluate(
-      () => document.querySelector('#help-modal .help-section table th').textContent
-    ),
-    'Operador'
+  // The intro is translated too.
+  assert.match(
+    await page.evaluate(() => document.querySelector('#recipes-modal .modal-body > p').textContent),
+    /Cálculos ya hechos/
   );
   // The example chips keep their (English) expressions across a swap.
-  assert.equal(
+  assert.match(
     await page.evaluate(
-      () => document.querySelector('#help-modal .help-section .help-example code').textContent
+      () => document.querySelector('#recipes-modal .modal-section .example-chip code').textContent
     ),
-    '1 + 1'
+    /bill = 120/
   );
-  await page.click('#help-modal .help-section .help-example');
+  await page.click('#recipes-modal .modal-section .example-chip');
   await wait(200);
-  assert.equal(await value(), '1 + 1');
+  assert.match(await value(), /bill = 120/);
   assert.deepEqual(errors, []);
 });
 
-test('the Help example chips are highlighted and multi-line examples get a line-number gutter', async () => {
+test('the Examples chips are highlighted and multi-line examples get a line-number gutter', async () => {
   await newPage();
-  await page.click('#help-button');
-  await waitFor(() => page.$('#help-modal .help-example code .number'));
+  await page.click('#recipes-button');
+  await waitFor(() => page.$('#recipes-modal .example-chip code .number'));
   const highlighted = await page.$$eval(
-    '#help-modal .help-example code .number',
+    '#recipes-modal .example-chip code .number',
     (nodes) => nodes.length
   );
   assert.ok(highlighted > 0, 'example tokens are highlighted');
 
-  const numbers = await page.$$eval('#help-modal .help-line-number', (nodes) =>
+  const numbers = await page.$$eval('#recipes-modal .example-line-number', (nodes) =>
     nodes.map((node) => node.textContent)
   );
   assert.ok(numbers.length >= 2, 'multi-line examples show line numbers');

@@ -10,9 +10,9 @@ import en from './ui/en.js';
 import pt from './ui/pt.js';
 import es from './ui/es.js';
 
-// The chrome strings. The Help/Examples content is generated from Markdown into
-// ./help/ and ./examples/ and lazy-loaded by the modals (js/ui/helpContent.js),
-// so it never lands in this eager dictionary.
+// The chrome strings. The Examples content is generated from Markdown into
+// ./examples/ and lazy-loaded by the Examples modal (js/ui/recipes.js), so it
+// never lands in this eager dictionary.
 const MESSAGES = { en, pt, es };
 
 let current = DEFAULT_LANGUAGE;

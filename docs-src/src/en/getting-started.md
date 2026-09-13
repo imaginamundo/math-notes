@@ -16,7 +16,7 @@ A line can be a plain number, an expression, an assignment, a comment, or a labe
 
 - The **editor** is the large text area. Its ghost layer shows results, tags and errors in place.
 - The **total bar** sits under the editor and aggregates the sheet. Use its dropdown to switch between **total**, **average** and **median**.
-- The **footer** holds text-size controls and the **Share**, **Settings**, **Examples** and **Help** buttons.
+- The **footer** holds text-size controls and the **Share**, **Settings**, **Examples** and **Documentation** buttons.
 - The **tabs bar** at the top holds separate sheets (see [Files, sharing & data](/docs/files/)).
 
 ## Results

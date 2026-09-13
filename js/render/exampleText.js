@@ -9,8 +9,8 @@ import parseLine from '../core/parseLine.js';
 //   end
 //
 // The header and its closing `end` stay flush; blank lines are left untouched.
-// Used by the Help and Examples chips for both the shown code and the text the
-// chip inserts, so what you see is what you paste.
+// Used by the Examples chips for both the shown code and the text the chip
+// inserts, so what you see is what you paste.
 function indentGroupBodies(text, indent = '  ') {
   let inGroup = false;
   return text

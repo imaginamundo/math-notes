@@ -4,7 +4,7 @@ export default {
 
   'editor.label': 'Entrada da calculadora',
   'editor.placeholder':
-    'Digite seus cálculos…\nOs resultados aparecem ao lado\nPressione Ajuda para ver tudo o que ele entende',
+    'Digite seus cálculos…\nOs resultados aparecem ao lado\nVeja a Documentação para tudo o que ele entende',
 
   'total.label': 'Agregação do total',
   'total.sum': 'total',
@@ -22,13 +22,10 @@ export default {
   'footer.share': 'Compartilhar',
   'footer.settings': 'Configurações',
   'footer.examples': 'Exemplos',
-  'footer.help': 'Ajuda',
   'footer.docs': 'Documentação',
 
-  'modal.help': 'Ajuda',
   'modal.examples': 'Exemplos',
   'modal.settings': 'Configurações',
-  'modal.closeHelp': 'Fechar a ajuda',
   'modal.closeExamples': 'Fechar os exemplos',
   'modal.closeSettings': 'Fechar as configurações',
 
@@ -79,8 +76,7 @@ export default {
   'starter.tagComment': '# Tags nomeiam linhas; uma #tag sozinha soma todas elas:',
 
   'autocomplete.label': 'Sugestões',
-  'help.exampleTitle': 'Clique para adicionar ao editor',
-  'help.fullDocs': 'Documentação completa',
+  'example.addTitle': 'Clique para adicionar ao editor',
 
   'settings.files': 'Arquivos',
   'settings.filesBody': 'Exporte a planilha ativa como texto ou importe uma de um arquivo.',

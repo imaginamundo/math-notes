@@ -135,7 +135,7 @@ test('a URL built by buildShareUrl decodes back through parseShareHash', async (
 });
 
 test('parseShareHash ignores hashes that carry no share token', () => {
-  for (const hash of ['', '#', '#help-basics', '#other=1', null, undefined, 7]) {
+  for (const hash of ['', '#', '#section', '#other=1', null, undefined, 7]) {
     assert.equal(parseShareHash(hash), null, `hash: ${JSON.stringify(hash)}`);
   }
 });

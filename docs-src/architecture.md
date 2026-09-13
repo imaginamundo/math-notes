@@ -490,12 +490,12 @@ the resolved language is not English) that hides `.layout` until `setLocale`
 applies the language, so the English source never flashes.
 
 Strings are split by area. `js/i18n/ui/<lang>.js` is the app chrome, eager and
-marked with `data-i18n` in `index.html`. The Help and Examples prose is authored
-in Markdown at `js/i18n/src/<area>.<lang>.md` and rendered at **build time**
+marked with `data-i18n` in `index.html`. The Examples prose is authored in
+Markdown at `js/i18n/src/examples.<lang>.md` and rendered at **build time**
 (`make -C js/i18n`, deno + marked, like the mathjs bundle) into the committed
-modules `js/i18n/<area>/<lang>.js`; a ` ```calc ` fence becomes a clickable
-example chip. `js/ui/helpContent.js` lazy-imports the active language only when a
-modal opens, so the prose never touches the boot path or the worker. The
+modules `js/i18n/examples/<lang>.js`; a ` ```calc ` fence becomes a clickable
+example chip. `js/ui/recipes.js` lazy-imports the active language only when the
+Examples modal opens, so the prose never touches the boot path or the worker. The
 evaluator stays English — keywords, error messages and result formatting are
 unchanged. `test/conventions.test.mjs` asserts that every `data-i18n` key in
 `index.html` resolves in every locale, that the Markdown languages keep the same
@@ -523,8 +523,8 @@ as the documentation. A worker under `/js/` could only ever control `/js/`
 (the browser's max-scope rule), which would leave the app and `/docs` online
 only. It precaches the shell and every module (except the build-only
 `js/i18n/build.js` and `js/lib/math.js` / `math.bundle.js`) into a versioned
-cache and serves same-origin GETs stale-while-revalidate; the Help/Examples
-content is cached too, so the modals work on a first offline visit. Both the app
+cache and serves same-origin GETs stale-while-revalidate; the Examples content
+is cached too, so the modal works on a first offline visit. Both the app
 (`js/registerServiceWorker.js`) and the docs (`docs-src/src/docs.js`) register
 it; `test/browser.test.mjs` asserts the registration scope is the whole origin.
 
@@ -540,11 +540,11 @@ it; `test/browser.test.mjs` asserts the registration scope is the whole origin.
 
 ## Documentation site
 
-The long-form user guide lives at `/docs`, separate from the in-app Help. It is
-authored in Markdown under `docs-src/src/<lang>/` — one file per category,
-ordered by `docs-src/src/structure.json` — and rendered at **build time** by
-`docs-src/build.js` (Deno + marked, the same toolchain as the Help content) into
-committed static HTML in `docs/`. No runtime Markdown and no backend are
+The long-form user guide lives at `/docs`. It is authored in Markdown under
+`docs-src/src/<lang>/` — one file per category, ordered by
+`docs-src/src/structure.json` — and rendered at **build time** by
+`docs-src/build.js` (Deno + marked, the same toolchain as the Examples content)
+into committed static HTML in `docs/`. No runtime Markdown and no backend are
 involved, and because the built site sits directly under `docs/`, any static
 server rooted at the repository serves it.
 

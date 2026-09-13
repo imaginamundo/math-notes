@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url';
 
 // The documentation site is generated from docs-src/src into docs/ and
 // committed. These checks cover the structure and the generated output without
-// running the Deno build (which CI does not have), the same way the Help content
-// is tested.
+// running the Deno build (which CI does not have), the same way the Examples
+// content is tested.
 const root = fileURLToPath(new URL('..', import.meta.url));
 const sources = join(root, 'docs-src');
 const docs = join(root, 'docs');

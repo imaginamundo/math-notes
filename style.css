@@ -856,34 +856,24 @@ button:hover {
   padding: 0.25em 1.25em 1.25em;
   overflow-y: auto;
 }
-.modal-footer {
-  flex: 0 0 auto;
-  padding: 0.6em 1.25em;
-  border-top: 1px solid var(--border-soft);
-  background: var(--surface-nav);
-  text-align: right;
-}
-.modal-docs-link {
-  font-size: 0.9em;
-}
-.help-section h2 {
+.modal-section h2 {
   margin: 1.2em 0 0.4em;
   font-size: 1.05em;
   color: var(--color-text);
   border-bottom: 1px solid var(--border-soft);
   padding-bottom: 0.25em;
 }
-.help-section:first-child h2 {
+.modal-section:first-child h2 {
   margin-top: 1em;
 }
-.help-section ul {
+.modal-section ul {
   margin: 0.4em 0;
   padding-left: 1.2em;
 }
-.help-section li {
+.modal-section li {
   margin: 0.2em 0;
 }
-.help-example {
+.example-chip {
   display: inline-flex;
   flex-direction: column;
   align-items: stretch;
@@ -898,14 +888,14 @@ button:hover {
   user-select: none;
   vertical-align: top;
 }
-.help-example:hover,
-.help-example:focus-visible {
+.example-chip:hover,
+.example-chip:focus-visible {
   border-color: var(--color-operator);
   filter: brightness(1.08);
   outline: none;
 }
 /* The body mirrors the editor: the input surface with a numbered gutter. */
-.help-example code {
+.example-chip code {
   display: block;
   background: var(--color-primary);
   padding: 0;
@@ -915,10 +905,10 @@ button:hover {
   font-family: inherit;
   line-height: 1.4;
 }
-.help-example .help-line {
+.example-chip .example-line {
   display: flex;
 }
-.help-example .help-line-number {
+.example-chip .example-line-number {
   flex: 0 0 auto;
   min-width: 1.6em;
   padding: 0.25em 0.5em 0.25em 0.6em;
@@ -928,12 +918,12 @@ button:hover {
   text-align: right;
   user-select: none;
 }
-.help-example .help-line-content {
+.example-chip .example-line-content {
   padding: 0.25em 0.7em;
   white-space: pre-wrap;
 }
 /* The hint reads like the editor's ghost result. */
-.help-returns {
+.example-result {
   padding: 0.2em 0.7em;
   background: var(--color-footer);
   color: var(--color-ghost);
@@ -945,23 +935,23 @@ code {
   border-radius: 4px;
   padding: 0.1em 0.35em;
 }
-.help-section table {
+.modal-section table {
   width: 100%;
   border-collapse: collapse;
   margin: 0.6em 0 1em;
   font-size: 0.92em;
 }
-.help-section th,
-.help-section td {
+.modal-section th,
+.modal-section td {
   text-align: left;
   padding: 0.35em 0.6em;
   border-bottom: 1px solid var(--border-table);
   vertical-align: top;
 }
-.help-section th {
+.modal-section th {
   color: var(--color-text);
 }
-.help-section td:first-child {
+.modal-section td:first-child {
   white-space: nowrap;
   font-weight: 600;
 }

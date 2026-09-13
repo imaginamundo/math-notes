@@ -16,16 +16,16 @@ function renderCode(codeNode, expr) {
   codeNode.textContent = '';
   lines.forEach((line, index) => {
     const row = document.createElement('span');
-    row.className = 'help-line';
+    row.className = 'example-line';
     if (numbered) {
       const gutter = document.createElement('span');
-      gutter.className = 'help-line-number';
+      gutter.className = 'example-line-number';
       gutter.setAttribute('aria-hidden', 'true');
       gutter.textContent = String(index + 1);
       row.appendChild(gutter);
     }
     const content = document.createElement('span');
-    content.className = 'help-line-content';
+    content.className = 'example-line-content';
     content.appendChild(format.line(line, names));
     row.appendChild(content);
     codeNode.appendChild(row);
@@ -36,8 +36,8 @@ function renderCode(codeNode, expr) {
 // bodies indented and highlighted), inserts the expression into the editor on
 // click/Enter/Space, then runs onInsert.
 function initExamples(containerNode, editableNode, onInsert) {
-  const title = t('help.exampleTitle');
-  containerNode.querySelectorAll('.help-example').forEach((example) => {
+  const title = t('example.addTitle');
+  containerNode.querySelectorAll('.example-chip').forEach((example) => {
     const expr = indentGroupBodies(example.dataset.expr);
     const codeNode = example.querySelector('code');
     if (codeNode) renderCode(codeNode, expr);

@@ -150,6 +150,6 @@ Terms used throughout the codebase and this documentation.
 - **Message key** — the identifier passed to `t(key, params)`; its `data-i18n`
   form marks static markup in `index.html`. Each `js/i18n/ui/<lang>.js` chrome
   dictionary must define every chrome key.
-- **Help content** — the Help/Examples prose, authored in Markdown under
-  `js/i18n/src/` and rendered at build time into lazy-loaded modules
-  (`js/ui/helpContent.js` fetches one only when a modal opens).
+- **Examples content** — the Examples prose, authored in Markdown under
+  `js/i18n/src/examples.<lang>.md` and rendered at build time into lazy-loaded
+  modules (`js/ui/recipes.js` fetches one only when the Examples modal opens).

@@ -26,4 +26,4 @@ As unidades de volume de cozinha seguem **Configurações → Sistema de medidas
 
 ## Idioma
 
-A interface, a Ajuda interna e os Exemplos existem em **inglês**, **português** e **espanhol**. O Math Notes começa no idioma do sistema e pode ser trocado em **Configurações → Idioma**. A sintaxe da calculadora continua sendo em inglês, independentemente do idioma da interface.
+A interface, os Exemplos e estas páginas de documentação existem em **inglês**, **português** e **espanhol**. O Math Notes começa no idioma do sistema e pode ser trocado em **Configurações → Idioma**. A sintaxe da calculadora continua sendo em inglês, independentemente do idioma da interface.

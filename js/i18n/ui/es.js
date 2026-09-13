@@ -4,7 +4,7 @@ export default {
 
   'editor.label': 'Entrada de la calculadora',
   'editor.placeholder':
-    'Escribe tus cálculos…\nLos resultados aparecen al lado\nPulsa Ayuda para ver todo lo que entiende',
+    'Escribe tus cálculos…\nLos resultados aparecen al lado\nConsulta la Documentación para todo lo que entiende',
 
   'total.label': 'Agregado del total',
   'total.sum': 'total',
@@ -22,13 +22,10 @@ export default {
   'footer.share': 'Compartir',
   'footer.settings': 'Ajustes',
   'footer.examples': 'Ejemplos',
-  'footer.help': 'Ayuda',
   'footer.docs': 'Documentación',
 
-  'modal.help': 'Ayuda',
   'modal.examples': 'Ejemplos',
   'modal.settings': 'Ajustes',
-  'modal.closeHelp': 'Cerrar la ayuda',
   'modal.closeExamples': 'Cerrar los ejemplos',
   'modal.closeSettings': 'Cerrar los ajustes',
 
@@ -80,8 +77,7 @@ export default {
   'starter.tagComment': '# Las etiquetas marcan filas; una #etiqueta sola las suma todas:',
 
   'autocomplete.label': 'Sugerencias',
-  'help.exampleTitle': 'Haz clic para añadir al editor',
-  'help.fullDocs': 'Documentación completa',
+  'example.addTitle': 'Haz clic para añadir al editor',
 
   'settings.files': 'Archivos',
   'settings.filesBody': 'Exporta la hoja activa como texto o importa una desde un archivo.',

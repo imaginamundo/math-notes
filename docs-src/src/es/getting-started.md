@@ -16,7 +16,7 @@ Una línea puede ser un número simple, una expresión, una asignación, un come
 
 - El **editor** es el área de texto grande. Su capa fantasma muestra resultados, tags y errores en su sitio.
 - La **barra de total** está debajo del editor y agrega la hoja. Usa su menú para cambiar entre **total**, **media** y **mediana**.
-- El **pie** contiene los controles de tamaño del texto y los botones **Compartir**, **Ajustes**, **Ejemplos** y **Ayuda**.
+- El **pie** contiene los controles de tamaño del texto y los botones **Compartir**, **Ajustes**, **Ejemplos** y **Documentación**.
 - La **barra de pestañas** de arriba guarda hojas separadas (consulta [Archivos, compartir & datos](/docs/files/)).
 
 ## Resultados

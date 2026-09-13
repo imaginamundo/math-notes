@@ -1,10 +1,10 @@
-// Build the Help and Examples content modules from the Markdown sources in
-// src/. Run with `make -C js/i18n` (or `npm run build:i18n`). The generated
-// files are committed and lazy-loaded by the modals, like the mathjs bundle.
+// Build the Examples content modules from the Markdown sources in src/. Run with
+// `make -C js/i18n` (or `npm run build:i18n`). The generated files are committed
+// and lazy-loaded by the Examples modal, like the mathjs bundle.
 import { marked } from 'npm:marked@15';
 
 const ROOT = new URL('.', import.meta.url).pathname;
-const AREAS = ['help', 'examples'];
+const AREAS = ['examples'];
 const LANGS = ['en', 'pt', 'es'];
 
 function escapeHtml(text) {
@@ -26,9 +26,9 @@ marked.use({
       if (!lang.startsWith('calc')) return false;
       const hint = lang.slice('calc'.length).trim();
       const expr = token.text.replace(/\n$/, '');
-      const hintHtml = hint ? `<span class="help-returns">${escapeHtml(hint)}</span>` : '';
+      const hintHtml = hint ? `<span class="example-result">${escapeHtml(hint)}</span>` : '';
       return (
-        `<div class="help-example" data-expr="${escapeAttr(expr)}" ` +
+        `<div class="example-chip" data-expr="${escapeAttr(expr)}" ` +
         `tabindex="0" role="button"><code></code>${hintHtml}</div>`
       );
     },

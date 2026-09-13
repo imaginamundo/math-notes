@@ -10,7 +10,7 @@ Tus hojas se quedan en tu dispositivo. Se guardan en el almacenamiento del naveg
 
 ## Idiomas de la interfaz
 
-La interfaz, la Ayuda interna y estas páginas de documentación existen en inglés, portugués y español. La sintaxis de la calculadora es siempre en inglés. Cambia el idioma de la app en **Ajustes → Idioma**.
+La interfaz, los Ejemplos y estas páginas de documentación existen en inglés, portugués y español. La sintaxis de la calculadora es siempre en inglés. Cambia el idioma de la app en **Ajustes → Idioma**.
 
 ## Créditos
 

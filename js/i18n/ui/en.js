@@ -5,7 +5,7 @@ export default {
 
   'editor.label': 'Calculator input',
   'editor.placeholder':
-    'Type your calculations…\nResults appear inline\nPress Help for everything this understands',
+    'Type your calculations…\nResults appear inline\nSee Documentation for everything it understands',
 
   'total.label': 'Total aggregate',
   'total.sum': 'total',
@@ -23,13 +23,10 @@ export default {
   'footer.share': 'Share',
   'footer.settings': 'Settings',
   'footer.examples': 'Examples',
-  'footer.help': 'Help',
   'footer.docs': 'Documentation',
 
-  'modal.help': 'Help',
   'modal.examples': 'Examples',
   'modal.settings': 'Settings',
-  'modal.closeHelp': 'Close help',
   'modal.closeExamples': 'Close examples',
   'modal.closeSettings': 'Close settings',
 
@@ -80,8 +77,7 @@ export default {
   'starter.tagComment': '# Tags name rows; a bare #tag totals them:',
 
   'autocomplete.label': 'Suggestions',
-  'help.exampleTitle': 'Click to add to the editor',
-  'help.fullDocs': 'Full documentation',
+  'example.addTitle': 'Click to add to the editor',
 
   'settings.files': 'Files',
   'settings.filesBody': 'Export the active sheet as text or import one from a file.',

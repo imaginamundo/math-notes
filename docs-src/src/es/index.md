@@ -2,7 +2,7 @@
 
 Math Notes es una calculadora en línea que funciona enteramente en tu navegador. Escribe los cálculos línea a línea y cada resultado aparece al lado, como una pista atenuada, con un total acumulado abajo. Está inspirada en [Numi](https://numi.app) y [Soulver](https://soulver.app).
 
-Esta guía cubre todos los recursos en detalle. Si quieres una referencia rápida mientras trabajas, abre la **Ayuda** dentro de la app — esta documentación es la versión larga.
+Esta guía cubre todos los recursos en detalle. Tenla abierta mientras trabajas — es la referencia completa de la app.
 
 ## Cómo leer esta guía
 

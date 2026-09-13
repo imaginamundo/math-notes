@@ -2,7 +2,7 @@
 
 Math Notes is an inline calculator that runs entirely in your browser. Type calculations line by line and each result appears beside it as dimmed ghost text, with a running total at the bottom. It is inspired by [Numi](https://numi.app) and [Soulver](https://soulver.app).
 
-This guide covers every feature in depth. If you want a quick reference while you work, open **Help** inside the app — this documentation is the long-form version.
+This guide covers every feature in depth. Keep it open while you work — it is the long-form reference for the app.
 
 ## How to read this guide
 

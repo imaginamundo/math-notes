@@ -125,8 +125,8 @@ Based on [Numi](https://numi.app/) and [Soulver](https://soulver.app/).
 - **Examples** — the **Examples** button opens ready-made sheets (bill splits,
   recipe scaling, unit prices, savings goals, interest, fuel cost, running pace,
   upload time, BMI and more) that drop into the editor with one click.
-- **Languages** — the interface, Help and Examples ship in English, Portuguese
-  and Spanish. It starts in your system language and can be changed in
+- **Languages** — the interface, Examples and documentation ship in English,
+  Portuguese and Spanish. It starts in your system language and can be changed in
   **Settings → Language** (the calculator itself keeps English syntax).
 - **Keyboard shortcuts** (see below).
 - Offline-first PWA via a service worker.
@@ -159,8 +159,8 @@ people = 4
 | `⇧⌘I` / `Ctrl+Shift+I`         | Import a sheet                  |
 | `⇧⌘⌫` / `Ctrl+Shift+Backspace` | Clear the active sheet          |
 
-The **Help** button opens the full reference with clickable examples, and the
-**Documentation** link in the footer opens the long-form user guide at
+The **Examples** button opens ready-made sheets, and the **Documentation** link
+in the footer opens the full user guide at
 [`/docs`](https://math.dio.dev/docs/).
 
 ## Reserved words
@@ -216,11 +216,11 @@ Regenerate the bundle, then minify it into the file the app loads:
 make -C js/lib
 ```
 
-### Updating Help & Examples
+### Updating Examples
 
-The Help and Examples prose is authored in Markdown under
-`js/i18n/src/<area>.<lang>.md` (a ` ```calc ` fence becomes a clickable
-example). Regenerate the committed modules after editing:
+The Examples prose is authored in Markdown under
+`js/i18n/src/examples.<lang>.md` (a ` ```calc ` fence becomes a clickable
+example chip). Regenerate the committed modules after editing:
 
 ```sh
 make -C js/i18n
@@ -250,10 +250,10 @@ server rooted at the repository serves them directly.
   `scales.js`, `symbols.js`, `timespan.js`, `units.js`, `wordOperators.js`,
   `percentage.js`).
 - `js/i18n/` — interface translations: the runtime, per-language `ui/` chrome
-  dictionaries, and the `src/` Markdown with its generated `help/`/`examples/`
-  content modules.
+  dictionaries, and the `src/` Markdown with its generated `examples/` content
+  modules.
 - `js/render/` — highlighting and result rendering.
-- `js/ui/` — tabs, modals, help, examples, onboarding and the starter prompt,
+- `js/ui/` — tabs, modals, examples, onboarding and the starter prompt,
   settings, find & replace, go-to-line, line numbers, indentation, import/export,
   sharing, shortcuts and font controls.
 - `js/storage/` — persistence (`tabsStore.js` for the tab collection,

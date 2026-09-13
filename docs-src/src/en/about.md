@@ -10,7 +10,7 @@ Your sheets stay on your device. They are saved in your browser's storage and ar
 
 ## Interface languages
 
-The interface, the in-app Help and these documentation pages are available in English, Portuguese and Spanish. The calculator syntax is always English. Switch the app's language in **Settings → Language**.
+The interface, the Examples and these documentation pages are available in English, Portuguese and Spanish. The calculator syntax is always English. Switch the app's language in **Settings → Language**.
 
 ## Credits
 

@@ -10,7 +10,7 @@ Suas planilhas ficam no seu dispositivo. São salvas no armazenamento do navegad
 
 ## Idiomas da interface
 
-A interface, a Ajuda interna e estas páginas de documentação existem em inglês, português e espanhol. A sintaxe da calculadora é sempre em inglês. Troque o idioma do app em **Configurações → Idioma**.
+A interface, os Exemplos e estas páginas de documentação existem em inglês, português e espanhol. A sintaxe da calculadora é sempre em inglês. Troque o idioma do app em **Configurações → Idioma**.
 
 ## Créditos
 

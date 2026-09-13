@@ -26,4 +26,4 @@ Cooking volume units follow **Settings → Measurement system** — **Metric** (
 
 ## Language
 
-The interface, the in-app Help and the Examples ship in **English**, **Portuguese** and **Spanish**. Math Notes starts in your system language and can be changed in **Settings → Language**. The calculator syntax itself stays English regardless of the interface language.
+The interface, the Examples and these documentation pages ship in **English**, **Portuguese** and **Spanish**. Math Notes starts in your system language and can be changed in **Settings → Language**. The calculator syntax itself stays English regardless of the interface language.

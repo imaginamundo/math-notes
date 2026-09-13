@@ -16,7 +16,7 @@ Uma linha pode ser um número simples, uma expressão, uma atribuição, um come
 
 - O **editor** é a área de texto grande. Sua camada fantasma mostra resultados, tags e erros no lugar.
 - A **barra de total** fica embaixo do editor e agrega a planilha. Use o menu dela para alternar entre **total**, **média** e **mediana**.
-- O **rodapé** tem os controles de tamanho do texto e os botões **Compartilhar**, **Configurações**, **Exemplos** e **Ajuda**.
+- O **rodapé** tem os controles de tamanho do texto e os botões **Compartilhar**, **Configurações**, **Exemplos** e **Documentação**.
 - A **barra de abas**, no topo, guarda planilhas separadas (veja [Arquivos, compartilhamento & dados](/docs/files/)).
 
 ## Resultados
