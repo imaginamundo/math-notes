@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Grupos &amp; totales · Documentación · Math Notes</title>
+  <meta name="description" content="Math Notes agrega de tres formas relacionadas: el total acumulado de la barra inferior, las palabras clave de agregación (sum, average, …) que escribes en una línea, y los grupos con nombre que muestran un subtotal en su sitio.">
+  <link rel="canonical" href="https://math.dio.dev/docs/es/groups/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/groups/">
+  <link rel="alternate" hreflang="pt" href="https://math.dio.dev/docs/pt/groups/">
+  <link rel="alternate" hreflang="es" href="https://math.dio.dev/docs/es/groups/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/groups/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Grupos &amp; totales">
+  <meta property="og:description" content="Math Notes agrega de tres formas relacionadas: el total acumulado de la barra inferior, las palabras clave de agregación (sum, average, …) que escribes en una línea, y los grupos con nombre que muestran un subtotal en su sitio.">
+  <meta property="og:url" content="https://math.dio.dev/docs/es/groups/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/es/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentación</span>
+    </a>
+    <div class="doc-header-actions">
+      <nav class="doc-lang" aria-label="Idioma"><a href="/docs/groups/" hreflang="en">English</a><a href="/docs/pt/groups/" hreflang="pt">Português</a><a href="/docs/es/groups/" hreflang="es" class="is-active" aria-current="page">Español</a></nav>
+      <a class="doc-app" href="/">Abrir Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Menú de la documentación</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Menú de la documentación"><ul><li class="doc-nav-item"><a href="/docs/es/">Inicio</a></li><li class="doc-nav-item"><a href="/docs/es/getting-started/">Primeros pasos</a></li><li class="doc-nav-item"><a href="/docs/es/writing-a-sheet/">Escribir una hoja</a></li><li class="doc-nav-item"><a href="/docs/es/numbers/">Números &amp; operadores</a></li><li class="doc-nav-item"><a href="/docs/es/lists/">Listas &amp; secuencias</a></li><li class="doc-nav-item is-active"><a href="/docs/es/groups/" aria-current="page">Grupos &amp; totales</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">En esta página</li><li><a href="#la-barra-de-total">La barra de total</a></li><li><a href="#palabras-clave-de-agregacion">Palabras clave de agregación</a></li><li><a href="#grupos">Grupos</a></li><li><a href="#interaccion-con-prev-y-tags">Interacción con prev y tags</a></li><li><a href="#errores-comunes">Errores comunes</a></li></ul></li><li class="doc-nav-item"><a href="/docs/es/units/">Unidades &amp; medidas</a></li><li class="doc-nav-item"><a href="/docs/es/money/">Dinero &amp; monedas</a></li><li class="doc-nav-item"><a href="/docs/es/dates/">Fechas &amp; tiempo</a></li><li class="doc-nav-item"><a href="/docs/es/files/">Archivos, compartir &amp; datos</a></li><li class="doc-nav-item"><a href="/docs/es/settings/">Ajustes &amp; apariencia</a></li><li class="doc-nav-item"><a href="/docs/es/app/">App &amp; plataforma</a></li><li class="doc-nav-item"><a href="/docs/es/reference/">Referencia</a></li><li class="doc-nav-item"><a href="/docs/es/about/">Acerca de</a></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>Grupos &amp; totales</h1>
+<p>Math Notes agrega de tres formas relacionadas: el total acumulado de la barra inferior, las palabras clave de agregación (<code>sum</code>, <code>average</code>, …) que escribes en una línea, y los grupos con nombre que muestran un subtotal en su sitio.</p>
+<h2 id="la-barra-de-total">La barra de total</h2>
+<p>La barra de total debajo del editor agrega todos los resultados numéricos de la hoja. Su menú alterna entre <strong>total</strong> (suma), <strong>media</strong> y <strong>mediana</strong>.</p>
+<p>Los números simples se reúnen en una sola unidad; las unidades compatibles (como <code>cm</code> y <code>m</code>) se funden en la mayor presente; las monedas o dimensiones mixtas caen en la suma numérica simple.</p>
+<h2 id="palabras-clave-de-agregacion">Palabras clave de agregación</h2>
+<p><code>sum</code>, <code>total</code>, <code>average</code> y <code>avg</code> agregan las líneas de arriba, hasta una línea en blanco. Una línea en blanco inicia un bloque nuevo, así que puedes mantener varias agregaciones independientes en una hoja.</p>
+<figure class="doc-example" data-expr="10
+20
+sum"><pre class="doc-code"><code data-calc>10
+20
+sum</code></pre><figcaption class="doc-example-result">la última línea devuelve 30</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="4
+8
+average"><pre class="doc-code"><code data-calc>4
+8
+average</code></pre><figcaption class="doc-example-result">la última línea devuelve 6</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="10
+20
+sum
+
+1
+2
+sum"><pre class="doc-code"><code data-calc>10
+20
+sum
+
+1
+2
+sum</code></pre><figcaption class="doc-example-result">la última línea devuelve 15</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><p>Las palabras clave también aceptan una tag: <code>sum #food</code>, o el atajo <code>#food</code> solo en la línea (consulta <a href="/docs/es/writing-a-sheet/">Tags</a>).</p>
+<h2 id="grupos">Grupos</h2>
+<p>Abre un grupo con nombre con una etiqueta en su propia línea (como <code>Groceries:</code>) y ciérralo con <code>end</code>. La cabecera muestra el subtotal del grupo y todo el bloque se sombrea. Las líneas interiores siguen contando en el total de abajo.</p>
+<figure class="doc-example" data-expr="Groceries:
+  4.50
+  3.20
+  2.40
+end"><pre class="doc-code"><code data-calc>Groceries:
+  4.50
+  3.20
+  2.40
+end</code></pre><figcaption class="doc-example-result">la cabecera muestra 10.1</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><p>Los grupos funcionan con unidades también, siguiendo la regla de unidad del total:</p>
+<figure class="doc-example" data-expr="Trip:
+  10 cm
+  1 m
+end"><pre class="doc-code"><code data-calc>Trip:
+  10 cm
+  1 m
+end</code></pre><figcaption class="doc-example-result">la cabecera muestra 1.1 m</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><p>Las líneas en blanco dentro del grupo se ignoran, y <code>sum</code>/<code>average</code> dentro de un grupo totalizan ese grupo, no la hoja entera.</p>
+<h2 id="interaccion-con-prev-y-tags">Interacción con <code>prev</code> y tags</h2>
+<p>Un grupo cerrado deja <code>prev</code> en el subtotal mostrado en la cabecera, y después continúa desde la línea <code>end</code>. Las tags siguen funcionando entre grupos: una fila marcada aporta su parte a la tag, esté en el grupo que esté.</p>
+<h2 id="errores-comunes">Errores comunes</h2>
+<ul>
+<li>Una cabecera sin <code>end</code> es solo una etiqueta, y las líneas siguientes son líneas normales.</li>
+<li>Un <code>end</code> sin cabecera abierta se informa como error.</li>
+<li>Los grupos no se anidan: una segunda cabecera dentro de un grupo abierto inicia una nueva etiqueta.</li>
+</ul>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — una calculadora en línea en el navegador.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

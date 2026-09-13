@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Configurações &amp; aparência · Documentação · Math Notes</title>
+  <meta name="description" content="Abra Configurações no rodapé. As escolhas são lembradas no navegador e aplicadas na próxima vez que você abrir o app.">
+  <link rel="canonical" href="https://math.dio.dev/docs/pt/settings/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/settings/">
+  <link rel="alternate" hreflang="pt" href="https://math.dio.dev/docs/pt/settings/">
+  <link rel="alternate" hreflang="es" href="https://math.dio.dev/docs/es/settings/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/settings/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Configurações &amp; aparência">
+  <meta property="og:description" content="Abra Configurações no rodapé. As escolhas são lembradas no navegador e aplicadas na próxima vez que você abrir o app.">
+  <meta property="og:url" content="https://math.dio.dev/docs/pt/settings/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/pt/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentação</span>
+    </a>
+    <div class="doc-header-actions">
+      <nav class="doc-lang" aria-label="Idioma"><a href="/docs/settings/" hreflang="en">English</a><a href="/docs/pt/settings/" hreflang="pt" class="is-active" aria-current="page">Português</a><a href="/docs/es/settings/" hreflang="es">Español</a></nav>
+      <a class="doc-app" href="/">Abrir o Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Menu da documentação</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Menu da documentação"><ul><li class="doc-nav-item"><a href="/docs/pt/">Início</a></li><li class="doc-nav-item"><a href="/docs/pt/getting-started/">Primeiros passos</a></li><li class="doc-nav-item"><a href="/docs/pt/writing-a-sheet/">Escrevendo uma planilha</a></li><li class="doc-nav-item"><a href="/docs/pt/numbers/">Números &amp; operadores</a></li><li class="doc-nav-item"><a href="/docs/pt/lists/">Listas &amp; sequências</a></li><li class="doc-nav-item"><a href="/docs/pt/groups/">Grupos &amp; totais</a></li><li class="doc-nav-item"><a href="/docs/pt/units/">Unidades &amp; medidas</a></li><li class="doc-nav-item"><a href="/docs/pt/money/">Dinheiro &amp; moedas</a></li><li class="doc-nav-item"><a href="/docs/pt/dates/">Datas &amp; tempo</a></li><li class="doc-nav-item"><a href="/docs/pt/files/">Arquivos, compartilhamento &amp; dados</a></li><li class="doc-nav-item is-active"><a href="/docs/pt/settings/" aria-current="page">Configurações &amp; aparência</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">Nesta página</li><li><a href="#tema">Tema</a></li><li><a href="#tamanho-do-texto">Tamanho do texto</a></li><li><a href="#precisao-decimal">Precisão decimal</a></li><li><a href="#relogio">Relógio</a></li><li><a href="#sistema-de-medidas">Sistema de medidas</a></li><li><a href="#idioma">Idioma</a></li></ul></li><li class="doc-nav-item"><a href="/docs/pt/app/">App &amp; plataforma</a></li><li class="doc-nav-item"><a href="/docs/pt/reference/">Referência</a></li><li class="doc-nav-item"><a href="/docs/pt/about/">Sobre</a></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>Configurações &amp; aparência</h1>
+<p>Abra <strong>Configurações</strong> no rodapé. As escolhas são lembradas no navegador e aplicadas na próxima vez que você abrir o app.</p>
+<h2 id="tema">Tema</h2>
+<p>Escolha um tema claro ou escuro. A paleta é aplicada por variáveis CSS, então toda superfície do app muda junto. Os temas disponíveis incluem <strong>Dracula</strong>, <strong>Solarized Dark</strong>, <strong>Monokai</strong> e <strong>Light</strong>.</p>
+<h2 id="tamanho-do-texto">Tamanho do texto</h2>
+<p><strong>−</strong> / <strong>+</strong> no rodapé mudam o texto do editor entre 50% e 200% do tamanho padrão do navegador, com <strong>Redefinir tamanho</strong> de volta a 100%. Como a escala parte do tamanho do seu navegador, ela respeita o tamanho de texto que você já escolheu para acessibilidade.</p>
+<h2 id="precisao-decimal">Precisão decimal</h2>
+<p>Os resultados mostram até <strong>3 casas decimais</strong> por padrão. Defina o número de casas de 0 a 10 em <strong>Configurações → Precisão decimal</strong>.</p>
+<p>Um resultado truncado termina com reticências (<code>…</code>); o cálculo em si mantém a precisão total, então linhas posteriores que usam o resultado não são afetadas pela escolha de exibição.</p>
+<h2 id="relogio">Relógio</h2>
+<p>Os horários usam o formato de 24 horas por padrão. <strong>Configurações → Relógio</strong> alterna para o formato de 12 horas com <code>am</code>/<code>pm</code>.</p>
+<h2 id="sistema-de-medidas">Sistema de medidas</h2>
+<p>As unidades de volume de cozinha seguem <strong>Configurações → Sistema de medidas</strong> — <strong>Métrico</strong> (padrão), <strong>Americano</strong> ou <strong>Imperial</strong>. Ele define <code>cup</code> como 250, 236.6 ou 284.1 ml, e muda <code>tsp</code>, <code>tbsp</code>, <code>fl oz</code>, <code>pint</code>, <code>quart</code> e <code>gallon</code> junto. Veja <a href="/docs/pt/units/">Unidades &amp; medidas</a>.</p>
+<h2 id="idioma">Idioma</h2>
+<p>A interface, a Ajuda interna e os Exemplos existem em <strong>inglês</strong>, <strong>português</strong> e <strong>espanhol</strong>. O Math Notes começa no idioma do sistema e pode ser trocado em <strong>Configurações → Idioma</strong>. A sintaxe da calculadora continua sendo em inglês, independentemente do idioma da interface.</p>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — uma calculadora em linha no navegador.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Primeros pasos · Documentación · Math Notes</title>
+  <meta name="description" content="Math Notes es una hoja de líneas. Escribes un cálculo por línea y la respuesta aparece a la derecha, como una pista atenuada. No hay botón = ni cuadrícula de celdas: la hoja se recalcula mientras escribes.">
+  <link rel="canonical" href="https://math.dio.dev/docs/es/getting-started/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/getting-started/">
+  <link rel="alternate" hreflang="pt" href="https://math.dio.dev/docs/pt/getting-started/">
+  <link rel="alternate" hreflang="es" href="https://math.dio.dev/docs/es/getting-started/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/getting-started/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Primeros pasos">
+  <meta property="og:description" content="Math Notes es una hoja de líneas. Escribes un cálculo por línea y la respuesta aparece a la derecha, como una pista atenuada. No hay botón = ni cuadrícula de celdas: la hoja se recalcula mientras escribes.">
+  <meta property="og:url" content="https://math.dio.dev/docs/es/getting-started/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/es/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentación</span>
+    </a>
+    <div class="doc-header-actions">
+      <nav class="doc-lang" aria-label="Idioma"><a href="/docs/getting-started/" hreflang="en">English</a><a href="/docs/pt/getting-started/" hreflang="pt">Português</a><a href="/docs/es/getting-started/" hreflang="es" class="is-active" aria-current="page">Español</a></nav>
+      <a class="doc-app" href="/">Abrir Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Menú de la documentación</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Menú de la documentación"><ul><li class="doc-nav-item"><a href="/docs/es/">Inicio</a></li><li class="doc-nav-item is-active"><a href="/docs/es/getting-started/" aria-current="page">Primeros pasos</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">En esta página</li><li><a href="#la-pantalla">La pantalla</a></li><li><a href="#resultados">Resultados</a></li><li><a href="#edicion">Edición</a></li><li><a href="#autocompletado">Autocompletado</a></li><li><a href="#primera-visita">Primera visita</a></li><li><a href="#sin-conexion">Sin conexión</a></li></ul></li><li class="doc-nav-item"><a href="/docs/es/writing-a-sheet/">Escribir una hoja</a></li><li class="doc-nav-item"><a href="/docs/es/numbers/">Números &amp; operadores</a></li><li class="doc-nav-item"><a href="/docs/es/lists/">Listas &amp; secuencias</a></li><li class="doc-nav-item"><a href="/docs/es/groups/">Grupos &amp; totales</a></li><li class="doc-nav-item"><a href="/docs/es/units/">Unidades &amp; medidas</a></li><li class="doc-nav-item"><a href="/docs/es/money/">Dinero &amp; monedas</a></li><li class="doc-nav-item"><a href="/docs/es/dates/">Fechas &amp; tiempo</a></li><li class="doc-nav-item"><a href="/docs/es/files/">Archivos, compartir &amp; datos</a></li><li class="doc-nav-item"><a href="/docs/es/settings/">Ajustes &amp; apariencia</a></li><li class="doc-nav-item"><a href="/docs/es/app/">App &amp; plataforma</a></li><li class="doc-nav-item"><a href="/docs/es/reference/">Referencia</a></li><li class="doc-nav-item"><a href="/docs/es/about/">Acerca de</a></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>Primeros pasos</h1>
+<p>Math Notes es una hoja de líneas. Escribes un cálculo por línea y la respuesta aparece a la derecha, como una pista atenuada. No hay botón <strong>=</strong> ni cuadrícula de celdas: la hoja se recalcula mientras escribes.</p>
+<figure class="doc-example" data-expr="1 + 1"><pre class="doc-code"><code data-calc>1 + 1</code></pre><figcaption class="doc-example-result">devuelve 2</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="2 * 3 + 1"><pre class="doc-code"><code data-calc>2 * 3 + 1</code></pre><figcaption class="doc-example-result">devuelve 7</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><p>Una línea puede ser un número simple, una expresión, una asignación, un comentario, o una etiqueta seguida de una expresión. El resultado de la última línea también aparece en la barra de total, abajo.</p>
+<h2 id="la-pantalla">La pantalla</h2>
+<ul>
+<li>El <strong>editor</strong> es el área de texto grande. Su capa fantasma muestra resultados, tags y errores en su sitio.</li>
+<li>La <strong>barra de total</strong> está debajo del editor y agrega la hoja. Usa su menú para cambiar entre <strong>total</strong>, <strong>media</strong> y <strong>mediana</strong>.</li>
+<li>El <strong>pie</strong> contiene los controles de tamaño del texto y los botones <strong>Compartir</strong>, <strong>Ajustes</strong>, <strong>Ejemplos</strong> y <strong>Ayuda</strong>.</li>
+<li>La <strong>barra de pestañas</strong> de arriba guarda hojas separadas (consulta <a href="/docs/es/files/">Archivos, compartir &amp; datos</a>).</li>
+</ul>
+<h2 id="resultados">Resultados</h2>
+<p>Los resultados se formatean con separadores de miles y se escriben con la unidad o moneda que llevan.</p>
+<figure class="doc-example" data-expr="1000000"><pre class="doc-code"><code data-calc>1000000</code></pre><figcaption class="doc-example-result">1,000,000</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="1cm to m"><pre class="doc-code"><code data-calc>1cm to m</code></pre><figcaption class="doc-example-result">0.01 m</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><p>Por defecto, un resultado muestra hasta <strong>3 decimales</strong>. Un valor con más precisión termina en puntos suspensivos, mientras que el cálculo conserva toda la precisión. Cámbialo en <strong>Ajustes → Precisión decimal</strong> (consulta <a href="/docs/es/settings/">Ajustes &amp; apariencia</a>).</p>
+<p>Cuando una línea no se puede evaluar, el error aparece en la propia línea, en rojo. Los errores nunca impiden que el resto de la hoja se evalúe.</p>
+<h2 id="edicion">Edición</h2>
+<ul>
+<li><strong>Sangría</strong> — <code>Tab</code> indenta la línea actual o una selección de varias líneas, <code>Shift+Tab</code> desindenta. La sangría es de dos espacios y no cambia cómo se evalúa la línea.</li>
+<li><strong>Comentar una línea</strong> — haz clic en el número de la línea en el margen izquierdo para comentarla o descomentarla. Una línea que ya empieza por <code>##</code> solo pierde un <code>#</code>.</li>
+<li><strong>Números de línea</strong> — el margen izquierdo numera la hoja y resalta la línea donde está el cursor.</li>
+<li><strong>Deshacer / rehacer</strong> — <code>⌘Z</code> / <code>Ctrl+Z</code> y <code>⇧⌘Z</code> / <code>Ctrl+Shift+Z</code>, con un historial separado para cada pestaña.</li>
+<li><strong>Ir a una línea</strong> — <code>⌘G</code> / <code>Ctrl+G</code> y escribe un número de línea.</li>
+<li><strong>Buscar y reemplazar</strong> — <code>⌘F</code> / <code>Ctrl+F</code> busca en la hoja activa con resaltado en vivo, y reemplaza una o todas las coincidencias.</li>
+<li><strong>Tamaño del texto</strong> — <strong>−</strong> / <strong>+</strong> del pie cambian el editor entre el 50% y el 200% del tamaño predeterminado del navegador; <strong>Restablecer tamaño</strong> vuelve al 100%.</li>
+</ul>
+<h2 id="autocompletado">Autocompletado</h2>
+<p>Mientras escribes, un cuadro de sugerencias propone las variables de la hoja y las <code>#tags</code>, además de las funciones, palabras clave, constantes y unidades integradas. Pulsa <code>Ctrl+Space</code> para abrirlo cuando quieras. <strong>↑</strong>/<strong>↓</strong> eligen, <strong>Enter</strong>/<strong>Tab</strong> insertan, <strong>Esc</strong> cierra.</p>
+<h2 id="primera-visita">Primera visita</h2>
+<p>La primera visita abre con una hoja de <strong>Bienvenida</strong> en vez de una página vacía — variables, etiquetas, <code>sum</code>, tags, duraciones con unidades, porcentajes y fechas. Usa sus botones <strong>Conservar contenido</strong> / <strong>Borrar contenido</strong> para descartarla o vaciarla.</p>
+<h2 id="sin-conexion">Sin conexión</h2>
+<p>Math Notes es una PWA instalable. Tras la primera visita, un service worker mantiene la app disponible sin conexión; las tasas de cambio se guardan en caché, así que las conversiones siguen funcionando. Consulta <a href="/docs/es/app/">App &amp; plataforma</a>.</p>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — una calculadora en línea en el navegador.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

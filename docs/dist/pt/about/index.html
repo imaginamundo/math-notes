@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Sobre · Documentação · Math Notes</title>
+  <meta name="description" content="O Math Notes é uma calculadora em linha no navegador, inspirada no Numi e no Soulver. Seu código é aberto — veja o repositório no GitHub.">
+  <link rel="canonical" href="https://math.dio.dev/docs/pt/about/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/about/">
+  <link rel="alternate" hreflang="pt" href="https://math.dio.dev/docs/pt/about/">
+  <link rel="alternate" hreflang="es" href="https://math.dio.dev/docs/es/about/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/about/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Sobre">
+  <meta property="og:description" content="O Math Notes é uma calculadora em linha no navegador, inspirada no Numi e no Soulver. Seu código é aberto — veja o repositório no GitHub.">
+  <meta property="og:url" content="https://math.dio.dev/docs/pt/about/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/pt/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentação</span>
+    </a>
+    <div class="doc-header-actions">
+      <nav class="doc-lang" aria-label="Idioma"><a href="/docs/about/" hreflang="en">English</a><a href="/docs/pt/about/" hreflang="pt" class="is-active" aria-current="page">Português</a><a href="/docs/es/about/" hreflang="es">Español</a></nav>
+      <a class="doc-app" href="/">Abrir o Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Menu da documentação</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Menu da documentação"><ul><li class="doc-nav-item"><a href="/docs/pt/">Início</a></li><li class="doc-nav-item"><a href="/docs/pt/getting-started/">Primeiros passos</a></li><li class="doc-nav-item"><a href="/docs/pt/writing-a-sheet/">Escrevendo uma planilha</a></li><li class="doc-nav-item"><a href="/docs/pt/numbers/">Números &amp; operadores</a></li><li class="doc-nav-item"><a href="/docs/pt/lists/">Listas &amp; sequências</a></li><li class="doc-nav-item"><a href="/docs/pt/groups/">Grupos &amp; totais</a></li><li class="doc-nav-item"><a href="/docs/pt/units/">Unidades &amp; medidas</a></li><li class="doc-nav-item"><a href="/docs/pt/money/">Dinheiro &amp; moedas</a></li><li class="doc-nav-item"><a href="/docs/pt/dates/">Datas &amp; tempo</a></li><li class="doc-nav-item"><a href="/docs/pt/files/">Arquivos, compartilhamento &amp; dados</a></li><li class="doc-nav-item"><a href="/docs/pt/settings/">Configurações &amp; aparência</a></li><li class="doc-nav-item"><a href="/docs/pt/app/">App &amp; plataforma</a></li><li class="doc-nav-item"><a href="/docs/pt/reference/">Referência</a></li><li class="doc-nav-item is-active"><a href="/docs/pt/about/" aria-current="page">Sobre</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">Nesta página</li><li><a href="#privacidade">Privacidade</a></li><li><a href="#idiomas-da-interface">Idiomas da interface</a></li><li><a href="#creditos">Créditos</a></li></ul></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>Sobre</h1>
+<p>O Math Notes é uma calculadora em linha no navegador, inspirada no <a href="https://numi.app">Numi</a> e no <a href="https://soulver.app">Soulver</a>. Seu código é aberto — veja o <a href="https://github.com/imaginamundo/math-notes">repositório no GitHub</a>.</p>
+<p>Os cálculos rodam no <a href="https://mathjs.org">mathjs</a>, uma biblioteca de matemática extensível para JavaScript. As taxas de câmbio vêm do <a href="https://www.ecb.europa.eu">Banco Central Europeu</a> via <a href="https://frankfurter.dev">Frankfurter</a>.</p>
+<h2 id="privacidade">Privacidade</h2>
+<p>Suas planilhas ficam no seu dispositivo. São salvas no armazenamento do navegador e nunca são enviadas a um servidor. Os links de compartilhamento carregam a planilha no fragmento da URL, que os navegadores não transmitem com a requisição. Veja <a href="/docs/pt/files/">Arquivos, compartilhamento &amp; dados</a>.</p>
+<h2 id="idiomas-da-interface">Idiomas da interface</h2>
+<p>A interface, a Ajuda interna e estas páginas de documentação existem em inglês, português e espanhol. A sintaxe da calculadora é sempre em inglês. Troque o idioma do app em <strong>Configurações → Idioma</strong>.</p>
+<h2 id="creditos">Créditos</h2>
+<p>O Math Notes é aberto. A documentação é gerada a partir de Markdown em tempo de build e publicada como páginas estáticas junto com o app.</p>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — uma calculadora em linha no navegador.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,10 +1,9 @@
 import { getLocale } from '../i18n/index.js';
 
 // The documentation is published per language at /docs (en), /docs/pt and
-// /docs/es. Only languages present in the map are linked; a locale without a
-// translated build falls back to English instead of a 404. Add `pt`/`es` here
-// once their docs sources exist under docs/src/.
-const PATHS = { en: '/docs/' };
+// /docs/es. A locale without a translated build falls back to English rather
+// than a 404.
+const PATHS = { en: '/docs/', pt: '/docs/pt/', es: '/docs/es/' };
 
 function initDocsLink() {
   const update = () => {

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Escrevendo uma planilha · Documentação · Math Notes</title>
+  <meta name="description" content="Uma planilha é uma lista de linhas avaliadas de cima para baixo. Cada linha pode definir um valor, referenciar algo acima dela, ou simplesmente produzir um resultado. As variáveis vivem em um único escopo por planilha e ficam disponíveis para toda linha abaixo da definição.">
+  <link rel="canonical" href="https://math.dio.dev/docs/pt/writing-a-sheet/">
+  <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/writing-a-sheet/">
+  <link rel="alternate" hreflang="pt" href="https://math.dio.dev/docs/pt/writing-a-sheet/">
+  <link rel="alternate" hreflang="es" href="https://math.dio.dev/docs/es/writing-a-sheet/">
+  <link rel="alternate" hreflang="x-default" href="https://math.dio.dev/docs/writing-a-sheet/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Math Notes">
+  <meta property="og:title" content="Escrevendo uma planilha">
+  <meta property="og:description" content="Uma planilha é uma lista de linhas avaliadas de cima para baixo. Cada linha pode definir um valor, referenciar algo acima dela, ou simplesmente produzir um resultado. As variáveis vivem em um único escopo por planilha e ficam disponíveis para toda linha abaixo da definição.">
+  <meta property="og:url" content="https://math.dio.dev/docs/pt/writing-a-sheet/">
+  <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <a class="doc-skip" href="#content">Skip to content</a>
+  <header class="doc-header">
+    <a class="doc-brand" href="/docs/pt/">
+      <span class="doc-brand-name">Math Notes</span>
+      <span class="doc-brand-tag">Documentação</span>
+    </a>
+    <div class="doc-header-actions">
+      <nav class="doc-lang" aria-label="Idioma"><a href="/docs/writing-a-sheet/" hreflang="en">English</a><a href="/docs/pt/writing-a-sheet/" hreflang="pt" class="is-active" aria-current="page">Português</a><a href="/docs/es/writing-a-sheet/" hreflang="es">Español</a></nav>
+      <a class="doc-app" href="/">Abrir o Math Notes</a>
+    </div>
+  </header>
+  <div class="doc-layout">
+    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Menu da documentação</button>
+    <aside class="doc-sidebar" id="doc-sidebar">
+      <nav class="doc-nav" aria-label="Menu da documentação"><ul><li class="doc-nav-item"><a href="/docs/pt/">Início</a></li><li class="doc-nav-item"><a href="/docs/pt/getting-started/">Primeiros passos</a></li><li class="doc-nav-item is-active"><a href="/docs/pt/writing-a-sheet/" aria-current="page">Escrevendo uma planilha</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">Nesta página</li><li><a href="#comentarios-e-rotulos">Comentários e rótulos</a></li><li><a href="#tags">Tags</a></li><li><a href="#variaveis">Variáveis</a></li><li><a href="#objetos">Objetos</a></li><li><a href="#referencias">Referências</a></li><li><a href="#palavras-reservadas">Palavras reservadas</a></li><li><a href="#linhas-em-branco">Linhas em branco</a></li></ul></li><li class="doc-nav-item"><a href="/docs/pt/numbers/">Números &amp; operadores</a></li><li class="doc-nav-item"><a href="/docs/pt/lists/">Listas &amp; sequências</a></li><li class="doc-nav-item"><a href="/docs/pt/groups/">Grupos &amp; totais</a></li><li class="doc-nav-item"><a href="/docs/pt/units/">Unidades &amp; medidas</a></li><li class="doc-nav-item"><a href="/docs/pt/money/">Dinheiro &amp; moedas</a></li><li class="doc-nav-item"><a href="/docs/pt/dates/">Datas &amp; tempo</a></li><li class="doc-nav-item"><a href="/docs/pt/files/">Arquivos, compartilhamento &amp; dados</a></li><li class="doc-nav-item"><a href="/docs/pt/settings/">Configurações &amp; aparência</a></li><li class="doc-nav-item"><a href="/docs/pt/app/">App &amp; plataforma</a></li><li class="doc-nav-item"><a href="/docs/pt/reference/">Referência</a></li><li class="doc-nav-item"><a href="/docs/pt/about/">Sobre</a></li></ul></nav>
+    </aside>
+    <main class="doc-main" id="content">
+      <article class="doc-content">
+<h1>Escrevendo uma planilha</h1>
+<p>Uma planilha é uma lista de linhas avaliadas de cima para baixo. Cada linha pode definir um valor, referenciar algo acima dela, ou simplesmente produzir um resultado. As variáveis vivem em um único escopo por planilha e ficam disponíveis para toda linha abaixo da definição.</p>
+<h2 id="comentarios-e-rotulos">Comentários e rótulos</h2>
+<p>Tudo depois de um <code>#</code> seguido de um espaço é um comentário e é ignorado.</p>
+<figure class="doc-example" data-expr="2 + 2 # this is a note"><pre class="doc-code"><code data-calc>2 + 2 # this is a note</code></pre><figcaption class="doc-example-result">retorna 4</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Um <code>rótulo:</code> antes de uma expressão nomeia a linha sem ser avaliado. Isso ajuda a lembrar o que uma linha significa.</p>
+<figure class="doc-example" data-expr="Price: 10 + 5"><pre class="doc-code"><code data-calc>Price: 10 + 5</code></pre><figcaption class="doc-example-result">retorna 15</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Um único <code>#</code> no início da linha também funciona como comentário.</p>
+<h2 id="tags">Tags</h2>
+<p>Sem espaço depois do <code>#</code>, uma palavra é uma <strong>tag</strong>, não um comentário. As tags marcam linhas para que você possa somá-las em outro lugar.</p>
+<figure class="doc-example" data-expr="20 #food
+30 #food
+#food"><pre class="doc-code"><code data-calc>20 #food
+30 #food
+#food</code></pre><figcaption class="doc-example-result">a última linha retorna 50</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Uma linha que contém apenas tags mostra a soma delas, e <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> (opcionalmente <code>of</code>) faz o mesmo. As linhas marcadas são somadas onde estiverem, acima ou abaixo do pedido.</p>
+<figure class="doc-example" data-expr="20 #food
+30 #food
+#food * 2"><pre class="doc-code"><code data-calc>20 #food
+30 #food
+#food * 2</code></pre><figcaption class="doc-example-result">a última linha retorna 100</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Tags também podem ser usadas diretamente em cálculos: <code>#food * 2</code>, <code>#food + #other</code>. Pedir uma tag que não tem linhas marcadas é um erro.</p>
+<p>Uma linha com várias tags é o <strong>valor total dividido igualmente</strong> entre elas. Então <code>burger: 2 * 50 #ana #bob</code> dá 50 para cada tag, enquanto a linha mantém os 100 completos.</p>
+<figure class="doc-example" data-expr="burger: 2 * 50 #ana #bob
+#ana
+#bob"><pre class="doc-code"><code data-calc>burger: 2 * 50 #ana #bob
+#ana
+#bob</code></pre><figcaption class="doc-example-result">cada tag recebe 50</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="variaveis">Variáveis</h2>
+<p>Atribua um valor com <code>=</code> e reutilize-o em linhas seguintes.</p>
+<figure class="doc-example" data-expr="pizzas = 2
+pizzaPrice = 30
+people = 4
+(pizzas * pizzaPrice) / people"><pre class="doc-code"><code data-calc>pizzas = 2
+pizzaPrice = 30
+people = 4
+(pizzas * pizzaPrice) / people</code></pre><figcaption class="doc-example-result">a última linha retorna 15</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Nomes de variáveis podem conter espaços. Um nome de várias palavras deve ser consistente: <code>monthly rent</code> é um nome só, não <code>monthly</code> e <code>rent</code>.</p>
+<figure class="doc-example" data-expr="monthly rent = 1500
+monthly rent * 12"><pre class="doc-code"><code data-calc>monthly rent = 1500
+monthly rent * 12</code></pre><figcaption class="doc-example-result">a última linha retorna 18,000</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Você pode guardar uma função com <code>f(x) = …</code> e chamá-la depois.</p>
+<figure class="doc-example" data-expr="double = f(x) = x * 2
+double(21)"><pre class="doc-code"><code data-calc>double = f(x) = x * 2
+double(21)</code></pre><figcaption class="doc-example-result">a última linha retorna 42</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="objetos">Objetos</h2>
+<p>Um objeto agrupa valores nomeados, e um ponto acessa um campo.</p>
+<figure class="doc-example" data-expr="invoice = {subtotal: 120, tax: 12}
+invoice.subtotal + invoice.tax"><pre class="doc-code"><code data-calc>invoice = {subtotal: 120, tax: 12}
+invoice.subtotal + invoice.tax</code></pre><figcaption class="doc-example-result">a última linha retorna 132</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="referencias">Referências</h2>
+<p><code>line(n)</code> usa o resultado da linha <code>n</code>. Apenas linhas acima podem ser referenciadas, e o valor aparece no lugar do token quando o cursor está em outra linha (o <code>line(3)</code> bruto reaparece enquanto você edita aquela linha).</p>
+<figure class="doc-example" data-expr="5
+line(1) * 2"><pre class="doc-code"><code data-calc>5
+line(1) * 2</code></pre><figcaption class="doc-example-result">a última linha retorna 10</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p><code>prev</code> se refere ao resultado mais recente acima dele. Ele ignora comentários e linhas em branco.</p>
+<figure class="doc-example" data-expr="20
+prev * 4"><pre class="doc-code"><code data-calc>20
+prev * 4</code></pre><figcaption class="doc-example-result">a última linha retorna 80</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="10
+# a comment in between
+prev + 1"><pre class="doc-code"><code data-calc>10
+# a comment in between
+prev + 1</code></pre><figcaption class="doc-example-result">a última linha retorna 11</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="palavras-reservadas">Palavras reservadas</h2>
+<p>Alguns nomes não podem ser usados como variáveis:</p>
+<ul>
+<li><code>prev</code> (o resultado anterior)</li>
+<li>as palavras de data incondicionais <code>today</code>, <code>now</code>, <code>yesterday</code>, <code>tomorrow</code>, <code>christmas</code>, <code>halloween</code></li>
+<li>qualquer nome que comece com <code>__</code> (os auxiliares internos do editor)</li>
+<li><code>end</code> fecha um grupo</li>
+</ul>
+<p>Fora isso, as variáveis compartilham um escopo com os nomes internos, então uma variável pode sombrear uma unidade ou função: depois de <code>m = 5</code>, <code>2 m</code> é <code>2 × m</code>, não dois metros. As palavras-chave de agregação <code>sum</code>, <code>total</code>, <code>average</code> e <code>avg</code> funcionam da mesma forma: depois de <code>total = 5</code>, uma linha <code>total</code> posterior lê a variável em vez de agregar.</p>
+<h2 id="linhas-em-branco">Linhas em branco</h2>
+<p>Uma linha em branco encerra o bloco que <code>sum</code>, <code>average</code> e as outras agregações examinam, e separa seções da planilha. Use-a para manter as agregações restritas às linhas que você quer.</p>
+      </article>
+      <footer class="doc-footer">
+        <p>Math Notes — uma calculadora em linha no navegador.</p>
+        <p><a href="https://github.com/imaginamundo/math-notes">GitHub</a></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
