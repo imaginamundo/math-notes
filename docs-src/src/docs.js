@@ -68,9 +68,3 @@ function wireMenu() {
 
 for (const figure of document.querySelectorAll('.doc-example')) wireExample(figure);
 wireMenu();
-
-// Register the same service worker the app uses so the docs work offline too.
-// Best effort: if the scope is not allowed the registration is simply skipped.
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/js/serviceWorker.js', { scope: '/' }).catch(() => {});
-}
