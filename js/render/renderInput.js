@@ -137,7 +137,7 @@ function createRowRenderer(view) {
       setGroupClass(row, results && results[i] ? results[i].group : undefined);
       patchReferences(row, i, results);
     }
-    layoutGroups();
+    layoutGroups(from);
     patched = textLines.slice();
     dirtyFrom = null;
   }
@@ -174,9 +174,12 @@ function createRowRenderer(view) {
 
   // A group shades as one box: every row in the group is widened to the widest
   // row (including its ghost), so the background no longer hugs each line's
-  // text length. Rounded corners are drawn by CSS on the first/last row.
-  function layoutGroups() {
+  // text length. Rounded corners are drawn by CSS on the first/last row. Only
+  // groups at or after `from` are re-measured, and all clears happen before any
+  // read so the browser lays out once instead of once per group.
+  function layoutGroups(from = 0) {
     if (typeof view.offsetWidth !== 'number') return;
+    const groups = [];
     let i = 0;
     while (i < rows.length) {
       const first = rows[i];
@@ -193,14 +196,21 @@ function createRowRenderer(view) {
         i++;
         if (isEnd) break;
       }
-      for (const row of groupRows) row.style.width = '';
+      if (i > from) groups.push(groupRows);
+    }
+    if (!groups.length) return;
+
+    for (const groupRows of groups) for (const row of groupRows) row.style.width = '';
+    const widths = groups.map((groupRows) => {
       let widest = 0;
       for (const row of groupRows) widest = Math.max(widest, row.offsetWidth);
-      if (widest > 0) {
-        const width = `${Math.ceil(widest)}px`;
-        for (const row of groupRows) row.style.width = width;
-      }
-    }
+      return widest;
+    });
+    groups.forEach((groupRows, index) => {
+      if (widths[index] <= 0) return;
+      const width = `${Math.ceil(widths[index])}px`;
+      for (const row of groupRows) row.style.width = width;
+    });
   }
 
   // The error ghost of a row, if it has one, so its truncated text can be
