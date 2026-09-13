@@ -74,7 +74,11 @@ function initEditorScroll(editableNode) {
     const x = parseFloat(cs.paddingLeft) + (pos - lineStart) * charWidth;
     const y = parseFloat(cs.paddingTop) + lineIndex * parseFloat(cs.lineHeight);
     const margin = 24;
-    if (x < scroller.scrollLeft + margin) scroller.scrollLeft = Math.max(0, x - margin);
+    // The line-number gutter is a fixed, opaque overlay on the left (it mirrors
+    // only the vertical scroll), so the left inset must clear its right edge —
+    // otherwise scrolling to the start of a line hides the caret behind it.
+    const leftInset = gutterRight() + margin;
+    if (x < scroller.scrollLeft + leftInset) scroller.scrollLeft = Math.max(0, x - leftInset);
     else if (x > scroller.scrollLeft + scroller.clientWidth - margin) {
       scroller.scrollLeft = x - scroller.clientWidth + margin;
     }
@@ -82,6 +86,17 @@ function initEditorScroll(editableNode) {
     else if (y > scroller.scrollTop + scroller.clientHeight - margin) {
       scroller.scrollTop = y - scroller.clientHeight + margin;
     }
+  }
+
+  // How much of the scroller's left edge the fixed line-number gutter covers,
+  // measured relative to the scroller (it is absolutely positioned beside it).
+  function gutterRight() {
+    const gutter = editableNode.closest('.input')?.querySelector('.line-numbers');
+    if (!gutter) return 0;
+    return Math.max(
+      0,
+      gutter.getBoundingClientRect().right - scroller.getBoundingClientRect().left
+    );
   }
 
   editableNode.addEventListener('input', () => {

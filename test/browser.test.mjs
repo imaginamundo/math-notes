@@ -641,6 +641,46 @@ test('a result on an overflowing line is reachable by horizontal scroll', async 
   assert.deepEqual(errors, []);
 });
 
+test('the horizontal scroll clears the gutter at the start of an overflowing line', async () => {
+  await newPage();
+  const longLine = 'word '.repeat(80).trim();
+  await setContent(longLine + '\n5 + 5');
+  await wait(300);
+
+  // Move the caret to the end of the long first line and let it scroll right.
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.focus();
+    const caret = ed.value.indexOf('\n');
+    ed.setSelectionRange(caret, caret);
+    ed.dispatchEvent(new KeyboardEvent('keyup', { key: 'End', bubbles: true }));
+  });
+  await wait(100);
+  const atEnd = await page.evaluate(() => document.querySelector('.editor-scroll').scrollLeft);
+  assert.ok(atEnd > 0, 'the long line scrolls horizontally');
+
+  // Home must bring the caret back into view, clear of the fixed line gutter.
+  await page.keyboard.press('Home');
+  await wait(120);
+  const state = await page.evaluate(() => {
+    const scroller = document.querySelector('.editor-scroll');
+    const ed = document.getElementById('content-editable');
+    const gutter = document.querySelector('.line-numbers');
+    const gutterRight = gutter
+      ? gutter.getBoundingClientRect().right - scroller.getBoundingClientRect().left
+      : 0;
+    const cs = getComputedStyle(ed);
+    return {
+      scrollLeft: scroller.scrollLeft,
+      caretScreenX: parseFloat(cs.paddingLeft) - scroller.scrollLeft,
+      gutterRight,
+    };
+  });
+  assert.equal(state.scrollLeft, 0, 'scrolled fully back to the start');
+  assert.ok(state.caretScreenX >= state.gutterRight, 'the caret is not hidden behind the gutter');
+  assert.deepEqual(errors, []);
+});
+
 test('blank lines keep the ghost rows aligned with the input', async () => {
   await newPage();
   await setContent('pizza = 4\npeople = 4');
