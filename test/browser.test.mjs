@@ -313,28 +313,6 @@ test('a line reference shows the referenced value in place', async () => {
   assert.deepEqual(errors, []);
 });
 
-test('clicking a result inserts a line reference at the caret', async () => {
-  await newPage();
-  await setContent('10\n20');
-  await waitFor(() =>
-    page.evaluate(() => document.querySelectorAll('#view .ghost-result').length === 2)
-  );
-  await page.evaluate(() => {
-    const ed = document.getElementById('content-editable');
-    ed.focus();
-    ed.setSelectionRange(3, 3);
-  });
-  const point = await page.evaluate(() => {
-    const ghost = document.querySelectorAll('#view .ghost-result')[0];
-    const rect = ghost.getBoundingClientRect();
-    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-  });
-  await page.mouse.click(point.x, point.y);
-  await wait(100);
-  assert.equal(await value(), '10\nline(1)20');
-  assert.deepEqual(errors, []);
-});
-
 test('Cmd+G jumps the caret to the requested line', async () => {
   await newPage();
   await setContent('one = 1\n\nthree = 3\n\nfive = 5');

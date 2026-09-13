@@ -470,7 +470,6 @@ input::placeholder {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  text-align: center;
   color: var(--color-ghost);
 }
 .title {

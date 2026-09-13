@@ -38,8 +38,7 @@ Terms used throughout the codebase and this documentation.
   (`monthly rent = 1500`); the engine rewrites the name to a single safe
   identifier so assignments and references resolve consistently.
 - **Line reference** — `line(n)` uses the result of line `n` (1-based, above
-  the current line). The view shows the referenced value in place of the token;
-  clicking a result inserts a reference at the caret.
+  the current line). The view shows the referenced value in place of the token.
 - **Tag** — `#word` (no space) labels a line; `#` followed by a space is a
   comment. A line that is only tags, or `total #tag` / `average #tag`, is an
   aggregate over the tagged value rows above it (across the whole sheet);
