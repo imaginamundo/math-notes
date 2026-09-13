@@ -19,4 +19,17 @@ function startOfLine(text, position) {
   return start;
 }
 
-export { indexOfLineAt, startOfLine };
+// A memoized `value.split('\n')`. Several consumers run per edit (the renderer,
+// the editor's sizing, the worker request, autocomplete), so they share one
+// allocation per text value. Treat the returned array as read-only.
+let linesValue = null;
+let linesCache = [];
+function sheetLines(value) {
+  if (value !== linesValue) {
+    linesValue = value;
+    linesCache = value.split('\n');
+  }
+  return linesCache;
+}
+
+export { indexOfLineAt, startOfLine, sheetLines };

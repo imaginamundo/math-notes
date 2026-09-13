@@ -7,6 +7,7 @@ import {
 } from '../core/autocomplete.js';
 import { VOCABULARY } from '../core/vocabulary.js';
 import { setEditorValue } from './editorInput.js';
+import { sheetLines } from '../util/text.js';
 
 // A caret-anchored suggestion popup. It opens while a word is being typed (at
 // least MIN_PREFIX characters) and on Ctrl/Cmd+Space, completes variables and
@@ -48,7 +49,7 @@ function initAutocomplete(editableNode, editorScroll) {
   }
 
   function entries() {
-    const lines = editableNode.value.split('\n');
+    const lines = sheetLines(editableNode.value);
     const variables = collectAssignments(lines).map((text) => ({ text, kind: 'variable' }));
     const tags = collectTags(lines).map((text) => ({ text: `#${text}`, kind: 'tag' }));
     return [...variables, ...tags, ...VOCABULARY];

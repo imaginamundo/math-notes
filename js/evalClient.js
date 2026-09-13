@@ -5,6 +5,7 @@ import { DEFAULT_PRECISION, readDecimalPrecision } from './core/decimalPrecision
 import { DEFAULT_CLOCK_FORMAT, readClockFormat } from './core/clockFormat.js';
 import { DEFAULT_TOTAL_MODE, readTotalMode } from './core/totalMode.js';
 import debounce from './util/debounce.js';
+import { sheetLines } from './util/text.js';
 
 const EVALUATE_TIMEOUT = 10000;
 const UPDATE_DELAY = 250;
@@ -144,7 +145,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     pendingUpdates++;
     if (pendingUpdates === 1) setBusy(true);
     const text = editableNode.value;
-    const lines = text.split('\n');
+    const lines = sheetLines(text);
     try {
       // Draw the input first so a slow sheet never hides what you just typed;
       // the results fill in when the reply lands (or not at all if stale).

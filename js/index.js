@@ -1,6 +1,6 @@
 import { createRowRenderer } from './render/renderInput.js';
 import renderTotal from './render/renderTotal.js';
-import { indexOfLineAt } from './util/text.js';
+import { indexOfLineAt, sheetLines } from './util/text.js';
 import registerServiceWorker from './registerServiceWorker.js';
 import { createEvalClient } from './evalClient.js';
 import initHelpModal from './ui/help.js';
@@ -68,7 +68,7 @@ const evalClient = createEvalClient(
 // Trigger changes: redraw what you typed immediately, then evaluate in the
 // worker on a debounce and fill the results in when it replies.
 contentEditableNode.addEventListener('input', () => {
-  renderTextLayer(contentEditableNode.value.split('\n'));
+  renderTextLayer(sheetLines(contentEditableNode.value));
   rowRenderer.updateActiveLine(activeLine());
   evalClient.schedule();
 });

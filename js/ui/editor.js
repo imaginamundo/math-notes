@@ -1,4 +1,4 @@
-import { indexOfLineAt, startOfLine } from '../util/text.js';
+import { indexOfLineAt, startOfLine, sheetLines } from '../util/text.js';
 
 // With the editor layers inside a scroll container, the textarea no longer
 // scrolls natively, so the caret must be kept visible manually. The sheet is
@@ -54,7 +54,7 @@ function initEditorScroll(editableNode) {
   function contentExtent(m) {
     const value = editableNode.value;
     if (!extentCache || extentCache.value !== value) {
-      const lines = value.split('\n');
+      const lines = sheetLines(value);
       let longest = 0;
       for (const line of lines) if (line.length > longest) longest = line.length;
       extentCache = { value, longest, count: lines.length };

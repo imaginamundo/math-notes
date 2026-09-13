@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { indexOfLineAt, startOfLine } from '../js/util/text.js';
+import { indexOfLineAt, startOfLine, sheetLines } from '../js/util/text.js';
 
 const text = 'ab\ncd\n\nef';
 
@@ -20,4 +20,11 @@ test('startOfLine finds where the containing line begins', () => {
   assert.equal(startOfLine(text, 5), 3);
   assert.equal(startOfLine(text, 6), 6);
   assert.equal(startOfLine(text, 7), 7);
+});
+
+test('sheetLines memoizes the split by text value', () => {
+  const a = sheetLines('x\ny');
+  assert.deepEqual(a, ['x', 'y']);
+  assert.equal(sheetLines('x\ny'), a, 'the same text returns the same array');
+  assert.deepEqual(sheetLines('x\nz'), ['x', 'z']);
 });
