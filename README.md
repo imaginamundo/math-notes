@@ -32,7 +32,10 @@ Based on [Numi](https://numi.app/).
   total.
 - **Indentation** — `Tab` indents and `Shift+Tab` outdents the current line or
   a multi-line selection (two spaces).
-- **Comments** with `#` and **labels** like `Price: 10 + 5`.
+- **Comments** with `# ` (hash + space) and **labels** like `Price: 10 + 5`.
+- **Tags** — `20 #food` labels a line; a line that is only `#food` (or
+  `total #food` / `average #food`) totals the tagged lines above, across the
+  whole sheet.
 - **Unit conversion** (`1 cm to m`) including CSS units (`px`, `em`, `point`).
 - **Currency conversion** (`100 USD to EUR`, `$5 to GBP`, `R$5 to EUR`) with
   live rates from the European Central Bank, cached for offline use.

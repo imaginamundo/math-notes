@@ -61,6 +61,33 @@ function findGroups(lines) {
   return { byEnd, groupOfLine };
 }
 
+// A tag request line: bare `#food` sums, and `sum|total|average|avg [#food]`
+// (optionally `... of #food`) picks the mode. Returns null when the code is an
+// ordinary expression.
+function tagAggregateMode(code) {
+  const text = code.trim();
+  if (text === '') return 'sum';
+  const match = /^(sum|total|average|avg)\s*(of)?$/i.exec(text);
+  if (!match) return null;
+  return match[1].toLowerCase().startsWith('a') ? 'average' : 'sum';
+}
+
+// Combine every tagged value row above the request, using the same unit rules
+// as the running total. A row tagged with several requested tags counts once.
+function tagAggregate(results, tags, toIndex, mode) {
+  const tagged = results
+    .slice(0, toIndex)
+    .filter(
+      (result) =>
+        result &&
+        result.type === 'value' &&
+        !result.aggregate &&
+        Array.isArray(result.tags) &&
+        tags.some((tag) => result.tags.includes(tag))
+    );
+  return aggregateAbove(tagged, 0, tagged.length, mode);
+}
+
 /**
  * Build an isolated evaluation engine: its own mathjs instance (aliases, css
  * and currency units configured), its own incremental result cache and its own
@@ -282,6 +309,24 @@ function createEngine() {
         continue;
       }
 
+      // Tags. A request line (`#food`, or `sum #food`) aggregates tagged value
+      // rows above; otherwise the tags label this line and are stored on its
+      // result for later requests.
+      const tags = parsed.tags;
+      if (tags.length && !parsed.valid) {
+        results[i] = { type: 'error', value: 'Tags must be at the end of a line' };
+        continue;
+      }
+      if (tags.length) {
+        const mode = tagAggregateMode(parsed.code);
+        if (mode) {
+          const value = tagAggregate(results, tags, i, mode);
+          results[i] = { type: 'value', value, aggregate: true };
+          if (value !== undefined) previousResult = value;
+          continue;
+        }
+      }
+
       if (parsed.isAssignment && AGGREGATE_KEYWORDS[parsed.label.toLowerCase()]) {
         results[i] = { type: 'error', value: `"${parsed.label}" is a reserved word` };
         continue;
@@ -310,7 +355,12 @@ function createEngine() {
 
       const { type, result, variable } = evaluateLine(parsedLine, scope);
       if (variable) variables[variable.label] = variable.value;
-      results[i] = { type, value: result, assigned: variable ? variable.value : undefined };
+      results[i] = {
+        type,
+        value: result,
+        assigned: variable ? variable.value : undefined,
+        tags: tags.length ? tags : undefined,
+      };
       if (type !== 'error' && result !== undefined && typeof result !== 'function') {
         previousResult = result;
       }

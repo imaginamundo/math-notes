@@ -208,6 +208,20 @@ test('a defined multi-word variable highlights as one token', () => {
   assert.equal(node.children[0].textContent, 'monthly rent');
 });
 
+test('tags render as tag tokens and comments stay comments', () => {
+  const node = format.line('20 #food # a note');
+  assert.equal(node.children[2]._classes.has('tag'), true);
+  assert.equal(node.children[2].textContent, '#food');
+  assert.equal(node.children[4]._classes.has('comment'), true);
+  assert.equal(node.children[4].textContent, '# a note');
+});
+
+test('a tag-only line renders as a tag', () => {
+  const node = format.line('#food');
+  assert.equal(node.children[0]._classes.has('tag'), true);
+  assert.equal(node.children[0].textContent, '#food');
+});
+
 test('renderText highlights multi-word variables defined in the sheet', () => {
   const view = new El('pre');
   const renderer = createRowRenderer(view);

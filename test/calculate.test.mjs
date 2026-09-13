@@ -8,14 +8,37 @@ test('parseLine splits a plain expression', () => {
   assert.deepEqual(parsed, {
     code: '1 + 1',
     comment: '',
+    tags: [],
+    valid: true,
     label: '',
     rhs: '',
     isAssignment: false,
     equalsIndex: -1,
     title: '',
     rawCode: '1 + 1',
+    tail: '',
     titleIndex: -1,
   });
+});
+
+test('parseLine separates tags from comments', () => {
+  const tagged = parseLine('20 #food #urgent');
+  assert.equal(tagged.code, '20 ');
+  assert.deepEqual(tagged.tags, ['food', 'urgent']);
+  assert.equal(tagged.comment, '');
+
+  const commented = parseLine('20 # a note');
+  assert.deepEqual(commented.tags, []);
+  assert.equal(commented.comment, '# a note');
+
+  const both = parseLine('20 #food # a note');
+  assert.deepEqual(both.tags, ['food']);
+  assert.equal(both.comment, '# a note');
+});
+
+test('parseLine flags a tag placed mid-expression', () => {
+  assert.equal(parseLine('20 #food + 10').valid, false);
+  assert.equal(parseLine('20 #food').valid, true);
 });
 
 test('parseLine detects an assignment', () => {
@@ -172,6 +195,40 @@ test('single words, units and scales are unaffected', () => {
   assert.equal(evaluateLines(['2 kg']).results[0].type, 'value');
   assert.equal(evaluateLines(['2k']).results[0].value, 2000);
   assert.equal(evaluateLines(['rate = 5', 'rate * 2']).results[1].value, 10);
+});
+
+test('tags sum all tagged value rows above', () => {
+  const { results, total } = evaluateLines(['20 #food', '30 #food', '#food']);
+  assert.equal(results[2].aggregate, true);
+  assert.equal(results[2].value, 50);
+  assert.equal(total, 50, 'the request row is not double counted');
+});
+
+test('tag requests support explicit sum and average', () => {
+  assert.equal(evaluateLines(['20 #food', '30 #food', 'total #food']).results[2].value, 50);
+  assert.equal(evaluateLines(['20 #food', '30 #food', 'average of #food']).results[2].value, 25);
+});
+
+test('a request for several tags counts each row once', () => {
+  assert.equal(evaluateLines(['20 #food #urgent', '30 #food', '#urgent']).results[2].value, 20);
+  assert.equal(
+    evaluateLines(['20 #food #urgent', '30 #food', '#food #urgent']).results[2].value,
+    50
+  );
+});
+
+test('tag sums follow the unit rules and ignore assignments and aggregates', () => {
+  const unit = evaluateLines(['10 cm #t', '1 m #t', '#t']).results[2].value;
+  assert.equal(unit.formatUnits(), 'm');
+  assert.ok(Math.abs(unit.toNumber() - 1.1) < 1e-9);
+  assert.equal(evaluateLines(['x = 5 #t', '10 #t', 'sum', '#t']).results[3].value, 10);
+});
+
+test('a tag placed mid-expression is an error', () => {
+  assert.equal(
+    evaluateLines(['20 #food', '#food * 2']).results[1].value,
+    'Tags must be at the end of a line'
+  );
 });
 
 test('evaluateLines evaluates comparisons as values', () => {

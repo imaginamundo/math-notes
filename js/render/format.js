@@ -21,7 +21,7 @@ function createWrapper(type, text) {
 // a whole name can be highlighted as a single variable token.
 function line(text, names = []) {
   const wrapper = createWrapper('line', '');
-  const { rawCode, comment: commentText, titleIndex } = parseLine(text);
+  const { rawCode, tail, titleIndex } = parseLine(text);
   const patterns = names.map((name) => anchoredNamePattern(name));
 
   if (titleIndex !== -1) {
@@ -36,9 +36,35 @@ function line(text, names = []) {
   } else if (rawCode) {
     appendCode(wrapper, rawCode, patterns);
   }
-  if (commentText) wrapper.appendChild(comment(commentText));
+  if (tail) appendTail(wrapper, tail);
 
   return wrapper;
+}
+
+// Render the part of a line after its first `#`: tags (`.tag`), whitespace, and
+// a trailing `# comment`.
+function appendTail(wrapper, tail) {
+  let rest = tail;
+  while (rest) {
+    if (/^#(\s|$)/.test(rest)) {
+      wrapper.appendChild(comment(rest));
+      return;
+    }
+    const tagMatch = /^#([A-Za-z0-9_-]+)/.exec(rest);
+    if (tagMatch) {
+      wrapper.appendChild(tag(tagMatch[0]));
+      rest = rest.slice(tagMatch[0].length);
+      continue;
+    }
+    const whitespace = /^\s+/.exec(rest);
+    if (whitespace) {
+      wrapper.appendChild(document.createTextNode(whitespace[0]));
+      rest = rest.slice(whitespace[0].length);
+      continue;
+    }
+    wrapper.appendChild(document.createTextNode(rest[0]));
+    rest = rest.slice(1);
+  }
 }
 
 function appendCode(wrapper, code, patterns = []) {
@@ -119,8 +145,12 @@ function comment(text) {
   return createWrapper('comment', text);
 }
 
+function tag(text) {
+  return createWrapper('tag', text);
+}
+
 function titleWrap(text) {
   return createWrapper('title', text);
 }
 
-export default { line, variable, number, currency, operator, comment };
+export default { line, variable, number, currency, operator, comment, tag };
