@@ -72,6 +72,9 @@ async function newPage({ firstRun = false } = {}) {
     await page.evaluateOnNewDocument(() => {
       try {
         localStorage.setItem('math-notes-onboarded', '1');
+        if (!localStorage.getItem('math-notes-language')) {
+          localStorage.setItem('math-notes-language', 'en');
+        }
       } catch {
         // storage unavailable
       }
@@ -91,6 +94,9 @@ async function newPageWithStorage(entries) {
   await page.evaluateOnNewDocument((pairs) => {
     try {
       for (const [key, value] of pairs) localStorage.setItem(key, value);
+      if (!localStorage.getItem('math-notes-language')) {
+        localStorage.setItem('math-notes-language', 'en');
+      }
     } catch {
       // storage unavailable
     }
@@ -868,6 +874,38 @@ test('a returning visitor with existing tabs is never seeded', async () => {
   assert.equal(
     await page.evaluate(() => document.querySelector('#tabs-bar .tab-name').textContent),
     'My work'
+  );
+  assert.deepEqual(errors, []);
+});
+
+test('Settings switches the interface language and remembers it', async () => {
+  await newPage();
+  await wait(300);
+  assert.equal(await page.evaluate(() => document.documentElement.lang), 'en');
+  assert.equal(
+    await page.evaluate(() => document.getElementById('share-button').textContent),
+    'Share'
+  );
+
+  await page.click('#settings-button');
+  await wait(200);
+  await page.click('.settings-language .measurement-card[data-lang="pt"]');
+  await wait(200);
+
+  assert.equal(await page.evaluate(() => document.documentElement.lang), 'pt');
+  assert.equal(
+    await page.evaluate(() => document.getElementById('share-button').textContent),
+    'Compartilhar'
+  );
+  assert.equal(await page.evaluate(() => localStorage.getItem('math-notes-language')), 'pt');
+
+  // The choice survives a reload.
+  await page.reload({ waitUntil: 'load' });
+  await wait(400);
+  assert.equal(await page.evaluate(() => document.documentElement.lang), 'pt');
+  assert.equal(
+    await page.evaluate(() => document.getElementById('share-button').textContent),
+    'Compartilhar'
   );
   assert.deepEqual(errors, []);
 });

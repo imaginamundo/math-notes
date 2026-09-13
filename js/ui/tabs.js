@@ -13,6 +13,7 @@ import { STORAGE_KEY, LEGACY_KEY, loadTabsState, createTabsWriter } from '../sto
 import createHistoryStore from './tabsHistory.js';
 import createTabsView from './tabsView.js';
 import debounce from '../util/debounce.js';
+import { t } from '../i18n/index.js';
 
 // The tab controller: it holds the single `state`, owns activation, undo,
 // snapshots and the public sheet API, and delegates the three side concerns to
@@ -168,7 +169,7 @@ function initTabs(editableNode, onUpdate) {
 
   function handleNew() {
     leaveActiveTab();
-    state = createTab(state, 'Tab ' + state.nextTabNumber);
+    state = createTab(state, t('tabs.defaultName', { n: state.nextTabNumber }));
     present('');
   }
 
@@ -176,7 +177,7 @@ function initTabs(editableNode, onUpdate) {
   // It never overwrites the active tab: an import is additive by design.
   function openSheet({ name, content }) {
     leaveActiveTab();
-    state = createTab(state, name || 'Shared sheet');
+    state = createTab(state, name || t('share.defaultName'));
     state = setContent(state, state.activeId, content || '');
     present(content || '');
   }
@@ -199,10 +200,11 @@ function initTabs(editableNode, onUpdate) {
   function handleClose(id) {
     const tab = state.tabs.find((entry) => entry.id === id);
     if (!tab) return;
-    if (!window.confirm(`Close "${tab.name}"? Its content will be lost.`)) return;
+    if (!window.confirm(t('tabs.closeConfirm', { name: tab.name }))) return;
     leaveActiveTab();
     state = closeTab(state, id);
-    if (!state.tabs.length) state = createTab(state, 'Tab ' + state.nextTabNumber);
+    if (!state.tabs.length)
+      state = createTab(state, t('tabs.defaultName', { n: state.nextTabNumber }));
     history.remove(id);
     present(getActiveTab().content);
   }
@@ -263,6 +265,9 @@ function initTabs(editableNode, onUpdate) {
   view.render();
   onUpdate();
   editableNode.focus();
+
+  // Re-render the tab bar (its aria-labels/titles) when the language changes.
+  window.addEventListener('language:updated', () => view.render());
 
   if (storageFailed) recoverFromSnapshots();
 

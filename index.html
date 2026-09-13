@@ -43,16 +43,16 @@
       <div id="input" class="input">
         <div class="editor-scroll">
           <div class="editor-content">
-            <textarea id="content-editable" class="content-editable" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="Calculator input" placeholder="Type your calculations…&#10;Results appear inline&#10;Press Help for everything this understands"></textarea>
+            <textarea id="content-editable" class="content-editable" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="Calculator input" data-i18n-aria-label="editor.label" placeholder="Type your calculations…&#10;Results appear inline&#10;Press Help for everything this understands" data-i18n-placeholder="editor.placeholder"></textarea>
             <pre id="view" class="view" aria-hidden="true"></pre>
           </div>
         </div>
       </div>
       <div class="total-row">
-        <select id="total-mode" class="total-mode" aria-label="Total aggregate">
-          <option value="sum">total</option>
-          <option value="average">average</option>
-          <option value="median">median</option>
+        <select id="total-mode" class="total-mode" aria-label="Total aggregate" data-i18n-aria-label="total.label">
+          <option value="sum" data-i18n="total.sum">total</option>
+          <option value="average" data-i18n="total.average">average</option>
+          <option value="median" data-i18n="total.median">median</option>
         </select>
         <span id="total" class="total"></span>
       </div>
@@ -61,34 +61,34 @@
       <span id="currency-status" class="status" aria-live="polite"></span>
       <span id="share-status" class="status" aria-live="polite"></span>
       <span id="loading" class="status" role="status">
-        <span class="sr-only">Calculating</span>
+        <span class="sr-only" data-i18n="loading.sr">Calculating</span>
         <span class="loading-dots" aria-hidden="true"></span>
       </span>
     </div>
     <div class="footer">
       <div class="button-wrap">
         <div class="footer-start">
-          <span class="font-size" role="group" aria-label="Text size">
+          <span class="font-size" role="group" aria-label="Text size" data-i18n-aria-label="font.group">
             <span class="font-steps">
-              <button id="font-minus" aria-label="Decrease text size" title="Decrease text size">−</button>
-              <button id="font-plus" aria-label="Increase text size" title="Increase text size">+</button>
+              <button id="font-minus" aria-label="Decrease text size" data-i18n-aria-label="font.decrease" title="Decrease text size" data-i18n-title="font.decrease">−</button>
+              <button id="font-plus" aria-label="Increase text size" data-i18n-aria-label="font.increase" title="Increase text size" data-i18n-title="font.increase">+</button>
             </span>
-            <button id="font-reset">Reset size</button>
+            <button id="font-reset" data-i18n="font.reset">Reset size</button>
           </span>
-          <button id="share-button" class="share">Share</button>
+          <button id="share-button" class="share" data-i18n="footer.share">Share</button>
         </div>
         <span class="actions">
-          <button id="settings-button" class="settings">Settings</button>
-          <button id="recipes-button" class="recipes">Examples</button>
-          <button id="help-button" class="help">Help</button>
+          <button id="settings-button" class="settings" data-i18n="footer.settings">Settings</button>
+          <button id="recipes-button" class="recipes" data-i18n="footer.examples">Examples</button>
+          <button id="help-button" class="help" data-i18n="footer.help">Help</button>
         </span>
       </div>
     </div>
   </div>
   <dialog id="help-modal" class="modal" aria-labelledby="help-title">
     <header class="modal-header">
-      <h1 id="help-title" class="modal-title">Help</h1>
-      <button class="modal-close" data-modal-close aria-label="Close help">×</button>
+      <h1 id="help-title" class="modal-title" data-i18n="modal.help">Help</h1>
+      <button class="modal-close" data-modal-close aria-label="Close help" data-i18n-aria-label="modal.closeHelp">×</button>
     </header>
       <nav class="modal-nav">
         <a class="modal-nav-link" href="#help-basics">Basics</a>
@@ -718,8 +718,8 @@
 
   <dialog id="recipes-modal" class="modal" aria-labelledby="recipes-title">
     <header class="modal-header">
-      <h1 id="recipes-title" class="modal-title">Examples</h1>
-      <button class="modal-close" data-modal-close aria-label="Close examples">×</button>
+      <h1 id="recipes-title" class="modal-title" data-i18n="modal.examples">Examples</h1>
+      <button class="modal-close" data-modal-close aria-label="Close examples" data-i18n-aria-label="modal.closeExamples">×</button>
     </header>
     <div class="modal-body">
       <p>Ready-made calculations. Click one to add it to the editor and edit the values.</p>
@@ -880,51 +880,56 @@
 
   <dialog id="settings-modal" class="modal" aria-labelledby="settings-title">
     <header class="modal-header">
-      <h1 id="settings-title" class="modal-title">Settings</h1>
-      <button class="modal-close" data-modal-close aria-label="Close settings">×</button>
+      <h1 id="settings-title" class="modal-title" data-i18n="modal.settings">Settings</h1>
+      <button class="modal-close" data-modal-close aria-label="Close settings" data-i18n-aria-label="modal.closeSettings">×</button>
     </header>
     <div class="modal-body">
       <section class="help-section">
-        <h2>Files</h2>
-        <p>Export the active sheet as text or import one from a file.</p>
+        <h2 data-i18n="settings.files">Files</h2>
+        <p data-i18n="settings.filesBody">Export the active sheet as text or import one from a file.</p>
         <div class="settings-files">
-          <button id="export-button" class="export">Export</button>
-          <button id="import-button" class="import">Import</button>
+          <button id="export-button" class="export" data-i18n="settings.export">Export</button>
+          <button id="import-button" class="import" data-i18n="settings.import">Import</button>
         </div>
       </section>
       <section class="help-section">
-        <h2>Theme</h2>
-        <p>Choose a theme.</p>
+        <h2 data-i18n="settings.theme">Theme</h2>
+        <p data-i18n="settings.themeBody">Choose a theme.</p>
         <div class="settings-themes"></div>
       </section>
       <section class="help-section">
-        <h2>Measurement system</h2>
-        <p>Used for cooking volume units. Metric is the default.</p>
+        <h2 data-i18n="settings.measurement">Measurement system</h2>
+        <p data-i18n="settings.measurementBody">Used for cooking volume units. Metric is the default.</p>
         <div class="settings-measurement"></div>
       </section>
       <section class="help-section">
-        <h2>Decimal precision</h2>
-        <p>Decimal places shown in results. A truncated result ends with an ellipsis; calculations keep full precision.</p>
+        <h2 data-i18n="settings.precision">Decimal precision</h2>
+        <p data-i18n="settings.precisionBody">Decimal places shown in results. A truncated result ends with an ellipsis; calculations keep full precision.</p>
         <label class="settings-precision">
-          Decimal places
+          <span data-i18n="settings.precisionLabel">Decimal places</span>
           <input id="decimal-precision" type="number" min="0" max="10" step="1" inputmode="numeric" />
         </label>
       </section>
       <section class="help-section">
-        <h2>Clock</h2>
-        <p>How clock times are written. 24-hour is the default.</p>
+        <h2 data-i18n="settings.clock">Clock</h2>
+        <p data-i18n="settings.clockBody">How clock times are written. 24-hour is the default.</p>
         <div class="settings-clock"></div>
       </section>
       <section class="help-section">
-        <h2>Recover</h2>
-        <p>Auto-saved snapshots of each tab are kept in IndexedDB. Restore one to recover lost work.</p>
-        <button id="restore-all-button" class="restore-all">Restore all from latest backup</button>
+        <h2 data-i18n="settings.language">Language</h2>
+        <p data-i18n="settings.languageBody">The language of the interface. Detected from your system by default.</p>
+        <div class="settings-language"></div>
+      </section>
+      <section class="help-section">
+        <h2 data-i18n="settings.recover">Recover</h2>
+        <p data-i18n="settings.recoverBody">Auto-saved snapshots of each tab are kept in IndexedDB. Restore one to recover lost work.</p>
+        <button id="restore-all-button" class="restore-all" data-i18n="settings.restoreAll">Restore all from latest backup</button>
         <div id="snapshot-history"></div>
       </section>
       <section class="help-section">
-        <h2>Reset</h2>
-        <p>Reset the theme, tabs and all stored data back to their defaults.</p>
-        <button id="reset-data-button" class="reset-data">Reset data</button>
+        <h2 data-i18n="settings.reset">Reset</h2>
+        <p data-i18n="settings.resetBody">Reset the theme, tabs and all stored data back to their defaults.</p>
+        <button id="reset-data-button" class="reset-data" data-i18n="settings.resetButton">Reset data</button>
       </section>
     </div>
   </dialog>

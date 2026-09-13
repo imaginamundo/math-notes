@@ -1,6 +1,7 @@
-import { STARTER_SHEET } from './onboarding.js';
+import { isStarterSheet } from './onboarding.js';
 import storage from '../util/storage.js';
 import { setEditorValue } from './editorInput.js';
+import { t } from '../i18n/index.js';
 
 // A small floating "Keep content | Clear content" control shown right after the
 // seeded Welcome sheet, so the sample content can be dismissed or emptied with
@@ -19,10 +20,6 @@ function writeDismissed() {
   storage.set(DISMISSED_KEY, '1');
 }
 
-function isStarterSheet(content) {
-  return content === STARTER_SHEET;
-}
-
 function initStarterPrompt(editableNode) {
   const scroller = editableNode.closest('.editor-scroll');
   if (!scroller) return;
@@ -30,13 +27,10 @@ function initStarterPrompt(editableNode) {
   const control = document.createElement('div');
   control.className = 'starter-prompt';
   control.setAttribute('role', 'group');
-  control.setAttribute('aria-label', 'Starter content actions');
 
   const keepButton = document.createElement('button');
   keepButton.type = 'button';
   keepButton.className = 'starter-keep';
-  keepButton.textContent = '✓ Keep content';
-  keepButton.title = 'Keep this example content';
   keepButton.addEventListener('click', () => {
     writeDismissed();
     hide();
@@ -45,12 +39,20 @@ function initStarterPrompt(editableNode) {
   const clearButton = document.createElement('button');
   clearButton.type = 'button';
   clearButton.className = 'starter-clear';
-  clearButton.textContent = '× Clear content';
-  clearButton.title = 'Empty this tab';
   clearButton.addEventListener('click', () => {
     writeDismissed();
     setEditorValue(editableNode, '');
   });
+
+  function refreshLabels() {
+    control.setAttribute('aria-label', t('starter.group'));
+    keepButton.textContent = t('starter.keep');
+    keepButton.title = t('starter.keepTitle');
+    clearButton.textContent = t('starter.clear');
+    clearButton.title = t('starter.clearTitle');
+  }
+  refreshLabels();
+  window.addEventListener('language:updated', refreshLabels);
 
   control.append(keepButton, clearButton);
   scroller.appendChild(control);

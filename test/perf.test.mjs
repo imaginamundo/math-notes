@@ -77,6 +77,7 @@ async function newPage() {
   await page.evaluateOnNewDocument(() => {
     try {
       localStorage.setItem('math-notes-onboarded', '1');
+      localStorage.setItem('math-notes-language', 'en');
     } catch {
       // storage unavailable
     }

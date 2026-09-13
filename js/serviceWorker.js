@@ -1,10 +1,15 @@
-const cacheName = 'math-notes-v31';
+const cacheName = 'math-notes-v32';
 const urlsToCache = [
   '../index.html',
   '../style.css',
   './core/aggregate.js',
   './core/autocomplete.js',
   './core/clockFormat.js',
+  './core/language.js',
+  './i18n/index.js',
+  './i18n/ui/en.js',
+  './i18n/ui/pt.js',
+  './i18n/ui/es.js',
   './core/vocabulary.js',
   './eval/aliases.js',
   './core/calculate.js',

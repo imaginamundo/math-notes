@@ -5,6 +5,8 @@
 //
 // handlers: { getState, focusEditor, activate(id), close(id), create(),
 //             rename(id, name), reorder(ids), dragged() }
+import { t } from '../i18n/index.js';
+
 function createTabsView(tabBarNode, handlers) {
   let drag = null;
   let lastDragTime = 0;
@@ -13,7 +15,7 @@ function createTabsView(tabBarNode, handlers) {
     const state = handlers.getState();
     tabBarNode.innerHTML = '';
     tabBarNode.setAttribute('role', 'tablist');
-    tabBarNode.setAttribute('aria-label', 'Worksheets');
+    tabBarNode.setAttribute('aria-label', t('tabs.list'));
     state.tabs.forEach((tab) => tabBarNode.appendChild(renderTab(tab, state.activeId)));
     tabBarNode.appendChild(renderNewButton());
     const panel = document.getElementById('editor-panel');
@@ -34,13 +36,13 @@ function createTabsView(tabBarNode, handlers) {
     const nameNode = document.createElement('span');
     nameNode.className = 'tab-name';
     nameNode.textContent = tab.name;
-    nameNode.title = 'Double-click to rename';
+    nameNode.title = t('tabs.rename');
 
     const closeNode = document.createElement('button');
     closeNode.className = 'tab-close';
     closeNode.textContent = '×';
-    closeNode.title = 'Close tab';
-    closeNode.setAttribute('aria-label', 'Close tab');
+    closeNode.title = t('tabs.close');
+    closeNode.setAttribute('aria-label', t('tabs.close'));
 
     tabNode.appendChild(nameNode);
     tabNode.appendChild(closeNode);
@@ -51,8 +53,8 @@ function createTabsView(tabBarNode, handlers) {
     const button = document.createElement('button');
     button.className = 'tab-new';
     button.textContent = '+';
-    button.title = 'New tab';
-    button.setAttribute('aria-label', 'New tab');
+    button.title = t('tabs.new');
+    button.setAttribute('aria-label', t('tabs.new'));
     return button;
   }
 
