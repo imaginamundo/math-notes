@@ -959,9 +959,10 @@ code {
   height: 1.2em;
   border-radius: 2px;
 }
-/* Measurement system picker */
+/* Measurement system, clock and language pickers */
 .settings-measurement,
-.settings-clock {
+.settings-clock,
+.settings-language {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4em;
