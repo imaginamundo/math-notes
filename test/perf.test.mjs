@@ -11,8 +11,8 @@ import { fileURLToPath } from 'node:url';
 // sizing + caret) and the worker evaluation round-trip. The bounds are loose
 // on purpose (headless Chrome on a busy CI box is noisy); they exist to catch
 // order-of-magnitude regressions, and the numbers are printed so a run can be
-// compared against a previous one.
-const SHEET_LINES = 1000;
+// compared against a previous one. Set PERF_LINES to stress a larger sheet.
+const SHEET_LINES = Number(process.env.PERF_LINES) || 1000;
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const MIME = {
