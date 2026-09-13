@@ -867,6 +867,7 @@ button:hover {
   flex-direction: column;
   align-items: stretch;
   gap: 0;
+  max-width: 100%;
   margin: 0.35em 0.5em 0.35em 0;
   padding: 0;
   border: 1px solid var(--border-chip);
@@ -883,23 +884,31 @@ button:hover {
   filter: brightness(1.08);
   outline: none;
 }
-/* The body mirrors the editor: the input surface with a numbered gutter. */
+/* The body mirrors the editor: the input surface with a numbered gutter.
+   Long lines scroll horizontally instead of wrapping. */
 .example-chip code {
   display: block;
   background: var(--color-primary);
   padding: 0;
   color: var(--color-text);
-  white-space: pre-wrap;
+  white-space: pre;
   min-width: 0;
+  overflow-x: auto;
   font-family: inherit;
   line-height: 1.4;
 }
 .example-chip .example-line {
   display: flex;
+  width: max-content;
+  min-width: 100%;
 }
 .example-chip .example-line-number {
+  position: sticky;
+  left: 0;
+  z-index: 1;
   flex: 0 0 auto;
-  min-width: 1.6em;
+  box-sizing: border-box;
+  width: calc(var(--example-gutter, 1ch) + 1.2em);
   padding: 0.25em 0.5em 0.25em 0.6em;
   background: var(--color-surface);
   border-right: 1px solid var(--border-strong);
@@ -909,7 +918,7 @@ button:hover {
 }
 .example-chip .example-line-content {
   padding: 0.25em 0.7em;
-  white-space: pre-wrap;
+  white-space: pre;
 }
 /* The hint reads like the editor's ghost result. */
 .example-result {

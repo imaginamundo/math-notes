@@ -61,7 +61,7 @@
 <p>Math Notes aggregates in three related ways: the running total in the bottom bar, the aggregate keywords (<code>sum</code>, <code>average</code>, …) you write on a line, and named groups that show a subtotal in place.</p>
 <h2 id="the-total-bar">The total bar<a class="doc-anchor" href="#the-total-bar" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p>The total bar under the editor aggregates every numeric result in the sheet. Its dropdown switches between <strong>total</strong> (sum), <strong>average</strong> and <strong>median</strong>.</p>
-<p>Plain numbers fold into a single unit; compatible units (such as <code>cm</code> and <code>m</code>) merge into the largest present; mixed currencies or dimensions fall back to the plain numeric sum.</p>
+<p>Plain numbers fold into a single unit; a bare number is read in the <strong>first</strong> unit used for its dimension, so adding a larger unit later (<code>1 day</code> after some hours) adds to the total instead of reinterpreting the earlier numbers. Compatible units (such as <code>cm</code> and <code>m</code>) merge into the largest present for display; mixed currencies or dimensions fall back to the plain numeric sum.</p>
 <h2 id="aggregate-keywords">Aggregate keywords<a class="doc-anchor" href="#aggregate-keywords" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p><code>sum</code>, <code>total</code>, <code>average</code> and <code>avg</code> aggregate the lines above, up to a blank line. A blank line starts a new block, so you can keep several independent aggregates in one sheet.</p>
 <figure class="doc-example" data-expr="10
