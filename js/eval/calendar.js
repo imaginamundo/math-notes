@@ -467,6 +467,14 @@ const ADD_WORKDAYS = new RegExp(`^(${DATE_SRC})\\s*([+-])\\s*(\\d+)\\s+workdays$
 const WORKDAYS_REL = new RegExp(`^(\\d+)\\s+workdays\\s+(after|before)\\s+(${DATE_SRC})$`, 'i');
 const WEEKDAY_ON = new RegExp(`^(?:day\\s+of\\s+the\\s+week|weekday)\\s+on\\s+(${DATE_SRC})$`, 'i');
 const WORK_HOURS_IN = /^work\s+hours\s+in\s+(.+)$/i;
+// `work hours in June [2026]` can appear inside a larger expression (`* 25 EUR`,
+// `+ 40`), so it is rewritten wherever it occurs rather than only as a whole
+// expression. The anchored form above stays as a fallback for friendlier errors
+// on text that is not a month.
+const WORK_HOURS_IN_PHRASE = new RegExp(
+  `\\bwork\\s+hours\\s+in\\s+(${MONTH_WORD})\\b(?:\\s+(\\d{4}))?`,
+  'gi'
+);
 const WORK_HOURS_BETWEEN = new RegExp(
   `^work\\s+hours\\s+between\\s+(${DATE_SRC})\\s+and\\s+(${DATE_SRC})$`,
   'i'
@@ -480,13 +488,21 @@ const IDENT_DURATION = new RegExp(`^(${IDENT})\\s*([+-])\\s*(${DURATION_SRC})$`,
 const DURATION_IDENT = new RegExp(`^(${DURATION_SRC})\\s+(after|before)\\s+(${IDENT})$`, 'i');
 
 function preprocessCalendar(expression) {
-  const expr = expression.trim().replace(/\bwork\s+days?\b/gi, 'workdays');
+  let expr = expression.trim().replace(/\bwork\s+days?\b/gi, 'workdays');
   if (!expr) return expression;
 
   // Rewrite the right-hand side of an assignment too, so a date (or a date
   // arithmetic expression) can be stored in a variable.
   const parsed = parseLine(expr);
   if (parsed.isAssignment) return `${parsed.label} = ${preprocessCalendar(parsed.rhs)}`;
+
+  // Rewrite a `work hours in <month>` phrase wherever it sits, so it composes
+  // with the arithmetic around it (`work hours in June * 25 EUR`).
+  expr = expr.replace(
+    WORK_HOURS_IN_PHRASE,
+    (match, month, year) =>
+      `__workHoursInMonth(${JSON.stringify(year ? `${month} ${year}` : month)})`
+  );
 
   let m;
   if ((m = DATE_AS.exec(expr))) {

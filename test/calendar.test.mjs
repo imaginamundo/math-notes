@@ -96,6 +96,15 @@ test('work hours assume an eight-hour workday', () => {
   assert.equal(valueOf('work hours in June 2026'), '176');
 });
 
+test('work hours compose with the arithmetic around them', () => {
+  assert.equal(
+    preprocessCalendar('work hours in June * 25 EUR'),
+    '__workHoursInMonth("June") * 25 EUR'
+  );
+  const { results } = evaluateLines(['work hours in June 2026 * 2']);
+  assert.equal(results[0].value, 352);
+});
+
 test('the weekday of a date', () => {
   assert.equal(valueOf('day of the week on January 24, 1984'), 'Tuesday');
   assert.equal(valueOf('weekday on March 9, 2024'), 'Saturday');

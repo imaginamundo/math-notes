@@ -142,7 +142,9 @@ local noon (so DST never shifts a day); `formatResult` renders a date as
 interval as `3 weeks 5 days`. Workdays/weekdays are Monday–Friday, counted or
 advanced by `countWorkdays`/`addWorkdays` (public holidays are not modelled
 yet); `work hours` assume an eight-hour workday, and a `workday` unit (8 h) lets
-`55h in workdays` convert.
+`55h in workdays` convert. `work hours in <month>` is rewritten wherever it
+appears, so it composes with the arithmetic around it
+(`work hours in June * 25 EUR`).
 
 The measurement system (`js/core/measurementSystem.js`) stores the preference
 (metric by default, US customary or Imperial; all three define a cup) and

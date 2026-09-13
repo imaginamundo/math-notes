@@ -79,9 +79,10 @@ Based on [Numi](https://numi.app/).
   `3 weeks after March 14, 2019`), relative dates (`today + 3 weeks`,
   `4 days from now`, `3 days ago`), intervals (`January 10 - February 5` →
   `3 weeks 5 days`, `days until Christmas`), date parts (`days in February 2020`,
-  `week number on march 12, 2021`), workdays/weekdays (`workdays in 3 weeks`,
-  `5 workdays after March 14, 2019`, `weekday on March 9, 2024` — Monday to
-  Friday, holidays not counted yet) and formatting
+  `week number on march 12, 2021`), workdays/weekdays and work hours
+  (`workdays in 3 weeks`, `5 workdays after March 14, 2019`,
+  `weekday on March 9, 2024`, `work hours in June * 25 EUR` — Monday to Friday,
+  eight-hour days, holidays not counted yet) and formatting
   (`March 12, 2023 as EEEE, MMM d, yyyy`). A date can be stored in a variable
   (`start = March 4`, then `start + 2 weeks`).
 - **Timespans** — `5.5 minutes as timespan` → `5 min 30 s`,
