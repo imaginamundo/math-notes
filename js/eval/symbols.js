@@ -1,4 +1,4 @@
-import { CURRENCY_SYMBOLS, SYMBOL_SOURCE } from '../core/currencySymbols.js';
+import { CURRENCY_SYMBOLS, SYMBOL_SOURCE, isCurrencyCode } from '../core/currencySymbols.js';
 
 const SYMBOL_AFTER_NUMBER = new RegExp(`(\\d[\\d.]*)\\s*(${SYMBOL_SOURCE})`, 'g');
 const SYMBOL_BEFORE_NUMBER = new RegExp(`(${SYMBOL_SOURCE})\\s*(\\d[\\d.]*)`, 'g');
@@ -13,41 +13,8 @@ const CODE_BEFORE_TO = new RegExp(`(?<![\\w.])(${CODE})(\\s+)to\\b`, 'gi');
 const CODE_AFTER_TO = new RegExp(`\\bto(\\s+)(${CODE})(?!\\w)`, 'gi');
 const CODE_AFTER_IN = new RegExp(`\\bin(\\s+)(${CODE})(?!\\w)`, 'gi');
 
-// The codes that act as currency units, extended at runtime with whatever rates
-// are registered. Kept private behind registerCurrencyCode so no other module
-// can mutate the recognizer's vocabulary out from under it.
-const CURRENCY_CODES = new Set([
-  'AUD',
-  'BRL',
-  'CAD',
-  'CHF',
-  'CNY',
-  'CZK',
-  'DKK',
-  'EUR',
-  'GBP',
-  'HKD',
-  'HUF',
-  'IDR',
-  'ILS',
-  'INR',
-  'ISK',
-  'JPY',
-  'KRW',
-  'MXN',
-  'MYR',
-  'NOK',
-  'NZD',
-  'PHP',
-  'PLN',
-  'RON',
-  'SEK',
-  'SGD',
-  'THB',
-  'TRY',
-  'USD',
-  'ZAR',
-]);
+// The codes that act as currency units live in core/currencySymbols.js, so the
+// domain (aggregate/unitMix) and this evaluator read one vocabulary.
 
 function preprocessSymbols(expression) {
   return uppercaseCurrencyCodes(
@@ -80,17 +47,10 @@ function uppercaseCurrencyCodes(expression) {
   );
 }
 
+// Unknown identifiers keep their case, so `usd = 5` stays a variable.
 function uppercaseCode(token) {
   const upper = token.toUpperCase();
-  return CURRENCY_CODES.has(upper) ? upper : token;
+  return isCurrencyCode(upper) ? upper : token;
 }
 
-function registerCurrencyCode(code) {
-  CURRENCY_CODES.add(code.toUpperCase());
-}
-
-function isCurrencyCode(code) {
-  return CURRENCY_CODES.has(String(code).toUpperCase());
-}
-
-export { registerCurrencyCode, isCurrencyCode, preprocessSymbols };
+export { preprocessSymbols };

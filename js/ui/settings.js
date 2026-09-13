@@ -38,7 +38,7 @@ const RESET_KEYS = [
   MEASUREMENT_KEY,
   PRECISION_KEY,
   CLOCK_KEY,
-  // So "Reset data" genuinely returns the app to a first run, tour included.
+  // So "Reset data" genuinely returns the app to a first run.
   ONBOARDED_KEY,
   // A first run should also offer the starter-content actions again.
   DISMISSED_KEY,

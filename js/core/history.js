@@ -5,6 +5,10 @@
 // Pure and free of any DOM dependency, so it can live next to the rest of the
 // core logic and be unit-tested without a document.
 const HISTORY_LIMIT = 100;
+// Each undo step is a whole sheet string, so cap their total size as well as
+// their count. The newest step is always kept, so even a single sheet larger
+// than the budget can still be undone once.
+const HISTORY_BYTES = 2 * 1024 * 1024;
 
 /**
  * @typedef {{ undo: string[], redo: string[], draft: string|null }} History
@@ -30,7 +34,22 @@ function recordChange(entry, lastValue, newValue) {
 function commitDraft(entry, current) {
   if (entry.draft === null) return entry;
   if (current === entry.draft) return { ...entry, draft: null };
-  return { undo: [...entry.undo, entry.draft].slice(-HISTORY_LIMIT), redo: [], draft: null };
+  return { undo: trimHistory([...entry.undo, entry.draft]), redo: [], draft: null };
+}
+
+// Keep the most recent steps, bounded by count and total characters: walk back
+// from the newest until the budget is spent, but never drop the newest step.
+function trimHistory(undo) {
+  const countFloor = Math.max(0, undo.length - HISTORY_LIMIT);
+  let bytes = 0;
+  let start = undo.length;
+  while (start > countFloor) {
+    const size = undo[start - 1].length;
+    if (bytes + size > HISTORY_BYTES && start < undo.length) break;
+    bytes += size;
+    start--;
+  }
+  return start === 0 ? undo : undo.slice(start);
 }
 
 function applyUndo(entry, current) {
@@ -49,4 +68,4 @@ function applyRedo(entry, current) {
   };
 }
 
-export { emptyHistory, recordChange, commitDraft, applyUndo, applyRedo };
+export { emptyHistory, recordChange, commitDraft, applyUndo, applyRedo, HISTORY_BYTES };

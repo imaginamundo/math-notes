@@ -1,4 +1,4 @@
-const cacheName = 'math-notes-v27';
+const cacheName = 'math-notes-v31';
 const urlsToCache = [
   '../index.html',
   '../style.css',
@@ -17,6 +17,7 @@ const urlsToCache = [
   './render/formatResult.js',
   './index.js',
   './storage/snapshots.js',
+  './storage/tabsStore.js',
   './ui/find.js',
   './ui/io.js',
   './ui/lineNumbers.js',
@@ -30,11 +31,11 @@ const urlsToCache = [
   './ui/recipes.js',
   './ui/onboarding.js',
   './ui/settings.js',
-  './ui/tour.js',
   './share/shareLink.js',
   './ui/share.js',
   './ui/starterPrompt.js',
   './util/clipboard.js',
+  './util/compress.js',
   './eval/scales.js',
   './eval/symbols.js',
   './eval/units.js',
@@ -44,6 +45,8 @@ const urlsToCache = [
   './ui/shortcuts.js',
   './render/renderTotal.js',
   './ui/tabs.js',
+  './ui/tabsHistory.js',
+  './ui/tabsView.js',
   './ui/cosmetic.js',
   './ui/editor.js',
   './ui/help.js',
@@ -67,18 +70,29 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Network-first with a cache fallback: always serve fresh assets when the
-// server is reachable, falling back to the cached copy when offline.
+// Stale-while-revalidate for same-origin GETs: a cached asset answers
+// immediately (so repeat loads are instant and offline works), while a
+// background fetch refreshes the copy for next time. Uncached requests wait on
+// the network and are cached on success.
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  if (request.method !== 'GET' || !request.url.startsWith(self.location.origin)) return;
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        if (response.ok && event.request.url.startsWith(self.location.origin)) {
+    caches.match(request).then((cached) => {
+      const network = fetch(request).then((response) => {
+        if (response && response.ok) {
           const copy = response.clone();
-          caches.open(cacheName).then((cache) => cache.put(event.request, copy));
+          caches.open(cacheName).then((cache) => cache.put(request, copy));
         }
         return response;
-      })
-      .catch(() => caches.match(event.request))
+      });
+      if (cached) {
+        // Keep the worker alive until the revalidation settles, but do not make
+        // the page wait on it.
+        event.waitUntil(network.catch(() => {}));
+        return cached;
+      }
+      return network;
+    })
   );
 });

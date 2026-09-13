@@ -1,8 +1,7 @@
 import { formatTimespan } from '../eval/timespan.js';
 import { formatDate, formatInterval } from '../eval/calendar.js';
-import { isCurrencyCode } from '../eval/symbols.js';
+import { isCurrencyCode, CURRENCY_DISPLAY } from '../core/currencySymbols.js';
 import { DEFAULT_PRECISION } from '../core/decimalPrecision.js';
-import { CURRENCY_DISPLAY } from '../core/currencySymbols.js';
 import { readableUnit } from '../core/unitNames.js';
 
 const formatters = new Map();

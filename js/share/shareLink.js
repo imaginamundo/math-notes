@@ -19,6 +19,14 @@
 // caller — never to `innerHTML` — so a hostile payload is inert text. Every
 // failure path here returns `null` rather than throwing.
 
+import {
+  SUPPORTS_COMPRESSION,
+  toBase64Url,
+  fromBase64Url,
+  deflate,
+  inflate,
+} from '../util/compress.js';
+
 const HASH_KEY = 's';
 const VERSION_COMPRESSED = '1';
 const VERSION_PLAIN = '0';
@@ -32,56 +40,6 @@ const MAX_DECODED_BYTES = 256 * 1024;
 // tell the user.
 const LONG_URL_LENGTH = 8000;
 
-const supportsCompression =
-  typeof CompressionStream !== 'undefined' && typeof DecompressionStream !== 'undefined';
-
-function toBase64Url(bytes) {
-  let binary = '';
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-  // base64url, not base64, so `+ / =` never need percent-encoding in a URL.
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-function fromBase64Url(text) {
-  const base64 = text.replace(/-/g, '+').replace(/_/g, '/');
-  const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
-  const binary = atob(padded);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return bytes;
-}
-
-async function deflate(bytes) {
-  const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate'));
-  return new Uint8Array(await new Response(stream).arrayBuffer());
-}
-
-// Inflates while counting bytes, so an oversized payload is abandoned mid-way
-// instead of being fully materialised first.
-async function inflate(bytes) {
-  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'));
-  const reader = stream.getReader();
-  const chunks = [];
-  let size = 0;
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    size += value.length;
-    if (size > MAX_DECODED_BYTES) {
-      await reader.cancel();
-      throw new Error('payload too large');
-    }
-    chunks.push(value);
-  }
-  const out = new Uint8Array(size);
-  let offset = 0;
-  for (const chunk of chunks) {
-    out.set(chunk, offset);
-    offset += chunk.length;
-  }
-  return out;
-}
-
 /**
  * Encode a sheet into a token. Returns `null` if it cannot be encoded.
  * @param {{ name: string, content: string }} sheet
@@ -91,7 +49,7 @@ async function encodeSheet(sheet) {
   try {
     const json = JSON.stringify({ n: String(sheet.name ?? ''), c: String(sheet.content ?? '') });
     const bytes = new TextEncoder().encode(json);
-    if (!supportsCompression) return `${VERSION_PLAIN}.${toBase64Url(bytes)}`;
+    if (!SUPPORTS_COMPRESSION) return `${VERSION_PLAIN}.${toBase64Url(bytes)}`;
     return `${VERSION_COMPRESSED}.${toBase64Url(await deflate(bytes))}`;
   } catch {
     return null;
@@ -116,8 +74,8 @@ async function decodeSheet(token) {
 
     let bytes = fromBase64Url(payload);
     if (version === VERSION_COMPRESSED) {
-      if (!supportsCompression) return null;
-      bytes = await inflate(bytes);
+      if (!SUPPORTS_COMPRESSION) return null;
+      bytes = await inflate(bytes, MAX_DECODED_BYTES);
     } else if (version === VERSION_PLAIN) {
       if (bytes.length > MAX_DECODED_BYTES) return null;
     } else {

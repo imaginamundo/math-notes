@@ -170,7 +170,6 @@ function initFind(editableNode, viewNode) {
   });
 
   document.addEventListener('keydown', (event) => {
-    if (document.body.classList.contains('tour-open')) return;
     if (document.querySelector('dialog[open]')) return;
     if (event.key === 'Escape' && barNode.classList.contains('open')) {
       event.preventDefault();

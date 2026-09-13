@@ -38,16 +38,18 @@ function unmangleName(token) {
 
 // Matches a whole name (its words separated by any whitespace) with identifier
 // boundaries, so `monthly rented` does not match `monthly rent`.
+function nameSource(name) {
+  return name.split(' ').map(escapeRegExp).join('\\s+');
+}
+
 function namePattern(name, { global = true } = {}) {
-  const words = name.split(' ').map(escapeRegExp).join('\\s+');
   const flags = global ? 'g' : '';
-  return new RegExp(`(?<![A-Za-z0-9_])${words}(?![A-Za-z0-9_])`, flags);
+  return new RegExp(`(?<![A-Za-z0-9_])${nameSource(name)}(?![A-Za-z0-9_])`, flags);
 }
 
 // Anchored form for the highlighter: matches a name at the start of the text.
 function anchoredNamePattern(name) {
-  const words = name.split(' ').map(escapeRegExp).join('\\s+');
-  return new RegExp(`^${words}(?![A-Za-z0-9_])`);
+  return new RegExp(`^${nameSource(name)}(?![A-Za-z0-9_])`);
 }
 
 function collectVariableNames(lines) {
@@ -60,15 +62,28 @@ function collectVariableNames(lines) {
   return [...names].sort((a, b) => b.length - a.length);
 }
 
+// Whether a line defines a multi-word name (`monthly rent = 1500`). Cheap, so
+// the renderer can test only the lines an edit touched before deciding it needs
+// to rebuild the whole name list.
+function isMultiWordDefinition(line) {
+  return NAME_WORDS.test(line.split('#')[0]);
+}
+
 function mangleLines(lines) {
   const names = collectVariableNames(lines);
   if (!names.length) return lines;
+  const mangled = new Map(names.map((name) => [name, mangleName(name)]));
+  // One alternation (longest name first) instead of a regex per name per line,
+  // so a sheet with many multi-word names stays linear in the line count.
+  const pattern = new RegExp(
+    `(?<![A-Za-z0-9_])(?:${names.map(nameSource).join('|')})(?![A-Za-z0-9_])`,
+    'g'
+  );
   return lines.map((line) => {
     const hash = line.indexOf('#');
     const code = hash === -1 ? line : line.slice(0, hash);
     const comment = hash === -1 ? '' : line.slice(hash);
-    let out = code;
-    for (const name of names) out = out.replace(namePattern(name), mangleName(name));
+    const out = code.replace(pattern, (match) => mangled.get(match.replace(/\s+/g, ' ')) || match);
     return out + comment;
   });
 }
@@ -79,5 +94,6 @@ export {
   namePattern,
   anchoredNamePattern,
   collectVariableNames,
+  isMultiWordDefinition,
   mangleLines,
 };

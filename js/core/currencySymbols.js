@@ -1,6 +1,9 @@
 // Static lexing data for currency *symbols* ($, €, R$ …). Pure data with no
 // logic or side effects, shared by the evaluator's preprocessor and the syntax
-// highlighter so neither imports the other's layer.
+// highlighter so neither imports the other's layer. It also owns the live set
+// of known currency *codes*, so the domain (aggregate/unitMix) and the
+// evaluator both read the vocabulary from here rather than the domain reaching
+// into `eval/`.
 
 // How each currency is written back: a symbol in front of the amount
 // (`350usd` -> `US$350`). Currencies with no distinct symbol (CHF, ZAR, the
@@ -68,4 +71,48 @@ const SYMBOL_SOURCE = SYMBOLS.map((symbol) => symbol.replace(/[.*+?^${}()|[\]\\]
   '|'
 );
 
-export { CURRENCY_SYMBOLS, CURRENCY_DISPLAY, SYMBOL_SOURCE };
+// The codes that act as currency units, extended at runtime with whatever rates
+// are registered. Kept private behind registerCurrencyCode so no other module
+// can mutate the recognizer's vocabulary out from under it.
+const CURRENCY_CODES = new Set([
+  'AUD',
+  'BRL',
+  'CAD',
+  'CHF',
+  'CNY',
+  'CZK',
+  'DKK',
+  'EUR',
+  'GBP',
+  'HKD',
+  'HUF',
+  'IDR',
+  'ILS',
+  'INR',
+  'ISK',
+  'JPY',
+  'KRW',
+  'MXN',
+  'MYR',
+  'NOK',
+  'NZD',
+  'PHP',
+  'PLN',
+  'RON',
+  'SEK',
+  'SGD',
+  'THB',
+  'TRY',
+  'USD',
+  'ZAR',
+]);
+
+function registerCurrencyCode(code) {
+  CURRENCY_CODES.add(String(code).toUpperCase());
+}
+
+function isCurrencyCode(code) {
+  return CURRENCY_CODES.has(String(code).toUpperCase());
+}
+
+export { CURRENCY_SYMBOLS, CURRENCY_DISPLAY, SYMBOL_SOURCE, registerCurrencyCode, isCurrencyCode };

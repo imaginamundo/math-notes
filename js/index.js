@@ -1,6 +1,6 @@
 import { createRowRenderer } from './render/renderInput.js';
 import renderTotal from './render/renderTotal.js';
-import { indexOfLineAt } from './util/text.js';
+import { indexOfLineAt, sheetLines } from './util/text.js';
 import registerServiceWorker from './registerServiceWorker.js';
 import { createEvalClient } from './evalClient.js';
 import initHelpModal from './ui/help.js';
@@ -22,6 +22,7 @@ import initTotalMode from './ui/totalMode.js';
 import initLoadingIndicator from './ui/loading.js';
 import initEditorScroll from './ui/editor.js';
 import { readClockFormat, setClockFormat } from './core/clockFormat.js';
+import { readDecimalPrecision, setDecimalPrecision } from './core/decimalPrecision.js';
 
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');
@@ -38,6 +39,7 @@ const rowRenderer = createRowRenderer(viewNode);
 // The main thread formats some values too (line references, copied results), so
 // it needs the clock format alongside the worker.
 setClockFormat(readClockFormat());
+setDecimalPrecision(readDecimalPrecision());
 
 function renderTextLayer(lines) {
   rowRenderer.renderText(lines);
@@ -66,7 +68,7 @@ const evalClient = createEvalClient(
 // Trigger changes: redraw what you typed immediately, then evaluate in the
 // worker on a debounce and fill the results in when it replies.
 contentEditableNode.addEventListener('input', () => {
-  renderTextLayer(contentEditableNode.value.split('\n'));
+  renderTextLayer(sheetLines(contentEditableNode.value));
   rowRenderer.updateActiveLine(activeLine());
   evalClient.schedule();
 });
@@ -104,7 +106,7 @@ function boot() {
   //    it floats beneath.
   initStarterPrompt(contentEditableNode);
 
-  // 5. The tour runs last, so every anchor it highlights already exists.
+  // 5. Onboarding seeds the starter sheet last, once everything else is wired.
   initOnboarding(contentEditableNode, tabsApi, onboardingState);
 }
 boot();
@@ -137,6 +139,7 @@ window.addEventListener('measurement:updated', (event) => {
 // Changing the display precision only reformats results, but the worker does
 // the formatting, so it needs the new value before the recompute.
 window.addEventListener('precision:updated', (event) => {
+  setDecimalPrecision(event.detail);
   evalClient.syncPrecision(event.detail);
   evalClient.update();
 });

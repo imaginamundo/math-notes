@@ -3,9 +3,12 @@
  * @property {number} id  Auto-increment IndexedDB key.
  * @property {string} tabId
  * @property {string} name
- * @property {string} content
+ * @property {string} content  Plain text, or a base64url deflate token when `compressed`.
+ * @property {boolean} [compressed]
  * @property {number} timestamp
  */
+
+import { compressText, decompressText } from '../util/compress.js';
 
 const DB_NAME = 'math-notes';
 const STORE = 'snapshots';
@@ -52,18 +55,30 @@ function sortNewest(snapshots) {
  */
 async function saveSnapshot(tab) {
   const db = await openDb();
+  // Store the sheet deflated when the platform supports it; fall back to plain
+  // text so a snapshot is never lost to a missing API.
+  const compressed = await compressText(tab.content);
   await new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, 'readwrite');
     tx.objectStore(STORE).add({
       tabId: tab.id,
       name: tab.name,
-      content: tab.content,
+      content: compressed === null ? tab.content : compressed,
+      compressed: compressed !== null,
       timestamp: Date.now(),
     });
     tx.oncomplete = resolve;
     tx.onerror = () => reject(tx.error);
   });
   await trimTab(tab.id);
+}
+
+// Inflate a compressed snapshot's content before it is used. A failed inflate
+// restores the tab empty rather than failing the whole recovery.
+async function hydrate(snapshot) {
+  if (!snapshot || !snapshot.compressed) return snapshot;
+  const content = await decompressText(snapshot.content);
+  return { ...snapshot, content: content === null ? '' : content };
 }
 
 // Keep at most SNAPSHOT_LIMIT snapshots per tab, dropping the oldest.
@@ -90,7 +105,7 @@ function trimTab(tabId) {
 async function listSnapshots() {
   const db = await openDb();
   const all = await requestToPromise(db.transaction(STORE).objectStore(STORE).getAll());
-  return sortNewest(all);
+  return Promise.all(sortNewest(all).map(hydrate));
 }
 
 // The most recent snapshot of each tab, newest first.

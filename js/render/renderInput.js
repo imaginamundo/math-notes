@@ -1,8 +1,8 @@
 import format from './format.js';
 import formatResult from './formatResult.js';
-import { readDecimalPrecision } from '../core/decimalPrecision.js';
+import { getDecimalPrecision } from '../core/decimalPrecision.js';
 import { firstDifference, arraysEqual } from '../util/sequence.js';
-import { collectVariableNames } from '../core/multiWordVariables.js';
+import { collectVariableNames, isMultiWordDefinition } from '../core/multiWordVariables.js';
 
 // Rendering is two-phase so that what you type never waits on the worker:
 // `renderText` redraws the highlighted input synchronously, and `patchResults`
@@ -18,6 +18,7 @@ function createRowRenderer(view) {
   let variableNames = []; // multi-word names, for highlighting
   let patched = null; // lines[] whose results are currently shown, or null
   let dirtyFrom = null; // first row whose result is still outstanding
+  let activeRow = -1; // row the caret is on, for the expanded-error treatment
 
   function createRow(line) {
     const row = document.createElement('div');
@@ -64,11 +65,8 @@ function createRowRenderer(view) {
    * @param {string[]} textLines
    */
   function renderText(textLines) {
-    const nextNames = collectVariableNames(textLines);
-    const namesChanged = !arraysEqual(variableNames, nextNames);
-    variableNames = nextNames;
-
     if (rows.length === 0) {
+      variableNames = collectVariableNames(textLines);
       buildRows(0, textLines);
       lines = textLines.slice();
       patched = null;
@@ -76,19 +74,25 @@ function createRowRenderer(view) {
       return;
     }
     const start = firstDifference(lines, textLines);
-    if (start === -1 && !namesChanged) return;
+    if (start === -1) return;
 
-    if (namesChanged) {
-      // A definition was added, renamed or removed: re-highlight every row so
-      // existing references pick up the new name token.
-      if (textLines.length === lines.length) {
-        for (let i = 0; i < textLines.length; i++) updateRow(i, textLines[i]);
-      } else {
-        buildRows(0, textLines);
+    // Rebuilding the name list is the only full-sheet scan here, so do it only
+    // when a changed line could have added, renamed or removed a definition.
+    if (namesMayChange(lines, textLines, start)) {
+      const nextNames = collectVariableNames(textLines);
+      const namesChanged = !arraysEqual(variableNames, nextNames);
+      variableNames = nextNames;
+      if (namesChanged) {
+        // Re-highlight every row so existing references pick up the new token.
+        if (textLines.length === lines.length) {
+          for (let i = 0; i < textLines.length; i++) updateRow(i, textLines[i]);
+        } else {
+          buildRows(0, textLines);
+        }
+        lines = textLines.slice();
+        dirtyFrom = 0;
+        return;
       }
-      lines = textLines.slice();
-      dirtyFrom = 0;
-      return;
     }
 
     if (textLines.length === lines.length) {
@@ -125,19 +129,15 @@ function createRowRenderer(view) {
     const from = Math.min(textFrom, resultFrom);
     for (let i = from; i < textLines.length; i++) {
       const row = rows[i];
-      if (row) patchRow(row, results ? results[i] : undefined);
-    }
-    // Group shading is applied to every row (not just the changed tail) so a
-    // group that disappeared above the patch point loses its background too.
-    // References are refreshed in the same pass: a referenced value can change
-    // while the referring line's own text did not.
-    for (let i = 0; i < textLines.length; i++) {
-      const row = rows[i];
       if (!row) continue;
+      patchRow(row, results ? results[i] : undefined);
+      // Group shading and `line(n)` references are refreshed in the same pass.
+      // A row above `from` cannot have changed: its own text did not, and a
+      // reference only points at an earlier line, whose value the engine kept.
       setGroupClass(row, results && results[i] ? results[i].group : undefined);
       patchReferences(row, i, results);
     }
-    layoutGroups();
+    layoutGroups(from);
     patched = textLines.slice();
     dirtyFrom = null;
   }
@@ -160,7 +160,7 @@ function createRowRenderer(view) {
       const valid =
         ref && ref.type === 'value' && ref.value !== undefined && typeof ref.value !== 'function';
       if (valid) {
-        const text = formatResult(ref.value, readDecimalPrecision());
+        const text = formatResult(ref.value, getDecimalPrecision());
         span.dataset.value = text;
         span.title = text;
         span.classList.add('resolved');
@@ -174,9 +174,12 @@ function createRowRenderer(view) {
 
   // A group shades as one box: every row in the group is widened to the widest
   // row (including its ghost), so the background no longer hugs each line's
-  // text length. Rounded corners are drawn by CSS on the first/last row.
-  function layoutGroups() {
+  // text length. Rounded corners are drawn by CSS on the first/last row. Only
+  // groups at or after `from` are re-measured, and all clears happen before any
+  // read so the browser lays out once instead of once per group.
+  function layoutGroups(from = 0) {
     if (typeof view.offsetWidth !== 'number') return;
+    const groups = [];
     let i = 0;
     while (i < rows.length) {
       const first = rows[i];
@@ -193,40 +196,60 @@ function createRowRenderer(view) {
         i++;
         if (isEnd) break;
       }
-      for (const row of groupRows) row.style.width = '';
+      if (i > from) groups.push(groupRows);
+    }
+    if (!groups.length) return;
+
+    for (const groupRows of groups) for (const row of groupRows) row.style.width = '';
+    const widths = groups.map((groupRows) => {
       let widest = 0;
       for (const row of groupRows) widest = Math.max(widest, row.offsetWidth);
-      if (widest > 0) {
-        const width = `${Math.ceil(widest)}px`;
-        for (const row of groupRows) row.style.width = width;
+      return widest;
+    });
+    groups.forEach((groupRows, index) => {
+      if (widths[index] <= 0) return;
+      const width = `${Math.ceil(widths[index])}px`;
+      for (const row of groupRows) row.style.width = width;
+    });
+  }
+
+  // The error ghost of a row, if it has one, so its truncated text can be
+  // swapped for the full message while the caret is on it.
+  function errorGhost(index) {
+    const row = rows[index];
+    if (!row) return null;
+    for (const child of row.children) {
+      if (
+        child.classList &&
+        child.classList.contains('ghost-result') &&
+        child.classList.contains('error')
+      ) {
+        return child;
       }
     }
+    return null;
+  }
+
+  function setExpanded(index, expanded) {
+    const ghost = errorGhost(index);
+    if (!ghost || !ghost.dataset || ghost.dataset.full === undefined) return;
+    ghost.textContent = expanded ? ghost.dataset.full : ghost.dataset.short;
   }
 
   // A caret on a row with a truncated error shows the full message on that
   // row; every other row stays compact. The active row is also marked so a
   // resolved `line(n)` can reveal its raw token while editing. Call it whenever
   // the active line may have changed (after input/click/selection, and after
-  // patching results).
+  // patching results) — only the outgoing and incoming rows are touched.
   function updateActiveLine(index) {
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      if (!row) continue;
-      if (row.classList) row.classList.toggle('active', i === index);
-      let ghost = null;
-      for (const child of row.children) {
-        if (
-          child.classList &&
-          child.classList.contains('ghost-result') &&
-          child.classList.contains('error')
-        ) {
-          ghost = child;
-          break;
-        }
-      }
-      if (!ghost || !ghost.dataset || ghost.dataset.full === undefined) continue;
-      ghost.textContent = i === index ? ghost.dataset.full : ghost.dataset.short;
+    if (activeRow !== index && rows[activeRow]) {
+      rows[activeRow].classList.toggle('active', false);
+      setExpanded(activeRow, false);
     }
+    activeRow = index;
+    if (rows[index]) rows[index].classList.toggle('active', true);
+    // After a patch the active row's ghost has been reset to its short form.
+    setExpanded(index, true);
   }
 
   function patchRow(row, result) {
@@ -264,7 +287,7 @@ function createRowRenderer(view) {
     const error = result.type === 'error';
     if (!error) {
       return {
-        value: `→ ${truncate(formatResult(result.value, readDecimalPrecision()), 80)}`,
+        value: `→ ${truncate(formatResult(result.value, getDecimalPrecision()), 80)}`,
         error: false,
       };
     }
@@ -273,6 +296,18 @@ function createRowRenderer(view) {
   }
 
   return { renderText, patchResults, updateActiveLine, relayout: layoutGroups };
+}
+
+// Whether the edit that starts at `start` could have changed the multi-word
+// name set: an inserted or removed line might be a definition, and a rewritten
+// line only matters if either version is one.
+function namesMayChange(previous, next, start) {
+  if (previous.length !== next.length) return true;
+  for (let i = start; i < next.length; i++) {
+    if (previous[i] === next[i]) continue;
+    if (isMultiWordDefinition(previous[i]) || isMultiWordDefinition(next[i])) return true;
+  }
+  return false;
 }
 
 function truncate(text, max) {
