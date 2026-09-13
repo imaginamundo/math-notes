@@ -6,28 +6,53 @@ import parseLine from './parseLine.js';
 
 // A word starts with a letter (or underscore/µ) and continues with letters,
 // digits, underscore or µ. Leading digits keep `300g` a word for `g` without
-// swallowing the number.
+// swallowing the number. A tag is `#` followed by tag characters (so `-` is
+// allowed inside a tag, unlike a plain word).
 const HEAD = /[A-Za-z_µ]/;
 const TAIL = /[A-Za-z0-9_µ]/;
+const TAG_TAIL = /[A-Za-z0-9_-]/;
 
-const KIND_ORDER = { variable: 0, keyword: 1, function: 2, constant: 3, unit: 4 };
+const KIND_ORDER = { variable: 0, tag: 1, keyword: 2, function: 3, constant: 4, unit: 5 };
 
 /**
  * The word around the caret, with the part before the caret as `prefix`.
- * Returns null when the caret is not inside a completable word.
+ * Returns null when the caret is not inside a completable word. A `#tag` comes
+ * back with `tag: true` and its range including the `#`.
  * @param {string} value
  * @param {number} caret
- * @returns {{ start: number, end: number, text: string, prefix: string }|null}
+ * @returns {{ start: number, end: number, text: string, prefix: string, tag: boolean }|null}
  */
 function wordRangeAt(value, caret) {
   if (typeof caret !== 'number' || caret < 0 || caret > value.length) return null;
+
+  let tagStart = caret;
+  while (tagStart > 0 && TAG_TAIL.test(value[tagStart - 1])) tagStart--;
+  if (value[tagStart - 1] === '#') {
+    const start = tagStart - 1;
+    let end = caret;
+    while (end < value.length && TAG_TAIL.test(value[end])) end++;
+    return {
+      start,
+      end,
+      text: value.slice(start, end),
+      prefix: value.slice(start, caret),
+      tag: true,
+    };
+  }
+
   let start = caret;
   while (start > 0 && TAIL.test(value[start - 1])) start--;
   while (start < caret && !HEAD.test(value[start])) start++;
   let end = caret;
   while (end < value.length && TAIL.test(value[end])) end++;
   if (start >= end || !HEAD.test(value[start])) return null;
-  return { start, end, text: value.slice(start, end), prefix: value.slice(start, caret) };
+  return {
+    start,
+    end,
+    text: value.slice(start, end),
+    prefix: value.slice(start, caret),
+    tag: false,
+  };
 }
 
 /**
@@ -39,9 +64,12 @@ function wordRangeAt(value, caret) {
  * @param {number} limit
  */
 function suggestionsFor(prefix, entries, limit = 8) {
+  const isTag = prefix.startsWith('#');
   const lower = prefix.toLowerCase();
   const scored = [];
   for (const entry of entries) {
+    // A `#` puts the popup in tag mode; otherwise only non-tag entries match.
+    if ((entry.kind === 'tag') !== isTag) continue;
     if (entry.text === prefix) continue;
     const lowerText = entry.text.toLowerCase();
     const index = lowerText.indexOf(lower);
@@ -89,4 +117,13 @@ function collectAssignments(lines) {
   return [...names];
 }
 
-export { wordRangeAt, suggestionsFor, applyCompletion, collectAssignments };
+// Every tag used in the sheet (`20 #food`), without the leading `#`.
+function collectTags(lines) {
+  const tags = new Set();
+  for (const line of lines) {
+    for (const tag of parseLine(line).tags) tags.add(tag);
+  }
+  return [...tags];
+}
+
+export { wordRangeAt, suggestionsFor, applyCompletion, collectAssignments, collectTags };

@@ -5,15 +5,60 @@ import {
   suggestionsFor,
   applyCompletion,
   collectAssignments,
+  collectTags,
 } from '../js/core/autocomplete.js';
 import { VOCABULARY } from '../js/core/vocabulary.js';
 
 test('wordRangeAt finds the word around the caret', () => {
-  assert.deepEqual(wordRangeAt('100 usd', 7), { start: 4, end: 7, text: 'usd', prefix: 'usd' });
-  assert.deepEqual(wordRangeAt('300g', 4), { start: 3, end: 4, text: 'g', prefix: 'g' });
-  assert.deepEqual(wordRangeAt('a + sq', 6), { start: 4, end: 6, text: 'sq', prefix: 'sq' });
+  assert.deepEqual(wordRangeAt('100 usd', 7), {
+    start: 4,
+    end: 7,
+    text: 'usd',
+    prefix: 'usd',
+    tag: false,
+  });
+  assert.deepEqual(wordRangeAt('300g', 4), {
+    start: 3,
+    end: 4,
+    text: 'g',
+    prefix: 'g',
+    tag: false,
+  });
+  assert.deepEqual(wordRangeAt('a + sq', 6), {
+    start: 4,
+    end: 6,
+    text: 'sq',
+    prefix: 'sq',
+    tag: false,
+  });
   // Mid-word: the whole word is replaced, not just the part before the caret.
-  assert.deepEqual(wordRangeAt('usd', 1), { start: 0, end: 3, text: 'usd', prefix: 'u' });
+  assert.deepEqual(wordRangeAt('usd', 1), {
+    start: 0,
+    end: 3,
+    text: 'usd',
+    prefix: 'u',
+    tag: false,
+  });
+});
+
+test('wordRangeAt recognises a #tag, including `-` inside it', () => {
+  assert.deepEqual(wordRangeAt('#food', 5), {
+    start: 0,
+    end: 5,
+    text: '#food',
+    prefix: '#food',
+    tag: true,
+  });
+  assert.deepEqual(wordRangeAt('#', 1), { start: 0, end: 1, text: '#', prefix: '#', tag: true });
+  assert.deepEqual(wordRangeAt('#my-tag', 7), {
+    start: 0,
+    end: 7,
+    text: '#my-tag',
+    prefix: '#my-tag',
+    tag: true,
+  });
+  // A lone `-` is arithmetic, not part of a tag.
+  assert.deepEqual(wordRangeAt('a-b', 3), { start: 2, end: 3, text: 'b', prefix: 'b', tag: false });
 });
 
 test('wordRangeAt ignores numbers and empty positions', () => {
@@ -57,6 +102,34 @@ test('suggestionsFor matches case-insensitively and later in the name', () => {
     suggestionsFor('usd', entries, 8).map((entry) => entry.text),
     ['USD']
   );
+});
+
+test('suggestionsFor keeps tags and names in separate modes', () => {
+  const entries = [
+    { text: '#food', kind: 'tag' },
+    { text: '#fuel', kind: 'tag' },
+    { text: 'foo', kind: 'function' },
+  ];
+  assert.deepEqual(
+    suggestionsFor('#fo', entries, 8).map((entry) => entry.text),
+    ['#food']
+  );
+  assert.deepEqual(
+    suggestionsFor('#', entries, 8).map((entry) => entry.text),
+    ['#food', '#fuel']
+  );
+  // Without a `#`, tag entries are hidden.
+  assert.deepEqual(
+    suggestionsFor('fo', entries, 8).map((entry) => entry.text),
+    ['foo']
+  );
+});
+
+test('collectTags lists the tags used in the sheet', () => {
+  assert.deepEqual(collectTags(['20 #food #urgent', '30 #food', '#food', 'x = 1']), [
+    'food',
+    'urgent',
+  ]);
 });
 
 test('applyCompletion replaces the word, bracketing functions', () => {

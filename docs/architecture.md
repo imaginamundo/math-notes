@@ -339,16 +339,18 @@ scrolling to a match anchors on the row.
 
 `js/ui/autocomplete.js` draws a caret-anchored `role="listbox"` popup inside
 `.editor-scroll`. It opens while a word of at least two letters is being typed
-and on `Ctrl`/`Cmd`+`Space`, offering the sheet's own assignments plus the
-curated vocabulary in `js/core/vocabulary.js` (keywords, functions, constants
-and the units from `core/measures.js` and `core/currencySymbols.js`).
+(or right after a single `#`) and on `Ctrl`/`Cmd`+`Space`, offering the sheet's
+own assignments and tags plus the curated vocabulary in
+`js/core/vocabulary.js` (keywords, functions, constants and the units from
+`core/measures.js` and `core/currencySymbols.js`).
 
 The logic is pure and unit-tested in `js/core/autocomplete.js`: `wordRangeAt`
 finds the word around the caret (leading digits stay outside it, so `300g`
-completes `g`), `suggestionsFor` ranks matches (variables and prefix matches
-first, exact matches dropped), and `applyCompletion` rewrites the range
-(functions get an opening bracket). `collectAssignments` collects variable names
-with `parseLine`.
+completes `g`; a `#tag` comes back with `tag: true` and `-` allowed inside),
+`suggestionsFor` ranks matches (variables and prefix matches first, exact
+matches dropped; a leading `#` restricts matches to tags), and `applyCompletion`
+rewrites the range (functions get an opening bracket). `collectAssignments` and
+`collectTags` collect variable names and tags with `parseLine`.
 
 The popup is positioned from `editorScroll.caretPosition()` — the glyph and line
 metrics `js/ui/editor.js` already measures — and flips above the caret when

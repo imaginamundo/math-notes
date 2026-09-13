@@ -537,6 +537,41 @@ test('autocomplete offers variables and functions and inserts the choice', async
   assert.deepEqual(errors, []);
 });
 
+test('autocomplete offers sheet tags after a #', async () => {
+  await newPage();
+
+  const type = (content) =>
+    page.evaluate((v) => {
+      const ed = document.getElementById('content-editable');
+      ed.focus();
+      ed.value = v;
+      ed.setSelectionRange(v.length, v.length);
+      ed.dispatchEvent(new Event('input', { bubbles: true }));
+    }, content);
+  const suggestions = () =>
+    page.evaluate(() => {
+      const node = document.getElementById('autocomplete-list');
+      if (!node || node.hidden) return [];
+      return [...node.children].map(
+        (child) => child.querySelector('.autocomplete-text').textContent
+      );
+    });
+
+  // A single `#` opens the popup, showing only tags (not the vocabulary).
+  await type('20 #food\n30 #fare\n#');
+  await waitFor(async () => (await suggestions()).includes('#food'));
+  const items = await suggestions();
+  assert.ok(items.includes('#fare'), 'tags from the sheet are offered');
+  assert.ok(!items.includes('sqrt'), 'a # keeps the popup in tag mode only');
+
+  // The prefix filters, and Enter inserts the whole tag.
+  await type('20 #food\n30 #fare\n#far');
+  await waitFor(async () => (await suggestions())[0] === '#fare');
+  await page.keyboard.press('Enter');
+  assert.equal(await value(), '20 #food\n30 #fare\n#fare');
+  assert.deepEqual(errors, []);
+});
+
 test('autocomplete scrolls the highlighted option into view', async () => {
   await newPage();
   await page.evaluate(() => {

@@ -97,9 +97,9 @@ Based on [Numi](https://numi.app/).
   (`line(1) + 1h`) or multiplied.
 - **Find & replace** — press `⌘F` / `Ctrl+F` to search the active sheet with
   live match highlighting, then replace one or all matches.
-- **Autocomplete** — a caret-anchored popup offers the sheet's variables plus
-  the built-in functions, keywords, constants and units as you type (or on
-  `Ctrl+Space`). `↑`/`↓` choose, `Enter`/`Tab` insert, `Esc` dismisses.
+- **Autocomplete** — a caret-anchored popup offers the sheet's variables and
+  `#tags` plus the built-in functions, keywords, constants and units as you type
+  (or on `Ctrl+Space`). `↑`/`↓` choose, `Enter`/`Tab` insert, `Esc` dismisses.
 - **Line numbers** — a left gutter numbers the sheet and highlights the line
   the caret is on. Click a number to comment or uncomment that line.
 - **Jump to line** — press `⌘G` / `Ctrl+G` and type a line number to move the

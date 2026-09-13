@@ -3,14 +3,16 @@ import {
   suggestionsFor,
   applyCompletion,
   collectAssignments,
+  collectTags,
 } from '../core/autocomplete.js';
 import { VOCABULARY } from '../core/vocabulary.js';
 import { setEditorValue } from './editorInput.js';
 
 // A caret-anchored suggestion popup. It opens while a word is being typed (at
-// least MIN_PREFIX characters) and on Ctrl/Cmd+Space, completes variables from
-// the sheet plus the curated vocabulary, and inserts the choice as a normal
-// edit (through setEditorValue, so undo and the renderer stay in sync).
+// least MIN_PREFIX characters) and on Ctrl/Cmd+Space, completes variables and
+// `#tags` from the sheet plus the curated vocabulary, and inserts the choice as
+// a normal edit (through setEditorValue, so undo and the renderer stay in sync).
+// A leading `#` switches it to tag mode and opens after the single character.
 //
 // Its keydown listener must be registered before the Tab handling in
 // js/ui/indent.js: when the popup is open it swallows the keys it uses with
@@ -49,11 +51,10 @@ function initAutocomplete(editableNode, editorScroll) {
   }
 
   function entries() {
-    const variables = collectAssignments(editableNode.value.split('\n')).map((text) => ({
-      text,
-      kind: 'variable',
-    }));
-    return [...variables, ...VOCABULARY];
+    const lines = editableNode.value.split('\n');
+    const variables = collectAssignments(lines).map((text) => ({ text, kind: 'variable' }));
+    const tags = collectTags(lines).map((text) => ({ text: `#${text}`, kind: 'tag' }));
+    return [...variables, ...tags, ...VOCABULARY];
   }
 
   function refresh(force) {
@@ -61,7 +62,8 @@ function initAutocomplete(editableNode, editorScroll) {
     if (editableNode.selectionStart !== editableNode.selectionEnd) return close();
     range = wordRangeAt(editableNode.value, editableNode.selectionStart);
     if (!range) return close();
-    if (!force && range.prefix.length < MIN_PREFIX) return close();
+    // A `#tag` opens after the single `#`; a plain word needs MIN_PREFIX.
+    if (!force && !range.tag && range.prefix.length < MIN_PREFIX) return close();
     items = suggestionsFor(range.prefix, entries(), MAX_ITEMS);
     if (!items.length) return close();
     activeIndex = 0;
