@@ -18,6 +18,7 @@ function createRowRenderer(view) {
   let variableNames = []; // multi-word names, for highlighting
   let patched = null; // lines[] whose results are currently shown, or null
   let dirtyFrom = null; // first row whose result is still outstanding
+  let activeRow = -1; // row the caret is on, for the expanded-error treatment
 
   function createRow(line) {
     const row = document.createElement('div');
@@ -203,30 +204,43 @@ function createRowRenderer(view) {
     }
   }
 
+  // The error ghost of a row, if it has one, so its truncated text can be
+  // swapped for the full message while the caret is on it.
+  function errorGhost(index) {
+    const row = rows[index];
+    if (!row) return null;
+    for (const child of row.children) {
+      if (
+        child.classList &&
+        child.classList.contains('ghost-result') &&
+        child.classList.contains('error')
+      ) {
+        return child;
+      }
+    }
+    return null;
+  }
+
+  function setExpanded(index, expanded) {
+    const ghost = errorGhost(index);
+    if (!ghost || !ghost.dataset || ghost.dataset.full === undefined) return;
+    ghost.textContent = expanded ? ghost.dataset.full : ghost.dataset.short;
+  }
+
   // A caret on a row with a truncated error shows the full message on that
   // row; every other row stays compact. The active row is also marked so a
   // resolved `line(n)` can reveal its raw token while editing. Call it whenever
   // the active line may have changed (after input/click/selection, and after
-  // patching results).
+  // patching results) — only the outgoing and incoming rows are touched.
   function updateActiveLine(index) {
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      if (!row) continue;
-      if (row.classList) row.classList.toggle('active', i === index);
-      let ghost = null;
-      for (const child of row.children) {
-        if (
-          child.classList &&
-          child.classList.contains('ghost-result') &&
-          child.classList.contains('error')
-        ) {
-          ghost = child;
-          break;
-        }
-      }
-      if (!ghost || !ghost.dataset || ghost.dataset.full === undefined) continue;
-      ghost.textContent = i === index ? ghost.dataset.full : ghost.dataset.short;
+    if (activeRow !== index && rows[activeRow]) {
+      rows[activeRow].classList.toggle('active', false);
+      setExpanded(activeRow, false);
     }
+    activeRow = index;
+    if (rows[index]) rows[index].classList.toggle('active', true);
+    // After a patch the active row's ghost has been reset to its short form.
+    setExpanded(index, true);
   }
 
   function patchRow(row, result) {
