@@ -30,6 +30,29 @@ test('preprocessSymbols maps the R$ symbol to BRL', () => {
   assert.equal(preprocessSymbols('R$5.50 to GBP'), '5.50 BRL to GBP');
 });
 
+test('preprocessSymbols maps prefixed dollar and yuan symbols', () => {
+  assert.equal(preprocessSymbols('US$350'), '350 USD');
+  assert.equal(preprocessSymbols('A$5 to USD'), '5 AUD to USD');
+  assert.equal(preprocessSymbols('CA$5 to USD'), '5 CAD to USD');
+  assert.equal(preprocessSymbols('HK$5 to USD'), '5 HKD to USD');
+  assert.equal(preprocessSymbols('NZ$5 to USD'), '5 NZD to USD');
+  assert.equal(preprocessSymbols('S$5 to USD'), '5 SGD to USD');
+  assert.equal(preprocessSymbols('MX$5 to USD'), '5 MXN to USD');
+  assert.equal(preprocessSymbols('CN¥5 to USD'), '5 CNY to USD');
+});
+
+test('preprocessSymbols maps other currency symbols', () => {
+  assert.equal(preprocessSymbols('5 lei'), '5 RON');
+  assert.equal(preprocessSymbols('5 Ft'), '5 HUF');
+  assert.equal(preprocessSymbols('5 zł'), '5 PLN');
+  assert.equal(preprocessSymbols('5 Kč'), '5 CZK');
+  assert.equal(preprocessSymbols('5 Rp'), '5 IDR');
+  assert.equal(preprocessSymbols('5 RM'), '5 MYR');
+  assert.equal(preprocessSymbols('5₱'), '5 PHP');
+  assert.equal(preprocessSymbols('5฿'), '5 THB');
+  assert.equal(preprocessSymbols('5₪'), '5 ILS');
+});
+
 test('preprocessSymbols leaves plain expressions untouched', () => {
   assert.equal(preprocessSymbols('2 + 2 * 3'), '2 + 2 * 3');
   assert.equal(preprocessSymbols('1cm to m'), '1cm to m');
@@ -38,14 +61,22 @@ test('preprocessSymbols leaves plain expressions untouched', () => {
 test('preprocessSymbols uppercases currency codes', () => {
   assert.equal(preprocessSymbols('5usd to brl'), '5 USD to BRL');
   assert.equal(preprocessSymbols('100 usd to eur'), '100 USD to EUR');
-  assert.equal(preprocessSymbols('gbp 5'), 'GBP 5');
+  assert.equal(preprocessSymbols('gbp 5'), '5 GBP');
   assert.equal(preprocessSymbols('50 eur in usd'), '50 EUR in USD');
 });
 
 test('preprocessSymbols keeps currency codes attached to numbers', () => {
   assert.equal(preprocessSymbols('5usd'), '5 USD');
-  assert.equal(preprocessSymbols('usd5'), 'USD 5');
+  assert.equal(preprocessSymbols('usd5'), '5 USD');
   assert.equal(preprocessSymbols('total = 5usd + 2'), 'total = 5 USD + 2');
+});
+
+test('preprocessSymbols puts the amount before a leading currency code', () => {
+  assert.equal(preprocessSymbols('BRL 360 / 30 days'), '360 BRL / 30 days');
+  assert.equal(preprocessSymbols('USD 5'), '5 USD');
+  assert.equal(preprocessSymbols('USD 5 in EUR'), '5 USD in EUR');
+  // Non-currency identifiers keep their order.
+  assert.equal(preprocessSymbols('foo 5'), 'foo 5');
 });
 
 test('preprocessSymbols leaves non-currency identifiers alone', () => {

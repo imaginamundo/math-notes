@@ -102,6 +102,12 @@ Terms used throughout the codebase and this documentation.
 - **Currency context** — places where a 3-letter code is treated as a unit
   (next to a number or a `to`/`in` conversion), so codes used as variables stay
   lowercase.
+- **Currency symbol** — how a currency amount is written back: the symbol in
+  front of the amount (`US$ 350`, `-US$ 50`), from `CURRENCY_DISPLAY` in
+  `js/core/currencySymbols.js`. A currency rate reads as a phrase
+  (`100 USD/hour` → `US$ 100 per hour`). Currencies with no distinct symbol keep
+  their ISO code. `CURRENCY_SYMBOLS` in the same file maps typed symbols to
+  codes.
 - **Share link** — a URL whose `#` fragment carries an encoded sheet
   (`#s=<version>.<base64url>`). Built and parsed by `js/share/shareLink.js`.
 - **Share token** — the `<version>.<base64url>` part of a share link: a version

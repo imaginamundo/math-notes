@@ -61,7 +61,10 @@ Each line goes through `preprocess` (`js/core/preprocess.js`) before mathjs:
 `$2k` becomes `2000 USD`; percentage before word operators so its `of|on|off`
 phrases are consumed first; rounding last, so it wraps the normalised value).
 `js/eval/symbols.js` only treats 3-letter currency codes as units in currency
-contexts (amounts and `to`/`in` conversions), so `usd = 5` stays a variable.
+contexts (amounts and `to`/`in` conversions), so `usd = 5` stays a variable. A
+currency code written before its amount is flipped so the amount leads
+(`BRL 360 / 30 days` → `360 BRL / 30 days`), which mathjs reads as the rate
+`BRL/day` rather than `BRL * days`.
 
 ### Measures and rates
 
@@ -85,6 +88,18 @@ already understands: `per`/`a`/`an` → `/`, `for a year` → `* 1 year`, `X at 
 `time to upload X at R` → `X / R`, and `D in T` → `__pace` (time/distance,
 formatted as `mm:ss/km`). `formatResult` simplifies compound units before
 display, so `30 hours at 10 km/hour` shows `300 km`, not `(hours km)/hour`.
+
+Currencies are units too. `formatResult` writes a single currency amount with
+its symbol from `CURRENCY_DISPLAY` in `js/core/currencySymbols.js`
+(`350usd` → `US$ 350`), keeping the sign in front (`-US$ 50`), and reads a
+currency rate as a phrase (`100 USD/hour` → `US$ 100 per hour`,
+`BRL/day` → `R$ 12 per day`). The currency is read from the original unit before
+`unit.simplify()`, which would otherwise fold it into whichever currency mathjs
+made the base; a compound that reduces to a currency (`2h * prev` where `prev`
+is a rate) is read back in the currency that was written. Currencies with no
+distinct symbol (CHF, ZAR, the Nordic krona) keep their ISO code so a result can
+always be typed back in; `CURRENCY_SYMBOLS` is the input map the same file
+supplies to `js/eval/symbols.js` and the highlighter.
 
 `js/eval/timespan.js` handles durations. Consecutive time components are joined
 with `+` (mathjs would multiply them) and `m` means minutes, so `3h 5m 10s`

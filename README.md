@@ -56,7 +56,10 @@ Based on [Numi](https://numi.app/).
   `10 km per day`, `30 hours at 10 km/hour`, `$24 a day for a year`,
   `time to upload 3 GB at 10 MB/s`, and pace `5 km in 25 min` → `05:00/km`.
 - **Currency conversion** (`100 USD to EUR`, `$5 to GBP`, `R$5 to EUR`) with
-  live rates from the European Central Bank, cached for offline use.
+  live rates from the European Central Bank, cached for offline use. Results are
+  written with the currency's symbol where it has one (`350usd` → `US$ 350`);
+  currencies without a symbol keep their ISO code, and a rate reads as a phrase
+  (`100 USD/hour` → `US$ 100 per hour`).
 - **Percentages**: `20% of $10`, `5% on $30`, `6% off 40 EUR`,
   `$50 as a % of $100`, `5% of what is 6`.
 - **Number scales**: repeated `k` — `2k` (2,000), `1kk` (1,000,000),

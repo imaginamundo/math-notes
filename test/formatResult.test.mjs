@@ -1,9 +1,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import formatResult from '../js/render/formatResult.js';
+import { registerRates } from '../js/eval/currency.js';
 import { create, all } from '../js/lib/math.bundle.min.js';
 
 const math = create(all);
+registerRates(math, {
+  base: 'EUR',
+  rates: { USD: 1.16, GBP: 0.86, JPY: 170, BRL: 6.2, CAD: 1.5, CHF: 0.94 },
+});
 
 test('formatResult groups large numbers', () => {
   assert.equal(formatResult(1000000), '1,000,000');
@@ -44,6 +49,36 @@ test('formatResult keeps unit prefixes', () => {
   math.createUnit('px', { definition: `${0.0254 / 96} m` });
   const converted = formatResult(math.evaluate('1 cm in px'));
   assert.equal(converted, '37.795… px');
+});
+
+test('formatResult writes currencies with their symbols', () => {
+  assert.equal(formatResult(math.evaluate('350 USD')), 'US$ 350');
+  assert.equal(formatResult(math.evaluate('350 EUR')), '€ 350');
+  assert.equal(formatResult(math.evaluate('50 GBP')), '£ 50');
+  assert.equal(formatResult(math.evaluate('50 JPY')), '¥ 50');
+  assert.equal(formatResult(math.evaluate('5 BRL')), 'R$ 5');
+  assert.equal(formatResult(math.evaluate('5 CAD')), 'CA$ 5');
+  assert.equal(formatResult(math.evaluate('-50 USD')), '-US$ 50');
+});
+
+test('formatResult keeps codes for currencies without a symbol', () => {
+  assert.equal(formatResult(math.evaluate('5 CHF')), '5 CHF');
+});
+
+test('formatResult writes currency rates as a phrase', () => {
+  assert.equal(formatResult(math.evaluate('100 USD / hour')), 'US$ 100 per hour');
+  assert.equal(formatResult(math.evaluate('360 BRL / 30 days')), 'R$ 12 per day');
+  assert.equal(formatResult(math.evaluate('10 USD / day')), 'US$ 10 per day');
+  assert.equal(formatResult(math.evaluate('5 km / day')), '5 km/day');
+});
+
+test('formatResult writes a compound that simplifies to a currency', () => {
+  assert.equal(formatResult(math.evaluate('24 USD / day * 1 year')), 'US$ 8,766');
+});
+
+test('formatResult keeps the written currency when a compound reduces', () => {
+  assert.equal(formatResult(math.evaluate('2 h * (33 USD / hour)')), 'US$ 66');
+  assert.equal(formatResult(math.evaluate('2 h * (33 BRL / hour)')), 'R$ 66');
 });
 
 test('formatResult shows fractions as fractions', () => {

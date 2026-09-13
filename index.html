@@ -349,7 +349,7 @@
             <code></code><span class="help-returns">returns 40</span>
           </div>
           <div class="help-example" data-expr="$490 rounded to nearest hundred" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 500 USD</span>
+            <code></code><span class="help-returns">returns US$ 500</span>
           </div>
           <div class="help-example" data-expr="21 rounded up to nearest 5" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 25</span>
@@ -557,7 +557,7 @@
 
         <section id="help-currency" class="help-section">
           <h2>Currency conversion</h2>
-          <p>Convert between currencies using 3-letter ISO codes or symbols. Rates come from the European Central Bank (via frankfurter.dev) and are cached locally for offline use.</p>
+          <p>Convert between currencies using 3-letter ISO codes or symbols. Results are written with the currency's symbol where it has one (<code>350usd</code> becomes <code>US$ 350</code>); currencies without a symbol keep their code. Rates come from the European Central Bank (via frankfurter.dev) and are cached locally for offline use.</p>
           <div class="help-example" data-expr="100 USD to EUR" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">converts USD to EUR</span>
           </div>
@@ -569,6 +569,9 @@
           </div>
           <div class="help-example" data-expr="50 EUR in BRL" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">converts to BRL</span>
+          </div>
+          <div class="help-example" data-expr="100 USD/hour" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">US$ 100 per hour</span>
           </div>
           <p><b>Supported codes:</b> <code>AUD</code>, <code>BRL</code>, <code>CAD</code>, <code>CHF</code>, <code>CNY</code>, <code>CZK</code>, <code>DKK</code>, <code>EUR</code>, <code>GBP</code>, <code>HKD</code>, <code>HUF</code>, <code>IDR</code>, <code>ILS</code>, <code>INR</code>, <code>ISK</code>, <code>JPY</code>, <code>KRW</code>, <code>MXN</code>, <code>MYR</code>, <code>NOK</code>, <code>NZD</code>, <code>PHP</code>, <code>PLN</code>, <code>RON</code>, <code>SEK</code>, <code>SGD</code>, <code>THB</code>, <code>TRY</code>, <code>USD</code>, <code>ZAR</code>.</p>
         </section>
