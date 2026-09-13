@@ -977,6 +977,22 @@ test('the Examples chips are highlighted and multi-line examples get a line-numb
   );
   assert.ok(numbers.length >= 2, 'multi-line examples show line numbers');
   assert.equal(numbers[0], '1');
+
+  const layout = await page.evaluate(() => {
+    const content = document.querySelector('#recipes-modal .example-line-content');
+    const ten = [...document.querySelectorAll('#recipes-modal .example-chip')].find(
+      (chip) => chip.querySelectorAll('.example-line').length >= 10
+    );
+    const code = ten ? ten.querySelector('code') : null;
+    return {
+      whiteSpace: getComputedStyle(content).whiteSpace,
+      overflowX: code ? getComputedStyle(code).overflowX : null,
+      gutter: code ? code.style.getPropertyValue('--example-gutter') : null,
+    };
+  });
+  assert.equal(layout.whiteSpace, 'pre', 'examples do not wrap');
+  assert.equal(layout.overflowX, 'auto', 'long examples scroll horizontally');
+  assert.equal(layout.gutter, '2ch', 'the gutter widens for two-digit line numbers');
   assert.deepEqual(errors, []);
 });
 

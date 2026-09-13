@@ -13,6 +13,8 @@ function renderCode(codeNode, expr) {
   const lines = expr.split('\n');
   const names = collectVariableNames(lines);
   const numbered = lines.length > 1;
+  // Size the gutter to the widest line number so 10+ lines stay aligned.
+  codeNode.style.setProperty('--example-gutter', `${String(lines.length).length}ch`);
   codeNode.textContent = '';
   lines.forEach((line, index) => {
     const row = document.createElement('span');

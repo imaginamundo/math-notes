@@ -375,13 +375,20 @@ body {
   font-size: 0.92em;
   line-height: 1.6;
 }
-/* Match the editor's number sidebar: a distinct column with a divider. */
+/* Match the editor's number sidebar: a distinct column with a divider. Long
+   lines scroll horizontally; the number column stays pinned while they do. */
 .doc-line {
   display: flex;
+  width: max-content;
+  min-width: 100%;
 }
 .doc-line-number {
+  position: sticky;
+  left: 0;
+  z-index: 1;
   flex: 0 0 auto;
-  min-width: 2.5em;
+  box-sizing: border-box;
+  width: calc(var(--doc-gutter, 1ch) + 1.6em);
   padding: 0.15em 0.7em 0.15em 0.9em;
   background: var(--color-surface);
   border-right: 1px solid var(--border-strong);

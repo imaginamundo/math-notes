@@ -13,6 +13,8 @@ function colorize(code) {
   const text = code.textContent;
   const lines = text.split('\n');
   const names = collectVariableNames(lines);
+  // Size the gutter to the widest line number so 10+ lines stay aligned.
+  code.style.setProperty('--doc-gutter', `${String(lines.length).length}ch`);
   code.textContent = '';
   lines.forEach((line, index) => {
     const row = document.createElement('span');
