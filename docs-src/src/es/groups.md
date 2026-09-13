@@ -6,7 +6,7 @@ Math Notes agrega de tres formas relacionadas: el total acumulado de la barra in
 
 La barra de total debajo del editor agrega todos los resultados numéricos de la hoja. Su menú alterna entre **total** (suma), **media** y **mediana**.
 
-Los números simples se reúnen en una sola unidad; las unidades compatibles (como `cm` y `m`) se funden en la mayor presente; las monedas o dimensiones mixtas caen en la suma numérica simple.
+Los números simples se reúnen en una sola unidad; un número sin unidad se lee en la **primera** unidad usada para su dimensión, así que añadir después una unidad mayor (`1 day` tras unas horas) suma al total en vez de reinterpretar los números anteriores. Las unidades compatibles (como `cm` y `m`) se funden en la mayor presente para mostrarla; las monedas o dimensiones mixtas caen en la suma numérica simple.
 
 ## Palabras clave de agregación
 

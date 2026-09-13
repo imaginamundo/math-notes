@@ -413,9 +413,32 @@ test('evaluateLines merges compatible units into the largest present', () => {
   assert.equal(time.formatUnits(), 'h');
   assert.ok(Math.abs(time.toNumber() - 2.5) < 1e-9);
 
+  const mass = evaluateLines(['500 g', '2 kg']).total;
+  assert.equal(mass.formatUnits(), 'kg');
+  assert.ok(Math.abs(mass.toNumber() - 2.5) < 1e-9);
+});
+
+test('bare numbers are read in the first unit used for the dimension', () => {
+  // `10` is read in grams (the first mass unit), not the largest display unit,
+  // so the total is 2.5 kg + 10 g.
   const mass = evaluateLines(['500 g', '2 kg', '10']).total;
   assert.equal(mass.formatUnits(), 'kg');
-  assert.ok(Math.abs(mass.toNumber() - 12.5) < 1e-9);
+  assert.ok(Math.abs(mass.toNumber() - 2.51) < 1e-9);
+});
+
+test('appending a larger unit adds exactly that unit to the total', () => {
+  const base = evaluateLines(['3 days + 4 hours in hours', '10']).total;
+  assert.equal(base.formatUnits(), 'hours');
+  assert.ok(Math.abs(base.toNumber() - 86) < 1e-9);
+
+  const withDay = evaluateLines(['3 days + 4 hours in hours', '10', '1 day']).total;
+  assert.equal(withDay.formatUnits(), 'day');
+  // One day more, with the bare `10` still read in hours (not days).
+  assert.ok(Math.abs(withDay.toNumber() * 24 - (base.toNumber() + 24)) < 1e-9);
+
+  const withWeek = evaluateLines(['3 days + 4 hours in hours', '10', '1 week']).total;
+  assert.equal(withWeek.formatUnits(), 'week');
+  assert.ok(Math.abs(withWeek.toNumber() * 168 - (base.toNumber() + 168)) < 1e-9);
 });
 
 test('evaluateLines aggregates compatible units too', () => {

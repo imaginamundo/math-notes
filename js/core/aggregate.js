@@ -130,6 +130,14 @@ function targetEntry(group) {
   return target;
 }
 
+// The group's first unit entry, in the order the sheet introduced its units.
+// Bare numbers are read in this unit, so appending a larger unit later (`1 day`
+// after some hours) adds a day instead of reinterpreting every earlier number
+// in the new display unit.
+function referenceEntry(group) {
+  return group.units.values().next().value;
+}
+
 // The group's summed amount, converted into its display unit.
 function groupAmount(group) {
   const target = targetEntry(group);
@@ -151,38 +159,43 @@ function groupCount(group) {
 function combine(summary, mode, empty) {
   const { numericSum, numericCount, numbers, groups } = summary;
 
-  if (mode === 'median') {
-    // With one unit group, plain numbers fold into it (as the sum does); the
-    // median is taken over the individual amounts in the group's target unit.
-    if (groups.length === 1) {
-      const group = groups[0];
-      const target = targetEntry(group);
-      const values = [];
-      for (const entry of group.units.values()) {
-        const ratio = unitRatio(entry, target.unit);
-        for (const amount of entry.amounts) values.push(amount * ratio);
-      }
-      values.push(...numbers);
-      if (!values.length) return empty;
-      const value = buildUnit(target, median(values));
-      if (value !== null) return value;
-    }
-    if (!numbers.length) return empty;
-    return median(numbers);
-  }
-
   // Exactly one unit group: plain numbers fold into it. Several groups
   // (different dimensions, currencies or affine units) are ignored, leaving
   // only the plain numbers.
   if (groups.length === 1) {
     const group = groups[0];
-    const combined = groupAmount(group) + (numericSum ?? 0);
-    const count = groupCount(group) + numericCount;
-    const amount = mode === 'average' ? (count ? combined / count : 0) : combined;
-    const value = buildUnit(targetEntry(group), amount);
-    if (value !== null) return value;
+    const target = targetEntry(group);
+    // Bare numbers are read in the group's reference unit and converted to the
+    // display unit, so the folded amount does not change just because a larger
+    // unit later became the display unit.
+    const fold = unitRatio(referenceEntry(group), target.unit);
+
+    if (mode === 'median') {
+      // The median is taken over the individual amounts in the group's display
+      // unit, with the plain numbers folded in.
+      const values = [];
+      for (const entry of group.units.values()) {
+        const ratio = unitRatio(entry, target.unit);
+        for (const amount of entry.amounts) values.push(amount * ratio);
+      }
+      for (const value of numbers) values.push(value * fold);
+      if (values.length) {
+        const value = buildUnit(target, median(values));
+        if (value !== null) return value;
+      }
+    } else {
+      const combined = groupAmount(group) + (numericSum ?? 0) * fold;
+      const count = groupCount(group) + numericCount;
+      const amount = mode === 'average' ? (count ? combined / count : 0) : combined;
+      const value = buildUnit(target, amount);
+      if (value !== null) return value;
+    }
   }
 
+  if (mode === 'median') {
+    if (!numbers.length) return empty;
+    return median(numbers);
+  }
   if (numericSum === null) return empty;
   return mode === 'average' ? numericSum / numericCount : numericSum;
 }

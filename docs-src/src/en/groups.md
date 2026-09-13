@@ -6,7 +6,7 @@ Math Notes aggregates in three related ways: the running total in the bottom bar
 
 The total bar under the editor aggregates every numeric result in the sheet. Its dropdown switches between **total** (sum), **average** and **median**.
 
-Plain numbers fold into a single unit; compatible units (such as `cm` and `m`) merge into the largest present; mixed currencies or dimensions fall back to the plain numeric sum.
+Plain numbers fold into a single unit; a bare number is read in the **first** unit used for its dimension, so adding a larger unit later (`1 day` after some hours) adds to the total instead of reinterpreting the earlier numbers. Compatible units (such as `cm` and `m`) merge into the largest present for display; mixed currencies or dimensions fall back to the plain numeric sum.
 
 ## Aggregate keywords
 
