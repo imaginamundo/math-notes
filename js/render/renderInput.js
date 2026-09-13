@@ -2,7 +2,7 @@ import format from './format.js';
 import formatResult from './formatResult.js';
 import { getDecimalPrecision } from '../core/decimalPrecision.js';
 import { firstDifference, arraysEqual } from '../util/sequence.js';
-import { collectVariableNames } from '../core/multiWordVariables.js';
+import { collectVariableNames, isMultiWordDefinition } from '../core/multiWordVariables.js';
 
 // Rendering is two-phase so that what you type never waits on the worker:
 // `renderText` redraws the highlighted input synchronously, and `patchResults`
@@ -65,11 +65,8 @@ function createRowRenderer(view) {
    * @param {string[]} textLines
    */
   function renderText(textLines) {
-    const nextNames = collectVariableNames(textLines);
-    const namesChanged = !arraysEqual(variableNames, nextNames);
-    variableNames = nextNames;
-
     if (rows.length === 0) {
+      variableNames = collectVariableNames(textLines);
       buildRows(0, textLines);
       lines = textLines.slice();
       patched = null;
@@ -77,19 +74,25 @@ function createRowRenderer(view) {
       return;
     }
     const start = firstDifference(lines, textLines);
-    if (start === -1 && !namesChanged) return;
+    if (start === -1) return;
 
-    if (namesChanged) {
-      // A definition was added, renamed or removed: re-highlight every row so
-      // existing references pick up the new name token.
-      if (textLines.length === lines.length) {
-        for (let i = 0; i < textLines.length; i++) updateRow(i, textLines[i]);
-      } else {
-        buildRows(0, textLines);
+    // Rebuilding the name list is the only full-sheet scan here, so do it only
+    // when a changed line could have added, renamed or removed a definition.
+    if (namesMayChange(lines, textLines, start)) {
+      const nextNames = collectVariableNames(textLines);
+      const namesChanged = !arraysEqual(variableNames, nextNames);
+      variableNames = nextNames;
+      if (namesChanged) {
+        // Re-highlight every row so existing references pick up the new token.
+        if (textLines.length === lines.length) {
+          for (let i = 0; i < textLines.length; i++) updateRow(i, textLines[i]);
+        } else {
+          buildRows(0, textLines);
+        }
+        lines = textLines.slice();
+        dirtyFrom = 0;
+        return;
       }
-      lines = textLines.slice();
-      dirtyFrom = 0;
-      return;
     }
 
     if (textLines.length === lines.length) {
@@ -287,6 +290,18 @@ function createRowRenderer(view) {
   }
 
   return { renderText, patchResults, updateActiveLine, relayout: layoutGroups };
+}
+
+// Whether the edit that starts at `start` could have changed the multi-word
+// name set: an inserted or removed line might be a definition, and a rewritten
+// line only matters if either version is one.
+function namesMayChange(previous, next, start) {
+  if (previous.length !== next.length) return true;
+  for (let i = start; i < next.length; i++) {
+    if (previous[i] === next[i]) continue;
+    if (isMultiWordDefinition(previous[i]) || isMultiWordDefinition(next[i])) return true;
+  }
+  return false;
 }
 
 function truncate(text, max) {

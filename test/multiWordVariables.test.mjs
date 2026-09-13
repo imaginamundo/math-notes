@@ -6,6 +6,7 @@ import {
   namePattern,
   anchoredNamePattern,
   collectVariableNames,
+  isMultiWordDefinition,
   mangleLines,
 } from '../js/core/multiWordVariables.js';
 
@@ -44,6 +45,14 @@ test('collectVariableNames gathers multi-word names, longest first', () => {
   ]);
   // A comment's `=` is not an assignment.
   assert.deepEqual(collectVariableNames(['a b = 1 # c d = 2', 'solo = 3']), ['a b']);
+});
+
+test('isMultiWordDefinition only matches a multi-word assignment', () => {
+  assert.equal(isMultiWordDefinition('monthly rent = 1500'), true);
+  assert.equal(isMultiWordDefinition('  net price = 2 # note'), true);
+  assert.equal(isMultiWordDefinition('price = 2'), false, 'single word');
+  assert.equal(isMultiWordDefinition('monthly rent * 2'), false, 'a reference, not a definition');
+  assert.equal(isMultiWordDefinition('x = a b'), false, 'multi-word on the wrong side');
 });
 
 test('mangleLines rewrites code but leaves comments alone', () => {

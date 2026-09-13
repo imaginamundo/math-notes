@@ -60,6 +60,13 @@ function collectVariableNames(lines) {
   return [...names].sort((a, b) => b.length - a.length);
 }
 
+// Whether a line defines a multi-word name (`monthly rent = 1500`). Cheap, so
+// the renderer can test only the lines an edit touched before deciding it needs
+// to rebuild the whole name list.
+function isMultiWordDefinition(line) {
+  return NAME_WORDS.test(line.split('#')[0]);
+}
+
 function mangleLines(lines) {
   const names = collectVariableNames(lines);
   if (!names.length) return lines;
@@ -79,5 +86,6 @@ export {
   namePattern,
   anchoredNamePattern,
   collectVariableNames,
+  isMultiWordDefinition,
   mangleLines,
 };
