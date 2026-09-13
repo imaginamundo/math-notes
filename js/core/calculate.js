@@ -241,6 +241,9 @@ function createEngine() {
   let totalMode = readTotalMode();
 
   function assertBoundedExpression(expression, scope) {
+    // Only a list literal or a range can materialise unboundedly; skip the
+    // extra parse for every other expression.
+    if (!/\[|:/.test(expression)) return;
     let tree;
     try {
       tree = math.parse(expression);
