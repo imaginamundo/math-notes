@@ -14,6 +14,7 @@ import { readMeasurementSystem } from './measurementSystem.js';
 import { readTotalMode } from './totalMode.js';
 import preprocess from './preprocess.js';
 import { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal } from './aggregate.js';
+import { unitMixError } from './unitMix.js';
 import { firstDifference } from '../util/sequence.js';
 import { mangleLines, unmangleName } from './multiWordVariables.js';
 
@@ -250,6 +251,8 @@ function createEngine() {
       const expression = preprocess(code);
       assertBoundedExpression(expression, scope);
       result = math.evaluate(expression, scope);
+      const mixError = unitMixError(result);
+      if (mixError) throw new Error(mixError);
       // The assignment statement already returns the rhs value; reuse it rather
       // than evaluating the rhs a second time, which could disagree for impure
       // expressions (e.g. `x = unix()`).

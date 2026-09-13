@@ -108,6 +108,11 @@ Terms used throughout the codebase and this documentation.
   (`100 USD/hour` → `US$ 100 per hour`). Currencies with no distinct symbol keep
   their ISO code. `CURRENCY_SYMBOLS` in the same file maps typed symbols to
   codes.
+- **Unit mix** — a unit expression that has no meaning: two different kinds
+  multiplied (`kg L`, `BRL hour`), a non-length power (`h^2`, `m^0.5`) or three
+  dimensions in one ratio. `unitMixError` in `js/core/unitMix.js` turns one into
+  a line error (a currency mix also suggests a rate); a single unit, area/volume,
+  a two-dimension ratio and named derived units (`N`, `J`) are allowed.
 - **Share link** — a URL whose `#` fragment carries an encoded sheet
   (`#s=<version>.<base64url>`). Built and parsed by `js/share/shareLink.js`.
 - **Share token** — the `<version>.<base64url>` part of a share link: a version

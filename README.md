@@ -59,7 +59,9 @@ Based on [Numi](https://numi.app/).
   live rates from the European Central Bank, cached for offline use. Results are
   written with the currency's symbol where it has one (`350usd` → `US$ 350`);
   currencies without a symbol keep their ISO code, and a rate reads as a phrase
-  (`100 USD/hour` → `US$ 100 per hour`).
+  (`100 USD/hour` → `US$ 100 per hour`). Units only combine in shapes that mean
+  something: `kg L`, `BRL hour`, `h^2` or `m^0.5` are reported as errors rather
+  than as strange combined units.
 - **Percentages**: `20% of $10`, `5% on $30`, `6% off 40 EUR`,
   `$50 as a % of $100`, `5% of what is 6`.
 - **Number scales**: repeated `k` — `2k` (2,000), `1kk` (1,000,000),

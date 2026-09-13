@@ -557,7 +557,7 @@
 
         <section id="help-currency" class="help-section">
           <h2>Currency conversion</h2>
-          <p>Convert between currencies using 3-letter ISO codes or symbols. Results are written with the currency's symbol where it has one (<code>350usd</code> becomes <code>US$ 350</code>); currencies without a symbol keep their code. Rates come from the European Central Bank (via frankfurter.dev) and are cached locally for offline use.</p>
+          <p>Convert between currencies using 3-letter ISO codes or symbols. Results are written with the currency's symbol where it has one (<code>350usd</code> becomes <code>US$ 350</code>); currencies without a symbol keep their code. Money only forms ratios (<code>USD/hour</code>, <code>USD/km</code>), so multiplying a currency by another unit (<code>BRL hour</code>) is an error — use a rate instead. Rates come from the European Central Bank (via frankfurter.dev) and are cached locally for offline use.</p>
           <div class="help-example" data-expr="100 USD to EUR" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">converts USD to EUR</span>
           </div>

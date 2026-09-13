@@ -101,6 +101,17 @@ distinct symbol (CHF, ZAR, the Nordic krona) keep their ISO code so a result can
 always be typed back in; `CURRENCY_SYMBOLS` is the input map the same file
 supplies to `js/eval/symbols.js` and the highlighter.
 
+Units only combine in shapes that mean something. `js/core/unitMix.js` inspects
+each line's result — simplified, with the net power per base dimension — and
+allows a single unit, area/volume (`m^2`, `m^3`), a ratio of two dimensions
+(`km/day`, `USD/hour`, `kg/m^2`) and any named derived unit mathjs keeps whole
+(`N`, `J`, `5 N * 2 m` → `J`). A product of two kinds (`kg L`, `BRL hour`,
+`GB m`), a non-length power (`h^2`, `kg^2`, `m^0.5`) or a three-dimensional
+ratio is an error; a currency mix also suggests a rate. `evaluateLine` calls it
+right after `math.evaluate`, so the message flows through the normal error path
+(`Cannot combine "kg" and "m" — that unit has no meaning`,
+`Cannot multiply a currency by "hour" — use a rate like "BRL per hour"`).
+
 `js/eval/timespan.js` handles durations. Consecutive time components are joined
 with `+` (mathjs would multiply them) and `m` means minutes, so `3h 5m 10s`
 evaluates as a timespan. A line that is only a timespan, `X as timespan`, and
