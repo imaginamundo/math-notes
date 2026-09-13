@@ -40,6 +40,15 @@ Based on [Numi](https://numi.app/).
   `sum`/`total`/`average`/`avg`, optionally `of`, before the tag) totals the
   tagged lines above, across the whole sheet.
 - **Unit conversion** (`1 cm to m`) including CSS units (`px`, `em`, `point`).
+- **Cooking & measures** — convert between volume and mass with a free-form
+  subject label: `300g butter in cups`, `2 cups flour in grams`, or even
+  `300g feathers in cups`. No dataset is required: a known subject uses its
+  density and any other label falls back to a default. Volume units follow the
+  measurement system in Settings (metric by default: `cup` = 250 ml,
+  `tbsp` = 15 ml, `tsp` = 5 ml).
+- **Rates** — `per`/`a`/`at`/`for` phrasing on top of compound units:
+  `10 km per day`, `30 hours at 10 km/hour`, `$24 a day for a year`,
+  `time to upload 3 GB at 10 MB/s`, and pace `5 km in 25 min` → `05:00/km`.
 - **Currency conversion** (`100 USD to EUR`, `$5 to GBP`, `R$5 to EUR`) with
   live rates from the European Central Bank, cached for offline use.
 - **Percentages**: `20% of $10`, `5% on $30`, `6% off 40 EUR`,
@@ -156,8 +165,8 @@ make -C js/lib
   `preprocess.js`, `aggregate.js`, `multiWordVariables.js`, `currencySymbols.js`,
   `tabsState.js`, `history.js`).
 - `js/eval/` — mathjs extensions and preprocessors (`aliases.js`, `cssUnits.js`,
-  `currency.js`, `datetime.js`, `rounding.js`, `scales.js`, `symbols.js`,
-  `units.js`, `wordOperators.js`, `percentage.js`).
+  `currency.js`, `datetime.js`, `measures.js`, `rates.js`, `rounding.js`,
+  `scales.js`, `symbols.js`, `units.js`, `wordOperators.js`, `percentage.js`).
 - `js/render/` — highlighting and result rendering.
 - `js/ui/` — tabs, modals, help, examples, onboarding and the tour, starter
   prompt, settings, find & replace, go-to-line, line numbers, indentation,

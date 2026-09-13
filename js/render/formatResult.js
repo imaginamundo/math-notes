@@ -69,14 +69,36 @@ function formatNumber(n) {
 }
 
 function formatUnit(unit) {
+  // Compound rates keep their original factors until simplified
+  // (`(hours km) / hour` -> `km`).
+  const simple = typeof unit.simplify === 'function' ? unit.simplify() : unit;
+  const units = simple.formatUnits();
+  const pace = /^min\s*\/\s*(km|mi)$/.exec(units);
+  if (pace) return formatPace(simple, pace[1]);
   let value;
   try {
-    value = unit.toNumber();
+    value = simple.toNumber();
   } catch {
-    value = unit.value;
+    value = simple.value;
   }
   const formatted = typeof value === 'number' ? formatNumber(value) : String(value);
-  return `${formatted} ${unit.formatUnits()}`;
+  return `${formatted} ${cleanUnits(units)}`;
+}
+
+// Rates read better without spaces around the slash: `km / day` -> `km/day`.
+function cleanUnits(units) {
+  return units
+    .replace(/\s*\/\s*/g, '/')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// A pace (`min/km`, `min/mi`) is shown as mm:ss.
+function formatPace(unit, name) {
+  const totalSeconds = Math.round(unit.toNumber() * 60);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}/${name}`;
 }
 
 export default formatResult;

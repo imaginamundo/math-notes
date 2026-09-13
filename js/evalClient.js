@@ -1,4 +1,6 @@
 import { fetchRates, loadCached } from './eval/currency.js';
+import { readMeasurementSystem } from './core/measurementSystem.js';
+import { DEFAULT_MEASUREMENT_SYSTEM } from './core/measures.js';
 import debounce from './util/debounce.js';
 
 const EVALUATE_TIMEOUT = 10000;
@@ -40,6 +42,12 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     // flight and fall back to the main-thread evaluator so the app degrades
     // gracefully instead of stalling on a 10s timeout per request.
     worker.addEventListener('error', dropWorker);
+    // Seed the worker with the stored measurement system; the worker defaults
+    // to metric, so only a non-default choice needs sending.
+    const measurementSystem = readMeasurementSystem();
+    if (measurementSystem !== DEFAULT_MEASUREMENT_SYSTEM) {
+      worker.postMessage({ type: 'measurement', data: measurementSystem });
+    }
     const cachedRates = loadCached();
     if (cachedRates) worker.postMessage({ type: 'rates', data: cachedRates });
   }
@@ -138,12 +146,17 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     if (worker && data) worker.postMessage({ type: 'rates', data });
   }
 
+  function syncMeasurement(system) {
+    if (worker && system) worker.postMessage({ type: 'measurement', data: system });
+  }
+
   fetchRates();
 
   return {
     update,
     requestLines,
     syncRates,
+    syncMeasurement,
     schedule: debounced.schedule,
     flush: debounced.flush,
   };

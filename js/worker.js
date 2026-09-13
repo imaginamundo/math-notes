@@ -1,4 +1,8 @@
-import { evaluateLines, registerCurrencyRates } from './core/calculate.js';
+import {
+  evaluateLines,
+  registerCurrencyRates,
+  registerMeasurementSystem,
+} from './core/calculate.js';
 import formatResult from './render/formatResult.js';
 
 self.addEventListener('message', (event) => {
@@ -32,5 +36,7 @@ self.addEventListener('message', (event) => {
     }
   } else if (type === 'rates') {
     registerCurrencyRates(data);
+  } else if (type === 'measurement') {
+    registerMeasurementSystem(data);
   }
 });

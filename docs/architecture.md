@@ -55,12 +55,40 @@ toward the scrollable extent and gives breathing room after long lines.
 ### Preprocessing
 
 Each line goes through `preprocess` (`js/core/preprocess.js`) before mathjs:
-`scales` → `symbols` → `percentage` → `wordOperators` → `rounding`, in that
-order (scales before currency so `$2k` becomes `2000 USD`; percentage before
-word operators so its `of|on|off` phrases are consumed first; rounding last, so
-it wraps the already-normalised value). `js/eval/symbols.js` only treats
-3-letter currency codes as units in currency contexts (amounts and `to`/`in`
-conversions), so `usd = 5` stays a variable.
+`measures` → `scales` → `symbols` → `percentage` → `wordOperators` → `rates` →
+`rounding`, in that order (measures first so a scale-like subject such as
+`4k video` is recognised before `scales` rewrites it; scales before currency so
+`$2k` becomes `2000 USD`; percentage before word operators so its `of|on|off`
+phrases are consumed first; rounding last, so it wraps the normalised value).
+`js/eval/symbols.js` only treats 3-letter currency codes as units in currency
+contexts (amounts and `to`/`in` conversions), so `usd = 5` stays a variable.
+
+### Measures and rates
+
+`js/core/measures.js` holds the pure data: unit dimensions (mass, volume,
+time, data, energy, distance), optional default factors, and the volume-unit
+definitions per measurement system. `js/eval/measures.js` matches
+`<value> <subject> in|to <target>` where the subject is **free-form** — no
+dataset is required. It rewrites to `__measure(value, factor, target)`, and the
+helper tries the value against the target directly (same dimension) and then
+the factor both ways, so `300g butter in cups` and `10 cups olive oil in grams`
+both work. A known subject uses its `DEFAULT_FACTORS` factor; any other label
+(`300g feathers in cups`, or none at all: `300g in cups`) falls back to
+`DEFAULT_DENSITY`. With no subject, only differing dimensions are taken over,
+so ordinary conversions stay with mathjs.
+
+`js/eval/rates.js` translates rate phrasing to the compound units mathjs
+already understands: `per`/`a`/`an` → `/`, `for a year` → `* 1 year`, `X at R`
+→ `__rate(X, R)` (whichever of `X*R` / `X/R` simplifies to fewer unit factors),
+`time to upload X at R` → `X / R`, and `D in T` → `__pace` (time/distance,
+formatted as `mm:ss/km`). `formatResult` simplifies compound units before
+display, so `30 hours at 10 km/hour` shows `300 km`, not `(hours km)/hour`.
+
+The measurement system (`js/core/measurementSystem.js`) stores the preference
+(metric by default) and re-registers the volume units. Switching it dispatches
+`measurement:updated`; `js/index.js` forwards the choice to the worker and the
+main-thread fallback, and the engine bumps its environment revision so cached
+results recompute.
 
 Rounding phrases (`1/3 to 2 dp`, `5.5 rounded up`, `37 to nearest 10`) are
 rewritten to mathjs `round`/`ceil`/`floor` by `js/eval/rounding.js`, whose

@@ -47,8 +47,23 @@ Terms used throughout the codebase and this documentation.
   closed by `end`; the header shows the block's subtotal (an aggregate result)
   and the block is shaded, while the inner lines still count in the bottom
   total. Groups are flat, and an unterminated header is just a label.
-- **Preprocessors** — the regex transforms run before mathjs, in order: scales,
-  symbols (currency), percentages, word operators, rounding.
+- **Preprocessors** — the regex transforms run before mathjs, in order:
+  measures, scales, symbols (currency), percentages, word operators, rates,
+  rounding.
+- **Subject label** — the free-form word(s) after a value and before a
+  conversion (`butter` in `300g butter in cups`). No dataset is required; it is
+  informational and selects a factor when one is known.
+- **Measure conversion** — a subject's factor bridges two dimensions
+  (`300g butter in cups`, `10 cups olive oil in grams`, or the dataset-free
+  `300g feathers in cups`), rewritten to `__measure` by `js/eval/measures.js`.
+  A known subject uses `DEFAULT_FACTORS`; any other label (or none) uses
+  `DEFAULT_DENSITY`.
+- **Measurement system** — the preferred volume units
+  (`js/core/measurementSystem.js`): metric (default), us, or imperial, each
+  including a cup. Applied at engine build and on `measurement:updated`.
+- **Rate** — a quantity per unit (`30 km/day`). mathjs supplies the arithmetic;
+  `js/eval/rates.js` translates `per`/`a`/`at`/`for`, transfer time and pace,
+  and `formatResult` simplifies and formats them.
 - **Rounding** — Soulver-style trailing phrases (`1/3 to 2 dp`, `5.5 rounded up`,
   `37 to nearest 10`, `0.534 to nearest 16th`) rewritten by
   `js/eval/rounding.js` to mathjs `round`/`ceil`/`floor`. Those are extended so

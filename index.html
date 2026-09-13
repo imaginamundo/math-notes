@@ -100,6 +100,8 @@
         <a class="modal-nav-link" href="#help-rounding">Rounding</a>
         <a class="modal-nav-link" href="#help-operators">Operators &amp; scales</a>
         <a class="modal-nav-link" href="#help-units">Units</a>
+        <a class="modal-nav-link" href="#help-cooking">Cooking</a>
+        <a class="modal-nav-link" href="#help-rates">Rates</a>
         <a class="modal-nav-link" href="#help-currency">Currency</a>
         <a class="modal-nav-link" href="#help-dates">Dates</a>
         <a class="modal-nav-link" href="#help-shortcuts">Shortcuts</a>
@@ -388,7 +390,7 @@
 
         <section id="help-units" class="help-section">
           <h2>Unit conversion</h2>
-          <p>Convert units with <code>to</code> or <code>in</code>. CSS units are supported too: <code>px</code>, <code>em</code> and <code>point</code>.</p>
+          <p>Convert units with <code>to</code> or <code>in</code>. CSS units are supported too: <code>px</code>, <code>em</code> and <code>point</code>. Volume units follow the measurement system in Settings (metric by default: <code>cup</code> = 250 ml, <code>tbsp</code> = 15 ml, <code>tsp</code> = 5 ml).</p>
           <div class="help-example" data-expr="1cm to m" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 0.01 m</span>
           </div>
@@ -490,6 +492,49 @@
             </tbody>
           </table>
           <p>See the <a href="https://mathjs.org/docs/datatypes/units.html#reference" rel="noopener" target="_blank">mathjs units reference</a> for the full list.</p>
+        </section>
+
+        <section id="help-cooking" class="help-section">
+          <h2>Cooking &amp; measures</h2>
+          <p>Convert between volume and mass by naming what you are measuring. The subject is free-form: known ingredients use their density, and anything else falls back to a default. Volume units follow your measurement system (metric by default).</p>
+          <div class="help-example" data-expr="300g butter in cups" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">≈ 1.32 cups</span>
+          </div>
+          <div class="help-example" data-expr="2 cups flour in grams" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">265 grams</span>
+          </div>
+          <div class="help-example" data-expr="300g feathers in cups" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">1.2 cups (any subject works)</span>
+          </div>
+          <div class="help-example" data-expr="1 cup sugar in grams" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">211.25 grams</span>
+          </div>
+          <div class="help-example" data-expr="1 tbsp olive oil in grams" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">13.77 grams</span>
+          </div>
+        </section>
+
+        <section id="help-rates" class="help-section">
+          <h2>Rates</h2>
+          <p>A rate is one unit per another. mathjs does the arithmetic; these phrases make rates easy to write.</p>
+          <div class="help-example" data-expr="90 km / 3 day" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">30 km/day</span>
+          </div>
+          <div class="help-example" data-expr="30 hours at 10 km/hour" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">300 km</span>
+          </div>
+          <div class="help-example" data-expr="100 km at 10 km/hour" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">10 hours</span>
+          </div>
+          <div class="help-example" data-expr="24 km a day for a year" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">8,766 km</span>
+          </div>
+          <div class="help-example" data-expr="time to upload 3 GB at 10 MB/s" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">300 s</span>
+          </div>
+          <div class="help-example" data-expr="5 km in 25 min" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">05:00/km</span>
+          </div>
         </section>
 
         <section id="help-currency" class="help-section">
@@ -660,6 +705,11 @@
         <h2>Theme</h2>
         <p>Choose a theme.</p>
         <div class="settings-themes"></div>
+      </section>
+      <section class="help-section">
+        <h2>Measurement system</h2>
+        <p>Used for cooking volume units. Metric is the default.</p>
+        <div class="settings-measurement"></div>
       </section>
       <section class="help-section">
         <h2>Recover</h2>

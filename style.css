@@ -439,6 +439,11 @@ input::placeholder {
 .variable {
   color: var(--color-variable);
 }
+/* Subject label token (`300g butter`). The highlighter does not emit it yet;
+   it falls back to the variable colour until a --color-subject is defined. */
+.subject {
+  color: var(--color-subject, var(--color-variable));
+}
 .number {
   color: var(--color-number);
 }
@@ -882,6 +887,28 @@ code {
   width: 1.2em;
   height: 1.2em;
   border-radius: 2px;
+}
+/* Measurement system picker */
+.settings-measurement {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+}
+.measurement-card {
+  padding: 0.4em 0.8em;
+  background: var(--surface-chip);
+  color: var(--color-text);
+  border: 1px solid var(--border-chip);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.measurement-card:hover {
+  background: var(--surface-chip-hover);
+  filter: none;
+}
+.measurement-card.active {
+  border-color: var(--color-operator);
+  box-shadow: inset 0 0 0 1px var(--color-operator);
 }
 .settings-files {
   display: flex;

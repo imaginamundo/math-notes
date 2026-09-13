@@ -6,6 +6,9 @@ import initCssUnits from '../eval/cssUnits.js';
 import initUnits from '../eval/units.js';
 import initDatetime from '../eval/datetime.js';
 import initRounding from '../eval/rounding.js';
+import initMeasures, { applyMeasurementSystem } from '../eval/measures.js';
+import initRates from '../eval/rates.js';
+import { readMeasurementSystem } from './measurementSystem.js';
 import preprocess from './preprocess.js';
 import { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal } from './aggregate.js';
 import { firstDifference } from '../util/sequence.js';
@@ -152,6 +155,8 @@ function createEngine() {
   initUnits(math);
   initDatetime(math);
   initRounding(math);
+  initMeasures(math, readMeasurementSystem());
+  initRates(math);
   initCurrency(math);
 
   const cache = {
@@ -464,15 +469,25 @@ function createEngine() {
     environmentRevision++;
   }
 
+  // Re-register the volume units for a measurement system and invalidate the
+  // cache, so switching metric/us/imperial recomputes every line.
+  function registerMeasurementSystem(system) {
+    applyMeasurementSystem(math, system);
+    environmentRevision++;
+  }
+
   if (typeof window !== 'undefined') {
     // The main-thread fallback registers rates through its own currency:updated
     // listener, so invalidate there too or cached conversions would go stale.
     window.addEventListener('currency:updated', () => {
       environmentRevision++;
     });
+    window.addEventListener('measurement:updated', (event) => {
+      if (event.detail) registerMeasurementSystem(event.detail);
+    });
   }
 
-  return { evaluateLine, evaluateLines, registerCurrencyRates };
+  return { evaluateLine, evaluateLines, registerCurrencyRates, registerMeasurementSystem };
 }
 
 // The default engine shared by the worker, the main-thread fallback and the
@@ -495,4 +510,14 @@ function registerCurrencyRates(data) {
   getEngine().registerCurrencyRates(data);
 }
 
-export { createEngine, evaluateLines, evaluateLine, registerCurrencyRates };
+function registerMeasurementSystem(system) {
+  getEngine().registerMeasurementSystem(system);
+}
+
+export {
+  createEngine,
+  evaluateLines,
+  evaluateLine,
+  registerCurrencyRates,
+  registerMeasurementSystem,
+};
