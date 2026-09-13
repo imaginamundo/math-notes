@@ -3,9 +3,7 @@ import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import en from '../js/i18n/ui/en.js';
-import pt from '../js/i18n/ui/pt.js';
-import es from '../js/i18n/ui/es.js';
+import { MESSAGES } from '../js/i18n/index.js';
 
 // Enforce the project's storage convention: localStorage is only ever touched
 // through js/util/storage.js so the "unavailable => null / no-op" policy is
@@ -61,9 +59,9 @@ test('every data-i18n key in index.html exists in every locale', () => {
   }
   assert.ok(keys.size > 0, 'index.html should carry data-i18n markers');
   for (const [name, dict] of [
-    ['en', en],
-    ['pt', pt],
-    ['es', es],
+    ['en', MESSAGES.en],
+    ['pt', MESSAGES.pt],
+    ['es', MESSAGES.es],
   ]) {
     const missing = [...keys].filter((key) => !(key in dict));
     assert.deepEqual(missing, [], `${name} is missing: ${missing.join(', ')}`);

@@ -9,10 +9,18 @@ import {
 import en from './ui/en.js';
 import pt from './ui/pt.js';
 import es from './ui/es.js';
+import helpEn from './help/en.js';
+import helpPt from './help/pt.js';
+import helpEs from './help/es.js';
 
-// The interface strings live per language in ./ui/. Only the app chrome is
-// translated in v1 — the calculator itself keeps English syntax and output.
-const MESSAGES = { en, pt, es };
+// The interface strings live per language in ./ui/ (chrome) and ./help/ (the
+// Help/Examples prose). Only the app chrome and Help are translated in v1 — the
+// calculator keeps English syntax and output.
+const MESSAGES = {
+  en: { ...en, ...helpEn },
+  pt: { ...pt, ...helpPt },
+  es: { ...es, ...helpEs },
+};
 
 let current = DEFAULT_LANGUAGE;
 

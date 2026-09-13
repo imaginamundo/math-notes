@@ -909,3 +909,35 @@ test('Settings switches the interface language and remembers it', async () => {
   );
   assert.deepEqual(errors, []);
 });
+
+test('the Help content follows the language and its examples still work', async () => {
+  await newPage();
+  await page.click('#settings-button');
+  await wait(150);
+  await page.click('.settings-language .measurement-card[data-lang="es"]');
+  await wait(150);
+  await page.click('#settings-modal .modal-close');
+  await wait(150);
+
+  assert.equal(
+    await page.evaluate(() => document.getElementById('help-button').textContent),
+    'Ayuda'
+  );
+  await page.click('#help-button');
+  await wait(200);
+  assert.equal(
+    await page.evaluate(() => document.querySelector('#help-basics h2').textContent),
+    'Básico'
+  );
+  // The example chips keep their (English) expressions across a swap.
+  assert.equal(
+    await page.evaluate(
+      () => document.querySelector('#help-basics .help-example code').textContent
+    ),
+    '1 + 1'
+  );
+  await page.click('#help-basics .help-example');
+  await wait(200);
+  assert.equal(await value(), '1 + 1');
+  assert.deepEqual(errors, []);
+});
