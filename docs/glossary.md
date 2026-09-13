@@ -66,4 +66,4 @@ Terms used throughout the codebase and this documentation.
   array, one popover, and an `outline` ring on the anchor.
 - **Tour step** — `{ anchor, title, body, placement }`. `anchor` is a CSS
   selector for a real element of the UI, or an array of them (e.g. the Help
-  step highlights both the Help and Recipes buttons).
+  step highlights both the Help and Examples buttons).

@@ -148,7 +148,7 @@ make -C js/lib
   `currency.js`, `datetime.js`, `scales.js`, `symbols.js`, `wordOperators.js`,
   `percentage.js`).
 - `js/render/` — highlighting and result rendering.
-- `js/ui/` — tabs, modals, help, recipes, settings, find & replace, line
+- `js/ui/` — tabs, modals, help, examples, settings, find & replace, line
   numbers, import/export, shortcuts and font controls.
 - `js/util/` — shared pure helpers (debounce, storage, clipboard, text, scroll,
   sequence).

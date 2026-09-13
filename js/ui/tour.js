@@ -26,8 +26,8 @@ const STEPS = [
   },
   {
     anchor: ['#help-button', '#recipes-button'],
-    title: 'Help and Recipes',
-    body: 'Help lists every feature — units, currencies, percentages, dates — with clickable examples. Recipes has ready-made sheets to start from.',
+    title: 'Help and Examples',
+    body: 'Help lists every feature — units, currencies, percentages, dates — with clickable examples. Examples has ready-made sheets to start from.',
     placement: 'top',
   },
   {

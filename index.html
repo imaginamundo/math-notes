@@ -75,7 +75,7 @@
         </div>
         <span class="actions">
           <button id="settings-button" class="settings">Settings</button>
-          <button id="recipes-button" class="recipes">Recipes</button>
+          <button id="recipes-button" class="recipes">Examples</button>
           <button id="help-button" class="help">Help</button>
         </span>
       </div>
@@ -527,8 +527,8 @@
 
   <dialog id="recipes-modal" class="modal" aria-labelledby="recipes-title">
     <header class="modal-header">
-      <h1 id="recipes-title" class="modal-title">Recipes</h1>
-      <button class="modal-close" data-modal-close aria-label="Close recipes">×</button>
+      <h1 id="recipes-title" class="modal-title">Examples</h1>
+      <button class="modal-close" data-modal-close aria-label="Close examples">×</button>
     </header>
     <div class="modal-body">
       <p>Ready-made calculations. Click one to add it to the editor and edit the values.</p>
@@ -538,6 +538,14 @@
         <p>Split a bill evenly, including the tip.</p>
         <div class="help-example" data-expr="bill = 120&#10;tip = bill * 10%&#10;people = 4&#10;(bill + tip) / people" tabindex="0" role="button" title="Click to add to the editor">
           <code></code><span class="help-returns">last line returns 33</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Restaurant bill split with tags</h2>
+        <p>Split a bar bill between four people. Each item is divided by the number of people who shared it and tagged with their names; the lines at the end total what each person owes.</p>
+        <div class="help-example" data-expr="At the bar:&#10;potato: 20 / 3 #name1 #name2 #name3&#10;burger: 50 #name1 #name3&#10;beer: 160 / 4 #name1 #name2 #name3 #name4&#10;end&#10;&#10;#name1&#10;#name2&#10;#name3&#10;#name4" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">each #name returns a person's total</span>
         </div>
       </section>
 
@@ -586,14 +594,6 @@
         <p>BMI from weight in kg and height in metres.</p>
         <div class="help-example" data-expr="weight = 70&#10;height = 1.75&#10;weight / height ^ 2" tabindex="0" role="button" title="Click to add to the editor">
           <code></code><span class="help-returns">last line returns ≈ 22.86</span>
-        </div>
-      </section>
-
-      <section class="help-section">
-        <h2>AI token estimate</h2>
-        <p>Roughly how many tokens a text will use for an AI model, from its word count. A common rule of thumb is one token per 0.75 words of English (about 4 characters).</p>
-        <div class="help-example" data-expr="words = 750&#10;words / 0.75" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">last line returns 1000</span>
         </div>
       </section>
     </div>
