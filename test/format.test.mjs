@@ -229,6 +229,12 @@ test('a tag-only line renders as a tag', () => {
   assert.equal(node.children[0].textContent, '#food');
 });
 
+test('a line reference renders as one reference token', () => {
+  const node = format.line('line(1) * 2');
+  assert.equal(node.children[0]._classes.has('reference'), true);
+  assert.equal(node.children[0].textContent, 'line(1)');
+});
+
 test('renderText highlights multi-word variables defined in the sheet', () => {
   const view = new El('pre');
   const renderer = createRowRenderer(view);

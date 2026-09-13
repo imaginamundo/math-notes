@@ -128,9 +128,13 @@ function createRowRenderer(view) {
     }
     // Group shading is applied to every row (not just the changed tail) so a
     // group that disappeared above the patch point loses its background too.
+    // References are refreshed in the same pass: a referenced value can change
+    // while the referring line's own text did not.
     for (let i = 0; i < textLines.length; i++) {
       const row = rows[i];
-      if (row) setGroupClass(row, results && results[i] ? results[i].group : undefined);
+      if (!row) continue;
+      setGroupClass(row, results && results[i] ? results[i].group : undefined);
+      patchReferences(row, i, results);
     }
     layoutGroups();
     patched = textLines.slice();
@@ -141,6 +145,30 @@ function createRowRenderer(view) {
     row.classList.toggle('group-header', group === 'header');
     row.classList.toggle('group-body', group === 'body');
     row.classList.toggle('group-end', group === 'end');
+  }
+
+  // Show the referenced line's value inside each `line(n)` token. The raw token
+  // stays in the DOM (invisible) so alignment and find offsets are unchanged;
+  // CSS draws the value over it from `data-value`.
+  function patchReferences(row, index, results) {
+    if (typeof row.querySelectorAll !== 'function') return;
+    for (const span of row.querySelectorAll('.reference')) {
+      const match = /^line\s*\(\s*(\d+)\s*\)$/.exec(span.textContent);
+      const n = match ? Number(match[1]) : 0;
+      const ref = results && n >= 1 && n <= index ? results[n - 1] : undefined;
+      const valid =
+        ref && ref.type === 'value' && ref.value !== undefined && typeof ref.value !== 'function';
+      if (valid) {
+        const text = formatResult(ref.value);
+        span.dataset.value = text;
+        span.title = text;
+        span.classList.add('resolved');
+      } else {
+        span.removeAttribute('data-value');
+        span.removeAttribute('title');
+        span.classList.remove('resolved');
+      }
+    }
   }
 
   // A group shades as one box: every row in the group is widened to the widest

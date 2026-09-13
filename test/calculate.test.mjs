@@ -245,6 +245,30 @@ test('requesting a tag with no tagged lines is an error', () => {
   );
 });
 
+test('line references resolve the value of a line above', () => {
+  assert.equal(evaluateLines(['5', 'line(1) * 2']).results[1].value, 10);
+  assert.equal(evaluateLines(['5', 'line(1) + line(1)']).results[1].value, 10);
+  assert.equal(evaluateLines(['5', 'x = line(1) + 1', 'x']).results[2].value, 6);
+});
+
+test('line references keep units', () => {
+  const total = evaluateLines(['10 cm', 'line(1) + 5 cm']).results[1].value;
+  assert.equal(total.formatUnits(), 'cm');
+  assert.ok(Math.abs(total.toNumber() - 15) < 1e-9);
+});
+
+test('line references only look at value rows above', () => {
+  assert.equal(evaluateLines(['line(2)', '5']).results[0].value, 'Line 2 is below this line');
+  assert.equal(evaluateLines(['line(1)']).results[0].value, 'Line 1 is below this line');
+  assert.equal(evaluateLines(['line(0)']).results[0].value, 'Line 0 does not exist');
+  assert.equal(evaluateLines(['x = 5', 'line(1)']).results[1].value, 'Line 1 has no value');
+});
+
+test('line references update when the referenced line changes', () => {
+  evaluateLines(['5', 'line(1)']);
+  assert.equal(evaluateLines(['7', 'line(1)']).results[1].value, 7);
+});
+
 test('evaluateLines evaluates comparisons as values', () => {
   assert.equal(evaluateLines(['2 >= 1']).results[0].value, true);
   assert.equal(evaluateLines(['1 == 1']).results[0].value, true);

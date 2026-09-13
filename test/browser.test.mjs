@@ -286,6 +286,55 @@ test('clicking a line number comments and uncomments that line', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('a line reference shows the referenced value in place', async () => {
+  await newPage();
+  await setContent('5\nline(1)');
+  await waitFor(() =>
+    page.evaluate(() => {
+      const ref = document.querySelector('#view .reference');
+      return Boolean(ref && ref.classList.contains('resolved'));
+    })
+  );
+  const state = await page.evaluate(() => {
+    const ref = document.querySelector('#view .reference');
+    return {
+      text: ref.textContent,
+      value: ref.dataset.value,
+      title: ref.title,
+      color: getComputedStyle(ref).color,
+      shown: getComputedStyle(ref, '::after').content,
+    };
+  });
+  assert.equal(state.text, 'line(1)', 'the raw token stays for offsets');
+  assert.equal(state.value, '5');
+  assert.equal(state.title, '5');
+  assert.equal(state.color, 'rgba(0, 0, 0, 0)', 'the raw token is transparent');
+  assert.equal(state.shown, '"5"', 'the value is drawn in place of the token');
+  assert.deepEqual(errors, []);
+});
+
+test('clicking a result inserts a line reference at the caret', async () => {
+  await newPage();
+  await setContent('10\n20');
+  await waitFor(() =>
+    page.evaluate(() => document.querySelectorAll('#view .ghost-result').length === 2)
+  );
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.focus();
+    ed.setSelectionRange(3, 3);
+  });
+  const point = await page.evaluate(() => {
+    const ghost = document.querySelectorAll('#view .ghost-result')[0];
+    const rect = ghost.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  });
+  await page.mouse.click(point.x, point.y);
+  await wait(100);
+  assert.equal(await value(), '10\nline(1)20');
+  assert.deepEqual(errors, []);
+});
+
 test('Cmd+G jumps the caret to the requested line', async () => {
   await newPage();
   await setContent('one = 1\n\nthree = 3\n\nfive = 5');
