@@ -4,7 +4,13 @@ import globals from 'globals';
 
 export default [
   {
-    ignores: ['js/lib/**', 'node_modules/**', '**/*.tmp.*'],
+    ignores: [
+      'js/lib/**',
+      'node_modules/**',
+      '**/*.tmp.*',
+      'js/i18n/help/**',
+      'js/i18n/examples/**',
+    ],
   },
   js.configs.recommended,
   {
@@ -23,6 +29,13 @@ export default [
     files: ['eslint.config.js'],
     languageOptions: {
       globals: globals.node,
+    },
+  },
+  {
+    // The i18n build script runs under Deno.
+    files: ['js/i18n/build.js'],
+    languageOptions: {
+      globals: { Deno: 'readonly' },
     },
   },
   {

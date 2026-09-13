@@ -79,6 +79,7 @@ export default {
   'starter.tagComment': '# Las etiquetas marcan filas; una #etiqueta sola las suma todas:',
 
   'autocomplete.label': 'Sugerencias',
+  'help.exampleTitle': 'Haz clic para añadir al editor',
 
   'settings.files': 'Archivos',
   'settings.filesBody': 'Exporta la hoja activa como texto o importa una desde un archivo.',

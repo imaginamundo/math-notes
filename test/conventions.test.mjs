@@ -81,3 +81,41 @@ test('core and eval do not depend on the i18n layer', () => {
   }
   assert.deepEqual(offenders, []);
 });
+
+function markdownStructure(md) {
+  const expressions = [...md.matchAll(/^```calc[^\n]*\n([\s\S]*?)^```$/gm)].map((m) =>
+    m[1].replace(/\n$/, '')
+  );
+  const sections = [...md.matchAll(/^## /gm)].length;
+  return { expressions, sections };
+}
+
+// The Markdown sources are the source of truth for the Help/Examples content.
+// Every language must keep the same examples (the calculator is English) and the
+// same section count; only the prose differs.
+test('every language has the same Help/Examples examples and section count', () => {
+  for (const area of ['help', 'examples']) {
+    const reference = markdownStructure(
+      readFileSync(join(root, `js/i18n/src/${area}.en.md`), 'utf8')
+    );
+    assert.ok(reference.sections > 0, `${area}.en.md should have sections`);
+    assert.ok(reference.expressions.length > 0, `${area}.en.md should have examples`);
+    for (const lang of ['pt', 'es']) {
+      const other = markdownStructure(
+        readFileSync(join(root, `js/i18n/src/${area}.${lang}.md`), 'utf8')
+      );
+      assert.deepEqual(other.expressions, reference.expressions, `${area}.${lang} examples differ`);
+      assert.equal(other.sections, reference.sections, `${area}.${lang} section count differs`);
+    }
+  }
+});
+
+test('the generated Help/Examples modules carry rendered sections', async () => {
+  const help = (await import('../js/i18n/help/en.js')).default;
+  assert.ok(help.sections.length >= 20);
+  assert.equal(help.sections[0].id, 'help-basics');
+  assert.match(help.sections[0].html, /class="help-example"/);
+  const examples = (await import('../js/i18n/examples/es.js')).default;
+  assert.ok(examples.intro.includes('<p>'));
+  assert.ok(examples.sections.length >= 19);
+});

@@ -18,6 +18,8 @@ no build step and is installable as a PWA.
 - `npm run format` / `npm run format:check` — Prettier.
 - `make -C js/lib` — rebuild the committed mathjs bundle (after bumping the
   version in `js/lib/math.js` and `package.json`).
+- `make -C js/i18n` (or `npm run build:i18n`) — regenerate the committed
+  Help/Examples content modules from the Markdown in `js/i18n/src/`.
 
 Always run `npm run lint`, `npm run format:check`, and `npm test` before
 committing. Make one focused change per commit.

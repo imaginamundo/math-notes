@@ -78,6 +78,7 @@ export default {
   'starter.tagComment': '# Tags nomeiam linhas; uma #tag sozinha soma todas elas:',
 
   'autocomplete.label': 'Sugestões',
+  'help.exampleTitle': 'Clique para adicionar ao editor',
 
   'settings.files': 'Arquivos',
   'settings.filesBody': 'Exporte a planilha ativa como texto ou importe uma de um arquivo.',

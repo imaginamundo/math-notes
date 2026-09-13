@@ -9,18 +9,11 @@ import {
 import en from './ui/en.js';
 import pt from './ui/pt.js';
 import es from './ui/es.js';
-import helpEn from './help/en.js';
-import helpPt from './help/pt.js';
-import helpEs from './help/es.js';
 
-// The interface strings live per language in ./ui/ (chrome) and ./help/ (the
-// Help/Examples prose). Only the app chrome and Help are translated in v1 — the
-// calculator keeps English syntax and output.
-const MESSAGES = {
-  en: { ...en, ...helpEn },
-  pt: { ...pt, ...helpPt },
-  es: { ...es, ...helpEs },
-};
+// The chrome strings. The Help/Examples content is generated from Markdown into
+// ./help/ and ./examples/ and lazy-loaded by the modals (js/ui/helpContent.js),
+// so it never lands in this eager dictionary.
+const MESSAGES = { en, pt, es };
 
 let current = DEFAULT_LANGUAGE;
 

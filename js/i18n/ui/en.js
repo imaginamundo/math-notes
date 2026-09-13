@@ -79,6 +79,7 @@ export default {
   'starter.tagComment': '# Tags name rows; a bare #tag totals them:',
 
   'autocomplete.label': 'Suggestions',
+  'help.exampleTitle': 'Click to add to the editor',
 
   'settings.files': 'Files',
   'settings.filesBody': 'Export the active sheet as text or import one from a file.',

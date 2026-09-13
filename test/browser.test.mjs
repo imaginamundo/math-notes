@@ -924,19 +924,19 @@ test('the Help content follows the language and its examples still work', async 
     'Ayuda'
   );
   await page.click('#help-button');
-  await wait(200);
-  assert.equal(
-    await page.evaluate(() => document.querySelector('#help-basics h2').textContent),
-    'Básico'
+  await waitFor(() =>
+    page.evaluate(
+      () => document.querySelector('#help-modal .help-section h2')?.textContent === 'Básico'
+    )
   );
   // The example chips keep their (English) expressions across a swap.
   assert.equal(
     await page.evaluate(
-      () => document.querySelector('#help-basics .help-example code').textContent
+      () => document.querySelector('#help-modal .help-section .help-example code').textContent
     ),
     '1 + 1'
   );
-  await page.click('#help-basics .help-example');
+  await page.click('#help-modal .help-section .help-example');
   await wait(200);
   assert.equal(await value(), '1 + 1');
   assert.deepEqual(errors, []);

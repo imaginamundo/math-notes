@@ -14,6 +14,7 @@ const EXCLUDED = new Set([
   'js/registerServiceWorker.js',
   'js/worker.js',
   'js/serviceWorker.js',
+  'js/i18n/build.js',
 ]);
 
 function listModules(dir) {
