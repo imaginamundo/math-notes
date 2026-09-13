@@ -962,6 +962,24 @@ test('the Help content follows the language and its examples still work', async 
   assert.deepEqual(errors, []);
 });
 
+test('the Help example chips are highlighted and multi-line examples get a line-number gutter', async () => {
+  await newPage();
+  await page.click('#help-button');
+  await waitFor(() => page.$('#help-modal .help-example code .number'));
+  const highlighted = await page.$$eval(
+    '#help-modal .help-example code .number',
+    (nodes) => nodes.length
+  );
+  assert.ok(highlighted > 0, 'example tokens are highlighted');
+
+  const numbers = await page.$$eval('#help-modal .help-line-number', (nodes) =>
+    nodes.map((node) => node.textContent)
+  );
+  assert.ok(numbers.length >= 2, 'multi-line examples show line numbers');
+  assert.equal(numbers[0], '1');
+  assert.deepEqual(errors, []);
+});
+
 test('the UI is hidden until a non-English language is applied', async () => {
   if (context) await context.close();
   context = await browser.createBrowserContext();
