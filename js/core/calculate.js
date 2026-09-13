@@ -98,6 +98,31 @@ function tagError(tags) {
   return `No values tagged ${tags.map((tag) => `#${tag}`).join(', ')}`;
 }
 
+// Rewrite a line whose tags take part in the calculation (`#food * 2`) so each
+// `#tag` becomes a scope variable holding the tag's aggregate over the rows
+// above. Returns the rewritten text, the values to inject, or an error when a
+// tag has no tagged rows.
+function substituteTags(parsed, results, index) {
+  const text = parsed.rawCode + parsed.tail.slice(0, parsed.tail.length - parsed.comment.length);
+  const values = {};
+  let error = null;
+
+  const substituted = text.replace(/#([A-Za-z0-9_-]+)/g, (match, tag) => {
+    const name = `__tag_${tag.replace(/[^A-Za-z0-9_]/g, '_')}`;
+    if (name in values) return name;
+    if (error) return match;
+    const value = tagAggregate(results, [tag], index, 'sum');
+    if (value === null) {
+      error = tagError([tag]);
+      return match;
+    }
+    values[name] = value;
+    return name;
+  });
+
+  return { text: substituted, values, error };
+}
+
 // Replace `line(n)` with an internal token bound to the value of line n, which
 // must be a value row above the current line. Returns the rewritten parsed line
 // and the scope values to inject, or an error message.
@@ -353,7 +378,7 @@ function createEngine() {
       const line = lines[i];
       if (line.trim() === '') lastBlankIndex = i;
 
-      const parsed = parseLine(line);
+      let parsed = parseLine(line);
 
       // A closing `end` row finalises the group: the subtotal is shown on the
       // header row (an aggregate result, so it never double counts in the
@@ -373,13 +398,21 @@ function createEngine() {
         continue;
       }
 
-      // Tags. A request line (`#food`, or `sum #food`) aggregates tagged value
-      // rows above; otherwise the tags label this line and are stored on its
-      // result for later requests.
-      const tags = parsed.tags;
+      // Tags. A trailing tag (`20 #food`) labels this line, and a line that is
+      // only tags (`#food`, or `sum #food`) aggregates the tagged rows above.
+      // Tags used inside a calculation (`#food * 2`, `#food + #other`) are
+      // substituted with their aggregate values and the line is evaluated.
+      let tags = parsed.tags;
+      let tagScope = null;
       if (tags.length && !parsed.valid) {
-        results[i] = { type: 'error', value: 'Tags must be at the end of a line' };
-        continue;
+        const substituted = substituteTags(parsed, results, i);
+        if (substituted.error) {
+          results[i] = { type: 'error', value: substituted.error };
+          continue;
+        }
+        tagScope = substituted.values;
+        parsed = parseLine(substituted.text);
+        tags = [];
       }
       if (tags.length) {
         const mode = tagAggregateMode(parsed.code);
@@ -412,6 +445,7 @@ function createEngine() {
       }
 
       const scope = { ...variables };
+      if (tagScope) Object.assign(scope, tagScope);
       if (previousResult !== undefined) scope.prev = previousResult;
 
       let parsedLine = parsed;

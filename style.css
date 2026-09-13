@@ -17,6 +17,10 @@
   --color-currency: #98c379;
   --color-title: #9aa4b0;
 
+  /* Tags (#word) — a high-contrast pill against the editor background */
+  --color-tag-bg: #c678dd;
+  --color-tag-text: #282c34;
+
   /* Feedback */
 
   /* Links */
@@ -70,6 +74,8 @@ html[data-theme='dracula'] {
   --color-operator: #8be9fd;
   --color-currency: #50fa7b;
   --color-title: #9aa0b8;
+  --color-tag-bg: #ffb86c;
+  --color-tag-text: #282a36;
   --color-ghost-error: #ff8a8a;
   --color-link: #8be9fd;
   --color-link-visited: #bd93f9;
@@ -94,6 +100,8 @@ html[data-theme='solarized-dark'] {
   --color-operator: #2aa198;
   --color-currency: #859900;
   --color-title: #a4b1b4;
+  --color-tag-bg: #d33682;
+  --color-tag-text: #fdf6e3;
   --color-ghost-error: #e56757;
   --color-link: #2f98d6;
   --color-link-visited: #8b92e0;
@@ -118,6 +126,8 @@ html[data-theme='monokai'] {
   --color-operator: #e6db74;
   --color-currency: #a6e22e;
   --color-title: #9a958a;
+  --color-tag-bg: #fd971f;
+  --color-tag-text: #272822;
   --color-ghost-error: #ff8a8a;
   --color-link: #66d9ef;
   --color-link-visited: #ae81ff;
@@ -143,6 +153,8 @@ html[data-theme='light'] {
   --color-operator: #0184bc;
   --color-currency: #50a14f;
   --color-title: #7f848e;
+  --color-tag-bg: #a626a4;
+  --color-tag-text: #ffffff;
   --color-link: #4078f2;
   --color-link-visited: #a626a4;
   --color-ghost: rgba(0, 0, 0, 0.45);
@@ -457,7 +469,9 @@ input::placeholder {
   opacity: 0.5;
 }
 .tag {
-  color: var(--color-link);
+  color: var(--color-tag-text);
+  background: var(--color-tag-bg);
+  border-radius: 3px;
 }
 .reference {
   color: var(--color-link);

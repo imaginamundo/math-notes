@@ -43,6 +43,8 @@ Terms used throughout the codebase and this documentation.
   comment. A line that is only tags, or `sum`/`total`/`average`/`avg` (optionally
   `of`) before the tag, is an aggregate over the tagged value rows above it
   (across the whole sheet); requesting a tag with no tagged rows is an error.
+  Tags can also appear in calculations (`#food * 2`, `#food + #other`), where
+  each is replaced by its aggregate.
 - **Group** — a named block opened by a label-only line (`Groceries:`) and
   closed by `end`; the header shows the block's subtotal (an aggregate result)
   and the block is shaded, while the inner lines still count in the bottom

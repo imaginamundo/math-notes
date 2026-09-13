@@ -169,9 +169,12 @@
           <div class="help-example" data-expr="Price: 10 + 5" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 15</span>
           </div>
-          <p>With no space, <code>#word</code> is a <b>tag</b>. A line that is only tags shows their total, and <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> (optionally <code>of</code>) before the tag also work. Tagged lines above are summed, wherever they are. Requesting a tag that has no tagged lines shows an error.</p>
+          <p>With no space, <code>#word</code> is a <b>tag</b>. A line that is only tags shows their total, and <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> (optionally <code>of</code>) before the tag also work. Tagged lines above are summed, wherever they are. Tags can also be used in calculations: <code>#food * 2</code>, <code>#food + #other</code>. Requesting a tag that has no tagged lines shows an error.</p>
           <div class="help-example" data-expr="20 #food&#10;30 #food&#10;#food" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">last line returns 50</span>
+          </div>
+          <div class="help-example" data-expr="20 #food&#10;30 #food&#10;#food * 2" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">last line returns 100</span>
           </div>
           <p><b>Tip:</b> click a line's number in the left gutter to comment or uncomment that line — handy for switching a calculation off without deleting it. A line that already starts with <code>##</code> just loses one <code>#</code>.</p>
         </section>

@@ -224,10 +224,21 @@ test('tag sums follow the unit rules and ignore assignments and aggregates', () 
   assert.equal(evaluateLines(['x = 5 #t', '10 #t', 'sum', '#t']).results[3].value, 10);
 });
 
-test('a tag placed mid-expression is an error', () => {
+test('tags can take part in calculations', () => {
+  assert.equal(evaluateLines(['20 #food', '#food * 2']).results[1].value, 40);
+  assert.equal(evaluateLines(['20 #food', '30 #other', '#food + #other']).results[2].value, 50);
+  assert.equal(evaluateLines(['20 #food', '30 #food', '#food * 2 + 5']).results[2].value, 105);
+  assert.equal(evaluateLines(['20 #food', '#food / 2']).results[1].value, 10);
+
+  const unit = evaluateLines(['10 cm #t', '1 m #t', '#t * 2']).results[2].value;
+  assert.equal(unit.formatUnits(), 'm');
+  assert.ok(Math.abs(unit.toNumber() - 2.2) < 1e-9);
+});
+
+test('a calculation tag with no tagged lines is an error', () => {
   assert.equal(
-    evaluateLines(['20 #food', '#food * 2']).results[1].value,
-    'Tags must be at the end of a line'
+    evaluateLines(['20 #food', '#missing * 2']).results[1].value,
+    'No values tagged #missing'
   );
 });
 
