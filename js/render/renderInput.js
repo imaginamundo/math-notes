@@ -1,6 +1,6 @@
 import format from './format.js';
 import formatResult from './formatResult.js';
-import { readDecimalPrecision } from '../core/decimalPrecision.js';
+import { getDecimalPrecision } from '../core/decimalPrecision.js';
 import { firstDifference, arraysEqual } from '../util/sequence.js';
 import { collectVariableNames } from '../core/multiWordVariables.js';
 
@@ -160,7 +160,7 @@ function createRowRenderer(view) {
       const valid =
         ref && ref.type === 'value' && ref.value !== undefined && typeof ref.value !== 'function';
       if (valid) {
-        const text = formatResult(ref.value, readDecimalPrecision());
+        const text = formatResult(ref.value, getDecimalPrecision());
         span.dataset.value = text;
         span.title = text;
         span.classList.add('resolved');
@@ -264,7 +264,7 @@ function createRowRenderer(view) {
     const error = result.type === 'error';
     if (!error) {
       return {
-        value: `→ ${truncate(formatResult(result.value, readDecimalPrecision()), 80)}`,
+        value: `→ ${truncate(formatResult(result.value, getDecimalPrecision()), 80)}`,
         error: false,
       };
     }

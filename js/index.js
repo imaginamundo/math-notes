@@ -22,6 +22,7 @@ import initTotalMode from './ui/totalMode.js';
 import initLoadingIndicator from './ui/loading.js';
 import initEditorScroll from './ui/editor.js';
 import { readClockFormat, setClockFormat } from './core/clockFormat.js';
+import { readDecimalPrecision, setDecimalPrecision } from './core/decimalPrecision.js';
 
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');
@@ -38,6 +39,7 @@ const rowRenderer = createRowRenderer(viewNode);
 // The main thread formats some values too (line references, copied results), so
 // it needs the clock format alongside the worker.
 setClockFormat(readClockFormat());
+setDecimalPrecision(readDecimalPrecision());
 
 function renderTextLayer(lines) {
   rowRenderer.renderText(lines);
@@ -137,6 +139,7 @@ window.addEventListener('measurement:updated', (event) => {
 // Changing the display precision only reformats results, but the worker does
 // the formatting, so it needs the new value before the recompute.
 window.addEventListener('precision:updated', (event) => {
+  setDecimalPrecision(event.detail);
   evalClient.syncPrecision(event.detail);
   evalClient.update();
 });

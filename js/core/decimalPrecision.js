@@ -7,6 +7,11 @@ const DEFAULT_PRECISION = 3;
 const MIN_PRECISION = 0;
 const MAX_PRECISION = 10;
 
+// The precision the renderers format with, kept in memory so drawing a row does
+// not read localStorage on every result (the worker holds its own copy, sent as
+// a message). Set at startup and on `precision:updated`.
+let current = DEFAULT_PRECISION;
+
 function normalizeDecimalPrecision(value) {
   if (value === '' || value === null || value === undefined) return DEFAULT_PRECISION;
   const n = Math.round(Number(value));
@@ -21,7 +26,17 @@ function readDecimalPrecision() {
 }
 
 function writeDecimalPrecision(value) {
-  storage.set(STORAGE_KEY, String(normalizeDecimalPrecision(value)));
+  const normalized = normalizeDecimalPrecision(value);
+  storage.set(STORAGE_KEY, String(normalized));
+  current = normalized;
+}
+
+function getDecimalPrecision() {
+  return current;
+}
+
+function setDecimalPrecision(value) {
+  current = normalizeDecimalPrecision(value);
 }
 
 export {
@@ -32,4 +47,6 @@ export {
   normalizeDecimalPrecision,
   readDecimalPrecision,
   writeDecimalPrecision,
+  getDecimalPrecision,
+  setDecimalPrecision,
 };
