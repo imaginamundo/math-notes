@@ -3,7 +3,7 @@
 //   April 1, 2019 - 3 months 5 days
 //   3 weeks after March 14, 2019
 //   28 days before March 12
-//   today + 3 weeks, 4 days from now, 3 days ago
+//   today + 3 weeks, 4 days from now, 2 weeks from today, 3 days ago
 //   January 10 - February 5        -> 3 weeks 5 days
 //   days until Christmas, days since July 15, days between 3 March and 30 May
 //   March 12, 2023 as EEEE, MMM d, yyyy
@@ -617,7 +617,7 @@ const DURATION_DATE = new RegExp(
   `^(${DURATION_SRC})\\s+(after|before)\\s+(${DATE_OR_IDENT})$`,
   'i'
 );
-const DURATION_FROM_NOW = new RegExp(`^(${DURATION_SRC})\\s+from\\s+now$`, 'i');
+const DURATION_FROM = new RegExp(`^(${DURATION_SRC})\\s+from\\s+(now|today)$`, 'i');
 const DURATION_AGO = new RegExp(`^(${DURATION_SRC})\\s+ago$`, 'i');
 const DATE_AS = new RegExp(`^(${DATE_SRC})\\s+as\\s+(.+)$`, 'i');
 const DAYS_VERB = /^days\s+(until|till|since|between)\s+(.+)$/i;
@@ -778,8 +778,8 @@ function preprocessCalendar(expression) {
     })`;
   }
 
-  if ((m = DURATION_FROM_NOW.exec(expr))) {
-    return `__dateAdd(__date("now"), ${JSON.stringify(m[1])}, 1)`;
+  if ((m = DURATION_FROM.exec(expr))) {
+    return `__dateAdd(__date(${JSON.stringify(m[2].toLowerCase())}), ${JSON.stringify(m[1])}, 1)`;
   }
 
   if ((m = DURATION_AGO.exec(expr))) {

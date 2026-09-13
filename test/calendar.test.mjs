@@ -176,6 +176,15 @@ test('date variables work with the date functions', () => {
   assert.equal(formatResult(results[2].value), 'Tuesday');
 });
 
+test('a duration from today or now', () => {
+  assert.equal(
+    preprocessCalendar('2 weeks from today'),
+    '__dateAdd(__date("today"), "2 weeks", 1)'
+  );
+  assert.equal(preprocessCalendar('4 days from now'), '__dateAdd(__date("now"), "4 days", 1)');
+  assert.equal(valueOf('2 weeks from today'), valueOf('today + 2 weeks'));
+});
+
 test('clock intervals chain and aggregate', () => {
   assert.equal(valueOf('9:00 am to 5:30 pm'), '8 hours 30 minutes');
   assert.equal(valueOf('9:00 am to 5:30 pm - 45 minutes'), '7 hours 45 minutes');

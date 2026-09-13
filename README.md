@@ -79,7 +79,7 @@ Based on [Numi](https://numi.app/).
 - **Dates**: `fromunix(1446587186)`, `unix()`.
 - **Calendar** — add or subtract time from a date (`10 June + 3 weeks`,
   `3 weeks after March 14, 2019`), relative dates (`today + 3 weeks`,
-  `4 days from now`, `3 days ago`), intervals (`January 10 - February 5` →
+  `4 days from now`, `2 weeks from today`, `3 days ago`), intervals (`January 10 - February 5` →
   `3 weeks 5 days`, `days until Christmas`), date parts (`days in February 2020`,
   `week number on march 12, 2021`), workdays/weekdays and work hours
   (`workdays in June`, `workdays in 2026`, `5 workdays after March 14, 2019`,

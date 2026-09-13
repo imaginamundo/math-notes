@@ -135,7 +135,7 @@ unit keys and `.value` (base SI) instead of calling `.to('s')` /
 `js/eval/calendar.js` handles dates. `preprocessCalendar` recognises date
 literals (`10 June`, `2019-04-01`, `12/02/1988`), `today`/`now`/`yesterday`/
 `tomorrow`, fixed-date holidays, and the operations around them (add/subtract a
-duration, `N units after/before`, `N days from now`/`ago`, intervals, `days
+duration, `N units after/before`, `N days from now`/`today`/`ago`, intervals, `days
 until/since/between`, date parts, and `as <pattern>`), rewriting each to a
 `__date*` helper since mathjs has no date type. It also rewrites the right-hand
 side of an assignment, so a date can be stored and reused (`start = March 4`,
