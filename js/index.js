@@ -99,6 +99,11 @@ function boot() {
 }
 boot();
 
+// The active sheet is now in the textarea, so the placeholder may show (only
+// when the sheet is empty). Keeping it hidden until here avoids a flash of the
+// placeholder before a saved sheet is restored.
+contentEditableNode.classList.add('ready');
+
 window.addEventListener('currency:updated', (event) => {
   evalClient.syncRates(event.detail && event.detail.data);
   evalClient.update();

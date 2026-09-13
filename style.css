@@ -322,6 +322,11 @@ body {
   overflow: hidden;
 }
 .content-editable::placeholder {
+  /* Hidden until the app has restored the active sheet (js/index.js adds
+     `.ready`), so a saved sheet never flashes the placeholder first. */
+  color: transparent;
+}
+.content-editable.ready::placeholder {
   color: var(--color-text);
   opacity: 0.55;
 }

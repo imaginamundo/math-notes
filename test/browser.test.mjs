@@ -430,6 +430,23 @@ test('Shift+Tab keeps the selection on the same lines', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('the placeholder stays hidden until the app is ready', async () => {
+  await newPage();
+  const state = await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    const ready = ed.classList.contains('ready');
+    const visible = getComputedStyle(ed, '::placeholder').color;
+    ed.classList.remove('ready');
+    const hidden = getComputedStyle(ed, '::placeholder').color;
+    ed.classList.add('ready');
+    return { ready, visible, hidden };
+  });
+  assert.equal(state.ready, true, 'boot marks the editor ready');
+  assert.equal(state.hidden, 'rgba(0, 0, 0, 0)', 'no placeholder before ready');
+  assert.notEqual(state.visible, 'rgba(0, 0, 0, 0)', 'placeholder returns once ready');
+  assert.deepEqual(errors, []);
+});
+
 test('a result on an overflowing line is reachable by horizontal scroll', async () => {
   await newPage();
   const longLine =
