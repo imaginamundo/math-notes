@@ -7,27 +7,27 @@ import { t } from '../i18n/index.js';
 
 // Render an example into the chip's <code>, reusing the app's highlighter so the
 // tokens carry the same colours as the editor. Multi-line examples also get a
-// line-number gutter, like the editor's, so blocks (groups) read clearly; a
-// one-line example stays a compact chip without a lone `1`.
+// numbered gutter, like the editor's, so blocks (groups) read clearly; a
+// one-line example keeps a lone content row with no number.
 function renderCode(codeNode, expr) {
   const lines = expr.split('\n');
   const names = collectVariableNames(lines);
+  const numbered = lines.length > 1;
   codeNode.textContent = '';
-  if (lines.length === 1) {
-    codeNode.appendChild(format.line(lines[0], names));
-    return;
-  }
   lines.forEach((line, index) => {
     const row = document.createElement('span');
     row.className = 'help-line';
-    const gutter = document.createElement('span');
-    gutter.className = 'help-line-number';
-    gutter.setAttribute('aria-hidden', 'true');
-    gutter.textContent = String(index + 1);
+    if (numbered) {
+      const gutter = document.createElement('span');
+      gutter.className = 'help-line-number';
+      gutter.setAttribute('aria-hidden', 'true');
+      gutter.textContent = String(index + 1);
+      row.appendChild(gutter);
+    }
     const content = document.createElement('span');
     content.className = 'help-line-content';
     content.appendChild(format.line(line, names));
-    row.append(gutter, content);
+    row.appendChild(content);
     codeNode.appendChild(row);
   });
 }

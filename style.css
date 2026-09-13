@@ -886,13 +886,14 @@ button:hover {
 .help-example {
   display: inline-flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 0.25em;
+  align-items: stretch;
+  gap: 0;
   margin: 0.35em 0.5em 0.35em 0;
-  padding: 0.45em 0.8em;
+  padding: 0;
   border: 1px solid var(--border-chip);
   border-radius: 6px;
   background: var(--surface-chip);
+  overflow: hidden;
   cursor: pointer;
   user-select: none;
   vertical-align: top;
@@ -900,11 +901,13 @@ button:hover {
 .help-example:hover,
 .help-example:focus-visible {
   border-color: var(--color-operator);
-  background: var(--surface-chip-hover);
+  filter: brightness(1.08);
   outline: none;
 }
+/* The body mirrors the editor: the input surface with a numbered gutter. */
 .help-example code {
-  background: transparent;
+  display: block;
+  background: var(--color-primary);
   padding: 0;
   color: var(--color-text);
   white-space: pre-wrap;
@@ -912,23 +915,29 @@ button:hover {
   font-family: inherit;
   line-height: 1.4;
 }
-/* Multi-line examples get the editor's line-number gutter. */
 .help-example .help-line {
   display: flex;
 }
 .help-example .help-line-number {
-  min-width: 1.5em;
-  padding-right: 0.5em;
+  flex: 0 0 auto;
+  min-width: 1.6em;
+  padding: 0.25em 0.5em 0.25em 0.6em;
+  background: var(--color-surface);
+  border-right: 1px solid var(--border-strong);
   color: var(--color-text-muted);
   text-align: right;
   user-select: none;
 }
 .help-example .help-line-content {
+  padding: 0.25em 0.7em;
   white-space: pre-wrap;
 }
+/* The hint reads like the editor's ghost result. */
 .help-returns {
+  padding: 0.2em 0.7em;
+  background: var(--color-footer);
+  color: var(--color-ghost);
   font-size: 0.82em;
-  color: var(--color-text-muted);
 }
 code {
   background: var(--surface-code);
