@@ -25,19 +25,20 @@ Based on [Numi](https://numi.app/).
   dot — `invoice.subtotal + invoice.tax`.
 - **Sequences and iteration**: mathjs ranges — `1:5` makes `[1, 2, 3, 4, 5]`,
   `1:2:10` steps by 2, and calling a function with a range applies it to every
-  element (`double(1:5)`); aggregate with `sum(1:100)` or `mean(1:5)`.
+  element (`double(1:5)`); aggregate with `sum(1:100)` or `mean(1:5)`. Lists and
+  ranges are capped at 100 items.
 - **`prev`** — reference the previous line's result.
 - **`sum` / `total` / `average` / `avg`** — aggregate the lines above (until a
   blank line), following the total's unit rule.
 - **Groups** — wrap lines in `Groceries:` … `end` to show a subtotal on the
   header line and shade the block; the inner lines still count in the bottom
-  total.
+  total, and `sum`/`average` inside a group total that group.
 - **Indentation** — `Tab` indents and `Shift+Tab` outdents the current line or
   a multi-line selection (two spaces).
 - **Comments** with `# ` (hash + space) and **labels** like `Price: 10 + 5`.
 - **Tags** — `20 #food` labels a line; a line that is only `#food` (or
-  `total #food` / `average #food`) totals the tagged lines above, across the
-  whole sheet.
+  `sum`/`total`/`average`/`avg`, optionally `of`, before the tag) totals the
+  tagged lines above, across the whole sheet.
 - **Unit conversion** (`1 cm to m`) including CSS units (`px`, `em`, `point`).
 - **Currency conversion** (`100 USD to EUR`, `$5 to GBP`, `R$5 to EUR`) with
   live rates from the European Central Bank, cached for offline use.
@@ -45,7 +46,8 @@ Based on [Numi](https://numi.app/).
   `$50 as a % of $100`, `5% of what is 6`.
 - **Number scales**: repeated `k` — `2k` (2,000), `1kk` (1,000,000),
   `1kkk` (1,000,000,000).
-- **Word operators**: `8 times 9`, `2 plus 3`, `10 minus 3`, `6 multiplied by 7`.
+- **Word operators**: `plus`, `minus`, `times`, `multiplied by`, `divided by`,
+  `with`, `without` and `mul` (`8 times 9`, `10 divided by 2`).
 - **Function aliases**: `ln`, `fact`, `arcsin`, `arccos`, `arctan`, `root`.
 - **Dates**: `fromunix(1446587186)`, `unix()`.
 - **Find & replace** — press `⌘F` / `Ctrl+F` to search the active sheet with
@@ -54,9 +56,9 @@ Based on [Numi](https://numi.app/).
   the caret is on. Click a number to comment or uncomment that line.
 - **Jump to line** — press `⌘G` / `Ctrl+G` and type a line number to move the
   caret there quickly.
-- **Text size** — the footer's − / + steps the editor text as a percentage of
-  your browser's default font size (100% = your setting), so it respects
-  accessibility preferences.
+- **Text size** — the footer's − / + steps the editor text between 50% and 200%
+  of your browser's default font size (100% = your setting), and **Reset size**
+  returns to 100%, so it respects accessibility preferences.
 - **Auto-saved snapshots** — every tab's edits are backed up to IndexedDB and
   can be recovered from the **Settings** modal; sheets are rebuilt automatically
   if localStorage is unavailable or corrupt.
@@ -66,8 +68,11 @@ Based on [Numi](https://numi.app/).
   log, and is not forwarded in a `Referer` header. Opening one asks first, then
   adds a new tab — it never overwrites the sheet you already have.
 - **Onboarding** — a first visit opens with a working `Welcome` sheet instead
-  of an empty page, plus a five-step tour of the interface. Both are
+  of an empty page, plus a five-step tour of the interface. The sheet offers
+  **Keep content** / **Clear content** to dismiss or empty it. Both are
   dismissible, and **Settings → Replay tutorial** brings the tour back.
+- **Examples** — the **Examples** button opens ready-made sheets (bill splits,
+  interest, BMI, fuel cost and more) that drop into the editor with one click.
 - **Keyboard shortcuts** (see below).
 - Offline-first PWA via a service worker.
 
@@ -143,12 +148,14 @@ make -C js/lib
 ### Architecture
 
 - `js/core/` — parsing and evaluation (`calculate.js`, `parseLine.js`,
-  `preprocess.js`, `aggregate.js`, `history.js`).
+  `preprocess.js`, `aggregate.js`, `multiWordVariables.js`, `currencySymbols.js`,
+  `tabsState.js`, `history.js`).
 - `js/eval/` — mathjs extensions and preprocessors (`aliases.js`, `cssUnits.js`,
-  `currency.js`, `datetime.js`, `scales.js`, `symbols.js`, `wordOperators.js`,
-  `percentage.js`).
+  `currency.js`, `datetime.js`, `scales.js`, `symbols.js`, `units.js`,
+  `wordOperators.js`, `percentage.js`).
 - `js/render/` — highlighting and result rendering.
-- `js/ui/` — tabs, modals, help, examples, settings, find & replace, line
-  numbers, import/export, shortcuts and font controls.
+- `js/ui/` — tabs, modals, help, examples, onboarding and the tour, starter
+  prompt, settings, find & replace, go-to-line, line numbers, indentation,
+  import/export, sharing, shortcuts and font controls.
 - `js/util/` — shared pure helpers (debounce, storage, clipboard, text, scroll,
   sequence).

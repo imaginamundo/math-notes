@@ -40,9 +40,9 @@ Terms used throughout the codebase and this documentation.
 - **Line reference** — `line(n)` uses the result of line `n` (1-based, above
   the current line). The view shows the referenced value in place of the token.
 - **Tag** — `#word` (no space) labels a line; `#` followed by a space is a
-  comment. A line that is only tags, or `total #tag` / `average #tag`, is an
-  aggregate over the tagged value rows above it (across the whole sheet);
-  requesting a tag with no tagged rows is an error.
+  comment. A line that is only tags, or `sum`/`total`/`average`/`avg` (optionally
+  `of`) before the tag, is an aggregate over the tagged value rows above it
+  (across the whole sheet); requesting a tag with no tagged rows is an error.
 - **Group** — a named block opened by a label-only line (`Groceries:`) and
   closed by `end`; the header shows the block's subtotal (an aggregate result)
   and the block is shaded, while the inner lines still count in the bottom
@@ -62,6 +62,12 @@ Terms used throughout the codebase and this documentation.
   tour (`js/ui/onboarding.js`). Gated on `math-notes-onboarded`.
 - **Starter sheet** — the `Welcome` sheet seeded on a first run. Every line
   evaluates, so the first screen already demonstrates the app.
+- **Starter prompt** — the floating **Keep content** / **Clear content** control
+  (`js/ui/starterPrompt.js`) shown while the active tab still holds exactly the
+  starter sheet; either button (or editing away) dismisses it for good.
+- **List/range limit** — `MAX_LIST_LENGTH` (100). List literals and statically
+  resolvable ranges longer than this are rejected before evaluation, so a range
+  like `1:1e9` cannot allocate an unbounded array and lock up the worker.
 - **Tour** — the guided walkthrough (`js/ui/tour.js`): a data-driven `STEPS`
   array, one popover, and an `outline` ring on the anchor.
 - **Tour step** — `{ anchor, title, body, placement }`. `anchor` is a CSS

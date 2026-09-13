@@ -39,7 +39,7 @@ const AGGREGATE_AVG_WORD = /\b(?:average|avg)\b(?!\s*\()/gi;
 
 // A group opens with a header line (`Name:` with no expression) and closes with
 // a line whose code is exactly `end`. Groups are flat: an unterminated header is
-// just a label, and an `end` with no open group is left to the evaluator.
+// just a label, and an `end` with no open group is reported as an error.
 function findGroups(lines) {
   const byEnd = new Map();
   const groupOfLine = new Map();

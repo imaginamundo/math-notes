@@ -108,6 +108,7 @@
         <section id="help-basics" class="help-section">
           <h2>Basics</h2>
           <p>Type a calculation on any line and its result appears right beside it as a dimmed hint. Errors show inline in red. The <b>total</b> at the bottom sums all numeric results, and results are formatted with thousands separators.</p>
+          <p>The footer's <b>−</b> / <b>+</b> change the editor text size (50–200%, with <b>Reset size</b> back to 100%). On a first visit a <b>Welcome</b> sheet demonstrates the app; use its <b>Keep content</b> / <b>Clear content</b> buttons to dismiss or empty it.</p>
           <div class="help-example" data-expr="1 + 1" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 2</span>
           </div>
@@ -165,7 +166,7 @@
           <div class="help-example" data-expr="Price: 10 + 5" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 15</span>
           </div>
-          <p>With no space, <code>#word</code> is a <b>tag</b>. A line that is only tags shows their total, and <code>total #tag</code> / <code>average #tag</code> also work. Tagged lines above are summed, wherever they are. Requesting a tag that has no tagged lines shows an error.</p>
+          <p>With no space, <code>#word</code> is a <b>tag</b>. A line that is only tags shows their total, and <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> (optionally <code>of</code>) before the tag also work. Tagged lines above are summed, wherever they are. Requesting a tag that has no tagged lines shows an error.</p>
           <div class="help-example" data-expr="20 #food&#10;30 #food&#10;#food" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">last line returns 50</span>
           </div>
@@ -218,11 +219,8 @@
         <section id="help-functions" class="help-section">
           <h2>Functions</h2>
           <p>Store a function with <code>f(x) = …</code> and call it later. Numi-style aliases are available too: <code>ln</code>, <code>fact</code>, <code>arcsin</code>, <code>arccos</code>, <code>arctan</code>, <code>root</code>.</p>
-          <div class="help-example" data-expr="double = f(x) = x * 2" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">stores a function</span>
-          </div>
-          <div class="help-example" data-expr="double(21)" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 42</span>
+          <div class="help-example" data-expr="double = f(x) = x * 2&#10;double(21)" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">last line returns 42</span>
           </div>
           <div class="help-example" data-expr="fact(5)" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 120</span>
@@ -239,7 +237,7 @@
           <h2>Lists</h2>
           <p>Write a list with square brackets. Lists are <b>1-indexed</b>: <code>n[1]</code> is the first
           element. Slice with a range, assign elements, do element-wise arithmetic, and combine lists with
-          the mathjs functions.</p>
+          the mathjs functions. Lists are capped at 100 items.</p>
           <div class="help-example" data-expr="[1, 2, 3]" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">[1, 2, 3]</span>
           </div>
@@ -276,7 +274,7 @@
           <h2>Sequences &amp; iteration</h2>
           <p>A range <code>start:end</code> (with an optional <code>:step</code>) makes a list of numbers, and
           calling a function with a range applies it to every element. Lists can be named and indexed like
-          any other variable.</p>
+          any other variable. Ranges are capped at 100 items.</p>
           <div class="help-example" data-expr="1:5" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">[1, 2, 3, 4, 5]</span>
           </div>
@@ -319,7 +317,7 @@
 
         <section id="help-operators" class="help-section">
           <h2>Operators &amp; scales</h2>
-          <p>Word operators and number scales work naturally.</p>
+          <p>Word operators and number scales work naturally: <code>plus</code>, <code>minus</code>, <code>times</code>, <code>multiplied by</code>, <code>divided by</code>, <code>with</code>, <code>without</code> and <code>mul</code>.</p>
           <div class="help-example" data-expr="8 times 9" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 72</span>
           </div>
@@ -331,6 +329,18 @@
           </div>
           <div class="help-example" data-expr="6 multiplied by 7" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 42</span>
+          </div>
+          <div class="help-example" data-expr="10 divided by 2" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 5</span>
+          </div>
+          <div class="help-example" data-expr="3 with 4" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 7</span>
+          </div>
+          <div class="help-example" data-expr="10 without 3" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 7</span>
+          </div>
+          <div class="help-example" data-expr="3 mul 4" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 12</span>
           </div>
           <div class="help-example" data-expr="2k" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 2,000</span>
@@ -464,7 +474,7 @@
           <div class="help-example" data-expr="50 EUR in BRL" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">converts to BRL</span>
           </div>
-          <p><b>Supported codes:</b> <code>BRL</code>, <code>CAD</code>, <code>CHF</code>, <code>CNY</code>, <code>CZK</code>, <code>DKK</code>, <code>EUR</code>, <code>GBP</code>, <code>HKD</code>, <code>HUF</code>, <code>IDR</code>, <code>ILS</code>, <code>INR</code>, <code>ISK</code>, <code>JPY</code>, <code>KRW</code>, <code>MXN</code>, <code>MYR</code>, <code>NOK</code>, <code>NZD</code>, <code>PHP</code>, <code>PLN</code>, <code>RON</code>, <code>SEK</code>, <code>SGD</code>, <code>THB</code>, <code>TRY</code>, <code>USD</code>, <code>ZAR</code>.</p>
+          <p><b>Supported codes:</b> <code>AUD</code>, <code>BRL</code>, <code>CAD</code>, <code>CHF</code>, <code>CNY</code>, <code>CZK</code>, <code>DKK</code>, <code>EUR</code>, <code>GBP</code>, <code>HKD</code>, <code>HUF</code>, <code>IDR</code>, <code>ILS</code>, <code>INR</code>, <code>ISK</code>, <code>JPY</code>, <code>KRW</code>, <code>MXN</code>, <code>MYR</code>, <code>NOK</code>, <code>NZD</code>, <code>PHP</code>, <code>PLN</code>, <code>RON</code>, <code>SEK</code>, <code>SGD</code>, <code>THB</code>, <code>TRY</code>, <code>USD</code>, <code>ZAR</code>.</p>
         </section>
 
         <section id="help-dates" class="help-section">
@@ -492,19 +502,19 @@
               <tr><th>Shortcut</th><th>Action</th></tr>
             </thead>
             <tbody>
-              <tr><td><code>⌘Z</code></td><td>Undo the last change in the tab</td></tr>
-              <tr><td><code>⇧⌘Z</code></td><td>Redo</td></tr>
+              <tr><td><code>⌘Z</code><br /><code>Ctrl+Z</code></td><td>Undo the last change in the tab</td></tr>
+              <tr><td><code>⇧⌘Z</code><br /><code>Ctrl+Shift+Z</code></td><td>Redo</td></tr>
               <tr><td><code>Ctrl+Tab</code><br /><code>Ctrl+⇧Tab</code></td><td>Next / previous tab</td></tr>
               <tr><td><code>⌘1…9</code><br /><code>Ctrl+1…9</code></td><td>Jump to the nth tab</td></tr>
-              <tr><td><code>⌘F</code></td><td>Find &amp; replace in the active sheet</td></tr>
-              <tr><td><code>⌘G</code></td><td>Jump to a line number</td></tr>
+              <tr><td><code>⌘F</code><br /><code>Ctrl+F</code></td><td>Find &amp; replace in the active sheet</td></tr>
+              <tr><td><code>⌘G</code><br /><code>Ctrl+G</code></td><td>Jump to a line number</td></tr>
               <tr><td><code>Tab</code></td><td>Indent the line or selection</td></tr>
               <tr><td><code>⇧Tab</code></td><td>Outdent the line or selection</td></tr>
-              <tr><td><code>⇧⌘C</code></td><td>Copy the current line's result</td></tr>
+              <tr><td><code>⇧⌘C</code><br /><code>Ctrl+Shift+C</code></td><td>Copy the current line's result</td></tr>
               <tr><td><code>⇧⌘S</code><br /><code>⇧⌘L</code></td><td>Copy a share link for the active sheet</td></tr>
-              <tr><td><code>⇧⌘E</code></td><td>Export the active sheet</td></tr>
-              <tr><td><code>⇧⌘I</code></td><td>Import a sheet</td></tr>
-              <tr><td><code>⇧⌘⌫</code></td><td>Clear the active sheet</td></tr>
+              <tr><td><code>⇧⌘E</code><br /><code>Ctrl+Shift+E</code></td><td>Export the active sheet</td></tr>
+              <tr><td><code>⇧⌘I</code><br /><code>Ctrl+Shift+I</code></td><td>Import a sheet</td></tr>
+              <tr><td><code>⇧⌘⌫</code><br /><code>Ctrl+Shift+Backspace</code></td><td>Clear the active sheet</td></tr>
             </tbody>
           </table>
         </section>

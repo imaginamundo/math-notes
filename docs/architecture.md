@@ -86,7 +86,30 @@ counts), the `end` row stays inert, and aggregates inside the group use the
 group start instead of the last blank line. Because the header depends on the
 lines below it, a change inside a group (or removing its `end`) invalidates the
 header. Groups are flat and annotation-only: inner lines still feed the running
-total.
+total, and an `end` with no open header is reported as an error rather than an
+unknown symbol.
+
+### Annotations and references
+
+Three features let a line refer to other lines without becoming arithmetic of
+their own:
+
+- **Tags** (`#word`, no space) label a value row. A request line — `#word`, or
+  `sum`/`total`/`average`/`avg` optionally followed by `of` and the tag —
+  aggregates every row above carrying one of the requested tags, using the same
+  unit rules as the total. A request with no matching rows is an error, and a
+  tag placed mid-expression is rejected (`Tags must be at the end of a line`).
+- **Line references** (`line(n)`, 1-based) inject the value of an earlier value
+  row under a private `__line_n` token. A reference to the current or a later
+  line, or to a row with no value, is an error; the view draws the referenced
+  value in place of the token.
+- **Multi-word variables** (`monthly rent = 1500`) are mangled to a single
+  identifier before diffing and evaluation, so assignments and references
+  resolve to the same name; `friendlyError` unmangles them for the message.
+
+`assertBoundedExpression` rejects list literals and statically resolvable ranges
+longer than `MAX_LIST_LENGTH` (100) before evaluation, so `1:1e9` cannot
+allocate an unbounded array in the worker.
 
 ### The worker
 
@@ -229,6 +252,12 @@ filled with a short working sheet (`STARTER_SHEET` in `js/ui/onboarding.js`) —
 every line evaluates, so the opening screen demonstrates the app rather than
 describing it. It is seeded through `tabsApi.seedSheet`, which fills the
 _active_ tab; that is deliberately different from an import, which adds one.
+
+**The starter prompt.** `js/ui/starterPrompt.js` adds a small floating **Keep
+content** / **Clear content** control just below the seeded sheet. It is visible
+only while the active tab still holds exactly `STARTER_SHEET` and the visitor
+has not dismissed it; either button (or editing away from the sheet) sets
+`math-notes-starter-dismissed`, so it never returns.
 
 **The tour.** `js/ui/tour.js` walks five anchors of the real UI. The highlight
 is an `outline` drawn on the anchor itself plus a raised `z-index`, not a
