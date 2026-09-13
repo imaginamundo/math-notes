@@ -204,6 +204,18 @@ test('the interval between two clock times', () => {
   assert.equal(valueOf('4pm to 3am'), '11 hours');
 });
 
+test('now is a clock operand', () => {
+  assert.equal(preprocessCalendar('23:00 - now'), '__clockInterval("23:00", "now", 0)');
+  assert.equal(preprocessCalendar('now to 23:00'), '__clockInterval("now", "23:00", 1)');
+  assert.equal(preprocessCalendar('now - 23:00'), '__clockInterval("now", "23:00", 0)');
+
+  for (const line of ['23:00 - now', 'now to 23:00']) {
+    const result = evaluateLines([line]).results[0];
+    assert.equal(result.type, 'value');
+    assert.equal(result.value.timespan, true, 'the interval is a timespan');
+  }
+});
+
 test('the minus operator resolves clock-time ambiguity like Soulver', () => {
   assert.equal(valueOf('5pm - 7pm'), '2 hours');
   assert.equal(valueOf('5pm - 2pm'), '3 hours');

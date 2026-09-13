@@ -65,6 +65,15 @@ test('parseLine keeps chained equals in the rhs', () => {
   assert.equal(parseLine('a = b = 3').rhs, 'b = 3');
 });
 
+test('parseLine does not read a clock colon as a title', () => {
+  assert.equal(parseLine('now to 23:00').title, '');
+  assert.equal(parseLine('now to 23:00').code, 'now to 23:00');
+  assert.equal(parseLine('23:00 - now').title, '');
+  // A genuine label still parses.
+  assert.equal(parseLine('Step 1: 2 + 3').title, 'Step 1');
+  assert.equal(parseLine('Price: 10').code, '10');
+});
+
 test('parseLine does not read comparisons as assignments', () => {
   for (const line of ['1 == 1', '2 >= 1', '2 <= 3', '1 != 2']) {
     assert.equal(parseLine(line).isAssignment, false, line);

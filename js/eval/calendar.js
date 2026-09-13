@@ -154,6 +154,7 @@ function markClock(date, flag = true) {
 
 function parseClock(text, now) {
   const s = String(text).trim().toLowerCase().replace(/\./g, '').replace(/\s+/g, ' ');
+  if (s === 'now') return markClock(new Date(now));
   let m = /^(\d{1,2}):(\d{2}) ?([ap])m$/.exec(s);
   if (m) return markClock(clockAt(now, to24(+m[1], m[3]), +m[2]));
   m = /^(\d{1,2}) ?([ap])m$/.exec(s);
@@ -673,8 +674,13 @@ const CLOCK_DURATION = new RegExp(`^(${CLOCK_SRC})\\s*([+-])\\s*(${DURATION_SRC}
 // A clock pair (`to` is a forward interval, `-` the ambiguous same-day
 // difference) can sit inside a larger expression, so it is rewritten wherever
 // it occurs and composes with the arithmetic around it
-// (`9:00 am to 5:30 pm - 45 minutes`).
-const CLOCK_PAIR_PHRASE = new RegExp(`\\b(${CLOCK_SRC})\\s+(to|-)\\s+(${CLOCK_SRC})`, 'gi');
+// (`9:00 am to 5:30 pm - 45 minutes`). `now` is a clock operand too, so the time
+// until a later clock time (`23:00 - now`) and forward intervals work.
+const CLOCK_OPERAND_SRC = `(?:${CLOCK_SRC}|now\\b)`;
+const CLOCK_PAIR_PHRASE = new RegExp(
+  `\\b(${CLOCK_OPERAND_SRC})\\s+(to|-)\\s+(${CLOCK_OPERAND_SRC})`,
+  'gi'
+);
 
 function preprocessCalendar(expression) {
   let expr = expression.trim().replace(/\bwork\s+days?\b/gi, 'workdays');
