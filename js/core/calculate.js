@@ -60,6 +60,46 @@ function findGroups(lines) {
   return { byEnd, groupOfLine };
 }
 
+// Multi-word variables (`monthly rent = 1500`, then `monthly rent * 12`). Each
+// name is rewritten to a single safe identifier so mathjs can store and resolve
+// it, and every occurrence in code (never in comments) is rewritten the same
+// way. Names are collected from assignment labels containing whitespace.
+function mangleName(name) {
+  return `__var_${name.replace(/_/g, '__').replace(/\s+/g, '_')}`;
+}
+
+function namePattern(name) {
+  const words = name
+    .split(' ')
+    .map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('\\s+');
+  return new RegExp(`(?<![A-Za-z0-9_])${words}(?![A-Za-z0-9_])`, 'g');
+}
+
+function collectVariableNames(lines) {
+  const names = new Set();
+  for (const line of lines) {
+    const code = line.split('#')[0];
+    const match = /^\s*([A-Za-z_][A-Za-z0-9_]*(?:\s+[A-Za-z_][A-Za-z0-9_]*)+)\s*=(?!=)/.exec(code);
+    if (match) names.add(match[1].replace(/\s+/g, ' '));
+  }
+  // Longest first so `net price` wins over a `price` defined elsewhere.
+  return [...names].sort((a, b) => b.length - a.length);
+}
+
+function mangleLines(lines) {
+  const names = collectVariableNames(lines);
+  if (!names.length) return lines;
+  return lines.map((line) => {
+    const hash = line.indexOf('#');
+    const code = hash === -1 ? line : line.slice(0, hash);
+    const comment = hash === -1 ? '' : line.slice(hash);
+    let out = code;
+    for (const name of names) out = out.replace(namePattern(name), mangleName(name));
+    return out + comment;
+  });
+}
+
 /**
  * Build an isolated evaluation engine: its own mathjs instance (aliases, css
  * and currency units configured), its own incremental result cache and its own
@@ -168,10 +208,13 @@ function createEngine() {
 
   /**
    * Evaluate a sheet line by line.
-   * @param {string[]} lines
+   * @param {string[]} inputLines
    * @returns {SheetResult}
    */
-  function evaluateLines(lines) {
+  function evaluateLines(inputLines) {
+    // Multi-word variable names are normalised before diffing/evaluating, so the
+    // cache stores the same form it compares against.
+    const lines = mangleLines(inputLines);
     if (cache.revision !== environmentRevision) {
       cache.lines = [];
       cache.results = [];

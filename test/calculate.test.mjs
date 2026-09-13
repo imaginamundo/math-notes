@@ -128,6 +128,34 @@ test('evaluateLines supports function variables', () => {
   assert.equal(results[1].value, 8);
 });
 
+test('evaluateLines supports multi-word variable names', () => {
+  const { results, total } = evaluateLines(['monthly rent = 1500', 'monthly rent * 12']);
+  assert.equal(results[0].type, 'assignment');
+  assert.equal(results[0].value, 1500);
+  assert.equal(results[1].value, 18000);
+  assert.equal(total, 18000);
+});
+
+test('multi-word names are not confused with word operators or aggregates', () => {
+  assert.equal(evaluateLines(['total cost = 50', 'total cost + 10']).results[1].value, 60);
+  assert.equal(evaluateLines(['net price = 100', 'net price plus 5']).results[1].value, 105);
+  assert.equal(evaluateLines(['sum total = 5', 'sum total * 2']).results[1].value, 10);
+});
+
+test('multi-word variables update incrementally and vanish with their definition', () => {
+  evaluateLines(['price per item = 10', 'price per item * 3']);
+  const updated = evaluateLines(['price per item = 20', 'price per item * 3']);
+  assert.equal(updated.results[1].value, 60);
+  const removed = evaluateLines(['price per item * 3']);
+  assert.equal(removed.results[0].type, 'error');
+});
+
+test('single words, units and scales are unaffected', () => {
+  assert.equal(evaluateLines(['2 kg']).results[0].type, 'value');
+  assert.equal(evaluateLines(['2k']).results[0].value, 2000);
+  assert.equal(evaluateLines(['rate = 5', 'rate * 2']).results[1].value, 10);
+});
+
 test('evaluateLines evaluates comparisons as values', () => {
   assert.equal(evaluateLines(['2 >= 1']).results[0].value, true);
   assert.equal(evaluateLines(['1 == 1']).results[0].value, true);

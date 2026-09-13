@@ -34,6 +34,9 @@ Terms used throughout the codebase and this documentation.
   current line (comments and blank lines are skipped).
 - **Object** — a mathjs object literal (`{key: value}`), rendered inline as
   `{ key: value, … }`; fields are reached with `obj.key`.
+- **Multi-word variable** — a variable whose name contains spaces
+  (`monthly rent = 1500`); the engine rewrites the name to a single safe
+  identifier so assignments and references resolve consistently.
 - **Group** — a named block opened by a label-only line (`Groceries:`) and
   closed by `end`; the header shows the block's subtotal (an aggregate result)
   and the block is shaded, while the inner lines still count in the bottom

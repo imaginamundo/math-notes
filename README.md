@@ -18,6 +18,7 @@ Based on [Numi](https://numi.app/).
 - **Undo / redo** per tab — `⌘Z` / `Ctrl+Z` (and `⇧⌘Z` to redo) restores the
   last change, with a separate history for every tab.
 - **Variables and functions**: `price = 30`, `double = f(x) = x * 2`.
+- **Multi-word variables**: `monthly rent = 1500`, then `monthly rent * 12`.
 - **Objects**: `invoice = {subtotal: 120, tax: 12}` then reach fields with a
   dot — `invoice.subtotal + invoice.tax`.
 - **Sequences and iteration**: mathjs ranges — `1:5` makes `[1, 2, 3, 4, 5]`,
