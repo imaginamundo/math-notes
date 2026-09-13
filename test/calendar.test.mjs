@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { evaluateLines } from '../js/core/calculate.js';
 import formatResult from '../js/render/formatResult.js';
 import { preprocessCalendar } from '../js/eval/calendar.js';
+import { DEFAULT_CLOCK_FORMAT, setClockFormat } from '../js/core/clockFormat.js';
 
 function valueOf(line) {
   return formatResult(evaluateLines([line]).results[0].value);
@@ -19,7 +20,7 @@ test('preprocessCalendar rewrites date arithmetic and intervals', () => {
   );
   assert.equal(
     preprocessCalendar('days until Christmas'),
-    '__daysBetweenText("today", "Christmas")'
+    '__daysBetweenText("today", __date("Christmas"))'
   );
 });
 
@@ -108,4 +109,83 @@ test('work hours compose with the arithmetic around them', () => {
 test('the weekday of a date', () => {
   assert.equal(valueOf('day of the week on January 24, 1984'), 'Tuesday');
   assert.equal(valueOf('weekday on March 9, 2024'), 'Saturday');
+});
+
+test('clock times parse and render (24-hour by default)', () => {
+  assert.equal(valueOf('9:45 am'), '09:45');
+  assert.equal(valueOf('4pm'), '16:00');
+  assert.equal(valueOf('16:00'), '16:00');
+  assert.equal(valueOf('1:30'), '01:30');
+  assert.equal(valueOf('12pm'), '12:00');
+  assert.equal(valueOf('12am'), '00:00');
+});
+
+test('the Clock setting switches to 12-hour', () => {
+  setClockFormat('12');
+  try {
+    assert.equal(valueOf('9:45 am'), '9:45 am');
+    assert.equal(valueOf('16:00 + 3 hours 12 minutes'), '7:12 pm');
+  } finally {
+    setClockFormat(DEFAULT_CLOCK_FORMAT);
+  }
+});
+
+test('adding and subtracting a duration from a clock time', () => {
+  assert.equal(valueOf('16:00 + 3 hours 12 minutes'), '19:12');
+  assert.equal(
+    preprocessCalendar('9:45 am - 15 hours 10 minutes'),
+    '__clockAdd("9:45 am", "15 hours 10 minutes", -1)'
+  );
+  assert.equal(valueOf('9:45 am - 15 hours 10 minutes'), 'Yesterday at 18:35');
+});
+
+test('timespan shorthand adds to a clock time', () => {
+  assert.equal(preprocessCalendar('now + 4h 3m 5s'), '__dateAdd(__date("now"), "4h 3m 5s", 1)');
+  assert.equal(valueOf('9:45 am + 4h 3m 5s'), '13:48');
+});
+
+test('date variables work with the date functions', () => {
+  assert.equal(preprocessCalendar('days until start'), '__daysBetweenText("today", start)');
+  assert.equal(preprocessCalendar('5 workdays after start'), '__addWorkdays(start, 1 * 5)');
+  assert.equal(preprocessCalendar('weekday on start'), '__weekday(start)');
+
+  const { results } = evaluateLines([
+    'start = March 4, 2025',
+    '5 workdays after start',
+    'weekday on start',
+  ]);
+  assert.equal(formatResult(results[1].value), '11 March 2025');
+  assert.equal(formatResult(results[2].value), 'Tuesday');
+});
+
+test('clock intervals chain and aggregate', () => {
+  assert.equal(valueOf('9:00 am to 5:30 pm'), '8 hours 30 minutes');
+  assert.equal(valueOf('9:00 am to 5:30 pm - 45 minutes'), '7 hours 45 minutes');
+
+  const { results } = evaluateLines([
+    'Monday:',
+    '9:00 am to 12:30 pm',
+    '1:00 pm to 5:30 pm',
+    'end',
+  ]);
+  assert.equal(formatResult(results[0].value), '8 hours');
+});
+
+test('the interval between two clock times', () => {
+  assert.equal(preprocessCalendar('7:30am to 8:45pm'), '__clockInterval("7:30am", "8:45pm", 1)');
+  assert.equal(valueOf('7:30am to 8:45pm'), '13 hours 15 minutes');
+  assert.equal(valueOf('4pm to 3am'), '11 hours');
+});
+
+test('the minus operator resolves clock-time ambiguity like Soulver', () => {
+  assert.equal(valueOf('5pm - 7pm'), '2 hours');
+  assert.equal(valueOf('5pm - 2pm'), '3 hours');
+  assert.equal(valueOf('4pm - 3am'), '13 hours');
+  assert.equal(valueOf('3am - 4pm'), '13 hours');
+});
+
+test('a one-digit-minute colon range is not mistaken for a clock time', () => {
+  assert.equal(preprocessCalendar('1:5'), '1:5');
+  assert.equal(preprocessCalendar('5:5'), '5:5');
+  assert.equal(preprocessCalendar('100:1'), '100:1');
 });

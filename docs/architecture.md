@@ -139,8 +139,21 @@ duration, `N units after/before`, `N days from now`/`ago`, intervals, `days
 until/since/between`, date parts, and `as <pattern>`), rewriting each to a
 `__date*` helper since mathjs has no date type. It also rewrites the right-hand
 side of an assignment, so a date can be stored and reused (`start = March 4`,
-then `start + 2 weeks` → `__dateAdd(start, "2 weeks", 1)`); `__dateAdd` accepts
-a Date (calendar arithmetic) or a duration Unit (plain duration addition).
+then `start + 2 weeks` → `__dateAdd(start, "2 weeks", 1)`); a variable works
+anywhere a literal does (`days until start`, `5 workdays after start`,
+`weekday on start`), because the helpers read a Date through `toDate`. `__dateAdd`
+accepts a Date (calendar arithmetic) or a duration Unit (plain duration
+addition).
+Clock times (`9:45 am`, `16:00`) parse to a Date marked `.clock`; `__clockAdd`
+and `__clockInterval` handle duration arithmetic and intervals (`to` runs
+forward past midnight, `-` keeps both on the same day per Soulver's ambiguity
+rule). An interval is a timespan Unit, so it chains and aggregates
+(`9:00 am to 5:30 pm - 45 minutes`), and `formatResult` renders a marked Date per
+the **Clock** setting (`js/core/clockFormat.js`, 24-hour by default) as `19:12`
+or `7:12 pm`, prefixed `Yesterday at` / `Tomorrow at` when it is not today.
+`now` is marked too, so `now + 3 hours` stays a clock time; durations accept the
+timespan shorthand (`now + 4h 3m 5s`), since `parseDuration` maps `h`/`m`/`s` and
+their full names alike.
 Dates are JS Date objects at
 local noon (so DST never shifts a day); `formatResult` renders a date as
 `D Month [YYYY]` (the year is omitted when it is the current one) and an

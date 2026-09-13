@@ -595,7 +595,7 @@
 
         <section id="help-calendar" class="help-section">
           <h2>Calendar</h2>
-          <p>Add or subtract time from a date, measure the interval between dates, and format a date with a pattern. Dates can be written as <code>10 June</code>, <code>June 10, 2023</code>, <code>2019-04-01</code> or <code>12/02/1988</code>. A date can be saved in a variable and reused (<code>start = March 4</code>, then <code>start + 2 weeks</code>). Workdays are Monday to Friday (public holidays are not counted yet).</p>
+          <p>Add or subtract time from a date, measure the interval between dates, and format a date with a pattern. Dates can be written as <code>10 June</code>, <code>June 10, 2023</code>, <code>2019-04-01</code> or <code>12/02/1988</code>. A date can be saved in a variable and reused (<code>start = March 4</code>, then <code>start + 2 weeks</code>). Clock times (<code>9:45 am</code>, <code>1:30</code>) add durations and measure intervals, shown in 24-hour by default (<b>Settings → Clock</b>). Workdays are Monday to Friday (public holidays are not counted yet).</p>
           <div class="help-example" data-expr="10 June + 3 weeks" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">1 July</span>
           </div>
@@ -613,6 +613,15 @@
           </div>
           <div class="help-example" data-expr="4 days from now" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">four days from now</span>
+          </div>
+          <div class="help-example" data-expr="16:00 + 3 hours 12 minutes" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">a clock time 3¼ hours later</span>
+          </div>
+          <div class="help-example" data-expr="7:30am to 8:45pm" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">13 hours 15 minutes</span>
+          </div>
+          <div class="help-example" data-expr="now + 3 hours 15 minutes" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">a clock time 3¼ hours from now</span>
           </div>
           <div class="help-example" data-expr="January 10 - February 5" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">3 weeks 5 days</span>
@@ -844,6 +853,11 @@
           Decimal places
           <input id="decimal-precision" type="number" min="0" max="10" step="1" inputmode="numeric" />
         </label>
+      </section>
+      <section class="help-section">
+        <h2>Clock</h2>
+        <p>How clock times are written. 24-hour is the default.</p>
+        <div class="settings-clock"></div>
       </section>
       <section class="help-section">
         <h2>Recover</h2>

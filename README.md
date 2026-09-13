@@ -84,7 +84,10 @@ Based on [Numi](https://numi.app/).
   `weekday on March 9, 2024`, `work hours in June * 25 EUR` — Monday to Friday,
   eight-hour days, holidays not counted yet) and formatting
   (`March 12, 2023 as EEEE, MMM d, yyyy`). A date can be stored in a variable
-  (`start = March 4`, then `start + 2 weeks`).
+  (`start = March 4`, then `start + 2 weeks`). Clock times (`9:45 am`, `1:30`)
+  take durations and measure intervals (`16:00 + 3 hours 12 minutes` → `19:12`,
+  `7:30am to 8:45pm` → `13 hours 15 minutes`); they show in 24-hour by default
+  and **Settings → Clock** switches to 12-hour.
 - **Timespans** — `5.5 minutes as timespan` → `5 min 30 s`,
   `72 days as timespan` → `10 weeks 2 days`, `3h 5m 10s` →
   `3 hours 5 minutes 10 seconds`, and `12.5 minutes in minutes and seconds`

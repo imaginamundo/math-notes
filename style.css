@@ -954,7 +954,8 @@ code {
   border-radius: 2px;
 }
 /* Measurement system picker */
-.settings-measurement {
+.settings-measurement,
+.settings-clock {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4em;

@@ -5,6 +5,7 @@ import {
   registerTotalMode,
 } from './core/calculate.js';
 import { DEFAULT_PRECISION, normalizeDecimalPrecision } from './core/decimalPrecision.js';
+import { setClockFormat } from './core/clockFormat.js';
 import formatResult from './render/formatResult.js';
 
 let precision = DEFAULT_PRECISION;
@@ -47,5 +48,7 @@ self.addEventListener('message', (event) => {
     registerTotalMode(data);
   } else if (type === 'precision') {
     precision = normalizeDecimalPrecision(data);
+  } else if (type === 'clock-format') {
+    setClockFormat(data);
   }
 });

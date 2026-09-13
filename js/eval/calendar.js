@@ -13,6 +13,7 @@
 // Every operation goes through a helper, since mathjs has no date type.
 
 import parseLine from '../core/parseLine.js';
+import { getClockFormat } from '../core/clockFormat.js';
 
 const MONTHS = {
   january: 1,
@@ -121,7 +122,7 @@ function resolveYear(day, month, year, now) {
 function parseDate(text, now) {
   const s = String(text).trim().toLowerCase().replace(/\.$/, '');
   if (s === 'today') return atNoon(now);
-  if (s === 'now') return new Date(now);
+  if (s === 'now') return markClock(new Date(now));
   if (s === 'yesterday') return addDays(atNoon(now), -1);
   if (s === 'tomorrow') return addDays(atNoon(now), 1);
   if (NAMED_DATES[s]) {
@@ -144,6 +145,62 @@ function parseDate(text, now) {
   return null;
 }
 
+// A clock time is today's date at the given time of day, marked so formatResult
+// renders it as a time (`6:26 pm`) rather than a date.
+function markClock(date, flag = true) {
+  if (flag) date.clock = true;
+  return date;
+}
+
+function parseClock(text, now) {
+  const s = String(text).trim().toLowerCase().replace(/\./g, '').replace(/\s+/g, ' ');
+  let m = /^(\d{1,2}):(\d{2}) ?([ap])m$/.exec(s);
+  if (m) return markClock(clockAt(now, to24(+m[1], m[3]), +m[2]));
+  m = /^(\d{1,2}) ?([ap])m$/.exec(s);
+  if (m) return markClock(clockAt(now, to24(+m[1], m[2]), 0));
+  m = /^(\d{1,2}):(\d{2})$/.exec(s);
+  if (m && +m[1] <= 23 && +m[2] <= 59) return markClock(clockAt(now, +m[1], +m[2]));
+  return null;
+}
+
+function clockAt(now, hour, minute) {
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute);
+}
+
+function to24(hour, mer) {
+  const h = hour % 12;
+  return mer === 'p' ? h + 12 : h;
+}
+
+function requireClock(text) {
+  const clock = parseClock(text, new Date());
+  if (!clock) throw new Error(`"${text}" is not a clock time I understand`);
+  return clock;
+}
+
+function clockAdd(text, duration, sign) {
+  const clock = requireClock(text);
+  return markClock(applyDuration(clock, parseDuration(duration), Number(sign) < 0 ? -1 : 1));
+}
+
+// The interval between two clock times as a timespan Unit, so it can be added,
+// subtracted and aggregated like any other duration. A `to` interval runs
+// forward, wrapping past midnight when needed (`4pm to 3am` is 11 hours); a `-`
+// interval keeps both on the same day (`4pm - 3am` is 13 hours), matching
+// Soulver's ambiguity rule.
+function clockInterval(aText, bText, forward, math) {
+  const a = requireClock(aText);
+  const b = requireClock(bText);
+  if (forward && b <= a) {
+    b.setDate(b.getDate() + 1);
+  }
+  // Minutes (not seconds) so that arithmetic keeps a unit formatResult draws as
+  // a timespan, rather than falling back to raw seconds.
+  const unit = math.unit(Math.round(Math.abs(b - a) / 60000), 'minutes');
+  unit.timespan = true;
+  return unit;
+}
+
 function addDays(date, days) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days, 12);
 }
@@ -157,12 +214,46 @@ function addMonths(date, delta) {
   return target;
 }
 
+// Every duration unit word maps to its canonical singular name, so `4h 3m 5s`
+// and `4 hours 3 minutes 5 seconds` parse the same. `m` is minutes (as in the
+// timespan syntax); months are `mo`/`month`.
+const DURATION_UNITS = {
+  d: 'day',
+  day: 'day',
+  days: 'day',
+  w: 'week',
+  week: 'week',
+  weeks: 'week',
+  mo: 'month',
+  month: 'month',
+  months: 'month',
+  y: 'year',
+  year: 'year',
+  years: 'year',
+  h: 'hour',
+  hr: 'hour',
+  hrs: 'hour',
+  hour: 'hour',
+  hours: 'hour',
+  m: 'minute',
+  min: 'minute',
+  mins: 'minute',
+  minute: 'minute',
+  minutes: 'minute',
+  s: 'second',
+  sec: 'second',
+  secs: 'second',
+  second: 'second',
+  seconds: 'second',
+};
+
 function parseDuration(text) {
   const parts = {};
-  const re = /(\d+(?:\.\d+)?)\s*(days?|weeks?|months?|years?|hours?|minutes?|seconds?)/gi;
+  const re = /(\d+(?:\.\d+)?)\s*([a-z]+)/gi;
   let m;
   while ((m = re.exec(String(text))) !== null) {
-    const unit = m[2].toLowerCase().replace(/s$/, '');
+    const unit = DURATION_UNITS[m[2].toLowerCase()];
+    if (!unit) continue;
     parts[unit] = (parts[unit] || 0) + Number(m[1]);
   }
   return parts;
@@ -184,7 +275,10 @@ function applyDuration(date, parts, sign) {
 // arithmetic (`x + 30 min`). Anything else is a mistake.
 function dateAdd(math, value, duration, sign) {
   const delta = Number(sign) < 0 ? -1 : 1;
-  if (value instanceof Date) return applyDuration(value, parseDuration(duration), delta);
+  if (value instanceof Date) {
+    // `now` is a clock time, so its arithmetic stays one (`now + 3 hours`).
+    return markClock(applyDuration(value, parseDuration(duration), delta), value.clock === true);
+  }
   if (value && value.isUnit === true) {
     return math.add(value, math.multiply(delta, durationUnit(math, duration)));
   }
@@ -235,9 +329,26 @@ function daysBetween(a, b) {
 }
 
 function formatDate(date) {
+  if (date.clock) return formatClock(date);
   const year = date.getFullYear();
   const suffix = year === new Date().getFullYear() ? '' : ` ${year}`;
   return `${date.getDate()} ${MONTH_NAMES[date.getMonth()]}${suffix}`;
+}
+
+// `19:12` or `7:12 pm` (per the Clock setting), with the day when the clock
+// time is not today.
+function formatClock(date, now = new Date()) {
+  const hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const time =
+    getClockFormat() === '12'
+      ? `${hours % 12 === 0 ? 12 : hours % 12}:${minutes} ${hours < 12 ? 'am' : 'pm'}`
+      : `${String(hours).padStart(2, '0')}:${minutes}`;
+  const day = Math.round((atNoon(date) - atNoon(now)) / DAY_MS);
+  if (day === 0) return time;
+  if (day === -1) return `Yesterday at ${time}`;
+  if (day === 1) return `Tomorrow at ${time}`;
+  return `${date.getDate()} ${MONTH_NAMES[date.getMonth()]} at ${time}`;
 }
 
 const INTERVAL_ORDER = ['year', 'month', 'week', 'day', 'hour', 'minute', 'second'];
@@ -301,12 +412,24 @@ function requireDate(text) {
   return date;
 }
 
+// A date argument in a rewritten expression: a date literal becomes
+// `__date("...")`, while a variable is passed straight through (it already
+// holds a Date).
+function dateArg(text) {
+  return DATE_LITERAL.test(text) ? `__date(${JSON.stringify(text)})` : text;
+}
+
+// Accept either a Date value (a date variable) or date text.
+function toDate(value) {
+  return value instanceof Date ? value : requireDate(value);
+}
+
 // Resolve two dates so the second is not before the first — an interval written
 // without years (`3 March to 30 May`) should not straddle a year boundary just
 // because the nearest occurrence of one date happens to fall in another year.
-function resolveInterval(aText, bText) {
-  const a = requireDate(aText);
-  let b = requireDate(bText);
+function resolveInterval(aValue, bValue) {
+  const a = toDate(aValue);
+  let b = toDate(bValue);
   if (b < a) b = addMonths(b, 12);
   return { a, b };
 }
@@ -394,6 +517,9 @@ function initCalendar(math) {
     {
       __date: (text) => requireDate(text),
       __dateAdd: (value, duration, sign) => dateAdd(math, value, duration, sign),
+      __clock: (text) => requireClock(text),
+      __clockAdd: (text, duration, sign) => clockAdd(text, duration, sign),
+      __clockInterval: (a, b, forward) => clockInterval(a, b, Number(forward) > 0, math),
       __dateInterval: (a, b) => {
         const { a: from, b: to } = resolveInterval(a, b);
         return { type: 'calendarInterval', parts: dateDiff(from, to) };
@@ -437,35 +563,69 @@ const DATE_SRC =
   `|(?:${MONTH_WORD})\\s+\\d{1,2}(?:st|nd|rd|th)?(?:,?\\s+\\d{4})?` +
   `|\\d{1,2}(?:st|nd|rd|th)?\\s+(?:${MONTH_WORD})(?:,?\\s+\\d{4})?` +
   `|\\d{4}-\\d{1,2}-\\d{1,2}|\\d{1,2}[./]\\d{1,2}[./]\\d{2,4})`;
-const DURATION_SRC = `(?:\\d+(?:\\.\\d+)?\\s*(?:days?|weeks?|months?|years?|hours?|minutes?|seconds?)\\s*)+`;
+// A date, or a variable that holds one (`start = March 4`, then `start + 2 weeks`).
+const IDENT = '[A-Za-z_][A-Za-z0-9_]*';
+const DATE_OR_IDENT = `(?:${DATE_SRC}|${IDENT})`;
+// Duration units, full names and the timespan shorthand (`4h 3m 5s`). The long
+// forms come first so `minutes` is not read as `m` + `inutes`.
+const DURATION_UNITS_SRC =
+  'days?|weeks?|months?|years?|hours?|hrs?|minutes?|mins?|seconds?|secs?|d|w|mo|y|h|m|s';
+const DURATION_SRC = `(?:\\d+(?:\\.\\d+)?\\s*(?:${DURATION_UNITS_SRC})\\s*)+`;
 const MONTH_YEAR_SRC = `(?:${MONTH_WORD})\\s+\\d{4}`;
+// A clock time: `9:45 am`, `7:30am`, `4pm`, `16:00`, `1:30`. A colon time counts
+// as a clock when it carries a meridiem or a minute (two digits); a one-digit
+// minute (`1:5`) stays a mathjs range.
+const CLOCK_SRC =
+  `(?:(?:[01]?\\d|2[0-3]):[0-5]\\d\\s*[ap]\\.?m\\.?` +
+  `|(?:0?[1-9]|1[0-2])\\s*[ap]\\.?m\\.?` +
+  `|(?:[01]?\\d|2[0-3]):[0-5]\\d)`;
 
 const DATE_ONLY = new RegExp(`^(${DATE_SRC})$`, 'i');
+const DATE_LITERAL = new RegExp(`^(?:${DATE_SRC})$`, 'i');
+const IDENT_ONLY = new RegExp(`^${IDENT}$`);
 const DATE_PAIR = new RegExp(`^(${DATE_SRC})\\s*(?:-|to)\\s*(${DATE_SRC})$`, 'i');
-const DATE_DURATION = new RegExp(`^(${DATE_SRC})\\s*([+-])\\s*(${DURATION_SRC})$`, 'i');
-const DURATION_DATE = new RegExp(`^(${DURATION_SRC})\\s+(after|before)\\s+(${DATE_SRC})$`, 'i');
+const DATE_DURATION = new RegExp(`^(${DATE_OR_IDENT})\\s*([+-])\\s*(${DURATION_SRC})$`, 'i');
+const DURATION_DATE = new RegExp(
+  `^(${DURATION_SRC})\\s+(after|before)\\s+(${DATE_OR_IDENT})$`,
+  'i'
+);
 const DURATION_FROM_NOW = new RegExp(`^(${DURATION_SRC})\\s+from\\s+now$`, 'i');
 const DURATION_AGO = new RegExp(`^(${DURATION_SRC})\\s+ago$`, 'i');
 const DATE_AS = new RegExp(`^(${DATE_SRC})\\s+as\\s+(.+)$`, 'i');
 const DAYS_VERB = /^days\s+(until|till|since|between)\s+(.+)$/i;
-const INCLUSIVE = new RegExp(`^(${DATE_SRC})\\s+through\\s+(${DATE_SRC})\\s+in\\s+days?$`, 'i');
+const INCLUSIVE = new RegExp(
+  `^(${DATE_OR_IDENT})\\s+through\\s+(${DATE_OR_IDENT})\\s+in\\s+days?$`,
+  'i'
+);
 const MIDPOINT = new RegExp(
-  `^(?:midpoint|halfway)\\s+between\\s+(${DATE_SRC})\\s+and\\s+(${DATE_SRC})$`,
+  `^(?:midpoint|halfway)\\s+between\\s+(${DATE_OR_IDENT})\\s+and\\s+(${DATE_OR_IDENT})$`,
   'i'
 );
 const DAYS_IN_MONTH = new RegExp(`^days\\s+in\\s+(${MONTH_YEAR_SRC})$`, 'i');
 const DAYS_IN_QUARTER = /^days\s+in\s+Q([1-4])$/i;
-const DAY_NUMBER = new RegExp(`^day\\s+(?:number|of\\s+year)\\s+on\\s+(${DATE_SRC})$`, 'i');
-const DAY_OF_MONTH = new RegExp(`^day\\s+of\\s+month\\s+on\\s+(${DATE_SRC})$`, 'i');
-const WEEK_NUMBER = new RegExp(`^week\\s+number\\s+on\\s+(${DATE_SRC})$`, 'i');
+const DAY_NUMBER = new RegExp(`^day\\s+(?:number|of\\s+year)\\s+on\\s+(${DATE_OR_IDENT})$`, 'i');
+const DAY_OF_MONTH = new RegExp(`^day\\s+of\\s+month\\s+on\\s+(${DATE_OR_IDENT})$`, 'i');
+const WEEK_NUMBER = new RegExp(`^week\\s+number\\s+on\\s+(${DATE_OR_IDENT})$`, 'i');
 const WEEK_OF_YEAR = /^week\s+of\s+year$/i;
-const DATE_AND_DATE = new RegExp(`^(${DATE_SRC})\\s+and\\s+(${DATE_SRC})$`, 'i');
+const DATE_AND_DATE = new RegExp(`^(${DATE_OR_IDENT})\\s+and\\s+(${DATE_OR_IDENT})$`, 'i');
 const WORKDAYS_IN = /^workdays\s+in\s+(.+)$/i;
-const WORKDAYS_RANGE = new RegExp(`^(${DATE_SRC})\\s+to\\s+(${DATE_SRC})\\s+in\\s+workdays$`, 'i');
-const WORKDAYS_FROM = new RegExp(`^workdays\\s+from\\s+(${DATE_SRC})\\s+to\\s+(${DATE_SRC})$`, 'i');
-const ADD_WORKDAYS = new RegExp(`^(${DATE_SRC})\\s*([+-])\\s*(\\d+)\\s+workdays$`, 'i');
-const WORKDAYS_REL = new RegExp(`^(\\d+)\\s+workdays\\s+(after|before)\\s+(${DATE_SRC})$`, 'i');
-const WEEKDAY_ON = new RegExp(`^(?:day\\s+of\\s+the\\s+week|weekday)\\s+on\\s+(${DATE_SRC})$`, 'i');
+const WORKDAYS_RANGE = new RegExp(
+  `^(${DATE_OR_IDENT})\\s+to\\s+(${DATE_OR_IDENT})\\s+in\\s+workdays$`,
+  'i'
+);
+const WORKDAYS_FROM = new RegExp(
+  `^workdays\\s+from\\s+(${DATE_OR_IDENT})\\s+to\\s+(${DATE_OR_IDENT})$`,
+  'i'
+);
+const ADD_WORKDAYS = new RegExp(`^(${DATE_OR_IDENT})\\s*([+-])\\s*(\\d+)\\s+workdays$`, 'i');
+const WORKDAYS_REL = new RegExp(
+  `^(\\d+)\\s+workdays\\s+(after|before)\\s+(${DATE_OR_IDENT})$`,
+  'i'
+);
+const WEEKDAY_ON = new RegExp(
+  `^(?:day\\s+of\\s+the\\s+week|weekday)\\s+on\\s+(${DATE_OR_IDENT})$`,
+  'i'
+);
 const WORK_HOURS_IN = /^work\s+hours\s+in\s+(.+)$/i;
 // `work hours in June [2026]` can appear inside a larger expression (`* 25 EUR`,
 // `+ 40`), so it is rewritten wherever it occurs rather than only as a whole
@@ -476,16 +636,17 @@ const WORK_HOURS_IN_PHRASE = new RegExp(
   'gi'
 );
 const WORK_HOURS_BETWEEN = new RegExp(
-  `^work\\s+hours\\s+between\\s+(${DATE_SRC})\\s+and\\s+(${DATE_SRC})$`,
+  `^work\\s+hours\\s+between\\s+(${DATE_OR_IDENT})\\s+and\\s+(${DATE_OR_IDENT})$`,
   'i'
 );
 
-// A date held in a variable (`start = March 4`, then `start + 2 weeks`). The
-// identifier is matched after every literal date pattern, so `today + 1 week`
-// still goes through the date path.
-const IDENT = '[A-Za-z_][A-Za-z0-9_]*';
-const IDENT_DURATION = new RegExp(`^(${IDENT})\\s*([+-])\\s*(${DURATION_SRC})$`, 'i');
-const DURATION_IDENT = new RegExp(`^(${DURATION_SRC})\\s+(after|before)\\s+(${IDENT})$`, 'i');
+const CLOCK_ONLY = new RegExp(`^(${CLOCK_SRC})$`, 'i');
+const CLOCK_DURATION = new RegExp(`^(${CLOCK_SRC})\\s*([+-])\\s*(${DURATION_SRC})$`, 'i');
+// A clock pair (`to` is a forward interval, `-` the ambiguous same-day
+// difference) can sit inside a larger expression, so it is rewritten wherever
+// it occurs and composes with the arithmetic around it
+// (`9:00 am to 5:30 pm - 45 minutes`).
+const CLOCK_PAIR_PHRASE = new RegExp(`\\b(${CLOCK_SRC})\\s+(to|-)\\s+(${CLOCK_SRC})`, 'gi');
 
 function preprocessCalendar(expression) {
   let expr = expression.trim().replace(/\bwork\s+days?\b/gi, 'workdays');
@@ -504,28 +665,43 @@ function preprocessCalendar(expression) {
       `__workHoursInMonth(${JSON.stringify(year ? `${month} ${year}` : month)})`
   );
 
+  // A clock pair can sit inside a larger expression too
+  // (`9:00 am to 5:30 pm - 45 minutes`); it becomes a duration the rest of the
+  // expression combines with.
+  expr = expr.replace(
+    CLOCK_PAIR_PHRASE,
+    (match, a, op, b) =>
+      `__clockInterval(${JSON.stringify(a)}, ${JSON.stringify(b)}, ${
+        op.toLowerCase() === 'to' ? 1 : 0
+      })`
+  );
+
   let m;
   if ((m = DATE_AS.exec(expr))) {
     return `__dateFormat(__date(${JSON.stringify(m[1])}), ${JSON.stringify(m[2])})`;
   }
 
+  // Clock times (`9:45 am`, `16:00`) and their arithmetic.
+  if ((m = CLOCK_DURATION.exec(expr))) {
+    return `__clockAdd(${JSON.stringify(m[1])}, ${JSON.stringify(m[3])}, ${m[2] === '-' ? -1 : 1})`;
+  }
+  if ((m = CLOCK_ONLY.exec(expr))) return `__clock(${JSON.stringify(m[1])})`;
+
   // Weekdays and workdays (public holidays are not modelled yet).
   if ((m = WORKDAYS_RANGE.exec(expr))) {
-    return `__workdaysBetween(${JSON.stringify(m[1])}, ${JSON.stringify(m[2])})`;
+    return `__workdaysBetween(${dateArg(m[1])}, ${dateArg(m[2])})`;
   }
   if ((m = WORKDAYS_FROM.exec(expr))) {
-    return `__workdaysBetween(${JSON.stringify(m[1])}, ${JSON.stringify(m[2])})`;
+    return `__workdaysBetween(${dateArg(m[1])}, ${dateArg(m[2])})`;
   }
   if ((m = WORK_HOURS_BETWEEN.exec(expr))) {
-    return `__workHoursBetween(${JSON.stringify(m[1])}, ${JSON.stringify(m[2])})`;
+    return `__workHoursBetween(${dateArg(m[1])}, ${dateArg(m[2])})`;
   }
   if ((m = ADD_WORKDAYS.exec(expr))) {
-    return `__addWorkdays(__date(${JSON.stringify(m[1])}), ${m[2] === '-' ? -1 : 1} * ${m[3]})`;
+    return `__addWorkdays(${dateArg(m[1])}, ${m[2] === '-' ? -1 : 1} * ${m[3]})`;
   }
   if ((m = WORKDAYS_REL.exec(expr))) {
-    return `__addWorkdays(__date(${JSON.stringify(m[3])}), ${
-      m[2].toLowerCase() === 'before' ? -1 : 1
-    } * ${m[1]})`;
+    return `__addWorkdays(${dateArg(m[3])}, ${m[2].toLowerCase() === 'before' ? -1 : 1} * ${m[1]})`;
   }
   if ((m = WORKDAYS_IN.exec(expr))) {
     return `__workdaysInDuration(${JSON.stringify(m[1])})`;
@@ -534,29 +710,30 @@ function preprocessCalendar(expression) {
     return `__workHoursInMonth(${JSON.stringify(m[1])})`;
   }
   if ((m = WEEKDAY_ON.exec(expr))) {
-    return `__weekday(__date(${JSON.stringify(m[1])}))`;
+    return `__weekday(${dateArg(m[1])})`;
   }
 
   if ((m = DAYS_VERB.exec(expr))) {
     const verb = m[1].toLowerCase();
     const pair = DATE_AND_DATE.exec(m[2]);
     if (verb === 'between' && pair) {
-      return `__daysBetweenText(${JSON.stringify(pair[1])}, ${JSON.stringify(pair[2])})`;
+      return `__daysBetweenText(${dateArg(pair[1])}, ${dateArg(pair[2])})`;
     }
-    const single = DATE_ONLY.exec(m[2]);
+    const single = DATE_ONLY.exec(m[2]) || (IDENT_ONLY.test(m[2]) ? [null, m[2]] : null);
     if (single && verb !== 'between') {
+      const arg = dateArg(single[1]);
       return verb === 'since'
-        ? `__daysBetweenText(${JSON.stringify(single[1])}, "today")`
-        : `__daysBetweenText("today", ${JSON.stringify(single[1])})`;
+        ? `__daysBetweenText(${arg}, "today")`
+        : `__daysBetweenText("today", ${arg})`;
     }
   }
 
   if ((m = INCLUSIVE.exec(expr))) {
-    return `__daysBetweenText(${JSON.stringify(m[1])}, ${JSON.stringify(m[2])}) + 1`;
+    return `__daysBetweenText(${dateArg(m[1])}, ${dateArg(m[2])}) + 1`;
   }
 
   if ((m = MIDPOINT.exec(expr))) {
-    return `__midpointText(${JSON.stringify(m[1])}, ${JSON.stringify(m[2])})`;
+    return `__midpointText(${dateArg(m[1])}, ${dateArg(m[2])})`;
   }
 
   if ((m = DATE_PAIR.exec(expr))) {
@@ -564,23 +741,11 @@ function preprocessCalendar(expression) {
   }
 
   if ((m = DATE_DURATION.exec(expr))) {
-    return `__dateAdd(__date(${JSON.stringify(m[1])}), ${JSON.stringify(m[3])}, ${
-      m[2] === '-' ? -1 : 1
-    })`;
+    return `__dateAdd(${dateArg(m[1])}, ${JSON.stringify(m[3])}, ${m[2] === '-' ? -1 : 1})`;
   }
 
   if ((m = DURATION_DATE.exec(expr))) {
-    return `__dateAdd(__date(${JSON.stringify(m[3])}), ${JSON.stringify(m[1])}, ${
-      m[2].toLowerCase() === 'before' ? -1 : 1
-    })`;
-  }
-
-  if ((m = IDENT_DURATION.exec(expr))) {
-    return `__dateAdd(${m[1]}, ${JSON.stringify(m[3])}, ${m[2] === '-' ? -1 : 1})`;
-  }
-
-  if ((m = DURATION_IDENT.exec(expr))) {
-    return `__dateAdd(${m[3]}, ${JSON.stringify(m[1])}, ${
+    return `__dateAdd(${dateArg(m[3])}, ${JSON.stringify(m[1])}, ${
       m[2].toLowerCase() === 'before' ? -1 : 1
     })`;
   }
@@ -595,9 +760,9 @@ function preprocessCalendar(expression) {
 
   if ((m = DAYS_IN_MONTH.exec(expr))) return `__daysInMonth(${JSON.stringify(m[1])})`;
   if ((m = DAYS_IN_QUARTER.exec(expr))) return `__daysInQuarter(${m[1]})`;
-  if ((m = DAY_NUMBER.exec(expr))) return `__dayOfYear(__date(${JSON.stringify(m[1])}))`;
-  if ((m = DAY_OF_MONTH.exec(expr))) return `__dayOfMonth(__date(${JSON.stringify(m[1])}))`;
-  if ((m = WEEK_NUMBER.exec(expr))) return `__weekNumber(__date(${JSON.stringify(m[1])}))`;
+  if ((m = DAY_NUMBER.exec(expr))) return `__dayOfYear(${dateArg(m[1])})`;
+  if ((m = DAY_OF_MONTH.exec(expr))) return `__dayOfMonth(${dateArg(m[1])})`;
+  if ((m = WEEK_NUMBER.exec(expr))) return `__weekNumber(${dateArg(m[1])})`;
   if (WEEK_OF_YEAR.test(expr)) return `__weekNumber(__date("today"))`;
   if ((m = DATE_ONLY.exec(expr))) return `__date(${JSON.stringify(m[1])})`;
 

@@ -77,10 +77,19 @@ Terms used throughout the codebase and this documentation.
 - **Calendar date** — a date value (`10 June`, `2019-04-01`, `today`),
   represented as a JS `Date` at local noon. `preprocessCalendar`
   (`js/eval/calendar.js`) rewrites date arithmetic to `__date*` helpers and
-  `formatResult` renders `D Month [YYYY]`.
+  `formatResult` renders `D Month [YYYY]`. A date variable works anywhere a
+  literal does (`days until start`, `5 workdays after start`), since the helpers
+  read a Date through `toDate`.
 - **Calendar interval** — the span between two dates (`January 10 - February 5`
   → `3 weeks 5 days`), a small `calendarInterval` value that `formatResult`
   draws as years/months/weeks/days.
+- **Clock time** — a moment today (`9:45 am`, `1:30`), a `Date` marked
+  `.clock`. `__clockAdd` adds a duration; `__clockInterval` measures an interval
+  as a timespan Unit, so it chains and aggregates
+  (`9:00 am to 5:30 pm - 45 minutes`). `formatResult` renders it per the
+  **Clock format** (`js/core/clockFormat.js`, 24-hour by default, 12-hour
+  optional) as `19:12` or `7:12 pm`, with `Yesterday at`/`Tomorrow at` when not
+  today. `to` wraps forward past midnight, `-` keeps both on the same day.
 - **Workday** — Monday–Friday. `js/eval/calendar.js` counts workdays in a span
   (`10 March to 17 March in workdays`), advances a date by workdays
   (`5 workdays after March 14`), and converts `work hours` at eight hours per

@@ -21,6 +21,7 @@ import initStarterPrompt from './ui/starterPrompt.js';
 import initTotalMode from './ui/totalMode.js';
 import initLoadingIndicator from './ui/loading.js';
 import initEditorScroll from './ui/editor.js';
+import { readClockFormat, setClockFormat } from './core/clockFormat.js';
 
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');
@@ -34,6 +35,9 @@ const loadingIndicator = initLoadingIndicator(document.getElementById('loading')
 // worker; only the results and total come back asynchronously (phase two).
 const editorScroll = initEditorScroll(contentEditableNode);
 const rowRenderer = createRowRenderer(viewNode);
+// The main thread formats some values too (line references, copied results), so
+// it needs the clock format alongside the worker.
+setClockFormat(readClockFormat());
 
 function renderTextLayer(lines) {
   rowRenderer.renderText(lines);
@@ -141,6 +145,13 @@ window.addEventListener('precision:updated', (event) => {
 // but the worker recomputes the total on every evaluation).
 window.addEventListener('total-mode:updated', (event) => {
   evalClient.syncTotalMode(event.detail);
+  evalClient.update();
+});
+
+// Changing the clock format only reformats clock-time results.
+window.addEventListener('clock-format:updated', (event) => {
+  setClockFormat(event.detail);
+  evalClient.syncClockFormat(event.detail);
   evalClient.update();
 });
 
