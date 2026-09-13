@@ -9,6 +9,25 @@ function initEditorScroll(editableNode) {
 
   let charWidth = 0;
   let cachedGutterInset = null;
+  let metricsCache = null;
+  let extentCache = null;
+
+  // The editor's font-derived metrics. They only change with the font, theme or
+  // viewport, so they are cached (and invalidated by refreshMetrics/resize)
+  // rather than re-read with getComputedStyle on every keystroke.
+  function metrics() {
+    if (!metricsCache) {
+      const cs = getComputedStyle(editableNode);
+      metricsCache = {
+        lineHeight: Math.round(parseFloat(cs.fontSize) * 1.65),
+        padLeft: parseFloat(cs.paddingLeft),
+        padRight: parseFloat(cs.paddingRight),
+        padTop: parseFloat(cs.paddingTop),
+        padBottom: parseFloat(cs.paddingBottom),
+      };
+    }
+    return metricsCache;
+  }
 
   // The textarea's intrinsic height is ~2 rows (its `rows` attribute), which
   // would shrink the grid and desync the ghost layer, so size it to its own
@@ -29,24 +48,28 @@ function initEditorScroll(editableNode) {
   // glyph width, plus padding. The textarea's own scrollWidth/scrollHeight
   // cannot be used to size it: once the box is pinned larger than its content
   // (e.g. after a font-size increase) scrollHeight only reports the box height,
-  // so shrinking the font would never let the box come back down.
-  function contentExtent(cs, lineHeight) {
+  // so shrinking the font would never let the box come back down. The longest
+  // line and count are cached against the text, so the second `syncSize` of an
+  // update (after the results patch, with the text unchanged) does no scan.
+  function contentExtent(m) {
     const value = editableNode.value;
-    const lines = value.split('\n');
-    let longest = 0;
-    for (const line of lines) if (line.length > longest) longest = line.length;
+    if (!extentCache || extentCache.value !== value) {
+      const lines = value.split('\n');
+      let longest = 0;
+      for (const line of lines) if (line.length > longest) longest = line.length;
+      extentCache = { value, longest, count: lines.length };
+    }
     if (!charWidth) measureCharWidth();
     return {
-      width: parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + longest * charWidth,
-      height: parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + lines.length * lineHeight,
+      width: m.padLeft + m.padRight + extentCache.longest * charWidth,
+      height: m.padTop + m.padBottom + extentCache.count * m.lineHeight,
     };
   }
 
   function syncSize() {
-    const cs = getComputedStyle(editableNode);
-    const lineHeight = Math.round(parseFloat(cs.fontSize) * 1.65);
-    document.documentElement.style.setProperty('--editor-line-height', `${lineHeight}px`);
-    const { width, height } = contentExtent(cs, lineHeight);
+    const m = metrics();
+    document.documentElement.style.setProperty('--editor-line-height', `${m.lineHeight}px`);
+    const { width, height } = contentExtent(m);
     editableNode.style.width = width > scroller.clientWidth ? `${Math.ceil(width)}px` : '';
     editableNode.style.height = height > scroller.clientHeight ? `${Math.ceil(height)}px` : '';
     editableNode.scrollTop = 0;
@@ -71,9 +94,9 @@ function initEditorScroll(editableNode) {
     const lineIndex = indexOfLineAt(value, pos);
     const lineStart = startOfLine(value, pos);
     if (!charWidth) measureCharWidth();
-    const cs = getComputedStyle(editableNode);
-    const x = parseFloat(cs.paddingLeft) + (pos - lineStart) * charWidth;
-    const y = parseFloat(cs.paddingTop) + lineIndex * parseFloat(cs.lineHeight);
+    const m = metrics();
+    const x = m.padLeft + (pos - lineStart) * charWidth;
+    const y = m.padTop + lineIndex * m.lineHeight;
     const margin = 24;
     // The line-number gutter is a fixed, opaque overlay on the left (it mirrors
     // only the vertical scroll), so the left inset must clear its right edge —
@@ -116,9 +139,13 @@ function initEditorScroll(editableNode) {
   document.addEventListener('selectionchange', () => {
     if (document.activeElement === editableNode) scrollCaretIntoView();
   });
-  // The gutter's width is font/viewport relative; re-measure after a resize.
+  // Re-measure the font-derived geometry after a font or viewport change, then
+  // re-pin the size (the resize can change whether the content overflows).
   window.addEventListener('resize', () => {
     cachedGutterInset = null;
+    metricsCache = null;
+    extentCache = null;
+    syncSize();
   });
 
   // The caret's position relative to the scroll content, so an overlay (the
@@ -129,12 +156,11 @@ function initEditorScroll(editableNode) {
     const pos = editableNode.selectionStart;
     if (pos === null) return null;
     if (!charWidth) measureCharWidth();
-    const cs = getComputedStyle(editableNode);
-    const lineHeight = parseFloat(cs.lineHeight);
+    const m = metrics();
     return {
-      left: parseFloat(cs.paddingLeft) + (pos - startOfLine(value, pos)) * charWidth,
-      top: parseFloat(cs.paddingTop) + indexOfLineAt(value, pos) * lineHeight,
-      lineHeight,
+      left: m.padLeft + (pos - startOfLine(value, pos)) * charWidth,
+      top: m.padTop + indexOfLineAt(value, pos) * m.lineHeight,
+      lineHeight: m.lineHeight,
       charWidth,
     };
   }
@@ -149,6 +175,8 @@ function initEditorScroll(editableNode) {
     refreshMetrics() {
       charWidth = 0;
       cachedGutterInset = null;
+      metricsCache = null;
+      extentCache = null;
       syncSize();
     },
   };
