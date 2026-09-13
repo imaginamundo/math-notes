@@ -486,11 +486,13 @@ re-renders on `language:updated`, dispatched by `setLocale()` after it updates
 `<html lang>`, `document.title` and the static markup. Settings renders one card
 per language, with the resolved one active.
 
-Only the app chrome is translated in v1: the evaluator stays English (keywords,
-error messages and result formatting are unchanged), which also keeps the
-`js/i18n/ui` dictionaries out of the worker. `test/conventions.test.mjs` asserts
-that every `data-i18n` key in `index.html` resolves in every locale and that
-`core`/`eval` never import `js/i18n/`.
+Strings are split by area: `js/i18n/ui/<lang>.js` is the app chrome, and
+`js/i18n/help/<lang>.js` is the Help and Examples prose behind the `data-i18n`
+markers in the two reference modals (the English file is generated from
+`index.html`). The evaluator stays English — keywords, error messages and result
+formatting are unchanged — which also keeps the dictionaries out of the worker.
+`test/conventions.test.mjs` asserts that every `data-i18n` key in `index.html`
+resolves in every locale and that `core`/`eval` never import `js/i18n/`.
 
 ## Performance
 

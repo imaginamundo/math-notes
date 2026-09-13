@@ -148,5 +148,6 @@ Terms used throughout the codebase and this documentation.
   `math-notes-language` (`js/core/language.js`); when unset it follows the system
   language. Only the chrome is translated — the evaluator stays English.
 - **Message key** — the identifier passed to `t(key, params)`. Its `data-i18n`
-  form marks static markup in `index.html`; each `js/i18n/ui/<lang>.js`
-  dictionary must define every key.
+  form marks static markup in `index.html`; each `js/i18n/<area>/<lang>.js`
+  dictionary (`ui` for chrome, `help` for the Help/Examples prose) must define
+  every key.
