@@ -68,6 +68,13 @@ test('the interval between two dates', () => {
   assert.equal(valueOf('April 1 through April 30 in days'), '30');
 });
 
+test('an explicit backward interval keeps its full span', () => {
+  assert.equal(valueOf('2020-06-01 - 2019-01-01'), '1 year 5 months');
+  assert.equal(valueOf('2021-06-01 - 2019-01-01'), '2 years 5 months');
+  // Both directions agree; an explicit year is never nudged.
+  assert.equal(valueOf('2019-01-01 - 2020-06-01'), '1 year 5 months');
+});
+
 test('days until, since and between', () => {
   assert.equal(valueOf('days between 3 March and 30 May'), '88');
 });

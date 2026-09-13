@@ -116,7 +116,11 @@ function resolveYear(day, month, year, now) {
   if (!thisYear) return null;
   const nextYear = makeDate(now.getFullYear() + 1, month, day);
   if (!nextYear) return thisYear;
-  return Math.abs(thisYear - now) <= Math.abs(nextYear - now) ? thisYear : nextYear;
+  const resolved = Math.abs(thisYear - now) <= Math.abs(nextYear - now) ? thisYear : nextYear;
+  // Remember that the year was implicit: only those dates may be nudged onto
+  // the other side of the later date when the interval has no year to place it.
+  resolved.implicitYear = true;
+  return resolved;
 }
 
 function parseDate(text, now) {
@@ -425,13 +429,15 @@ function toDate(value) {
   return value instanceof Date ? value : requireDate(value);
 }
 
-// Resolve two dates so the second is not before the first — an interval written
-// without years (`3 March to 30 May`) should not straddle a year boundary just
-// because the nearest occurrence of one date happens to fall in another year.
+// Resolve two dates so the second is not before the first — but only when the
+// second date's year was implicit (a `3 March to 30 May` written without years,
+// where the nearest occurrence of one date happens to fall after the other). An
+// explicit backward interval (`2020-06-01 - 2019-01-01`) keeps its real span and
+// `dateDiff` swaps the endpoints instead of dropping a whole year.
 function resolveInterval(aValue, bValue) {
   const a = toDate(aValue);
   let b = toDate(bValue);
-  if (b < a) b = addMonths(b, 12);
+  if (b < a && b.implicitYear === true) b = addMonths(b, 12);
   return { a, b };
 }
 
