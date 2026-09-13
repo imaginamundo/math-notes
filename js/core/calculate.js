@@ -42,16 +42,16 @@ const MAX_LIST_LENGTH = 100;
 // Matches a standalone aggregate keyword, i.e. not a mathjs function call
 // like `sum([1, 2, 3])`.
 const AGGREGATE_WORD = /\b(?:sum|total|average|avg)\b(?!\s*\()/i;
-const AGGREGATE_SUM_WORD = /\b(?:sum|total)\b(?!\s*\()/gi;
-const AGGREGATE_AVG_WORD = /\b(?:average|avg)\b(?!\s*\()/gi;
+const AGGREGATE_WORD_ALL = /\b(sum|total|average|avg)\b(?!\s*\()/gi;
 
-// Labels a line may not assign to: the aggregate keywords and `prev` (the docs
-// reserve them), the unconditional date keywords (rewritten before mathjs, so a
-// variable of that name could never be read back) and the whole `__` namespace,
-// which holds the engine's own helpers and the generated names multi-word
-// variables are mangled to. Checked against the raw label, before mangling, so
-// a multi-word variable (which becomes `__var_...`) is never mistaken for a
-// reserved name.
+// Labels a line may not assign to: `prev` and the unconditional date keywords
+// (rewritten before mathjs, so a variable of that name could never be read
+// back) and the whole `__` namespace, which holds the engine's own helpers and
+// the generated names multi-word variables are mangled to. Aggregate keywords
+// (`sum`/`total`/…) are deliberately not here: assigning one makes the variable
+// shadow the keyword from then on. Checked against the raw label, before
+// mangling, so a multi-word variable (which becomes `__var_...`) is never
+// mistaken for a reserved name.
 const RESERVED_LABELS = new Set([
   'prev',
   'today',
@@ -63,10 +63,7 @@ const RESERVED_LABELS = new Set([
 ]);
 
 function isReservedLabel(label) {
-  const lower = label.toLowerCase();
-  return (
-    AGGREGATE_KEYWORDS[lower] !== undefined || RESERVED_LABELS.has(lower) || label.startsWith('__')
-  );
+  return RESERVED_LABELS.has(label.toLowerCase()) || label.startsWith('__');
 }
 
 // A group opens with a header line (`Name:` with no expression) and closes with
@@ -342,12 +339,15 @@ function createEngine() {
   }
 
   // Replace aggregate keywords in an expression with the block's values so they
-  // work inside expressions too, e.g. `a = sum` or `sum * 2`.
-  function substituteAggregates(parsed, sum, average) {
+  // work inside expressions too, e.g. `a = sum` or `sum * 2`. A keyword the user
+  // has redefined as a variable is left alone, so the variable shadows it.
+  function substituteAggregates(parsed, sum, average, variables) {
     const replace = (expression) =>
-      expression
-        .replace(AGGREGATE_SUM_WORD, String(sum))
-        .replace(AGGREGATE_AVG_WORD, String(average));
+      expression.replace(AGGREGATE_WORD_ALL, (word) =>
+        variables[word] !== undefined
+          ? word
+          : String(AGGREGATE_KEYWORDS[word.toLowerCase()] === 'average' ? average : sum)
+      );
 
     if (parsed.isAssignment) {
       const rhs = replace(parsed.rhs);
@@ -404,7 +404,7 @@ function createEngine() {
       const line = lines[i];
       if (line.trim() === '') lastBlankIndex = i;
       const parsed = parseLine(line);
-      if (parsed.isAssignment && !AGGREGATE_KEYWORDS[parsed.label.toLowerCase()]) {
+      if (parsed.isAssignment) {
         const stored = results[i];
         const assigned = stored
           ? stored.assigned !== undefined
@@ -487,7 +487,10 @@ function createEngine() {
 
       const group = groups.groupOfLine.get(i);
       const blockStart = group ? group.start + 1 : lastBlankIndex + 1;
-      const keyword = AGGREGATE_KEYWORDS[parsed.code.trim().toLowerCase()];
+      const bare = parsed.code.trim();
+      // A variable named like an aggregate keyword shadows it (`total = 5`).
+      const keyword =
+        variables[bare] === undefined ? AGGREGATE_KEYWORDS[bare.toLowerCase()] : undefined;
 
       if (keyword) {
         const value = aggregateAbove(results, blockStart, i, keyword);
@@ -504,7 +507,7 @@ function createEngine() {
       if (AGGREGATE_WORD.test(parsed.code)) {
         const blockSum = aggregateAbove(results, blockStart, i, 'sum');
         const blockAvg = aggregateAbove(results, blockStart, i, 'average');
-        parsedLine = substituteAggregates(parsed, blockSum, blockAvg);
+        parsedLine = substituteAggregates(parsed, blockSum, blockAvg, variables);
       }
 
       const resolved = resolveLineRefs(parsedLine, results, i);

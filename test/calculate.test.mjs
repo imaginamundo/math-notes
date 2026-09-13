@@ -548,12 +548,16 @@ test('evaluateLines keeps the mathjs sum function callable', () => {
   assert.equal(evaluateLines(['sum([1, 2, 3])']).results[0].value, 6);
 });
 
-test('evaluateLines rejects assigning to aggregate keywords', () => {
-  const { results } = evaluateLines(['sum = 5', 'average = 3', 'total']);
-  assert.equal(results[0].type, 'error');
-  assert.match(results[0].value, /reserved/);
-  assert.equal(results[1].type, 'error');
-  assert.equal(results[2].value, 0);
+test('a variable can shadow an aggregate keyword', () => {
+  const { results } = evaluateLines(['total = 5', 'total * 2']);
+  assert.equal(results[0].type, 'assignment');
+  assert.equal(results[1].value, 10);
+
+  // Without a definition, the keyword still aggregates.
+  assert.equal(evaluateLines(['10', '20', 'total']).results[2].value, 30);
+
+  // A shadowed keyword leaves the other aggregate keywords alone.
+  assert.equal(evaluateLines(['total = 5', '10', 'total + sum']).results[2].value, 15);
 });
 
 test('evaluateLines rejects assigning to prev, date keywords and internals', () => {
