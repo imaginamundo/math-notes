@@ -233,22 +233,30 @@ their own:
 
 `assertBoundedExpression` rejects list literals and statically resolvable ranges
 longer than `MAX_LIST_LENGTH` (100) before evaluation, so `1:1e9` cannot
-allocate an unbounded array in the worker.
+allocate an unbounded array in the worker. It parses only when the expression
+contains `[` or `:`, the only bounded constructs, so ordinary lines skip the
+extra parse.
 
 ### The worker
 
 Evaluation runs in a Web Worker (`js/worker.js`) so a heavy sheet never blocks
-typing, and the main thread never parses the large mathjs bundle. The worker
-client lives in `js/evalClient.js`: it owns the worker connection, the
-request/reply protocol, and the debounced `schedule`/`flush` update scheduling.
-Each request posts `{ id, type: 'evaluate', lines }` and resolves when the
-worker replies. `update()` draws the typed input first (phase one) and then,
-on reply, applies the results — but only if the sheet text is still unchanged,
-so a stale reply is never rendered and two back-to-back requests for the same
-text cannot both be dropped. Every request also has a timeout so a hung worker
-can't freeze the sheet, and if the worker fails to load or crashes its
-in-flight requests are rejected and later evaluations fall back to the
-main-thread engine instead of stalling.
+typing, and the main thread never parses the large mathjs bundle. The worker is
+created on the first evaluation, not at load, so opening the page does not parse
+the 646 KB bundle until the sheet is actually typed into. The worker client
+lives in `js/evalClient.js`: it owns the worker connection, the request/reply
+protocol, and the debounced `schedule`/`flush` update scheduling.
+
+Each request posts `{ id, type: 'evaluate', lines, from }`, where `lines` is only
+the suffix from the first changed line and `from` its start index (0 for the
+first request, `-1` when nothing changed). The worker keeps the full sheet and
+rebuilds it with `applyLinePatch`, so an edit near the end of a long sheet ships
+a few lines instead of the whole document. `update()` draws the typed input
+first (phase one) and then, on reply, applies the results — but only if the
+sheet text is still unchanged, so a stale reply is never rendered and two
+back-to-back requests for the same text cannot both be dropped. Every request
+also has a timeout so a hung worker can't freeze the sheet, and if the worker
+fails to load or crashes its in-flight requests are rejected and later
+evaluations fall back to the main-thread engine instead of stalling.
 
 **Serialization:** mathjs `Unit`, `BigNumber`, etc. lose their prototypes in
 structured clone. The worker therefore pre-formats every result value into a
@@ -273,7 +281,8 @@ inline rename and drag-reorder, calling back into the controller). Current
 content persists to localStorage (debounced). Separately, versioned
 **snapshots** of each tab (id, name, content, timestamp, capped at 10 per tab)
 are auto-saved to IndexedDB (`js/storage/snapshots.js`) on a pause in typing and
-on blur/tab-switch/close/pagehide.
+on blur/tab-switch/close/pagehide; the content is stored deflated through
+`js/util/compress.js` when the platform supports it, and inflated on read.
 
 If localStorage is unavailable or corrupt on load, the tab collection is
 rebuilt automatically from the latest snapshot of each tab. Settings offers
@@ -284,13 +293,16 @@ Undo/redo is per tab, kept in memory only: edits are grouped into bursts
 except a burst that ends where it began, which is dropped. The pure helpers
 (`recordChange`/`commitDraft`/`applyUndo`/`applyRedo`) live in
 `js/core/history.js`; `js/ui/tabsHistory.js` is the per-tab store around them.
+The history is capped by both count (100 steps) and total size (2 MB), so a
+large sheet cannot retain an unbounded stack of full copies.
 
 ## Sharing a sheet by link
 
 `js/share/shareLink.js` is a pure module that packs the **active** sheet into a
 URL and back out again. `js/ui/share.js` wires the button and the incoming
 import; `js/util/clipboard.js` holds the clipboard write both it and
-`js/ui/shortcuts.js` use.
+`js/ui/shortcuts.js` use. The base64url and deflate helpers it needs live in
+`js/util/compress.js`, shared with the snapshot store.
 
 The sheet goes in `location.hash`, deliberately, not in a query string. A
 fragment is never sent to the server, so the sheet does not reach GitHub Pages
@@ -397,6 +409,27 @@ creates a row renderer once with `createRowRenderer(viewNode)`
   engine holds the mode, and since it only affects the total, the per-line
   cache stays valid.
 
+### The typing hot path
+
+`js/index.js` runs a fixed sequence per input: `renderText` (phase one),
+`syncSize`, `updateActiveLine`, then a debounced evaluation. Each step is built
+so its cost tracks the edit, not the sheet:
+
+- `renderText` rescans the multi-word names only when a changed line is a
+  definition (`isMultiWordDefinition`), and re-highlights just the changed rows.
+- `js/ui/editor.js` caches the font-derived metrics, the content extent (longest
+  line and count) and the line-gutter inset, so sizing and caret tracking do not
+  read `getComputedStyle`/`getBoundingClientRect` per keystroke; a resize or font
+  change invalidates them.
+- `updateActiveLine` touches only the outgoing and incoming rows, and the
+  line-number gutter (`js/ui/lineNumbers.js`) likewise moves only its highlight.
+- `patchResults` refreshes group shading and `line(n)` references from the first
+  changed row on, and lays out only the groups it touched, clearing all widths
+  before the reads to avoid layout thrash.
+- The renderers read the decimal precision from memory
+  (`getDecimalPrecision`), and the sheet text is split once per edit
+  (`sheetLines` in `js/util/text.js`).
+
 ## Line numbers
 
 A `.line-numbers` gutter (`js/ui/lineNumbers.js`) numbers every line (plus one
@@ -436,6 +469,20 @@ look like a return visit. `readOnboardingState()` exists for exactly that, and
 The flag is written **before** seeding, so a crash mid-seed cannot loop a user
 through onboarding on every reload. `RESET_KEYS` in `js/ui/settings.js`
 includes it, so "Reset data" genuinely returns the app to a first run.
+
+## Performance
+
+The design keeps per-keystroke work proportional to the edit, not the sheet: the
+engine evaluates only changed lines and reuses the cached grouping; the renderer
+rebuilds only changed rows; and the client sends the worker only the changed
+suffix. On the pure side, `mangleLines` rewrites every multi-word name in one
+combined pass, and the autocomplete reuses its entry list unless a changed line
+contains `=` or `#`.
+
+`test/perf.test.mjs` guards this. It seeds a 1000-line sheet and measures the
+synchronous first paint and per-keystroke cost, failing on order-of-magnitude
+regressions; run `node --test test/perf.test.mjs` to compare a change against a
+baseline.
 
 ## Accessibility notes
 

@@ -191,6 +191,13 @@ by browser tests driven through puppeteer:
 npm test
 ```
 
+`test/perf.test.mjs` seeds a ~1000-line sheet and prints the first-paint and
+per-keystroke timings. Run it alone to compare a change against a baseline:
+
+```sh
+node --test test/perf.test.mjs
+```
+
 ### Updating math.js
 
 The pinned version lives in two places, keep them in sync:
@@ -217,5 +224,8 @@ make -C js/lib
 - `js/ui/` — tabs, modals, help, examples, onboarding and the starter prompt,
   settings, find & replace, go-to-line, line numbers, indentation, import/export,
   sharing, shortcuts and font controls.
+- `js/storage/` — persistence (`tabsStore.js` for the tab collection,
+  `snapshots.js` for the versioned IndexedDB backups).
+- `js/share/` — share-link encoding (`shareLink.js`).
 - `js/util/` — shared pure helpers (debounce, storage, clipboard, text, scroll,
-  sequence).
+  sequence, compress).
