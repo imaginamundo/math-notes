@@ -18,4 +18,14 @@ function arraysEqual(a, b) {
   return true;
 }
 
-export { firstDifference, arraysEqual };
+// Rebuild a line list from a patch: `from` is the first changed index and
+// `suffix` the new lines from there on. `from === 0` (or no previous list)
+// means `suffix` is the whole list.
+function applyLinePatch(previous, from, suffix) {
+  if (from > 0 && previous && previous.length) {
+    return previous.slice(0, from).concat(suffix);
+  }
+  return suffix;
+}
+
+export { firstDifference, arraysEqual, applyLinePatch };

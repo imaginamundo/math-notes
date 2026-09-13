@@ -6,6 +6,7 @@ import { DEFAULT_CLOCK_FORMAT, readClockFormat } from './core/clockFormat.js';
 import { DEFAULT_TOTAL_MODE, readTotalMode } from './core/totalMode.js';
 import debounce from './util/debounce.js';
 import { sheetLines } from './util/text.js';
+import { firstDifference } from './util/sequence.js';
 
 const EVALUATE_TIMEOUT = 10000;
 const UPDATE_DELAY = 250;
@@ -28,6 +29,9 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
   let fallbackModule = null;
   let pendingUpdates = 0;
   let busy = false;
+  // The lines last handed to the worker, so a later evaluation can send only the
+  // changed suffix (the worker keeps the full sheet and rebuilds from it).
+  let lastSentLines = null;
   // A precision change only reformats results, so the engine reports "no
   // change" (startLine -1). Force one full re-render so the new precision shows.
   let precisionDirty = false;
@@ -74,6 +78,8 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     }
     const cachedRates = loadCached();
     if (cachedRates) created.postMessage({ type: 'rates', data: cachedRates });
+    // A fresh worker holds no sheet, so the next request must be a full one.
+    lastSentLines = null;
     return created;
   }
 
@@ -113,7 +119,17 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
           if (data.type === 'error') reject(new Error(data.message));
           else resolve({ id, data });
         });
-        active.postMessage({ id, type: 'evaluate', lines });
+        // Send only the suffix from the first changed line. `from` is -1 when
+        // nothing changed, in which case the worker rebuilds the same sheet.
+        const from = lastSentLines ? firstDifference(lastSentLines, lines) : 0;
+        const suffix = from > 0 ? lines.slice(from) : from === 0 ? lines : [];
+        active.postMessage({
+          id,
+          type: 'evaluate',
+          lines: suffix,
+          from: from === -1 ? lines.length : from,
+        });
+        lastSentLines = lines;
       });
     }
     const load = fallbackModule

@@ -7,14 +7,18 @@ import {
 import { DEFAULT_PRECISION, normalizeDecimalPrecision } from './core/decimalPrecision.js';
 import { setClockFormat } from './core/clockFormat.js';
 import formatResult from './render/formatResult.js';
+import { applyLinePatch } from './util/sequence.js';
 
 let precision = DEFAULT_PRECISION;
+// The full sheet, reconstructed from the suffix patches the client sends.
+let sheetLines = [];
 
 self.addEventListener('message', (event) => {
-  const { id, type, lines, data } = event.data || {};
+  const { id, type, lines, from, data } = event.data || {};
   if (type === 'evaluate') {
     try {
-      const { results, total, startLine } = evaluateLines(lines);
+      sheetLines = applyLinePatch(sheetLines, from, lines);
+      const { results, total, startLine } = evaluateLines(sheetLines);
       // Values are pre-formatted to strings so no mathjs class instances
       // (units, big numbers) cross the structured-clone boundary.
       const serialized = results.map((result) => ({

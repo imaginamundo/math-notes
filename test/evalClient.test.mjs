@@ -93,6 +93,25 @@ test('flush with nothing scheduled is a no-op', async () => {
   assert.equal(WorkerStub.latest, null, 'the worker is created lazily');
 });
 
+test('only the changed suffix is sent after the first evaluation', async () => {
+  const { client, node } = setup();
+  node.value = 'a\nb\nc';
+  await client.update();
+  const worker = WorkerStub.latest;
+  assert.deepEqual(worker.sent[0].lines, ['a', 'b', 'c'], 'the first message is the whole sheet');
+  assert.equal(worker.sent[0].from, 0);
+
+  node.value = 'a\nb\nc2';
+  await client.update();
+  assert.deepEqual(worker.sent[1].lines, ['c2'], 'only the changed tail is sent');
+  assert.equal(worker.sent[1].from, 2);
+
+  // An unchanged sheet sends no lines; the worker rebuilds the same list.
+  await client.update();
+  assert.deepEqual(worker.sent[2].lines, []);
+  assert.equal(worker.sent[2].from, 3);
+});
+
 test('a stale reply is not rendered', async () => {
   const { client, node, renders } = setup();
   await client.update(); // creates the worker
