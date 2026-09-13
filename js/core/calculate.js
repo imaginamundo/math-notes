@@ -5,6 +5,7 @@ import initAliases from '../eval/aliases.js';
 import initCssUnits from '../eval/cssUnits.js';
 import initUnits from '../eval/units.js';
 import initDatetime from '../eval/datetime.js';
+import initRounding from '../eval/rounding.js';
 import preprocess from './preprocess.js';
 import { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal } from './aggregate.js';
 import { firstDifference } from '../util/sequence.js';
@@ -150,6 +151,7 @@ function createEngine() {
   initCssUnits(math);
   initUnits(math);
   initDatetime(math);
+  initRounding(math);
   initCurrency(math);
 
   const cache = {

@@ -48,7 +48,11 @@ Terms used throughout the codebase and this documentation.
   and the block is shaded, while the inner lines still count in the bottom
   total. Groups are flat, and an unterminated header is just a label.
 - **Preprocessors** — the regex transforms run before mathjs, in order: scales,
-  symbols (currency), percentages, word operators.
+  symbols (currency), percentages, word operators, rounding.
+- **Rounding** — Soulver-style trailing phrases (`1/3 to 2 dp`, `5.5 rounded up`,
+  `37 to nearest 10`, `0.534 to nearest 16th`) rewritten by
+  `js/eval/rounding.js` to mathjs `round`/`ceil`/`floor`. Those are extended so
+  a Unit rounds in its displayed unit, and a fraction result is shown as `n/d`.
 - **Currency context** — places where a 3-letter code is treated as a unit
   (next to a number or a `to`/`in` conversion), so codes used as variables stay
   lowercase.

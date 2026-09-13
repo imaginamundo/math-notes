@@ -8,6 +8,7 @@ function initAliases(math) {
       arccos: math.acos,
       arctan: math.atan,
       root: math.nthRoot,
+      π: math.pi,
     },
     { override: true }
   );

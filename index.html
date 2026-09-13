@@ -97,6 +97,7 @@
         <a class="modal-nav-link" href="#help-lists">Lists</a>
         <a class="modal-nav-link" href="#help-ranges">Sequences</a>
         <a class="modal-nav-link" href="#help-percentages">Percentages</a>
+        <a class="modal-nav-link" href="#help-rounding">Rounding</a>
         <a class="modal-nav-link" href="#help-operators">Operators &amp; scales</a>
         <a class="modal-nav-link" href="#help-units">Units</a>
         <a class="modal-nav-link" href="#help-currency">Currency</a>
@@ -312,6 +313,38 @@
           </div>
           <div class="help-example" data-expr="5% of what is 6" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 120</span>
+          </div>
+        </section>
+
+        <section id="help-rounding" class="help-section">
+          <h2>Rounding</h2>
+          <p>Round a result with a phrase at the end of the line, or call <code>round</code>, <code>ceil</code> or <code>floor</code> directly. Rounding works with units and currencies too.</p>
+          <div class="help-example" data-expr="1/3 to 2 dp" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 0.33</span>
+          </div>
+          <div class="help-example" data-expr="π to 5 digits" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 3.14159</span>
+          </div>
+          <div class="help-example" data-expr="5.5 rounded" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 6</span>
+          </div>
+          <div class="help-example" data-expr="5.5 rounded up" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 6</span>
+          </div>
+          <div class="help-example" data-expr="5.5 rounded down" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 5</span>
+          </div>
+          <div class="help-example" data-expr="37 to nearest 10" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 40</span>
+          </div>
+          <div class="help-example" data-expr="$490 rounded to nearest hundred" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 500 USD</span>
+          </div>
+          <div class="help-example" data-expr="21 rounded up to nearest 5" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 25</span>
+          </div>
+          <div class="help-example" data-expr="0.534 to nearest 16th" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 9/16</span>
           </div>
         </section>
 

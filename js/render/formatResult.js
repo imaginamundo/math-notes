@@ -10,6 +10,10 @@ function formatResult(value) {
 function formatValue(value, depth) {
   if (typeof value === 'number') return formatNumber(value);
   if (value && value.isUnit === true) return formatUnit(value);
+  // mathjs Fraction stringifies to its decimal; show the fraction instead.
+  if (value && value.type === 'Fraction' && typeof value.toFraction === 'function') {
+    return value.toFraction();
+  }
   if (Array.isArray(value) || (value && value.isMatrix)) {
     if (depth >= MAX_DEPTH) return '[…]';
     const items = value.isMatrix && value.toArray ? value.toArray() : value;

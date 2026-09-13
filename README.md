@@ -46,9 +46,14 @@ Based on [Numi](https://numi.app/).
   `$50 as a % of $100`, `5% of what is 6`.
 - **Number scales**: repeated `k` — `2k` (2,000), `1kk` (1,000,000),
   `1kkk` (1,000,000,000).
+- **Rounding** — Soulver-style phrases: `1/3 to 2 dp`, `pi to 5 digits`,
+  `5.5 rounded` / `rounded up` / `rounded down`, `37 to nearest 10`,
+  `$490 rounded to nearest hundred`, and `0.534 to nearest 16th` (shown as a
+  fraction). Works with units and currencies.
 - **Word operators**: `plus`, `minus`, `times`, `multiplied by`, `divided by`,
   `with`, `without` and `mul` (`8 times 9`, `10 divided by 2`).
-- **Function aliases**: `ln`, `fact`, `arcsin`, `arccos`, `arctan`, `root`.
+- **Function aliases**: `ln`, `fact`, `arcsin`, `arccos`, `arctan`, `root`; `π`
+  is accepted for `pi`.
 - **Dates**: `fromunix(1446587186)`, `unix()`.
 - **Find & replace** — press `⌘F` / `Ctrl+F` to search the active sheet with
   live match highlighting, then replace one or all matches.
@@ -151,8 +156,8 @@ make -C js/lib
   `preprocess.js`, `aggregate.js`, `multiWordVariables.js`, `currencySymbols.js`,
   `tabsState.js`, `history.js`).
 - `js/eval/` — mathjs extensions and preprocessors (`aliases.js`, `cssUnits.js`,
-  `currency.js`, `datetime.js`, `scales.js`, `symbols.js`, `units.js`,
-  `wordOperators.js`, `percentage.js`).
+  `currency.js`, `datetime.js`, `rounding.js`, `scales.js`, `symbols.js`,
+  `units.js`, `wordOperators.js`, `percentage.js`).
 - `js/render/` — highlighting and result rendering.
 - `js/ui/` — tabs, modals, help, examples, onboarding and the tour, starter
   prompt, settings, find & replace, go-to-line, line numbers, indentation,

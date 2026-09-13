@@ -55,11 +55,19 @@ toward the scrollable extent and gives breathing room after long lines.
 ### Preprocessing
 
 Each line goes through `preprocess` (`js/core/preprocess.js`) before mathjs:
-`scales` → `symbols` → `percentage` → `wordOperators`, in that order (scales
-before currency so `$2k` becomes `2000 USD`; percentage before word operators
-so its `of|on|off` phrases are consumed first). `js/eval/symbols.js` only
-treats 3-letter currency codes as units in currency contexts (amounts and
-`to`/`in` conversions), so `usd = 5` stays a variable.
+`scales` → `symbols` → `percentage` → `wordOperators` → `rounding`, in that
+order (scales before currency so `$2k` becomes `2000 USD`; percentage before
+word operators so its `of|on|off` phrases are consumed first; rounding last, so
+it wraps the already-normalised value). `js/eval/symbols.js` only treats
+3-letter currency codes as units in currency contexts (amounts and `to`/`in`
+conversions), so `usd = 5` stays a variable.
+
+Rounding phrases (`1/3 to 2 dp`, `5.5 rounded up`, `37 to nearest 10`) are
+rewritten to mathjs `round`/`ceil`/`floor` by `js/eval/rounding.js`, whose
+`initRounding` extends those three with a Unit overload (mathjs's own wants a
+valueless unit): the unit's displayed value is rounded and rebuilt, so
+`round(4.567 m, 2)` is `4.57 m`. `to nearest 16th` builds a mathjs Fraction,
+which `formatResult` renders as `n/d`.
 
 ### The pure engine
 

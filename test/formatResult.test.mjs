@@ -43,6 +43,12 @@ test('formatResult keeps unit prefixes', () => {
   assert.match(converted, /^37\.7952755906 px$/);
 });
 
+test('formatResult shows fractions as fractions', () => {
+  assert.equal(formatResult(math.fraction(9, 16)), '9/16');
+  assert.equal(formatResult(math.fraction(-9, 16)), '-9/16');
+  assert.equal(formatResult(math.fraction(4, 2)), '2');
+});
+
 test('formatResult shows short lists in full', () => {
   assert.equal(formatResult([1, 2, 3, 4, 5]), '[1, 2, 3, 4, 5]');
   assert.equal(formatResult(math.matrix([1, 2, 3])), '[1, 2, 3]');
