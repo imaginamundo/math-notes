@@ -55,10 +55,10 @@
       <article class="doc-content">
 <h1>Groups &amp; totals</h1>
 <p>Math Notes aggregates in three related ways: the running total in the bottom bar, the aggregate keywords (<code>sum</code>, <code>average</code>, …) you write on a line, and named groups that show a subtotal in place.</p>
-<h2 id="the-total-bar">The total bar</h2>
+<h2 id="the-total-bar">The total bar<a class="doc-anchor" href="#the-total-bar" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p>The total bar under the editor aggregates every numeric result in the sheet. Its dropdown switches between <strong>total</strong> (sum), <strong>average</strong> and <strong>median</strong>.</p>
 <p>Plain numbers fold into a single unit; compatible units (such as <code>cm</code> and <code>m</code>) merge into the largest present; mixed currencies or dimensions fall back to the plain numeric sum.</p>
-<h2 id="aggregate-keywords">Aggregate keywords</h2>
+<h2 id="aggregate-keywords">Aggregate keywords<a class="doc-anchor" href="#aggregate-keywords" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p><code>sum</code>, <code>total</code>, <code>average</code> and <code>avg</code> aggregate the lines above, up to a blank line. A blank line starts a new block, so you can keep several independent aggregates in one sheet.</p>
 <figure class="doc-example" data-expr="10
 20
@@ -81,7 +81,7 @@ sum
 1
 2
 sum</code></pre><figcaption class="doc-example-result">last line returns 15</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>The keywords can also take a tag: <code>sum #food</code>, or the shorthand <code>#food</code> on its own line (see <a href="/docs/writing-a-sheet/">Tags</a>).</p>
-<h2 id="groups">Groups</h2>
+<h2 id="groups">Groups<a class="doc-anchor" href="#groups" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p>Open a named group with a label on its own line (like <code>Groceries:</code>) and close it with <code>end</code>. The header shows the group&#39;s subtotal and the whole block is shaded. The inner lines still count in the bottom total.</p>
 <figure class="doc-example" data-expr="Groceries:
   4.50
@@ -99,9 +99,9 @@ end"><pre class="doc-code"><code data-calc>Trip:
   10 cm
   1 m
 end</code></pre><figcaption class="doc-example-result">header shows 1.1 m</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>Blank lines inside a group are ignored, and <code>sum</code>/<code>average</code> inside a group total that group rather than the whole sheet.</p>
-<h2 id="interaction-with-prev-and-tags">Interaction with <code>prev</code> and tags</h2>
+<h2 id="interaction-with-prev-and-tags">Interaction with <code>prev</code> and tags<a class="doc-anchor" href="#interaction-with-prev-and-tags" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p>A closed group leaves <code>prev</code> at the subtotal shown on its header, then continues from the <code>end</code> line. Tags still work across groups: a tagged row contributes its share to the tag no matter which group it sits in.</p>
-<h2 id="mistakes">Mistakes</h2>
+<h2 id="mistakes">Mistakes<a class="doc-anchor" href="#mistakes" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <ul>
 <li>A header with no <code>end</code> is just a label, and the lines after it are ordinary lines.</li>
 <li>An <code>end</code> with no open header is reported as an error.</li>

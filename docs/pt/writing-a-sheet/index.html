@@ -55,11 +55,11 @@
       <article class="doc-content">
 <h1>Escrevendo uma planilha</h1>
 <p>Uma planilha é uma lista de linhas avaliadas de cima para baixo. Cada linha pode definir um valor, referenciar algo acima dela, ou simplesmente produzir um resultado. As variáveis vivem em um único escopo por planilha e ficam disponíveis para toda linha abaixo da definição.</p>
-<h2 id="comentarios-e-rotulos">Comentários e rótulos</h2>
+<h2 id="comentarios-e-rotulos">Comentários e rótulos<a class="doc-anchor" href="#comentarios-e-rotulos" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
 <p>Tudo depois de um <code>#</code> seguido de um espaço é um comentário e é ignorado.</p>
 <figure class="doc-example" data-expr="2 + 2 # this is a note"><pre class="doc-code"><code data-calc>2 + 2 # this is a note</code></pre><figcaption class="doc-example-result">retorna 4</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Um <code>rótulo:</code> antes de uma expressão nomeia a linha sem ser avaliado. Isso ajuda a lembrar o que uma linha significa.</p>
 <figure class="doc-example" data-expr="Price: 10 + 5"><pre class="doc-code"><code data-calc>Price: 10 + 5</code></pre><figcaption class="doc-example-result">retorna 15</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Um único <code>#</code> no início da linha também funciona como comentário.</p>
-<h2 id="tags">Tags</h2>
+<h2 id="tags">Tags<a class="doc-anchor" href="#tags" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
 <p>Sem espaço depois do <code>#</code>, uma palavra é uma <strong>tag</strong>, não um comentário. As tags marcam linhas para que você possa somá-las em outro lugar.</p>
 <figure class="doc-example" data-expr="20 #food
 30 #food
@@ -76,7 +76,7 @@
 #ana
 #bob"><pre class="doc-code"><code data-calc>burger: 2 * 50 #ana #bob
 #ana
-#bob</code></pre><figcaption class="doc-example-result">cada tag recebe 50</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="variaveis">Variáveis</h2>
+#bob</code></pre><figcaption class="doc-example-result">cada tag recebe 50</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="variaveis">Variáveis<a class="doc-anchor" href="#variaveis" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
 <p>Atribua um valor com <code>=</code> e reutilize-o em linhas seguintes.</p>
 <figure class="doc-example" data-expr="pizzas = 2
 pizzaPrice = 30
@@ -90,11 +90,11 @@ monthly rent * 12"><pre class="doc-code"><code data-calc>monthly rent = 1500
 monthly rent * 12</code></pre><figcaption class="doc-example-result">a última linha retorna 18,000</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Você pode guardar uma função com <code>f(x) = …</code> e chamá-la depois.</p>
 <figure class="doc-example" data-expr="double = f(x) = x * 2
 double(21)"><pre class="doc-code"><code data-calc>double = f(x) = x * 2
-double(21)</code></pre><figcaption class="doc-example-result">a última linha retorna 42</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="objetos">Objetos</h2>
+double(21)</code></pre><figcaption class="doc-example-result">a última linha retorna 42</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="objetos">Objetos<a class="doc-anchor" href="#objetos" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
 <p>Um objeto agrupa valores nomeados, e um ponto acessa um campo.</p>
 <figure class="doc-example" data-expr="invoice = {subtotal: 120, tax: 12}
 invoice.subtotal + invoice.tax"><pre class="doc-code"><code data-calc>invoice = {subtotal: 120, tax: 12}
-invoice.subtotal + invoice.tax</code></pre><figcaption class="doc-example-result">a última linha retorna 132</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="referencias">Referências</h2>
+invoice.subtotal + invoice.tax</code></pre><figcaption class="doc-example-result">a última linha retorna 132</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="referencias">Referências<a class="doc-anchor" href="#referencias" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
 <p><code>line(n)</code> usa o resultado da linha <code>n</code>. Apenas linhas acima podem ser referenciadas, e o valor aparece no lugar do token quando o cursor está em outra linha (o <code>line(3)</code> bruto reaparece enquanto você edita aquela linha).</p>
 <figure class="doc-example" data-expr="5
 line(1) * 2"><pre class="doc-code"><code data-calc>5
@@ -105,7 +105,7 @@ prev * 4</code></pre><figcaption class="doc-example-result">a última linha reto
 # a comment in between
 prev + 1"><pre class="doc-code"><code data-calc>10
 # a comment in between
-prev + 1</code></pre><figcaption class="doc-example-result">a última linha retorna 11</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="palavras-reservadas">Palavras reservadas</h2>
+prev + 1</code></pre><figcaption class="doc-example-result">a última linha retorna 11</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="palavras-reservadas">Palavras reservadas<a class="doc-anchor" href="#palavras-reservadas" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
 <p>Alguns nomes não podem ser usados como variáveis:</p>
 <ul>
 <li><code>prev</code> (o resultado anterior)</li>
@@ -114,7 +114,7 @@ prev + 1</code></pre><figcaption class="doc-example-result">a última linha reto
 <li><code>end</code> fecha um grupo</li>
 </ul>
 <p>Fora isso, as variáveis compartilham um escopo com os nomes internos, então uma variável pode sombrear uma unidade ou função: depois de <code>m = 5</code>, <code>2 m</code> é <code>2 × m</code>, não dois metros. As palavras-chave de agregação <code>sum</code>, <code>total</code>, <code>average</code> e <code>avg</code> funcionam da mesma forma: depois de <code>total = 5</code>, uma linha <code>total</code> posterior lê a variável em vez de agregar.</p>
-<h2 id="linhas-em-branco">Linhas em branco</h2>
+<h2 id="linhas-em-branco">Linhas em branco<a class="doc-anchor" href="#linhas-em-branco" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
 <p>Uma linha em branco encerra o bloco que <code>sum</code>, <code>average</code> e as outras agregações examinam, e separa seções da planilha. Use-a para manter as agregações restritas às linhas que você quer.</p>
       </article>
       <footer class="doc-footer">

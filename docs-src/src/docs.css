@@ -141,6 +141,8 @@ body {
 .doc-nav-item.is-active > a {
   color: var(--color-text-strong);
   background: var(--surface-chip);
+  /* Keep the left edge square so the accent bar is not clipped by the radii. */
+  border-radius: 0 5px 5px 0;
   box-shadow: inset 2px 0 0 var(--color-operator);
 }
 .doc-nav-sub {
@@ -159,6 +161,10 @@ body {
 .doc-nav-sub a:hover {
   color: var(--color-text);
   text-decoration: none;
+}
+.doc-nav-sub a.is-active {
+  color: var(--color-text-strong);
+  font-weight: 600;
 }
 .doc-nav-sub-title {
   padding: 0.3em 0.5em 0.15em;
@@ -198,6 +204,30 @@ body {
   margin: 1.4em 0 0.4em;
   font-size: 1.08em;
   color: var(--color-text-strong);
+}
+/* A per-heading link that appears on hover/focus, so a section can be linked
+   and shared by its anchor. */
+.doc-content .doc-anchor {
+  margin-left: 0.35em;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.doc-content h2:hover .doc-anchor,
+.doc-content h3:hover .doc-anchor,
+.doc-content .doc-anchor:focus-visible {
+  opacity: 1;
+}
+.doc-content .doc-anchor:hover {
+  color: var(--color-operator);
+  text-decoration: none;
+  filter: none;
+}
+@media (hover: none) {
+  .doc-content .doc-anchor {
+    opacity: 1;
+  }
 }
 .doc-content p,
 .doc-content li {

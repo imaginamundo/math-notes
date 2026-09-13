@@ -55,10 +55,10 @@
       <article class="doc-content">
 <h1>Grupos &amp; totales</h1>
 <p>Math Notes agrega de tres formas relacionadas: el total acumulado de la barra inferior, las palabras clave de agregación (<code>sum</code>, <code>average</code>, …) que escribes en una línea, y los grupos con nombre que muestran un subtotal en su sitio.</p>
-<h2 id="la-barra-de-total">La barra de total</h2>
+<h2 id="la-barra-de-total">La barra de total<a class="doc-anchor" href="#la-barra-de-total" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <p>La barra de total debajo del editor agrega todos los resultados numéricos de la hoja. Su menú alterna entre <strong>total</strong> (suma), <strong>media</strong> y <strong>mediana</strong>.</p>
 <p>Los números simples se reúnen en una sola unidad; las unidades compatibles (como <code>cm</code> y <code>m</code>) se funden en la mayor presente; las monedas o dimensiones mixtas caen en la suma numérica simple.</p>
-<h2 id="palabras-clave-de-agregacion">Palabras clave de agregación</h2>
+<h2 id="palabras-clave-de-agregacion">Palabras clave de agregación<a class="doc-anchor" href="#palabras-clave-de-agregacion" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <p><code>sum</code>, <code>total</code>, <code>average</code> y <code>avg</code> agregan las líneas de arriba, hasta una línea en blanco. Una línea en blanco inicia un bloque nuevo, así que puedes mantener varias agregaciones independientes en una hoja.</p>
 <figure class="doc-example" data-expr="10
 20
@@ -81,7 +81,7 @@ sum
 1
 2
 sum</code></pre><figcaption class="doc-example-result">la última línea devuelve 15</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><p>Las palabras clave también aceptan una tag: <code>sum #food</code>, o el atajo <code>#food</code> solo en la línea (consulta <a href="/docs/es/writing-a-sheet/">Tags</a>).</p>
-<h2 id="grupos">Grupos</h2>
+<h2 id="grupos">Grupos<a class="doc-anchor" href="#grupos" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <p>Abre un grupo con nombre con una etiqueta en su propia línea (como <code>Groceries:</code>) y ciérralo con <code>end</code>. La cabecera muestra el subtotal del grupo y todo el bloque se sombrea. Las líneas interiores siguen contando en el total de abajo.</p>
 <figure class="doc-example" data-expr="Groceries:
   4.50
@@ -99,9 +99,9 @@ end"><pre class="doc-code"><code data-calc>Trip:
   10 cm
   1 m
 end</code></pre><figcaption class="doc-example-result">la cabecera muestra 1.1 m</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><p>Las líneas en blanco dentro del grupo se ignoran, y <code>sum</code>/<code>average</code> dentro de un grupo totalizan ese grupo, no la hoja entera.</p>
-<h2 id="interaccion-con-prev-y-tags">Interacción con <code>prev</code> y tags</h2>
+<h2 id="interaccion-con-prev-y-tags">Interacción con <code>prev</code> y tags<a class="doc-anchor" href="#interaccion-con-prev-y-tags" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <p>Un grupo cerrado deja <code>prev</code> en el subtotal mostrado en la cabecera, y después continúa desde la línea <code>end</code>. Las tags siguen funcionando entre grupos: una fila marcada aporta su parte a la tag, esté en el grupo que esté.</p>
-<h2 id="errores-comunes">Errores comunes</h2>
+<h2 id="errores-comunes">Errores comunes<a class="doc-anchor" href="#errores-comunes" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <ul>
 <li>Una cabecera sin <code>end</code> es solo una etiqueta, y las líneas siguientes son líneas normales.</li>
 <li>Un <code>end</code> sin cabecera abierta se informa como error.</li>

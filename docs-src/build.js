@@ -27,6 +27,7 @@ const UI = {
     language: 'Language',
     footer: 'Math Notes — a browser-based inline calculator.',
     guide: 'User guide',
+    anchor: 'Link to this section',
   },
   pt: {
     htmlLang: 'pt',
@@ -42,6 +43,7 @@ const UI = {
     language: 'Idioma',
     footer: 'Math Notes — uma calculadora em linha no navegador.',
     guide: 'Guia de utilização',
+    anchor: 'Link para esta secção',
   },
   es: {
     htmlLang: 'es',
@@ -57,6 +59,7 @@ const UI = {
     language: 'Idioma',
     footer: 'Math Notes — una calculadora en línea en el navegador.',
     guide: 'Guía de uso',
+    anchor: 'Enlace a esta sección',
   },
 };
 
@@ -118,9 +121,10 @@ function headingId(text) {
   );
 }
 
-// Give every h2/h3 an id and collect the h2s as a table of contents, so the
-// in-page anchors and the sidebar sub-navigation cannot drift apart.
-function addHeadingIds(html) {
+// Give every h2/h3 an id, a copy-linkable anchor and collect the h2s as a table
+// of contents, so the in-page anchors and the sidebar sub-navigation cannot
+// drift apart.
+function addHeadingIds(html, ui) {
   const toc = [];
   const seen = new Map();
   const out = html.replace(/<h([23])>(.*?)<\/h\1>/g, (match, level, inner) => {
@@ -130,14 +134,17 @@ function addHeadingIds(html) {
     seen.set(base, count + 1);
     const id = count === 0 ? base : `${base}-${count + 1}`;
     if (level === '2') toc.push({ id, text });
-    return `<h${level} id="${id}">${inner}</h${level}>`;
+    const anchor =
+      `<a class="doc-anchor" href="#${id}" aria-label="${escapeAttr(ui.anchor)}"` +
+      ` title="${escapeAttr(ui.anchor)}">#</a>`;
+    return `<h${level} id="${id}">${inner}${anchor}</h${level}>`;
   });
   return { html: out, toc };
 }
 
 function renderMarkdown(md, ui) {
   currentUi = ui;
-  return addHeadingIds(marked.parse(md).trim());
+  return addHeadingIds(marked.parse(md).trim(), ui);
 }
 
 function titleOf(md, fallback) {

@@ -55,11 +55,11 @@
       <article class="doc-content">
 <h1>Writing a sheet</h1>
 <p>A sheet is a list of lines evaluated from top to bottom. Each line can define a value, reference something above it, or simply produce a result. Variables live in one scope per sheet and are available to every line below their definition.</p>
-<h2 id="comments-and-labels">Comments and labels</h2>
+<h2 id="comments-and-labels">Comments and labels<a class="doc-anchor" href="#comments-and-labels" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p>Everything after a <code>#</code> followed by a space is a comment and is ignored.</p>
 <figure class="doc-example" data-expr="2 + 2 # this is a note"><pre class="doc-code"><code data-calc>2 + 2 # this is a note</code></pre><figcaption class="doc-example-result">returns 4</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>A <code>label:</code> before an expression names the line without being evaluated. This is handy for reminding yourself what a line means.</p>
 <figure class="doc-example" data-expr="Price: 10 + 5"><pre class="doc-code"><code data-calc>Price: 10 + 5</code></pre><figcaption class="doc-example-result">returns 15</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>A single <code>#</code> at the very start of a line also works as a comment.</p>
-<h2 id="tags">Tags</h2>
+<h2 id="tags">Tags<a class="doc-anchor" href="#tags" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p>With no space after the <code>#</code>, a word is a <strong>tag</strong> rather than a comment. Tags label lines so you can total them elsewhere.</p>
 <figure class="doc-example" data-expr="20 #food
 30 #food
@@ -76,7 +76,7 @@
 #ana
 #bob"><pre class="doc-code"><code data-calc>burger: 2 * 50 #ana #bob
 #ana
-#bob</code></pre><figcaption class="doc-example-result">each tag gets 50</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><h2 id="variables">Variables</h2>
+#bob</code></pre><figcaption class="doc-example-result">each tag gets 50</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><h2 id="variables">Variables<a class="doc-anchor" href="#variables" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p>Assign a value with <code>=</code> and reuse it on later lines.</p>
 <figure class="doc-example" data-expr="pizzas = 2
 pizzaPrice = 30
@@ -90,11 +90,11 @@ monthly rent * 12"><pre class="doc-code"><code data-calc>monthly rent = 1500
 monthly rent * 12</code></pre><figcaption class="doc-example-result">last line returns 18,000</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>You can store a function with <code>f(x) = …</code> and call it later.</p>
 <figure class="doc-example" data-expr="double = f(x) = x * 2
 double(21)"><pre class="doc-code"><code data-calc>double = f(x) = x * 2
-double(21)</code></pre><figcaption class="doc-example-result">last line returns 42</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><h2 id="objects">Objects</h2>
+double(21)</code></pre><figcaption class="doc-example-result">last line returns 42</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><h2 id="objects">Objects<a class="doc-anchor" href="#objects" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p>An object groups named values, and a dot reaches a field.</p>
 <figure class="doc-example" data-expr="invoice = {subtotal: 120, tax: 12}
 invoice.subtotal + invoice.tax"><pre class="doc-code"><code data-calc>invoice = {subtotal: 120, tax: 12}
-invoice.subtotal + invoice.tax</code></pre><figcaption class="doc-example-result">last line returns 132</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><h2 id="references">References</h2>
+invoice.subtotal + invoice.tax</code></pre><figcaption class="doc-example-result">last line returns 132</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><h2 id="references">References<a class="doc-anchor" href="#references" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p><code>line(n)</code> uses the result of line <code>n</code>. Only lines above can be referenced, and the value shows in place of the token while the caret is elsewhere (the raw <code>line(3)</code> reappears while you edit that line).</p>
 <figure class="doc-example" data-expr="5
 line(1) * 2"><pre class="doc-code"><code data-calc>5
@@ -105,7 +105,7 @@ prev * 4</code></pre><figcaption class="doc-example-result">last line returns 80
 # a comment in between
 prev + 1"><pre class="doc-code"><code data-calc>10
 # a comment in between
-prev + 1</code></pre><figcaption class="doc-example-result">last line returns 11</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><h2 id="reserved-words">Reserved words</h2>
+prev + 1</code></pre><figcaption class="doc-example-result">last line returns 11</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><h2 id="reserved-words">Reserved words<a class="doc-anchor" href="#reserved-words" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p>A few names cannot be used as variables:</p>
 <ul>
 <li><code>prev</code> (the previous result)</li>
@@ -114,7 +114,7 @@ prev + 1</code></pre><figcaption class="doc-example-result">last line returns 11
 <li><code>end</code> closes a group</li>
 </ul>
 <p>Variables otherwise share one scope with the built-in names, so a variable can shadow a unit or function: after <code>m = 5</code>, <code>2 m</code> is <code>2 × m</code>, not two metres. The aggregate keywords <code>sum</code>, <code>total</code>, <code>average</code> and <code>avg</code> work the same way: after <code>total = 5</code>, a later <code>total</code> line reads the variable instead of aggregating.</p>
-<h2 id="blank-lines">Blank lines</h2>
+<h2 id="blank-lines">Blank lines<a class="doc-anchor" href="#blank-lines" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p>A blank line ends the block that <code>sum</code>, <code>average</code> and the other aggregates look at, and it separates sections of a sheet. Use it to keep aggregates scoped to the lines you mean.</p>
       </article>
       <footer class="doc-footer">

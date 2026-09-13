@@ -1,6 +1,7 @@
 // Progressive enhancement for the documentation pages. The content and
 // navigation are fully rendered at build time; this only adds the app's syntax
-// colours, copy buttons, "Open in Math Notes" links and the mobile menu.
+// colours, copy buttons, "Open in Math Notes" links, the mobile menu and the
+// sidebar scroll-spy.
 import format from '/js/render/format.js';
 import { collectVariableNames } from '/js/core/multiWordVariables.js';
 import { buildShareUrl } from '/js/share/shareLink.js';
@@ -66,8 +67,68 @@ function wireMenu() {
   });
 }
 
+// Highlight the section of the current page in the sidebar as the reader
+// scrolls. The targets are the h2s the sub-navigation links to.
+function wireScrollSpy() {
+  const links = [...document.querySelectorAll('.doc-nav-sub a[href^="#"]')];
+  if (!links.length) return;
+  const targets = links
+    .map((link) => ({
+      link,
+      section: document.getElementById(decodeURIComponent(link.hash.slice(1))),
+    }))
+    .filter((entry) => entry.section);
+  if (!targets.length) return;
+
+  let active = null;
+  const setActive = (link) => {
+    if (link === active) return;
+    active = link;
+    for (const entry of targets) entry.link.classList.toggle('is-active', entry.link === link);
+  };
+
+  // A section is "current" once its top reaches just below the sticky header.
+  // Account for `scroll-padding-top`, which is what anchor jumps align to.
+  const header = document.querySelector('.doc-header');
+  const headerOffset = () => {
+    const sticky = header ? header.getBoundingClientRect().height : 72;
+    const padding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+    return Math.max(sticky, padding) + 16;
+  };
+
+  const update = () => {
+    const offset = headerOffset();
+    let current = targets[0].link;
+    for (const { link, section } of targets) {
+      if (section.getBoundingClientRect().top <= offset) current = link;
+      else break;
+    }
+    const atBottom =
+      window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+    if (atBottom) current = targets[targets.length - 1].link;
+    setActive(current);
+  };
+
+  let ticking = false;
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        update();
+        ticking = false;
+      });
+    },
+    { passive: true }
+  );
+  window.addEventListener('resize', update, { passive: true });
+  update();
+}
+
 for (const figure of document.querySelectorAll('.doc-example')) wireExample(figure);
 wireMenu();
+wireScrollSpy();
 
 // The app's service worker lives at the site root (scope `/`), so it also keeps
 // the documentation available offline once it has been visited.

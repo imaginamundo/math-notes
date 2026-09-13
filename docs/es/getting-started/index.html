@@ -56,18 +56,18 @@
 <h1>Primeros pasos</h1>
 <p>Math Notes es una hoja de líneas. Escribes un cálculo por línea y la respuesta aparece a la derecha, como una pista atenuada. No hay botón <strong>=</strong> ni cuadrícula de celdas: la hoja se recalcula mientras escribes.</p>
 <figure class="doc-example" data-expr="1 + 1"><pre class="doc-code"><code data-calc>1 + 1</code></pre><figcaption class="doc-example-result">devuelve 2</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="2 * 3 + 1"><pre class="doc-code"><code data-calc>2 * 3 + 1</code></pre><figcaption class="doc-example-result">devuelve 7</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><p>Una línea puede ser un número simple, una expresión, una asignación, un comentario, o una etiqueta seguida de una expresión. El resultado de la última línea también aparece en la barra de total, abajo.</p>
-<h2 id="la-pantalla">La pantalla</h2>
+<h2 id="la-pantalla">La pantalla<a class="doc-anchor" href="#la-pantalla" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <ul>
 <li>El <strong>editor</strong> es el área de texto grande. Su capa fantasma muestra resultados, tags y errores en su sitio.</li>
 <li>La <strong>barra de total</strong> está debajo del editor y agrega la hoja. Usa su menú para cambiar entre <strong>total</strong>, <strong>media</strong> y <strong>mediana</strong>.</li>
 <li>El <strong>pie</strong> contiene los controles de tamaño del texto y los botones <strong>Compartir</strong>, <strong>Ajustes</strong>, <strong>Ejemplos</strong> y <strong>Ayuda</strong>.</li>
 <li>La <strong>barra de pestañas</strong> de arriba guarda hojas separadas (consulta <a href="/docs/es/files/">Archivos, compartir &amp; datos</a>).</li>
 </ul>
-<h2 id="resultados">Resultados</h2>
+<h2 id="resultados">Resultados<a class="doc-anchor" href="#resultados" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <p>Los resultados se formatean con separadores de miles y se escriben con la unidad o moneda que llevan.</p>
 <figure class="doc-example" data-expr="1000000"><pre class="doc-code"><code data-calc>1000000</code></pre><figcaption class="doc-example-result">1,000,000</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="1cm to m"><pre class="doc-code"><code data-calc>1cm to m</code></pre><figcaption class="doc-example-result">0.01 m</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><p>Por defecto, un resultado muestra hasta <strong>3 decimales</strong>. Un valor con más precisión termina en puntos suspensivos, mientras que el cálculo conserva toda la precisión. Cámbialo en <strong>Ajustes → Precisión decimal</strong> (consulta <a href="/docs/es/settings/">Ajustes &amp; apariencia</a>).</p>
 <p>Cuando una línea no se puede evaluar, el error aparece en la propia línea, en rojo. Los errores nunca impiden que el resto de la hoja se evalúe.</p>
-<h2 id="edicion">Edición</h2>
+<h2 id="edicion">Edición<a class="doc-anchor" href="#edicion" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <ul>
 <li><strong>Sangría</strong> — <code>Tab</code> indenta la línea actual o una selección de varias líneas, <code>Shift+Tab</code> desindenta. La sangría es de dos espacios y no cambia cómo se evalúa la línea.</li>
 <li><strong>Comentar una línea</strong> — haz clic en el número de la línea en el margen izquierdo para comentarla o descomentarla. Una línea que ya empieza por <code>##</code> solo pierde un <code>#</code>.</li>
@@ -77,11 +77,11 @@
 <li><strong>Buscar y reemplazar</strong> — <code>⌘F</code> / <code>Ctrl+F</code> busca en la hoja activa con resaltado en vivo, y reemplaza una o todas las coincidencias.</li>
 <li><strong>Tamaño del texto</strong> — <strong>−</strong> / <strong>+</strong> del pie cambian el editor entre el 50% y el 200% del tamaño predeterminado del navegador; <strong>Restablecer tamaño</strong> vuelve al 100%.</li>
 </ul>
-<h2 id="autocompletado">Autocompletado</h2>
+<h2 id="autocompletado">Autocompletado<a class="doc-anchor" href="#autocompletado" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <p>Mientras escribes, un cuadro de sugerencias propone las variables de la hoja y las <code>#tags</code>, además de las funciones, palabras clave, constantes y unidades integradas. Pulsa <code>Ctrl+Space</code> para abrirlo cuando quieras. <strong>↑</strong>/<strong>↓</strong> eligen, <strong>Enter</strong>/<strong>Tab</strong> insertan, <strong>Esc</strong> cierra.</p>
-<h2 id="primera-visita">Primera visita</h2>
+<h2 id="primera-visita">Primera visita<a class="doc-anchor" href="#primera-visita" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <p>La primera visita abre con una hoja de <strong>Bienvenida</strong> en vez de una página vacía — variables, etiquetas, <code>sum</code>, tags, duraciones con unidades, porcentajes y fechas. Usa sus botones <strong>Conservar contenido</strong> / <strong>Borrar contenido</strong> para descartarla o vaciarla.</p>
-<h2 id="sin-conexion">Sin conexión</h2>
+<h2 id="sin-conexion">Sin conexión<a class="doc-anchor" href="#sin-conexion" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <p>Math Notes es una PWA instalable. Tras la primera visita, un service worker mantiene la app disponible sin conexión; las tasas de cambio se guardan en caché, así que las conversiones siguen funcionando. Consulta <a href="/docs/es/app/">App &amp; plataforma</a>.</p>
       </article>
       <footer class="doc-footer">

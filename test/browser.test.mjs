@@ -1025,3 +1025,33 @@ test('the service worker is registered from the site root so it controls the app
     'the worker must control the whole origin, not just /js/'
   );
 });
+
+test('the documentation headings anchor and the sidebar tracks scrolling', async () => {
+  await newPage();
+  await page.goto(`http://localhost:${server.address().port}/docs/getting-started/`, {
+    waitUntil: 'load',
+  });
+  await waitFor(() => page.$('.doc-anchor'));
+
+  const anchors = await page.$$eval('.doc-anchor', (nodes) =>
+    nodes.map((node) => ({
+      href: node.getAttribute('href'),
+      id: node.closest('h2, h3')?.id,
+    }))
+  );
+  assert.ok(anchors.length >= 5, 'every heading carries an anchor');
+  assert.ok(
+    anchors.every((anchor) => anchor.href === `#${anchor.id}`),
+    'each anchor links to its own heading'
+  );
+
+  const initial = await page.$eval('.doc-nav-sub a.is-active', (node) => node.textContent);
+  assert.equal(initial, 'The screen');
+  // Disable smooth scrolling so the jump settles immediately.
+  await page.addStyleTag({ content: 'html { scroll-behavior: auto !important; }' });
+  await page.evaluate(() => document.getElementById('editing').scrollIntoView());
+  await wait(250);
+  const scrolled = await page.$eval('.doc-nav-sub a.is-active', (node) => node.textContent);
+  assert.equal(scrolled, 'Editing', 'the sidebar highlights the section in view');
+  assert.deepEqual(errors, []);
+});
