@@ -1,6 +1,9 @@
 node_modules/
 .DS_Store
 
+# Local opencode config
+opencode.json
+
 # Throwaway verification scripts
 *.tmp.*
 verify-*.mjs
