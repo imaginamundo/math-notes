@@ -344,6 +344,19 @@ test('a line reference shows the referenced value in place', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('a line reference updates when the referenced line changes', async () => {
+  await newPage();
+  await setContent('5\nline(1)');
+  await waitFor(() =>
+    page.evaluate(() => document.querySelector('#view .reference')?.dataset.value === '5')
+  );
+  await setContent('7\nline(1)');
+  await waitFor(() =>
+    page.evaluate(() => document.querySelector('#view .reference')?.dataset.value === '7')
+  );
+  assert.deepEqual(errors, []);
+});
+
 test('Cmd+G jumps the caret to the requested line', async () => {
   await newPage();
   await setContent('one = 1\n\nthree = 3\n\nfive = 5');

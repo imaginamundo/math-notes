@@ -129,15 +129,11 @@ function createRowRenderer(view) {
     const from = Math.min(textFrom, resultFrom);
     for (let i = from; i < textLines.length; i++) {
       const row = rows[i];
-      if (row) patchRow(row, results ? results[i] : undefined);
-    }
-    // Group shading is applied to every row (not just the changed tail) so a
-    // group that disappeared above the patch point loses its background too.
-    // References are refreshed in the same pass: a referenced value can change
-    // while the referring line's own text did not.
-    for (let i = 0; i < textLines.length; i++) {
-      const row = rows[i];
       if (!row) continue;
+      patchRow(row, results ? results[i] : undefined);
+      // Group shading and `line(n)` references are refreshed in the same pass.
+      // A row above `from` cannot have changed: its own text did not, and a
+      // reference only points at an earlier line, whose value the engine kept.
       setGroupClass(row, results && results[i] ? results[i].group : undefined);
       patchReferences(row, i, results);
     }
