@@ -1,6 +1,6 @@
 function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./js/serviceWorker.js').catch(() => {});
+    navigator.serviceWorker.register('./serviceWorker.js').catch(() => {});
   }
 }
 

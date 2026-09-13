@@ -1009,3 +1009,19 @@ test('the documentation page renders highlighted examples and wires its actions'
   assert.equal(state.heading, 'Getting started');
   assert.deepEqual(errors, []);
 });
+
+test('the service worker is registered from the site root so it controls the app', async () => {
+  await newPage();
+  const scope = await page.evaluate(async () => {
+    const registration = await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((resolve) => setTimeout(() => resolve(null), 4000)),
+    ]);
+    return registration ? registration.scope : null;
+  });
+  assert.equal(
+    scope,
+    `http://localhost:${server.address().port}/`,
+    'the worker must control the whole origin, not just /js/'
+  );
+});

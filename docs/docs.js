@@ -68,3 +68,9 @@ function wireMenu() {
 
 for (const figure of document.querySelectorAll('.doc-example')) wireExample(figure);
 wireMenu();
+
+// The app's service worker lives at the site root (scope `/`), so it also keeps
+// the documentation available offline once it has been visited.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/serviceWorker.js', { scope: '/' }).catch(() => {});
+}

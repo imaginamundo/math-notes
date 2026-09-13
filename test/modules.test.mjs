@@ -13,7 +13,7 @@ const EXCLUDED = new Set([
   'js/index.js',
   'js/registerServiceWorker.js',
   'js/worker.js',
-  'js/serviceWorker.js',
+  'serviceWorker.js',
   'js/i18n/build.js',
 ]);
 

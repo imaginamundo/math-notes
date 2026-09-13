@@ -515,6 +515,19 @@ synchronous first paint and per-keystroke cost, failing on order-of-magnitude
 regressions; run `node --test test/perf.test.mjs` to compare a change against a
 baseline.
 
+## Offline
+
+The service worker lives at the **repository root** (`serviceWorker.js`), not
+under `js/`, so its default scope is `/` and it can cache the app shell as well
+as the documentation. A worker under `/js/` could only ever control `/js/`
+(the browser's max-scope rule), which would leave the app and `/docs` online
+only. It precaches the shell and every module (except the build-only
+`js/i18n/build.js` and `js/lib/math.js` / `math.bundle.js`) into a versioned
+cache and serves same-origin GETs stale-while-revalidate; the Help/Examples
+content is cached too, so the modals work on a first offline visit. Both the app
+(`js/registerServiceWorker.js`) and the docs (`docs-src/src/docs.js`) register
+it; `test/browser.test.mjs` asserts the registration scope is the whole origin.
+
 ## Accessibility notes
 
 - The view and line gutter are `aria-hidden`; the textarea is the accessible
