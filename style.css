@@ -437,12 +437,19 @@ input::placeholder {
 .total-row {
   display: flex;
   align-items: center;
-  padding: 0.5em 1em 0.5em calc(1em + var(--line-gutter) + var(--safe-left));
+  padding: 0.2em 1em 0.2em calc(1em + var(--line-gutter) + var(--safe-left));
   background: var(--color-surface);
   border-top: 1px solid var(--border-strong);
 }
-.total-label {
+.total-mode {
   margin-right: 0.75em;
+  padding: 0.2em 0.4em;
+  color: var(--color-text);
+  background: var(--surface-chip);
+  border: 1px solid var(--border-chip);
+  border-radius: 4px;
+  font: inherit;
+  cursor: pointer;
 }
 .total {
   font-weight: 700;
@@ -492,6 +499,15 @@ input::placeholder {
   text-align: center;
   line-height: normal;
   color: var(--color-text);
+  opacity: 1;
+}
+/* On the line being edited, reveal the raw `line(n)` token and show the value
+   over it at half opacity, so the token stays easy to edit. */
+.line-row.active .reference.resolved {
+  color: var(--color-link);
+}
+.line-row.active .reference.resolved::after {
+  opacity: 0.5;
 }
 .title {
   color: var(--color-title);
@@ -632,6 +648,41 @@ button:hover {
 }
 .starter-prompt button + button {
   border-left: 1px solid var(--border-strong);
+}
+.autocomplete {
+  position: absolute;
+  z-index: 3;
+  min-width: 10em;
+  max-width: 22em;
+  max-height: 14em;
+  overflow-y: auto;
+  padding: 0.2em 0;
+  background: var(--color-footer);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.25em;
+  font-size: 0.9em;
+}
+.autocomplete[hidden] {
+  display: none;
+}
+.autocomplete-option {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1em;
+  padding: 0.1em 0.6em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.autocomplete-option.active {
+  background: var(--color-primary);
+}
+.autocomplete-text {
+  color: var(--color-text);
+}
+.autocomplete-detail {
+  color: var(--color-text-muted);
+  font-size: 0.85em;
 }
 .find-bar {
   position: absolute;
@@ -903,7 +954,8 @@ code {
   border-radius: 2px;
 }
 /* Measurement system picker */
-.settings-measurement {
+.settings-measurement,
+.settings-clock {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4em;
@@ -923,6 +975,22 @@ code {
 .measurement-card.active {
   border-color: var(--color-operator);
   box-shadow: inset 0 0 0 1px var(--color-operator);
+}
+/* Decimal precision picker */
+.settings-precision {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  color: var(--color-text);
+}
+.settings-precision input {
+  width: 4.5em;
+  padding: 0.35em 0.5em;
+  color: var(--color-text);
+  background: var(--surface-chip);
+  border: 1px solid var(--border-chip);
+  border-radius: 4px;
+  font: inherit;
 }
 .settings-files {
   display: flex;

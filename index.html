@@ -49,7 +49,11 @@
         </div>
       </div>
       <div class="total-row">
-        <b class="total-label">total:</b>
+        <select id="total-mode" class="total-mode" aria-label="Total aggregate">
+          <option value="sum">total</option>
+          <option value="average">average</option>
+          <option value="median">median</option>
+        </select>
         <span id="total" class="total"></span>
       </div>
     </div>
@@ -104,6 +108,7 @@
         <a class="modal-nav-link" href="#help-rates">Rates</a>
         <a class="modal-nav-link" href="#help-currency">Currency</a>
         <a class="modal-nav-link" href="#help-dates">Dates</a>
+        <a class="modal-nav-link" href="#help-calendar">Calendar</a>
         <a class="modal-nav-link" href="#help-timespans">Timespans</a>
         <a class="modal-nav-link" href="#help-shortcuts">Shortcuts</a>
         <a class="modal-nav-link" href="#help-about">About</a>
@@ -111,8 +116,8 @@
       <div class="modal-body">
         <section id="help-basics" class="help-section">
           <h2>Basics</h2>
-          <p>Type a calculation on any line and its result appears right beside it as a dimmed hint. Errors show inline in red. The <b>total</b> at the bottom sums all numeric results, and results are formatted with thousands separators.</p>
-          <p>The footer's <b>−</b> / <b>+</b> change the editor text size (50–200%, with <b>Reset size</b> back to 100%). On a first visit a <b>Welcome</b> sheet demonstrates the app; use its <b>Keep content</b> / <b>Clear content</b> buttons to dismiss or empty it.</p>
+          <p>Type a calculation on any line and its result appears right beside it as a dimmed hint. Errors show inline in red. The <b>total</b> at the bottom sums all numeric results — use its dropdown to switch to the <b>average</b> or <b>median</b> — and results are formatted with thousands separators. Results show up to 3 decimal places (<b>Settings → Decimal precision</b>); a value with more precision ends with an ellipsis, while calculations keep full precision.</p>
+          <p>The footer's <b>−</b> / <b>+</b> change the editor text size (50–200%, with <b>Reset size</b> back to 100%). On a first visit a <b>Welcome</b> sheet demonstrates the app; use its <b>Keep content</b> / <b>Clear content</b> buttons to dismiss or empty it. As you type, a popup suggests variables, <b>#tags</b> and built-in names (or press <b>Ctrl+Space</b>): <b>↑</b>/<b>↓</b> to choose, <b>Enter</b>/<b>Tab</b> to insert, <b>Esc</b> to dismiss.</p>
           <div class="help-example" data-expr="1 + 1" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 2</span>
           </div>
@@ -170,7 +175,7 @@
           <div class="help-example" data-expr="Price: 10 + 5" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 15</span>
           </div>
-          <p>With no space, <code>#word</code> is a <b>tag</b>. A line that is only tags shows their total, and <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> (optionally <code>of</code>) before the tag also work. Tagged lines above are summed, wherever they are. Tags can also be used in calculations: <code>#food * 2</code>, <code>#food + #other</code>. Requesting a tag that has no tagged lines shows an error.</p>
+          <p>With no space, <code>#word</code> is a <b>tag</b>. A line that is only tags shows their total, and <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> (optionally <code>of</code>) before the tag also work. Tagged lines above are summed, wherever they are. A row with several tags is the full amount split equally between them, so each tag gets its share while the row and its group total keep the full price. Tags can also be used in calculations: <code>#food * 2</code>, <code>#food + #other</code>. Requesting a tag that has no tagged lines shows an error.</p>
           <div class="help-example" data-expr="20 #food&#10;30 #food&#10;#food" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">last line returns 50</span>
           </div>
@@ -206,7 +211,7 @@
           <div class="help-example" data-expr="monthly rent = 1500&#10;monthly rent * 12" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">last line returns 18,000</span>
           </div>
-          <p>Reference the result of a line above with <code>line(n)</code>. The reference shows the value inline and only lines above can be referenced.</p>
+          <p>Reference the result of a line above with <code>line(n)</code>. The reference shows the value inline (the raw <code>line(n)</code> stays visible while you edit that line) and only lines above can be referenced.</p>
           <div class="help-example" data-expr="5&#10;line(1) * 2" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">last line returns 10</span>
           </div>
@@ -344,7 +349,7 @@
             <code></code><span class="help-returns">returns 40</span>
           </div>
           <div class="help-example" data-expr="$490 rounded to nearest hundred" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 500 USD</span>
+            <code></code><span class="help-returns">returns US$ 500</span>
           </div>
           <div class="help-example" data-expr="21 rounded up to nearest 5" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 25</span>
@@ -394,7 +399,7 @@
 
         <section id="help-units" class="help-section">
           <h2>Unit conversion</h2>
-          <p>Convert units with <code>to</code> or <code>in</code>. CSS units are supported too: <code>px</code>, <code>em</code> and <code>point</code>. Cooking volume units follow the measurement system in <b>Settings → Measurement system</b> — Metric (default), US customary or Imperial — which sets <code>cup</code> (250 / 236.6 / 284.1 ml), <code>tsp</code>, <code>tbsp</code>, <code>fl oz</code>, <code>pint</code>, <code>quart</code> and <code>gallon</code>.</p>
+          <p>Convert units with <code>to</code>, <code>in</code> or <code>as</code>. CSS units are supported too: <code>px</code>, <code>em</code> and <code>point</code>. Cooking volume units follow the measurement system in <b>Settings → Measurement system</b> — Metric (default), US customary or Imperial — which sets <code>cup</code> (250 / 236.6 / 284.1 ml), <code>tsp</code>, <code>tbsp</code>, <code>fl oz</code>, <code>pint</code>, <code>quart</code> and <code>gallon</code>.</p>
           <div class="help-example" data-expr="1cm to m" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 0.01 m</span>
           </div>
@@ -552,7 +557,7 @@
 
         <section id="help-currency" class="help-section">
           <h2>Currency conversion</h2>
-          <p>Convert between currencies using 3-letter ISO codes or symbols. Rates come from the European Central Bank (via frankfurter.dev) and are cached locally for offline use.</p>
+          <p>Convert between currencies using 3-letter ISO codes or symbols. Results are written with the currency's symbol where it has one (<code>350usd</code> becomes <code>US$ 350</code>); currencies without a symbol keep their code. Money only forms ratios (<code>USD/hour</code>, <code>USD/km</code>), so multiplying a currency by another unit (<code>BRL hour</code>) is an error — use a rate instead. Rates come from the European Central Bank (via frankfurter.dev) and are cached locally for offline use.</p>
           <div class="help-example" data-expr="100 USD to EUR" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">converts USD to EUR</span>
           </div>
@@ -564,6 +569,9 @@
           </div>
           <div class="help-example" data-expr="50 EUR in BRL" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">converts to BRL</span>
+          </div>
+          <div class="help-example" data-expr="100 USD/hour" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">US$ 100 per hour</span>
           </div>
           <p><b>Supported codes:</b> <code>AUD</code>, <code>BRL</code>, <code>CAD</code>, <code>CHF</code>, <code>CNY</code>, <code>CZK</code>, <code>DKK</code>, <code>EUR</code>, <code>GBP</code>, <code>HKD</code>, <code>HUF</code>, <code>IDR</code>, <code>ILS</code>, <code>INR</code>, <code>ISK</code>, <code>JPY</code>, <code>KRW</code>, <code>MXN</code>, <code>MYR</code>, <code>NOK</code>, <code>NZD</code>, <code>PHP</code>, <code>PLN</code>, <code>RON</code>, <code>SEK</code>, <code>SGD</code>, <code>THB</code>, <code>TRY</code>, <code>USD</code>, <code>ZAR</code>.</p>
         </section>
@@ -585,9 +593,65 @@
           </div>
         </section>
 
+        <section id="help-calendar" class="help-section">
+          <h2>Calendar</h2>
+          <p>Add or subtract time from a date, measure the interval between dates, and format a date with a pattern. Dates can be written as <code>10 June</code>, <code>June 10, 2023</code>, <code>2019-04-01</code> or <code>12/02/1988</code>. A date can be saved in a variable and reused (<code>start = March 4</code>, then <code>start + 2 weeks</code>). Clock times (<code>9:45 am</code>, <code>1:30</code>) add durations and measure intervals, shown in 24-hour by default (<b>Settings → Clock</b>). Workdays are Monday to Friday (public holidays are not counted yet).</p>
+          <div class="help-example" data-expr="10 June + 3 weeks" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">1 July</span>
+          </div>
+          <div class="help-example" data-expr="start = March 4, 2025&#10;start + 2 weeks" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">18 March 2025</span>
+          </div>
+          <div class="help-example" data-expr="April 1, 2019 - 3 months 5 days" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">27 December 2018</span>
+          </div>
+          <div class="help-example" data-expr="3 weeks after March 14, 2019" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">4 April 2019</span>
+          </div>
+          <div class="help-example" data-expr="today + 3 weeks" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">three weeks from today</span>
+          </div>
+          <div class="help-example" data-expr="4 days from now" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">four days from now</span>
+          </div>
+          <div class="help-example" data-expr="16:00 + 3 hours 12 minutes" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">a clock time 3¼ hours later</span>
+          </div>
+          <div class="help-example" data-expr="7:30am to 8:45pm" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">13 hours 15 minutes</span>
+          </div>
+          <div class="help-example" data-expr="now + 3 hours 15 minutes" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">a clock time 3¼ hours from now</span>
+          </div>
+          <div class="help-example" data-expr="January 10 - February 5" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">3 weeks 5 days</span>
+          </div>
+          <div class="help-example" data-expr="days until Christmas" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">days until 25 December</span>
+          </div>
+          <div class="help-example" data-expr="workdays in 3 weeks" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">15 workdays</span>
+          </div>
+          <div class="help-example" data-expr="work hours in June" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">176 work hours (8h days)</span>
+          </div>
+          <div class="help-example" data-expr="10 March to 17 March in workdays" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">5 workdays</span>
+          </div>
+          <div class="help-example" data-expr="5 workdays after March 14, 2019" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">21 March 2019</span>
+          </div>
+          <div class="help-example" data-expr="weekday on March 9, 2024" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">Saturday</span>
+          </div>
+          <div class="help-example" data-expr="March 12, 2023 as EEEE, MMM d, yyyy" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">Sunday, Mar 12, 2023</span>
+          </div>
+        </section>
+
         <section id="help-timespans" class="help-section">
           <h2>Timespans</h2>
-          <p>Show a duration as a timespan of components, or split it into two units. A timespan is a real duration, so it can be added and multiplied. Time units can be written short (<code>3h 5m 10s</code>) or long.</p>
+          <p>Show a duration as a timespan of components, or split it into two units. A timespan is a real duration, so it can be added and multiplied, and converted to a single unit with <code>to</code>/<code>in</code>/<code>as</code> (<code>as minutes</code>). Time units can be written short (<code>3h 5m 10s</code>) or long.</p>
           <div class="help-example" data-expr="5.5 minutes as timespan" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">5 min 30 s</span>
           </div>
@@ -670,8 +734,8 @@
 
       <section class="help-section">
         <h2>Restaurant bill split with tags</h2>
-        <p>Split a bar bill between four people. Each item is divided by the number of people who shared it and tagged with their names; the lines at the end total what each person owes.</p>
-        <div class="help-example" data-expr="At the bar:&#10;potato: 20 / 3 #name1 #name2 #name3&#10;burger: 50 #name1 #name3&#10;beer: 160 / 4 #name1 #name2 #name3 #name4&#10;end&#10;&#10;#name1&#10;#name2&#10;#name3&#10;#name4" tabindex="0" role="button" title="Click to add to the editor">
+        <p>Split a bar bill between four people. Write each item's full amount and tag everyone who shared it; each tag gets an equal share, while the group total keeps the full price.</p>
+        <div class="help-example" data-expr="At the bar:&#10;potato: 20 #name1 #name2 #name3&#10;burger: 2 * 50 #name1 #name3&#10;beer: 160 #name1 #name2 #name3 #name4&#10;end&#10;&#10;#name1&#10;#name2&#10;#name3&#10;#name4" tabindex="0" role="button" title="Click to add to the editor">
           <code></code><span class="help-returns">each #name returns a person's total</span>
         </div>
       </section>
@@ -755,6 +819,62 @@
           <code></code><span class="help-returns">last line returns ≈ 22.86</span>
         </div>
       </section>
+
+      <section class="help-section">
+        <h2>Age and elapsed time</h2>
+        <p>Measure the span from a date to today — first as calendar years, months and days, then as a plain day count.</p>
+        <div class="help-example" data-expr="1990-04-01 to today&#10;days since 1990-04-01" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">exact age, then total days</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Countdown to a birthday</h2>
+        <p>Days left until the next time a date comes around. Change the month and day to your own.</p>
+        <div class="help-example" data-expr="birthday = June 21&#10;days until birthday" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">days until the next 21 June</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Fuel cost with units</h2>
+        <p>The consumption and the price per litre cancel down to a total cost.</p>
+        <div class="help-example" data-expr="trip = 350 km&#10;economy = 7 l / 100 km&#10;price = 1.70 EUR/l&#10;trip * economy * price" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">€ 41.65</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Overtime pay</h2>
+        <p>Regular hours at the base rate, plus the extra hours at time and a half.</p>
+        <div class="help-example" data-expr="worked = 45&#10;rate = 25 USD/hour&#10;regular = 40 hours * rate&#10;overtime = (worked - 40) hours * rate * 1.5&#10;regular + overtime" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">US$ 1,187.5 for 40 h + 5 h overtime</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Meeting length</h2>
+        <p>Add the clock-time interval of each meeting and show the total as a timespan.</p>
+        <div class="help-example" data-expr="standup = 9:00 am to 9:15 am&#10;review = 2:00 pm to 3:30 pm&#10;standup + review as timespan" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">1 hour 45 minutes total</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Clock reminders</h2>
+        <p>Get a clock time a fixed offset after an anchor time — handy for alarms and reminders.</p>
+        <div class="help-example" data-expr="wake = 6:30 am&#10;wake + 45 minutes&#10;wake + 8 hours" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">07:15 and 14:30</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Household budget by category</h2>
+        <p>Tag each expense with a category; a line that is only the tag totals that category, and tags add up too.</p>
+        <div class="help-example" data-expr="Budget:&#10;rent: 1200 #home&#10;utilities: 150 #home&#10;groceries: 480 #living&#10;transport: 120 #living&#10;end&#10;#home&#10;#living&#10;#home + #living" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">each #tag is a category total; the last adds them up</span>
+        </div>
+      </section>
     </div>
   </dialog>
 
@@ -781,6 +901,19 @@
         <h2>Measurement system</h2>
         <p>Used for cooking volume units. Metric is the default.</p>
         <div class="settings-measurement"></div>
+      </section>
+      <section class="help-section">
+        <h2>Decimal precision</h2>
+        <p>Decimal places shown in results. A truncated result ends with an ellipsis; calculations keep full precision.</p>
+        <label class="settings-precision">
+          Decimal places
+          <input id="decimal-precision" type="number" min="0" max="10" step="1" inputmode="numeric" />
+        </label>
+      </section>
+      <section class="help-section">
+        <h2>Clock</h2>
+        <p>How clock times are written. 24-hour is the default.</p>
+        <div class="settings-clock"></div>
       </section>
       <section class="help-section">
         <h2>Recover</h2>

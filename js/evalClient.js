@@ -1,6 +1,9 @@
 import { fetchRates, loadCached } from './eval/currency.js';
 import { readMeasurementSystem } from './core/measurementSystem.js';
 import { DEFAULT_MEASUREMENT_SYSTEM } from './core/measures.js';
+import { DEFAULT_PRECISION, readDecimalPrecision } from './core/decimalPrecision.js';
+import { DEFAULT_CLOCK_FORMAT, readClockFormat } from './core/clockFormat.js';
+import { DEFAULT_TOTAL_MODE, readTotalMode } from './core/totalMode.js';
 import debounce from './util/debounce.js';
 
 const EVALUATE_TIMEOUT = 10000;
@@ -23,6 +26,11 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
   let fallbackModule = null;
   let pendingUpdates = 0;
   let busy = false;
+  // A precision change only reformats results, so the engine reports "no
+  // change" (startLine -1). Force one full re-render so the new precision shows.
+  let precisionDirty = false;
+  // The clock format is the same: reformat only, so force a full re-render.
+  let clockFormatDirty = false;
 
   function setBusy(value) {
     if (busy === value) return;
@@ -47,6 +55,18 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     const measurementSystem = readMeasurementSystem();
     if (measurementSystem !== DEFAULT_MEASUREMENT_SYSTEM) {
       worker.postMessage({ type: 'measurement', data: measurementSystem });
+    }
+    const precision = readDecimalPrecision();
+    if (precision !== DEFAULT_PRECISION) {
+      worker.postMessage({ type: 'precision', data: precision });
+    }
+    const totalMode = readTotalMode();
+    if (totalMode !== DEFAULT_TOTAL_MODE) {
+      worker.postMessage({ type: 'total-mode', data: totalMode });
+    }
+    const clockFormat = readClockFormat();
+    if (clockFormat !== DEFAULT_CLOCK_FORMAT) {
+      worker.postMessage({ type: 'clock-format', data: clockFormat });
     }
     const cachedRates = loadCached();
     if (cachedRates) worker.postMessage({ type: 'rates', data: cachedRates });
@@ -131,6 +151,14 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
       if (onTextRender) onTextRender(lines);
       const { data } = await requestEvaluate(lines);
       if (editableNode.value !== text) return;
+      if (precisionDirty) {
+        data.startLine = 0;
+        precisionDirty = false;
+      }
+      if (clockFormatDirty) {
+        data.startLine = 0;
+        clockFormatDirty = false;
+      }
       onRender(lines, data);
     } catch (error) {
       console.error('Failed to update the sheet:', error);
@@ -150,6 +178,20 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     if (worker && system) worker.postMessage({ type: 'measurement', data: system });
   }
 
+  function syncPrecision(value) {
+    if (worker && value !== undefined) worker.postMessage({ type: 'precision', data: value });
+    precisionDirty = true;
+  }
+
+  function syncTotalMode(mode) {
+    if (worker && mode) worker.postMessage({ type: 'total-mode', data: mode });
+  }
+
+  function syncClockFormat(format) {
+    if (worker && format) worker.postMessage({ type: 'clock-format', data: format });
+    clockFormatDirty = true;
+  }
+
   fetchRates();
 
   return {
@@ -157,6 +199,9 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     requestLines,
     syncRates,
     syncMeasurement,
+    syncPrecision,
+    syncTotalMode,
+    syncClockFormat,
     schedule: debounced.schedule,
     flush: debounced.flush,
   };

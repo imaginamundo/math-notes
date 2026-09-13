@@ -1,4 +1,5 @@
 import formatResult from './formatResult.js';
+import { readDecimalPrecision } from '../core/decimalPrecision.js';
 
 // The visible total updates on every evaluation, but the screen reader should
 // not announce every recompute while someone is still typing. Announcements go
@@ -8,7 +9,7 @@ const ANNOUNCE_DELAY = 800;
 let announceTimer = null;
 
 function renderTotal(totalNode, total) {
-  const text = total === null ? '' : formatResult(total);
+  const text = total === null ? '' : formatResult(total, readDecimalPrecision());
   totalNode.textContent = text;
 
   const live = liveRegionFor(totalNode);

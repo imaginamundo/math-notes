@@ -64,12 +64,20 @@ function preprocessSymbols(expression) {
 }
 
 function uppercaseCurrencyCodes(expression) {
-  return expression
-    .replace(CODE_AFTER_NUMBER, (match, number, code) => `${number} ${uppercaseCode(code)}`)
-    .replace(CODE_BEFORE_NUMBER, (match, code, number) => `${uppercaseCode(code)} ${number}`)
-    .replace(CODE_BEFORE_TO, (match, code, space) => `${uppercaseCode(code)}${space}to`)
-    .replace(CODE_AFTER_TO, (match, space, code) => `to${space}${uppercaseCode(code)}`)
-    .replace(CODE_AFTER_IN, (match, space, code) => `in${space}${uppercaseCode(code)}`);
+  return (
+    expression
+      .replace(CODE_AFTER_NUMBER, (match, number, code) => `${number} ${uppercaseCode(code)}`)
+      // A currency code before its amount is flipped so the amount leads
+      // (`BRL 360 / 30 days` -> `360 BRL / 30 days`), which mathjs reads as the
+      // rate `BRL/day` rather than `BRL * days`. Non-currency identifiers are
+      // left alone.
+      .replace(CODE_BEFORE_NUMBER, (match, code, number) =>
+        isCurrencyCode(code) ? `${number} ${uppercaseCode(code)}` : match
+      )
+      .replace(CODE_BEFORE_TO, (match, code, space) => `${uppercaseCode(code)}${space}to`)
+      .replace(CODE_AFTER_TO, (match, space, code) => `to${space}${uppercaseCode(code)}`)
+      .replace(CODE_AFTER_IN, (match, space, code) => `in${space}${uppercaseCode(code)}`)
+  );
 }
 
 function uppercaseCode(token) {

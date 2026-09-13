@@ -1,5 +1,6 @@
 import format from './format.js';
 import formatResult from './formatResult.js';
+import { readDecimalPrecision } from '../core/decimalPrecision.js';
 import { firstDifference, arraysEqual } from '../util/sequence.js';
 import { collectVariableNames } from '../core/multiWordVariables.js';
 
@@ -159,7 +160,7 @@ function createRowRenderer(view) {
       const valid =
         ref && ref.type === 'value' && ref.value !== undefined && typeof ref.value !== 'function';
       if (valid) {
-        const text = formatResult(ref.value);
+        const text = formatResult(ref.value, readDecimalPrecision());
         span.dataset.value = text;
         span.title = text;
         span.classList.add('resolved');
@@ -203,12 +204,15 @@ function createRowRenderer(view) {
   }
 
   // A caret on a row with a truncated error shows the full message on that
-  // row; every other row stays compact. Call it whenever the active line may
-  // have changed (after input/click/selection, and after patching results).
+  // row; every other row stays compact. The active row is also marked so a
+  // resolved `line(n)` can reveal its raw token while editing. Call it whenever
+  // the active line may have changed (after input/click/selection, and after
+  // patching results).
   function updateActiveLine(index) {
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       if (!row) continue;
+      if (row.classList) row.classList.toggle('active', i === index);
       let ghost = null;
       for (const child of row.children) {
         if (
@@ -259,7 +263,10 @@ function createRowRenderer(view) {
     if (!result || result.type === 'assignment' || result.value === undefined) return null;
     const error = result.type === 'error';
     if (!error) {
-      return { value: `→ ${truncate(formatResult(result.value), 80)}`, error: false };
+      return {
+        value: `→ ${truncate(formatResult(result.value, readDecimalPrecision()), 80)}`,
+        error: false,
+      };
     }
     const full = String(result.value);
     return { value: truncate(full, 80), error: true, full };

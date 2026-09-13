@@ -16,9 +16,12 @@ import initFind from './ui/find.js';
 import initLineNumbers from './ui/lineNumbers.js';
 import initGoToLine from './ui/goToLine.js';
 import initIndent from './ui/indent.js';
+import initAutocomplete from './ui/autocomplete.js';
 import initStarterPrompt from './ui/starterPrompt.js';
+import initTotalMode from './ui/totalMode.js';
 import initLoadingIndicator from './ui/loading.js';
 import initEditorScroll from './ui/editor.js';
+import { readClockFormat, setClockFormat } from './core/clockFormat.js';
 
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');
@@ -32,6 +35,9 @@ const loadingIndicator = initLoadingIndicator(document.getElementById('loading')
 // worker; only the results and total come back asynchronously (phase two).
 const editorScroll = initEditorScroll(contentEditableNode);
 const rowRenderer = createRowRenderer(viewNode);
+// The main thread formats some values too (line references, copied results), so
+// it needs the clock format alongside the worker.
+setClockFormat(readClockFormat());
 
 function renderTextLayer(lines) {
   rowRenderer.renderText(lines);
@@ -88,7 +94,11 @@ function boot() {
   initFind(contentEditableNode, viewNode);
   initLineNumbers(contentEditableNode);
   initGoToLine(contentEditableNode);
+  // Before initIndent: when the popup is open it swallows Tab, so the
+  // autocomplete's keydown listener must run first.
+  initAutocomplete(contentEditableNode, editorScroll);
   initIndent(contentEditableNode);
+  initTotalMode();
 
   // 4. The starter prompt is wired before onboarding can seed the sheet that
   //    it floats beneath.
@@ -121,6 +131,27 @@ window.addEventListener('currency:error', () => {
 // the main-thread fallback, then recomputes every line.
 window.addEventListener('measurement:updated', (event) => {
   evalClient.syncMeasurement(event.detail);
+  evalClient.update();
+});
+
+// Changing the display precision only reformats results, but the worker does
+// the formatting, so it needs the new value before the recompute.
+window.addEventListener('precision:updated', (event) => {
+  evalClient.syncPrecision(event.detail);
+  evalClient.update();
+});
+
+// Switching the total aggregate recomputes the total (the lines are unchanged,
+// but the worker recomputes the total on every evaluation).
+window.addEventListener('total-mode:updated', (event) => {
+  evalClient.syncTotalMode(event.detail);
+  evalClient.update();
+});
+
+// Changing the clock format only reformats clock-time results.
+window.addEventListener('clock-format:updated', (event) => {
+  setClockFormat(event.detail);
+  evalClient.syncClockFormat(event.detail);
   evalClient.update();
 });
 

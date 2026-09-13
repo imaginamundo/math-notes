@@ -11,6 +11,20 @@ import {
   readMeasurementSystem,
   writeMeasurementSystem,
 } from '../core/measurementSystem.js';
+import {
+  STORAGE_KEY as PRECISION_KEY,
+  MIN_PRECISION,
+  MAX_PRECISION,
+  readDecimalPrecision,
+  writeDecimalPrecision,
+  normalizeDecimalPrecision,
+} from '../core/decimalPrecision.js';
+import {
+  STORAGE_KEY as CLOCK_KEY,
+  CLOCK_FORMATS,
+  readClockFormat,
+  writeClockFormat,
+} from '../core/clockFormat.js';
 
 const STORAGE_KEY = 'math-notes-theme';
 // "Reset data" must clear exactly the keys the app's modules own, imported
@@ -22,6 +36,8 @@ const RESET_KEYS = [
   CURRENCY_KEY,
   FONT_KEY,
   MEASUREMENT_KEY,
+  PRECISION_KEY,
+  CLOCK_KEY,
   // So "Reset data" genuinely returns the app to a first run, tour included.
   ONBOARDED_KEY,
   // A first run should also offer the starter-content actions again.
@@ -121,6 +137,42 @@ function initSettings(contentEditableNode, tabsApi) {
     });
   }
   renderMeasurement();
+
+  const precisionInput = document.getElementById('decimal-precision');
+  precisionInput.min = String(MIN_PRECISION);
+  precisionInput.max = String(MAX_PRECISION);
+  precisionInput.value = String(readDecimalPrecision());
+  precisionInput.addEventListener('change', () => {
+    const value = normalizeDecimalPrecision(precisionInput.value);
+    writeDecimalPrecision(value);
+    precisionInput.value = String(value);
+    window.dispatchEvent(new CustomEvent('precision:updated', { detail: value }));
+  });
+
+  const CLOCK_NAMES = { 24: '24-hour', 12: '12-hour' };
+  const clockNode = modal.querySelector('.settings-clock');
+  CLOCK_FORMATS.forEach((format) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'measurement-card';
+    card.dataset.format = format;
+    card.textContent = CLOCK_NAMES[format];
+    card.title = `Show clock times in ${CLOCK_NAMES[format]} format`;
+    card.addEventListener('click', () => {
+      writeClockFormat(format);
+      renderClock();
+      window.dispatchEvent(new CustomEvent('clock-format:updated', { detail: format }));
+    });
+    clockNode.appendChild(card);
+  });
+
+  function renderClock() {
+    const current = readClockFormat();
+    clockNode.querySelectorAll('.measurement-card').forEach((card) => {
+      card.classList.toggle('active', card.dataset.format === current);
+    });
+  }
+  renderClock();
 
   const resetButton = document.getElementById('reset-data-button');
   resetButton.addEventListener('click', async () => {

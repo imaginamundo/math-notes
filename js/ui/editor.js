@@ -98,9 +98,28 @@ function initEditorScroll(editableNode) {
     if (document.activeElement === editableNode) scrollCaretIntoView();
   });
 
+  // The caret's position relative to the scroll content, so an overlay (the
+  // autocomplete popup) can sit under it. Uses the same glyph/line metrics as
+  // the view layer, so it stays aligned with the ghost text.
+  function caretPosition() {
+    const value = editableNode.value;
+    const pos = editableNode.selectionStart;
+    if (pos === null) return null;
+    if (!charWidth) measureCharWidth();
+    const cs = getComputedStyle(editableNode);
+    const lineHeight = parseFloat(cs.lineHeight);
+    return {
+      left: parseFloat(cs.paddingLeft) + (pos - startOfLine(value, pos)) * charWidth,
+      top: parseFloat(cs.paddingTop) + indexOfLineAt(value, pos) * lineHeight,
+      lineHeight,
+      charWidth,
+    };
+  }
+
   syncSize();
   return {
     syncSize,
+    caretPosition,
     // The font controls change the --app-font-scale outside the editor, which
     // makes the cached character width and the --editor-line-height both stale.
     // Re-measure the glyphs and recompute the row metrics to match.

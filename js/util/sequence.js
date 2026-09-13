@@ -5,7 +5,7 @@
 function firstDifference(previous, next) {
   const length = Math.max(previous.length, next.length);
   for (let i = 0; i < length; i++) {
-    if (previous[i] !== next[i]) return i;
+    if (i >= previous.length || i >= next.length || previous[i] !== next[i]) return i;
   }
   return -1;
 }

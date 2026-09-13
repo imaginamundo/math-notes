@@ -9,9 +9,12 @@ import initRounding from '../eval/rounding.js';
 import initMeasures, { applyMeasurementSystem } from '../eval/measures.js';
 import initRates from '../eval/rates.js';
 import initTimespan from '../eval/timespan.js';
+import initCalendar from '../eval/calendar.js';
 import { readMeasurementSystem } from './measurementSystem.js';
+import { readTotalMode } from './totalMode.js';
 import preprocess from './preprocess.js';
 import { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal } from './aggregate.js';
+import { unitMixError } from './unitMix.js';
 import { firstDifference } from '../util/sequence.js';
 import { mangleLines, unmangleName } from './multiWordVariables.js';
 
@@ -39,8 +42,29 @@ const MAX_LIST_LENGTH = 100;
 // Matches a standalone aggregate keyword, i.e. not a mathjs function call
 // like `sum([1, 2, 3])`.
 const AGGREGATE_WORD = /\b(?:sum|total|average|avg)\b(?!\s*\()/i;
-const AGGREGATE_SUM_WORD = /\b(?:sum|total)\b(?!\s*\()/gi;
-const AGGREGATE_AVG_WORD = /\b(?:average|avg)\b(?!\s*\()/gi;
+const AGGREGATE_WORD_ALL = /\b(sum|total|average|avg)\b(?!\s*\()/gi;
+
+// Labels a line may not assign to: `prev` and the unconditional date keywords
+// (rewritten before mathjs, so a variable of that name could never be read
+// back) and the whole `__` namespace, which holds the engine's own helpers and
+// the generated names multi-word variables are mangled to. Aggregate keywords
+// (`sum`/`total`/…) are deliberately not here: assigning one makes the variable
+// shadow the keyword from then on. Checked against the raw label, before
+// mangling, so a multi-word variable (which becomes `__var_...`) is never
+// mistaken for a reserved name.
+const RESERVED_LABELS = new Set([
+  'prev',
+  'today',
+  'now',
+  'yesterday',
+  'tomorrow',
+  'christmas',
+  'halloween',
+]);
+
+function isReservedLabel(label) {
+  return RESERVED_LABELS.has(label.toLowerCase()) || label.startsWith('__');
+}
 
 // A group opens with a header line (`Name:` with no expression) and closes with
 // a line whose code is exactly `end`. Groups are flat: an unterminated header is
@@ -78,9 +102,11 @@ function tagAggregateMode(code) {
 }
 
 // Combine every tagged value row above the request, using the same unit rules
-// as the running total. A row tagged with several requested tags counts once.
-// Returns null when no row carries any of the requested tags.
-function tagAggregate(results, tags, toIndex, mode) {
+// as the running total. A row tagged for several people is the item's full
+// amount, split equally between them, so each tag gets its share while the row
+// itself (and the group total) keeps the full price. Returns null when no row
+// carries any of the requested tags.
+function tagAggregate(results, tags, toIndex, mode, math) {
   const tagged = results
     .slice(0, toIndex)
     .filter(
@@ -92,7 +118,19 @@ function tagAggregate(results, tags, toIndex, mode) {
         tags.some((tag) => result.tags.includes(tag))
     );
   if (!tagged.length) return null;
-  return aggregateAbove(tagged, 0, tagged.length, mode);
+  const shares = tagged.map((result) => ({
+    type: 'value',
+    value: splitShare(result.value, result.tags.length, math),
+  }));
+  return aggregateAbove(shares, 0, shares.length, mode);
+}
+
+// One person's share of a value split `count` ways (a number or a Unit).
+function splitShare(value, count, math) {
+  if (count <= 1) return value;
+  if (typeof value === 'number') return value / count;
+  if (value && value.isUnit === true) return math.multiply(value, 1 / count);
+  return value;
 }
 
 function tagError(tags) {
@@ -103,7 +141,7 @@ function tagError(tags) {
 // `#tag` becomes a scope variable holding the tag's aggregate over the rows
 // above. Returns the rewritten text, the values to inject, or an error when a
 // tag has no tagged rows.
-function substituteTags(parsed, results, index) {
+function substituteTags(parsed, results, index, math) {
   const text = parsed.rawCode + parsed.tail.slice(0, parsed.tail.length - parsed.comment.length);
   const values = {};
   let error = null;
@@ -112,7 +150,7 @@ function substituteTags(parsed, results, index) {
     const name = `__tag_${tag.replace(/[^A-Za-z0-9_]/g, '_')}`;
     if (name in values) return name;
     if (error) return match;
-    const value = tagAggregate(results, [tag], index, 'sum');
+    const value = tagAggregate(results, [tag], index, 'sum', math);
     if (value === null) {
       error = tagError([tag]);
       return match;
@@ -184,6 +222,7 @@ function createEngine() {
   initMeasures(math, readMeasurementSystem());
   initRates(math);
   initTimespan(math);
+  initCalendar(math);
   initCurrency(math);
 
   const cache = {
@@ -195,6 +234,10 @@ function createEngine() {
   // Bumped whenever evaluation semantics change without the lines changing
   // (currency rates registered), so the cache cannot serve stale results.
   let environmentRevision = 0;
+
+  // Which aggregate the total bar shows. Only affects the total, not the
+  // per-line cache, so it is read fresh on each evaluation.
+  let totalMode = readTotalMode();
 
   function assertBoundedExpression(expression, scope) {
     let tree;
@@ -243,6 +286,8 @@ function createEngine() {
       const expression = preprocess(code);
       assertBoundedExpression(expression, scope);
       result = math.evaluate(expression, scope);
+      const mixError = unitMixError(result);
+      if (mixError) throw new Error(mixError);
       // The assignment statement already returns the rhs value; reuse it rather
       // than evaluating the rhs a second time, which could disagree for impure
       // expressions (e.g. `x = unix()`).
@@ -294,12 +339,15 @@ function createEngine() {
   }
 
   // Replace aggregate keywords in an expression with the block's values so they
-  // work inside expressions too, e.g. `a = sum` or `sum * 2`.
-  function substituteAggregates(parsed, sum, average) {
+  // work inside expressions too, e.g. `a = sum` or `sum * 2`. A keyword the user
+  // has redefined as a variable is left alone, so the variable shadows it.
+  function substituteAggregates(parsed, sum, average, variables) {
     const replace = (expression) =>
-      expression
-        .replace(AGGREGATE_SUM_WORD, String(sum))
-        .replace(AGGREGATE_AVG_WORD, String(average));
+      expression.replace(AGGREGATE_WORD_ALL, (word) =>
+        variables[word] !== undefined
+          ? word
+          : String(AGGREGATE_KEYWORDS[word.toLowerCase()] === 'average' ? average : sum)
+      );
 
     if (parsed.isAssignment) {
       const rhs = replace(parsed.rhs);
@@ -341,7 +389,7 @@ function createEngine() {
       return start;
     })();
     if (startLine === -1) {
-      return { results: cache.results, total: computeTotal(cache.results), startLine };
+      return { results: cache.results, total: computeTotal(cache.results, totalMode), startLine };
     }
 
     // Reuse the results of unchanged lines and rebuild the evaluation context up
@@ -351,12 +399,17 @@ function createEngine() {
     let previousResult;
     let lastBlankIndex = -1;
     const groups = findGroups(lines);
+    // A group header's cached value is the group subtotal, but the main loop
+    // only feeds it to `previousResult` when the matching `end` is reached, not
+    // at the header line. Mirror that here or a `prev` after the group would see
+    // the stale last body value.
+    const headerStarts = new Set([...groups.byEnd.values()].map((group) => group.start));
 
     for (let i = 0; i < startLine; i++) {
       const line = lines[i];
       if (line.trim() === '') lastBlankIndex = i;
       const parsed = parseLine(line);
-      if (parsed.isAssignment && !AGGREGATE_KEYWORDS[parsed.label.toLowerCase()]) {
+      if (parsed.isAssignment) {
         const stored = results[i];
         const assigned = stored
           ? stored.assigned !== undefined
@@ -365,8 +418,14 @@ function createEngine() {
           : undefined;
         if (assigned !== undefined) variables[parsed.label] = assigned;
       }
+      const endGroup = groups.byEnd.get(i);
       const result = results[i];
-      if (
+      if (endGroup) {
+        // A closed group leaves `prev` at the subtotal shown on its header.
+        const header = results[endGroup.start];
+        if (header && header.value !== undefined) previousResult = header.value;
+      } else if (
+        !headerStarts.has(i) &&
         result &&
         result.type !== 'error' &&
         result.value !== undefined &&
@@ -381,6 +440,8 @@ function createEngine() {
       if (line.trim() === '') lastBlankIndex = i;
 
       let parsed = parseLine(line);
+      // The raw label, before mangleLines rewrote multi-word names.
+      const original = parseLine(inputLines[i]);
 
       // A closing `end` row finalises the group: the subtotal is shown on the
       // header row (an aggregate result, so it never double counts in the
@@ -407,7 +468,7 @@ function createEngine() {
       let tags = parsed.tags;
       let tagScope = null;
       if (tags.length && !parsed.valid) {
-        const substituted = substituteTags(parsed, results, i);
+        const substituted = substituteTags(parsed, results, i, math);
         if (substituted.error) {
           results[i] = { type: 'error', value: substituted.error };
           continue;
@@ -419,7 +480,7 @@ function createEngine() {
       if (tags.length) {
         const mode = tagAggregateMode(parsed.code);
         if (mode) {
-          const value = tagAggregate(results, tags, i, mode);
+          const value = tagAggregate(results, tags, i, mode, math);
           if (value === null) {
             results[i] = { type: 'error', value: tagError(tags) };
             continue;
@@ -430,14 +491,17 @@ function createEngine() {
         }
       }
 
-      if (parsed.isAssignment && AGGREGATE_KEYWORDS[parsed.label.toLowerCase()]) {
-        results[i] = { type: 'error', value: `"${parsed.label}" is a reserved word` };
+      if (original.isAssignment && isReservedLabel(original.label)) {
+        results[i] = { type: 'error', value: `"${original.label}" is a reserved word` };
         continue;
       }
 
       const group = groups.groupOfLine.get(i);
       const blockStart = group ? group.start + 1 : lastBlankIndex + 1;
-      const keyword = AGGREGATE_KEYWORDS[parsed.code.trim().toLowerCase()];
+      const bare = parsed.code.trim();
+      // A variable named like an aggregate keyword shadows it (`total = 5`).
+      const keyword =
+        variables[bare] === undefined ? AGGREGATE_KEYWORDS[bare.toLowerCase()] : undefined;
 
       if (keyword) {
         const value = aggregateAbove(results, blockStart, i, keyword);
@@ -454,7 +518,7 @@ function createEngine() {
       if (AGGREGATE_WORD.test(parsed.code)) {
         const blockSum = aggregateAbove(results, blockStart, i, 'sum');
         const blockAvg = aggregateAbove(results, blockStart, i, 'average');
-        parsedLine = substituteAggregates(parsed, blockSum, blockAvg);
+        parsedLine = substituteAggregates(parsed, blockSum, blockAvg, variables);
       }
 
       const resolved = resolveLineRefs(parsedLine, results, i);
@@ -497,7 +561,7 @@ function createEngine() {
         lineIndex === group.start ? 'header' : lineIndex === group.end ? 'end' : 'body';
     }
 
-    return { results, total: computeTotal(results), startLine };
+    return { results, total: computeTotal(results, totalMode), startLine };
   }
 
   function registerCurrencyRates(data) {
@@ -512,6 +576,12 @@ function createEngine() {
     environmentRevision++;
   }
 
+  // The total mode only changes how the total is aggregated, not the per-line
+  // results, so the cache stays valid.
+  function registerTotalMode(mode) {
+    totalMode = mode;
+  }
+
   if (typeof window !== 'undefined') {
     // The main-thread fallback registers rates through its own currency:updated
     // listener, so invalidate there too or cached conversions would go stale.
@@ -521,9 +591,18 @@ function createEngine() {
     window.addEventListener('measurement:updated', (event) => {
       if (event.detail) registerMeasurementSystem(event.detail);
     });
+    window.addEventListener('total-mode:updated', (event) => {
+      if (event.detail) registerTotalMode(event.detail);
+    });
   }
 
-  return { evaluateLine, evaluateLines, registerCurrencyRates, registerMeasurementSystem };
+  return {
+    evaluateLine,
+    evaluateLines,
+    registerCurrencyRates,
+    registerMeasurementSystem,
+    registerTotalMode,
+  };
 }
 
 // The default engine shared by the worker, the main-thread fallback and the
@@ -550,10 +629,15 @@ function registerMeasurementSystem(system) {
   getEngine().registerMeasurementSystem(system);
 }
 
+function registerTotalMode(mode) {
+  getEngine().registerTotalMode(mode);
+}
+
 export {
   createEngine,
   evaluateLines,
   evaluateLine,
   registerCurrencyRates,
   registerMeasurementSystem,
+  registerTotalMode,
 };

@@ -43,7 +43,11 @@ function parseLine(line) {
   if (colonIndex !== -1) {
     const codeEquals = rawCode.indexOf('=');
     const candidate = rawCode.slice(0, colonIndex).trim();
+    // A colon between digits is a clock time (`now to 23:00`), not a `label:`.
+    const clockColon =
+      /\d/.test(rawCode[colonIndex - 1] || '') && /\d/.test(rawCode[colonIndex + 1] || '');
     if (
+      !clockColon &&
       candidate &&
       (codeEquals === -1 || codeEquals > colonIndex) &&
       /^[A-Za-z_][A-Za-z0-9_ ]*$/.test(candidate)

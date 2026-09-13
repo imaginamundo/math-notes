@@ -78,6 +78,18 @@ const CANONICAL_UNIT = {
 const UNIT_ALT = Object.keys(COMPONENT_UNIT)
   .sort((a, b) => b.length - a.length)
   .join('|');
+// Units whose explicit conversion should win over the timespan display.
+const MINUTE_HOUR_UNITS = new Set([
+  'min',
+  'mins',
+  'minute',
+  'minutes',
+  'h',
+  'hr',
+  'hrs',
+  'hour',
+  'hours',
+]);
 const COMPONENT_SOURCE = `\\d+(?:\\.\\d+)?\\s*(?:${UNIT_ALT})(?![A-Za-z])`;
 const RUN_SOURCE = `${COMPONENT_SOURCE}(?:\\s+${COMPONENT_SOURCE})+`;
 const WHOLE_RUN = new RegExp(`^\\s*${RUN_SOURCE}\\s*$`, 'i');
@@ -97,8 +109,11 @@ function joinTimeComponents(expression) {
 }
 
 function preprocessTimespan(expression) {
+  // `as` converts like `to`/`in` (`... as minutes`), except `as timespan`
+  // (handled below) and `as a %` (percentage, already consumed).
+  const converted = expression.replace(/\s+as\s+(?!timespan\b|a\s+%)/gi, ' to ');
   // mathjs reads `min` as the min() function; a number before it is a minute.
-  const normalized = expression.replace(/(\d+(?:\.\d+)?)\s*min(?![\w(])/gi, '$1 minutes');
+  const normalized = converted.replace(/(\d+(?:\.\d+)?)\s*min(?![\w(])/gi, '$1 minutes');
 
   // A line that is nothing but time components displays as a timespan.
   if (WHOLE_RUN.test(normalized)) {
@@ -117,25 +132,42 @@ function preprocessTimespan(expression) {
     if (a && b) return `__timespanParts((${inParts[1]}), "${a}", "${b}")`;
   }
 
+  // An explicit conversion to minutes/hours (`... to minutes`, `... as hours`)
+  // keeps that unit instead of rendering as a timespan. Seconds/days already
+  // keep their unit, and `m` stays meters.
+  const timeConversion = /^(.*\S)\s+(?:to|in)\s+([A-Za-z]+)$/i.exec(joined);
+  if (timeConversion && MINUTE_HOUR_UNITS.has(timeConversion[2].toLowerCase())) {
+    return `__keepUnit(${timeConversion[1]} to ${timeConversion[2]})`;
+  }
+
   return joined;
 }
 
-function toTimespanUnit(math, value) {
-  if (!value || value.isUnit !== true) throw new Error('A timespan needs a time quantity');
-  return value.to('timespan');
+// A timespan is a real Unit (so arithmetic works); the `timespan` property is
+// the display hint formatResult reads. Cloned so a marked unit never mutates a
+// cached result. `.value` is the value in base SI units (seconds for time) and,
+// unlike `.to('s')`, does not change mathjs's preferred unit for later results.
+function toTimespanUnit(value, second) {
+  if (!value || value.isUnit !== true || !value.equalBase(second)) {
+    throw new Error('A timespan needs a time quantity');
+  }
+  return value.clone();
 }
 
-function timespan(math, value) {
-  return toTimespanUnit(math, value);
+function timespan(value, second) {
+  const unit = toTimespanUnit(value, second);
+  unit.timespan = true;
+  return unit;
 }
 
-function timespanParts(math, value, unitA, unitB) {
-  const unit = toTimespanUnit(math, value);
-  const seconds = unit.toNumber();
+function timespanParts(value, second, unitA, unitB) {
+  const unit = toTimespanUnit(value, second);
+  const seconds = unit.value;
   const sizeA = UNIT_SECONDS[unitA];
   const sizeB = UNIT_SECONDS[unitB];
   const countA = Math.floor(seconds / sizeA);
   const remainder = seconds - countA * sizeA;
+  unit.timespan = true;
   unit.displayParts = [
     { unit: unitA, value: countA },
     { unit: unitB, value: remainder / sizeB },
@@ -183,17 +215,17 @@ function formatTimespan(seconds, parts, formatNumber) {
 }
 
 function initTimespan(math) {
-  // A real time unit (1 s) so a timespan is a duration that survives arithmetic;
-  // formatResult renders it as components.
-  try {
-    math.createUnit('timespan', { definition: '1 s' }, { override: true });
-  } catch {
-    // already defined
-  }
+  const second = math.unit('s');
   math.import(
     {
-      __timespan: (value) => timespan(math, value),
-      __timespanParts: (value, unitA, unitB) => timespanParts(math, value, unitA, unitB),
+      __timespan: (value) => timespan(value, second),
+      __timespanParts: (value, unitA, unitB) => timespanParts(value, second, unitA, unitB),
+      // Marks an explicit conversion so formatResult keeps the requested unit
+      // instead of drawing the duration as a timespan.
+      __keepUnit: (value) => {
+        if (value && value.isUnit === true) value.keepUnit = true;
+        return value;
+      },
     },
     { override: true }
   );

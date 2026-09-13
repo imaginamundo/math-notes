@@ -2,8 +2,13 @@ import {
   evaluateLines,
   registerCurrencyRates,
   registerMeasurementSystem,
+  registerTotalMode,
 } from './core/calculate.js';
+import { DEFAULT_PRECISION, normalizeDecimalPrecision } from './core/decimalPrecision.js';
+import { setClockFormat } from './core/clockFormat.js';
 import formatResult from './render/formatResult.js';
+
+let precision = DEFAULT_PRECISION;
 
 self.addEventListener('message', (event) => {
   const { id, type, lines, data } = event.data || {};
@@ -19,11 +24,12 @@ self.addEventListener('message', (event) => {
             ? undefined
             : result.type === 'error'
               ? result.value
-              : formatResult(result.value),
+              : formatResult(result.value, precision),
         group: result.group,
       }));
       // The total may be a Unit (same-unit sheet) and must be serialized too.
-      const serializedTotal = total === null || total === undefined ? total : formatResult(total);
+      const serializedTotal =
+        total === null || total === undefined ? total : formatResult(total, precision);
       self.postMessage({
         id,
         type: 'result',
@@ -38,5 +44,11 @@ self.addEventListener('message', (event) => {
     registerCurrencyRates(data);
   } else if (type === 'measurement') {
     registerMeasurementSystem(data);
+  } else if (type === 'total-mode') {
+    registerTotalMode(data);
+  } else if (type === 'precision') {
+    precision = normalizeDecimalPrecision(data);
+  } else if (type === 'clock-format') {
+    setClockFormat(data);
   }
 });

@@ -47,11 +47,12 @@ function buildUnit(entry, amount) {
   }
 }
 
-// Scan a range of results once into the plain-number sum and the unit groups,
-// so totals and aggregates share the exact same rules.
+// Scan a range of results once into the plain numbers and the unit groups, so
+// totals and aggregates share the exact same rules.
 function scan(results) {
   let numericSum = null;
   let numericCount = 0;
+  const numbers = [];
   const groups = [];
 
   for (const result of results) {
@@ -61,6 +62,7 @@ function scan(results) {
     if (typeof value === 'number' && Number.isFinite(value)) {
       numericSum = (numericSum ?? 0) + value;
       numericCount++;
+      numbers.push(value);
       continue;
     }
     if (!(value && value.isUnit === true)) continue;
@@ -79,7 +81,7 @@ function scan(results) {
     addUnit(group, name, value, amount);
   }
 
-  return { numericSum, numericCount, groups };
+  return { numericSum, numericCount, numbers, groups };
 }
 
 function findGroup(groups, kind, name, value) {
@@ -96,11 +98,12 @@ function findGroup(groups, kind, name, value) {
 function addUnit(group, name, value, amount) {
   let entry = group.units.get(name);
   if (!entry) {
-    entry = { unit: name, sum: 0, count: 0, sample: value, sampleAmount: amount };
+    entry = { unit: name, sum: 0, count: 0, sample: value, sampleAmount: amount, amounts: [] };
     group.units.set(name, entry);
   }
   entry.sum += amount;
   entry.count++;
+  entry.amounts.push(amount);
   // Keep a non-zero sample so conversions and rescaling stay finite.
   if (entry.sampleAmount === 0 && amount !== 0) {
     entry.sample = value;
@@ -146,7 +149,27 @@ function groupCount(group) {
 // Apply the shared total/aggregate rules to a scan. `empty` is what an empty
 // range yields (0 for an aggregate row, null for the running total).
 function combine(summary, mode, empty) {
-  const { numericSum, numericCount, groups } = summary;
+  const { numericSum, numericCount, numbers, groups } = summary;
+
+  if (mode === 'median') {
+    // With one unit group, plain numbers fold into it (as the sum does); the
+    // median is taken over the individual amounts in the group's target unit.
+    if (groups.length === 1) {
+      const group = groups[0];
+      const target = targetEntry(group);
+      const values = [];
+      for (const entry of group.units.values()) {
+        const ratio = unitRatio(entry, target.unit);
+        for (const amount of entry.amounts) values.push(amount * ratio);
+      }
+      values.push(...numbers);
+      if (!values.length) return empty;
+      const value = buildUnit(target, median(values));
+      if (value !== null) return value;
+    }
+    if (!numbers.length) return empty;
+    return median(numbers);
+  }
 
   // Exactly one unit group: plain numbers fold into it. Several groups
   // (different dimensions, currencies or affine units) are ignored, leaving
@@ -164,12 +187,18 @@ function combine(summary, mode, empty) {
   return mode === 'average' ? numericSum / numericCount : numericSum;
 }
 
+function median(values) {
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+}
+
 function aggregateAbove(results, fromIndex, toIndex, mode) {
   return combine(scan(results.slice(fromIndex, toIndex)), mode, 0);
 }
 
-function computeTotal(results) {
-  return combine(scan(results), 'sum', null);
+function computeTotal(results, mode = 'sum') {
+  return combine(scan(results), mode, null);
 }
 
-export { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal };
+export { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal, median };
