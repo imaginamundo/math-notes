@@ -5,6 +5,12 @@ import { DISMISSED_KEY } from './starterPrompt.js';
 import { FONT_KEY } from './cosmetic.js';
 import { STORAGE_KEY as TABS_KEY, LEGACY_KEY as LEGACY_TABS_KEY } from './tabs.js';
 import { STORAGE_KEY as CURRENCY_KEY } from '../eval/currency.js';
+import { MEASUREMENT_SYSTEMS } from '../core/measures.js';
+import {
+  STORAGE_KEY as MEASUREMENT_KEY,
+  readMeasurementSystem,
+  writeMeasurementSystem,
+} from '../core/measurementSystem.js';
 
 const STORAGE_KEY = 'math-notes-theme';
 // "Reset data" must clear exactly the keys the app's modules own, imported
@@ -15,6 +21,7 @@ const RESET_KEYS = [
   LEGACY_TABS_KEY,
   CURRENCY_KEY,
   FONT_KEY,
+  MEASUREMENT_KEY,
   // So "Reset data" genuinely returns the app to a first run, tour included.
   ONBOARDED_KEY,
   // A first run should also offer the starter-content actions again.
@@ -89,6 +96,31 @@ function initSettings(contentEditableNode, tabsApi) {
     });
   }
   renderActive();
+
+  const MEASUREMENT_NAMES = { metric: 'Metric', us: 'US customary', imperial: 'Imperial' };
+  const measurementNode = modal.querySelector('.settings-measurement');
+  MEASUREMENT_SYSTEMS.forEach((system) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'measurement-card';
+    card.dataset.system = system;
+    card.textContent = MEASUREMENT_NAMES[system] || system;
+    card.title = `Use ${MEASUREMENT_NAMES[system] || system} volume units`;
+    card.addEventListener('click', () => {
+      writeMeasurementSystem(system);
+      renderMeasurement();
+      window.dispatchEvent(new CustomEvent('measurement:updated', { detail: system }));
+    });
+    measurementNode.appendChild(card);
+  });
+
+  function renderMeasurement() {
+    const current = readMeasurementSystem();
+    measurementNode.querySelectorAll('.measurement-card').forEach((card) => {
+      card.classList.toggle('active', card.dataset.system === current);
+    });
+  }
+  renderMeasurement();
 
   const resetButton = document.getElementById('reset-data-button');
   resetButton.addEventListener('click', async () => {

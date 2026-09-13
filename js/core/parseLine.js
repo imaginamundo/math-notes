@@ -76,7 +76,8 @@ function parseLine(line) {
 }
 
 // After the first tag, only whitespace, further tags and a trailing comment may
-// follow; any other code means a tag was placed mid-expression.
+// follow; any other code means the tags are used in the calculation rather than
+// labelling the line, so `valid` is false.
 function tagsAtEnd(tail) {
   let i = 0;
   let sawTag = false;

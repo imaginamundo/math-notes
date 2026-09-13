@@ -15,6 +15,8 @@ function initHelpModal(contentEditableNode) {
 
   initExamples(helpModalNode, contentEditableNode, close);
 
+  let activeId = '';
+
   function updateActiveLink() {
     const threshold = helpBodyNode.getBoundingClientRect().top + 40;
     const atBottom =
@@ -23,9 +25,16 @@ function initHelpModal(contentEditableNode) {
     for (const section of sections) {
       if (atBottom || section.getBoundingClientRect().top <= threshold) currentId = section.id;
     }
+    let activeLink = null;
     navLinks.forEach((link) => {
-      link.classList.toggle('active', link.getAttribute('href') === '#' + currentId);
+      const isActive = link.getAttribute('href') === '#' + currentId;
+      link.classList.toggle('active', isActive);
+      if (isActive) activeLink = link;
     });
+    if (currentId !== activeId) {
+      activeId = currentId;
+      if (activeLink) activeLink.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
   }
 
   helpBodyNode.addEventListener('scroll', updateActiveLink, { passive: true });

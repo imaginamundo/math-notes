@@ -1,3 +1,5 @@
+import { formatTimespan } from '../eval/timespan.js';
+
 const numberFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 10 });
 const LIST_SHOW = 12;
 const MAX_DEPTH = 3;
@@ -10,6 +12,10 @@ function formatResult(value) {
 function formatValue(value, depth) {
   if (typeof value === 'number') return formatNumber(value);
   if (value && value.isUnit === true) return formatUnit(value);
+  // mathjs Fraction stringifies to its decimal; show the fraction instead.
+  if (value && value.type === 'Fraction' && typeof value.toFraction === 'function') {
+    return value.toFraction();
+  }
   if (Array.isArray(value) || (value && value.isMatrix)) {
     if (depth >= MAX_DEPTH) return '[…]';
     const items = value.isMatrix && value.toArray ? value.toArray() : value;
@@ -65,14 +71,40 @@ function formatNumber(n) {
 }
 
 function formatUnit(unit) {
+  // A timespan is a real duration; render it as components instead of seconds.
+  if (unit.formatUnits() === 'timespan') {
+    return formatTimespan(unit.toNumber(), unit.displayParts, formatNumber);
+  }
+  // Compound rates keep their original factors until simplified
+  // (`(hours km) / hour` -> `km`).
+  const simple = typeof unit.simplify === 'function' ? unit.simplify() : unit;
+  const units = simple.formatUnits();
+  const pace = /^min\s*\/\s*(km|mi)$/.exec(units);
+  if (pace) return formatPace(simple, pace[1]);
   let value;
   try {
-    value = unit.toNumber();
+    value = simple.toNumber();
   } catch {
-    value = unit.value;
+    value = simple.value;
   }
   const formatted = typeof value === 'number' ? formatNumber(value) : String(value);
-  return `${formatted} ${unit.formatUnits()}`;
+  return `${formatted} ${cleanUnits(units)}`;
+}
+
+// Rates read better without spaces around the slash: `km / day` -> `km/day`.
+function cleanUnits(units) {
+  return units
+    .replace(/\s*\/\s*/g, '/')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// A pace (`min/km`, `min/mi`) is shown as mm:ss.
+function formatPace(unit, name) {
+  const totalSeconds = Math.round(unit.toNumber() * 60);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}/${name}`;
 }
 
 export default formatResult;

@@ -140,6 +140,12 @@ function variable(text) {
   return createWrapper('variable', text);
 }
 
+// A free-form subject label (`butter` in `300g butter`). Exposed for the
+// highlighter to use later; nothing emits it yet.
+function subject(text) {
+  return createWrapper('subject', text);
+}
+
 function number(text) {
   return createWrapper('number', text);
 }
@@ -168,4 +174,14 @@ function titleWrap(text) {
   return createWrapper('title', text);
 }
 
-export default { line, variable, number, currency, operator, comment, tag, reference };
+export default {
+  line,
+  variable,
+  subject,
+  number,
+  currency,
+  operator,
+  comment,
+  tag,
+  reference,
+};

@@ -5,6 +5,11 @@ import initAliases from '../eval/aliases.js';
 import initCssUnits from '../eval/cssUnits.js';
 import initUnits from '../eval/units.js';
 import initDatetime from '../eval/datetime.js';
+import initRounding from '../eval/rounding.js';
+import initMeasures, { applyMeasurementSystem } from '../eval/measures.js';
+import initRates from '../eval/rates.js';
+import initTimespan from '../eval/timespan.js';
+import { readMeasurementSystem } from './measurementSystem.js';
 import preprocess from './preprocess.js';
 import { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal } from './aggregate.js';
 import { firstDifference } from '../util/sequence.js';
@@ -39,7 +44,7 @@ const AGGREGATE_AVG_WORD = /\b(?:average|avg)\b(?!\s*\()/gi;
 
 // A group opens with a header line (`Name:` with no expression) and closes with
 // a line whose code is exactly `end`. Groups are flat: an unterminated header is
-// just a label, and an `end` with no open group is left to the evaluator.
+// just a label, and an `end` with no open group is reported as an error.
 function findGroups(lines) {
   const byEnd = new Map();
   const groupOfLine = new Map();
@@ -92,6 +97,31 @@ function tagAggregate(results, tags, toIndex, mode) {
 
 function tagError(tags) {
   return `No values tagged ${tags.map((tag) => `#${tag}`).join(', ')}`;
+}
+
+// Rewrite a line whose tags take part in the calculation (`#food * 2`) so each
+// `#tag` becomes a scope variable holding the tag's aggregate over the rows
+// above. Returns the rewritten text, the values to inject, or an error when a
+// tag has no tagged rows.
+function substituteTags(parsed, results, index) {
+  const text = parsed.rawCode + parsed.tail.slice(0, parsed.tail.length - parsed.comment.length);
+  const values = {};
+  let error = null;
+
+  const substituted = text.replace(/#([A-Za-z0-9_-]+)/g, (match, tag) => {
+    const name = `__tag_${tag.replace(/[^A-Za-z0-9_]/g, '_')}`;
+    if (name in values) return name;
+    if (error) return match;
+    const value = tagAggregate(results, [tag], index, 'sum');
+    if (value === null) {
+      error = tagError([tag]);
+      return match;
+    }
+    values[name] = value;
+    return name;
+  });
+
+  return { text: substituted, values, error };
 }
 
 // Replace `line(n)` with an internal token bound to the value of line n, which
@@ -150,6 +180,10 @@ function createEngine() {
   initCssUnits(math);
   initUnits(math);
   initDatetime(math);
+  initRounding(math);
+  initMeasures(math, readMeasurementSystem());
+  initRates(math);
+  initTimespan(math);
   initCurrency(math);
 
   const cache = {
@@ -346,7 +380,7 @@ function createEngine() {
       const line = lines[i];
       if (line.trim() === '') lastBlankIndex = i;
 
-      const parsed = parseLine(line);
+      let parsed = parseLine(line);
 
       // A closing `end` row finalises the group: the subtotal is shown on the
       // header row (an aggregate result, so it never double counts in the
@@ -366,13 +400,21 @@ function createEngine() {
         continue;
       }
 
-      // Tags. A request line (`#food`, or `sum #food`) aggregates tagged value
-      // rows above; otherwise the tags label this line and are stored on its
-      // result for later requests.
-      const tags = parsed.tags;
+      // Tags. A trailing tag (`20 #food`) labels this line, and a line that is
+      // only tags (`#food`, or `sum #food`) aggregates the tagged rows above.
+      // Tags used inside a calculation (`#food * 2`, `#food + #other`) are
+      // substituted with their aggregate values and the line is evaluated.
+      let tags = parsed.tags;
+      let tagScope = null;
       if (tags.length && !parsed.valid) {
-        results[i] = { type: 'error', value: 'Tags must be at the end of a line' };
-        continue;
+        const substituted = substituteTags(parsed, results, i);
+        if (substituted.error) {
+          results[i] = { type: 'error', value: substituted.error };
+          continue;
+        }
+        tagScope = substituted.values;
+        parsed = parseLine(substituted.text);
+        tags = [];
       }
       if (tags.length) {
         const mode = tagAggregateMode(parsed.code);
@@ -405,6 +447,7 @@ function createEngine() {
       }
 
       const scope = { ...variables };
+      if (tagScope) Object.assign(scope, tagScope);
       if (previousResult !== undefined) scope.prev = previousResult;
 
       let parsedLine = parsed;
@@ -462,15 +505,25 @@ function createEngine() {
     environmentRevision++;
   }
 
+  // Re-register the volume units for a measurement system and invalidate the
+  // cache, so switching metric/us/imperial recomputes every line.
+  function registerMeasurementSystem(system) {
+    applyMeasurementSystem(math, system);
+    environmentRevision++;
+  }
+
   if (typeof window !== 'undefined') {
     // The main-thread fallback registers rates through its own currency:updated
     // listener, so invalidate there too or cached conversions would go stale.
     window.addEventListener('currency:updated', () => {
       environmentRevision++;
     });
+    window.addEventListener('measurement:updated', (event) => {
+      if (event.detail) registerMeasurementSystem(event.detail);
+    });
   }
 
-  return { evaluateLine, evaluateLines, registerCurrencyRates };
+  return { evaluateLine, evaluateLines, registerCurrencyRates, registerMeasurementSystem };
 }
 
 // The default engine shared by the worker, the main-thread fallback and the
@@ -493,4 +546,14 @@ function registerCurrencyRates(data) {
   getEngine().registerCurrencyRates(data);
 }
 
-export { createEngine, evaluateLines, evaluateLine, registerCurrencyRates };
+function registerMeasurementSystem(system) {
+  getEngine().registerMeasurementSystem(system);
+}
+
+export {
+  createEngine,
+  evaluateLines,
+  evaluateLine,
+  registerCurrencyRates,
+  registerMeasurementSystem,
+};

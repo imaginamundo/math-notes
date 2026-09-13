@@ -117,6 +117,13 @@ window.addEventListener('currency:error', () => {
   showCurrencyStatus('exchange rates unavailable');
 });
 
+// Switching measurement system re-registers the volume units in the worker and
+// the main-thread fallback, then recomputes every line.
+window.addEventListener('measurement:updated', (event) => {
+  evalClient.syncMeasurement(event.detail);
+  evalClient.update();
+});
+
 let statusTimer = null;
 function showCurrencyStatus(text) {
   currencyStatusNode.textContent = text;
