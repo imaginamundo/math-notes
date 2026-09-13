@@ -231,6 +231,20 @@ test('a tag placed mid-expression is an error', () => {
   );
 });
 
+test('requesting a tag with no tagged lines is an error', () => {
+  assert.equal(evaluateLines(['#food']).results[0].type, 'error');
+  assert.equal(evaluateLines(['#food']).results[0].value, 'No values tagged #food');
+  assert.equal(
+    evaluateLines(['20 #food', 'average #food']).results[1].value,
+    20,
+    'a tagged line still works'
+  );
+  assert.equal(
+    evaluateLines(['20 #food', '#urgent #other']).results[1].value,
+    'No values tagged #urgent, #other'
+  );
+});
+
 test('evaluateLines evaluates comparisons as values', () => {
   assert.equal(evaluateLines(['2 >= 1']).results[0].value, true);
   assert.equal(evaluateLines(['1 == 1']).results[0].value, true);

@@ -39,7 +39,8 @@ Terms used throughout the codebase and this documentation.
   identifier so assignments and references resolve consistently.
 - **Tag** — `#word` (no space) labels a line; `#` followed by a space is a
   comment. A line that is only tags, or `total #tag` / `average #tag`, is an
-  aggregate over the tagged value rows above it (across the whole sheet).
+  aggregate over the tagged value rows above it (across the whole sheet);
+  requesting a tag with no tagged rows is an error.
 - **Group** — a named block opened by a label-only line (`Groceries:`) and
   closed by `end`; the header shows the block's subtotal (an aggregate result)
   and the block is shaded, while the inner lines still count in the bottom

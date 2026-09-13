@@ -74,6 +74,7 @@ function tagAggregateMode(code) {
 
 // Combine every tagged value row above the request, using the same unit rules
 // as the running total. A row tagged with several requested tags counts once.
+// Returns null when no row carries any of the requested tags.
 function tagAggregate(results, tags, toIndex, mode) {
   const tagged = results
     .slice(0, toIndex)
@@ -85,7 +86,12 @@ function tagAggregate(results, tags, toIndex, mode) {
         Array.isArray(result.tags) &&
         tags.some((tag) => result.tags.includes(tag))
     );
+  if (!tagged.length) return null;
   return aggregateAbove(tagged, 0, tagged.length, mode);
+}
+
+function tagError(tags) {
+  return `No values tagged ${tags.map((tag) => `#${tag}`).join(', ')}`;
 }
 
 /**
@@ -321,6 +327,10 @@ function createEngine() {
         const mode = tagAggregateMode(parsed.code);
         if (mode) {
           const value = tagAggregate(results, tags, i, mode);
+          if (value === null) {
+            results[i] = { type: 'error', value: tagError(tags) };
+            continue;
+          }
           results[i] = { type: 'value', value, aggregate: true };
           if (value !== undefined) previousResult = value;
           continue;
