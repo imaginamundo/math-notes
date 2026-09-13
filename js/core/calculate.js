@@ -8,6 +8,7 @@ import initDatetime from '../eval/datetime.js';
 import preprocess from './preprocess.js';
 import { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal } from './aggregate.js';
 import { firstDifference } from '../util/sequence.js';
+import { mangleLines, unmangleName } from './multiWordVariables.js';
 
 /**
  * @typedef {Object} LineResult
@@ -58,6 +59,39 @@ function findGroups(lines) {
     }
   }
   return { byEnd, groupOfLine };
+}
+
+// A tag request line: bare `#food` sums, and `sum|total|average|avg [#food]`
+// (optionally `... of #food`) picks the mode. Returns null when the code is an
+// ordinary expression.
+function tagAggregateMode(code) {
+  const text = code.trim();
+  if (text === '') return 'sum';
+  const match = /^(sum|total|average|avg)\s*(of)?$/i.exec(text);
+  if (!match) return null;
+  return match[1].toLowerCase().startsWith('a') ? 'average' : 'sum';
+}
+
+// Combine every tagged value row above the request, using the same unit rules
+// as the running total. A row tagged with several requested tags counts once.
+// Returns null when no row carries any of the requested tags.
+function tagAggregate(results, tags, toIndex, mode) {
+  const tagged = results
+    .slice(0, toIndex)
+    .filter(
+      (result) =>
+        result &&
+        result.type === 'value' &&
+        !result.aggregate &&
+        Array.isArray(result.tags) &&
+        tags.some((tag) => result.tags.includes(tag))
+    );
+  if (!tagged.length) return null;
+  return aggregateAbove(tagged, 0, tagged.length, mode);
+}
+
+function tagError(tags) {
+  return `No values tagged ${tags.map((tag) => `#${tag}`).join(', ')}`;
 }
 
 /**
@@ -135,7 +169,7 @@ function createEngine() {
       // expressions (e.g. `x = unix()`).
       value = isAssignment ? result : undefined;
     } catch (error) {
-      result = error;
+      result = friendlyError(error, code, scope);
       value = undefined;
       type = 'error';
     }
@@ -145,6 +179,39 @@ function createEngine() {
     const variable = isAssignment && value !== undefined ? { label, value } : null;
 
     return { type, result: result instanceof Error ? result.message : result, variable };
+  }
+
+  // Turn mathjs's terse "Undefined symbol x" into a phrase-level message when
+  // the unknown symbol is part of a multi-word name (`monthly rent`) or a
+  // mangled forward reference (`__var_monthly_rent`). Single unknowns keep the
+  // original message.
+  function friendlyError(error, code, scope) {
+    const message = error && error.message ? error.message : String(error);
+    const match = /^Undefined symbol ([A-Za-z_][A-Za-z0-9_]*)$/.exec(message);
+    if (!match) return message;
+    const symbol = match[1];
+
+    const original = unmangleName(symbol);
+    if (original) return `"${original}" is not defined`;
+
+    let expression = code;
+    try {
+      expression = preprocess(code);
+    } catch {
+      // keep the raw code
+    }
+    const run =
+      /(?<![A-Za-z0-9_])([A-Za-z_][A-Za-z0-9_]*(?:\s+[A-Za-z_][A-Za-z0-9_]*)+)(?![A-Za-z0-9_])/g;
+    let matchRun;
+    while ((matchRun = run.exec(expression)) !== null) {
+      const words = matchRun[1].split(/\s+/);
+      if (!words.includes(symbol)) continue;
+      const known = words.some(
+        (word) => word !== symbol && (math[word] !== undefined || word in scope)
+      );
+      if (!known) return `"${matchRun[1]}" is not defined`;
+    }
+    return message;
   }
 
   // Replace aggregate keywords in an expression with the block's values so they
@@ -168,10 +235,13 @@ function createEngine() {
 
   /**
    * Evaluate a sheet line by line.
-   * @param {string[]} lines
+   * @param {string[]} inputLines
    * @returns {SheetResult}
    */
-  function evaluateLines(lines) {
+  function evaluateLines(inputLines) {
+    // Multi-word variable names are normalised before diffing/evaluating, so the
+    // cache stores the same form it compares against.
+    const lines = mangleLines(inputLines);
     if (cache.revision !== environmentRevision) {
       cache.lines = [];
       cache.results = [];
@@ -245,6 +315,34 @@ function createEngine() {
         continue;
       }
 
+      // An `end` row with no open group is a mistake, not an unknown symbol.
+      if (parsed.code.trim() === 'end') {
+        results[i] = { type: 'error', value: '"end" without a matching group header' };
+        continue;
+      }
+
+      // Tags. A request line (`#food`, or `sum #food`) aggregates tagged value
+      // rows above; otherwise the tags label this line and are stored on its
+      // result for later requests.
+      const tags = parsed.tags;
+      if (tags.length && !parsed.valid) {
+        results[i] = { type: 'error', value: 'Tags must be at the end of a line' };
+        continue;
+      }
+      if (tags.length) {
+        const mode = tagAggregateMode(parsed.code);
+        if (mode) {
+          const value = tagAggregate(results, tags, i, mode);
+          if (value === null) {
+            results[i] = { type: 'error', value: tagError(tags) };
+            continue;
+          }
+          results[i] = { type: 'value', value, aggregate: true };
+          if (value !== undefined) previousResult = value;
+          continue;
+        }
+      }
+
       if (parsed.isAssignment && AGGREGATE_KEYWORDS[parsed.label.toLowerCase()]) {
         results[i] = { type: 'error', value: `"${parsed.label}" is a reserved word` };
         continue;
@@ -273,7 +371,12 @@ function createEngine() {
 
       const { type, result, variable } = evaluateLine(parsedLine, scope);
       if (variable) variables[variable.label] = variable.value;
-      results[i] = { type, value: result, assigned: variable ? variable.value : undefined };
+      results[i] = {
+        type,
+        value: result,
+        assigned: variable ? variable.value : undefined,
+        tags: tags.length ? tags : undefined,
+      };
       if (type !== 'error' && result !== undefined && typeof result !== 'function') {
         previousResult = result;
       }

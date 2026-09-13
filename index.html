@@ -90,7 +90,7 @@
       <nav class="modal-nav">
         <a class="modal-nav-link" href="#help-basics">Basics</a>
         <a class="modal-nav-link" href="#help-tabs">Tabs</a>
-        <a class="modal-nav-link" href="#help-comments">Comments &amp; labels</a>
+        <a class="modal-nav-link" href="#help-comments">Comments, labels &amp; tags</a>
         <a class="modal-nav-link" href="#help-variables">Variables</a>
         <a class="modal-nav-link" href="#help-groups">Groups</a>
         <a class="modal-nav-link" href="#help-functions">Functions</a>
@@ -157,13 +157,17 @@
         </section>
 
         <section id="help-comments" class="help-section">
-          <h2>Comments &amp; labels</h2>
-          <p>Everything after a <code>#</code> on a line is ignored. A <code>label:</code> before an expression names the line without being evaluated.</p>
+          <h2>Comments, labels &amp; tags</h2>
+          <p>Everything after a <code>#</code> followed by a space is ignored (a comment). A <code>label:</code> before an expression names the line without being evaluated.</p>
           <div class="help-example" data-expr="2 + 2 # this is a note" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 4</span>
           </div>
           <div class="help-example" data-expr="Price: 10 + 5" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 15</span>
+          </div>
+          <p>With no space, <code>#word</code> is a <b>tag</b>. A line that is only tags shows their total, and <code>total #tag</code> / <code>average #tag</code> also work. Tagged lines above are summed, wherever they are. Requesting a tag that has no tagged lines shows an error.</p>
+          <div class="help-example" data-expr="20 #food&#10;30 #food&#10;#food" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">last line returns 50</span>
           </div>
           <p><b>Tip:</b> click a line's number in the left gutter to comment or uncomment that line — handy for switching a calculation off without deleting it. A line that already starts with <code>##</code> just loses one <code>#</code>.</p>
         </section>
@@ -190,11 +194,15 @@
           <div class="help-example" data-expr="invoice = {subtotal: 120, tax: 12}&#10;invoice.subtotal + invoice.tax" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">last line returns 132</span>
           </div>
+          <p>Variable names can contain spaces.</p>
+          <div class="help-example" data-expr="monthly rent = 1500&#10;monthly rent * 12" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">last line returns 18,000</span>
+          </div>
         </section>
 
         <section id="help-groups" class="help-section">
           <h2>Groups</h2>
-          <p>Open a named group with a label on its own line (like <code>Groceries:</code>) and close it with <code>end</code>. The header shows the group's subtotal and the whole group is shaded as a box; the inner lines still count in the bottom total. Blank lines inside are ignored, and <code>sum</code>/<code>average</code> inside a group total that group. A header with no <code>end</code> is just a label.</p>
+          <p>Open a named group with a label on its own line (like <code>Groceries:</code>) and close it with <code>end</code>. The header shows the group's subtotal and the whole group is shaded as a box; the inner lines still count in the bottom total. Blank lines inside are ignored, and <code>sum</code>/<code>average</code> inside a group total that group. A header with no <code>end</code> is just a label, and an <code>end</code> with no header is an error.</p>
           <div class="help-example" data-expr="Groceries:&#10;4.50&#10;3.20&#10;2.40&#10;end" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">header shows 10.1</span>
           </div>

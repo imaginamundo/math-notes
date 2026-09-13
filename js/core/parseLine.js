@@ -1,7 +1,40 @@
+// A tag is `#word` (no space); `#` followed by whitespace starts a comment.
+const TAG = /^#([A-Za-z0-9_-]+)/;
+
 function parseLine(line) {
-  const commentIndex = line.indexOf('#');
-  const comment = commentIndex === -1 ? '' : line.slice(commentIndex);
-  const rawCode = commentIndex === -1 ? line : line.slice(0, commentIndex);
+  const tags = [];
+  let comment = '';
+  let firstSpecial = -1;
+
+  let i = 0;
+  while (i < line.length) {
+    const ch = line[i];
+    if (ch !== '#') {
+      i++;
+      continue;
+    }
+    if (firstSpecial === -1) firstSpecial = i;
+    const after = line.slice(i + 1);
+    if (after === '' || /^\s/.test(after)) {
+      comment = line.slice(i);
+      break;
+    }
+    const match = TAG.exec(line.slice(i));
+    if (match) {
+      tags.push(match[1]);
+      i += match[0].length;
+      continue;
+    }
+    // A '#' that is neither a tag nor followed by whitespace: treat the rest as
+    // a comment rather than guess.
+    comment = line.slice(i);
+    break;
+  }
+
+  const rawCode = firstSpecial === -1 ? line : line.slice(0, firstSpecial);
+  const tail = firstSpecial === -1 ? '' : line.slice(firstSpecial);
+  const valid = tail === '' || tagsAtEnd(tail);
+
   let code = rawCode;
   let title = '';
   let titleIndex = -1;
@@ -26,7 +59,48 @@ function parseLine(line) {
   const rhs = equalsIndex === -1 ? '' : code.slice(equalsIndex + 1).trim();
   const isAssignment = label !== '' && rhs !== '';
 
-  return { code, comment, label, rhs, isAssignment, equalsIndex, title, rawCode, titleIndex };
+  return {
+    code,
+    comment,
+    tags,
+    valid,
+    label,
+    rhs,
+    isAssignment,
+    equalsIndex,
+    title,
+    rawCode,
+    tail,
+    titleIndex,
+  };
+}
+
+// After the first tag, only whitespace, further tags and a trailing comment may
+// follow; any other code means a tag was placed mid-expression.
+function tagsAtEnd(tail) {
+  let i = 0;
+  let sawTag = false;
+  while (i < tail.length) {
+    const ch = tail[i];
+    if (/\s/.test(ch)) {
+      i++;
+      continue;
+    }
+    if (ch === '#') {
+      const after = tail.slice(i + 1);
+      if (after === '' || /^\s/.test(after)) return true; // comment to the end
+      const match = TAG.exec(tail.slice(i));
+      if (match) {
+        sawTag = true;
+        i += match[0].length;
+        continue;
+      }
+      return true; // '#' treated as a comment start
+    }
+    if (sawTag) return false;
+    i++;
+  }
+  return true;
 }
 
 export default parseLine;
