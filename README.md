@@ -40,8 +40,10 @@ Based on [Numi](https://numi.app/).
 - **Comments** with `# ` (hash + space) and **labels** like `Price: 10 + 5`.
 - **Tags** — `20 #food` labels a line; a line that is only `#food` (or
   `sum`/`total`/`average`/`avg`, optionally `of`, before the tag) totals the
-  tagged lines above, across the whole sheet. Tags can also be used in
-  calculations (`#food * 2`, `#food + #other`).
+  tagged lines above, across the whole sheet. A row with several tags is the
+  full amount split equally between them, so `burger: 2 * 50 #ana #bob` gives
+  each tag 50 while the row (and the group total) keeps the full 100.
+  Tags can also be used in calculations (`#food * 2`, `#food + #other`).
 - **Unit conversion** (`1 cm to m`, `10 km as m`) including CSS units (`px`,
   `em`, `point`).
 - **Cooking & measures** — convert between dimensions with a free-form,

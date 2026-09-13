@@ -209,12 +209,27 @@ test('tag requests support explicit sum and average', () => {
   assert.equal(evaluateLines(['20 #food', '30 #food', 'average of #food']).results[2].value, 25);
 });
 
-test('a request for several tags counts each row once', () => {
-  assert.equal(evaluateLines(['20 #food #urgent', '30 #food', '#urgent']).results[2].value, 20);
+test('a row shared between several tags is split between them', () => {
+  // `20 #food #urgent` gives 10 to each tag; `30 #food` keeps its whole value.
+  assert.equal(evaluateLines(['20 #food #urgent', '30 #food', '#urgent']).results[2].value, 10);
   assert.equal(
     evaluateLines(['20 #food #urgent', '30 #food', '#food #urgent']).results[2].value,
-    50
+    40
   );
+});
+
+test('a split row keeps its full value in the group total', () => {
+  const { results } = evaluateLines([
+    'At the bar:',
+    'potato: 20 #name1 #name2 #name3',
+    'burger: 2 * 50 #name1 #name3',
+    'beer: 160 #name1 #name2 #name3 #name4',
+    'end',
+    '',
+    '#name1',
+  ]);
+  assert.equal(results[0].value, 280, 'the header is the full bill');
+  assert.ok(Math.abs(results[6].value - 96.66666666666667) < 1e-9, "one person's share");
 });
 
 test('tag sums follow the unit rules and ignore assignments and aggregates', () => {

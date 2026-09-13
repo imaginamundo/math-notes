@@ -213,10 +213,12 @@ their own:
 - **Tags** (`#word`, no space) label a value row. A request line — `#word`, or
   `sum`/`total`/`average`/`avg` optionally followed by `of` and the tag —
   aggregates every row above carrying one of the requested tags, using the same
-  unit rules as the total. Tags used inside a calculation (`#food * 2`,
-  `#food + #other`) are substituted with their aggregate values before
-  evaluation (`substituteTags`), so they act as scope variables; a tag with no
-  matching rows is an error either way.
+  unit rules as the total. A row with several tags is the full amount split
+  equally between them, so each tag gets its share while the row and the group
+  total keep the full price. Tags used inside a calculation
+  (`#food * 2`, `#food + #other`) are substituted with their aggregate values
+  before evaluation (`substituteTags`), so they act as scope variables; a tag
+  with no matching rows is an error either way.
 - **Line references** (`line(n)`, 1-based) inject the value of an earlier value
   row under a private `__line_n` token. A reference to the current or a later
   line, or to a row with no value, is an error; the view draws the referenced

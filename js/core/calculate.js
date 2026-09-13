@@ -105,9 +105,11 @@ function tagAggregateMode(code) {
 }
 
 // Combine every tagged value row above the request, using the same unit rules
-// as the running total. A row tagged with several requested tags counts once.
-// Returns null when no row carries any of the requested tags.
-function tagAggregate(results, tags, toIndex, mode) {
+// as the running total. A row tagged for several people is the item's full
+// amount, split equally between them, so each tag gets its share while the row
+// itself (and the group total) keeps the full price. Returns null when no row
+// carries any of the requested tags.
+function tagAggregate(results, tags, toIndex, mode, math) {
   const tagged = results
     .slice(0, toIndex)
     .filter(
@@ -119,7 +121,19 @@ function tagAggregate(results, tags, toIndex, mode) {
         tags.some((tag) => result.tags.includes(tag))
     );
   if (!tagged.length) return null;
-  return aggregateAbove(tagged, 0, tagged.length, mode);
+  const shares = tagged.map((result) => ({
+    type: 'value',
+    value: splitShare(result.value, result.tags.length, math),
+  }));
+  return aggregateAbove(shares, 0, shares.length, mode);
+}
+
+// One person's share of a value split `count` ways (a number or a Unit).
+function splitShare(value, count, math) {
+  if (count <= 1) return value;
+  if (typeof value === 'number') return value / count;
+  if (value && value.isUnit === true) return math.multiply(value, 1 / count);
+  return value;
 }
 
 function tagError(tags) {
@@ -130,7 +144,7 @@ function tagError(tags) {
 // `#tag` becomes a scope variable holding the tag's aggregate over the rows
 // above. Returns the rewritten text, the values to inject, or an error when a
 // tag has no tagged rows.
-function substituteTags(parsed, results, index) {
+function substituteTags(parsed, results, index, math) {
   const text = parsed.rawCode + parsed.tail.slice(0, parsed.tail.length - parsed.comment.length);
   const values = {};
   let error = null;
@@ -139,7 +153,7 @@ function substituteTags(parsed, results, index) {
     const name = `__tag_${tag.replace(/[^A-Za-z0-9_]/g, '_')}`;
     if (name in values) return name;
     if (error) return match;
-    const value = tagAggregate(results, [tag], index, 'sum');
+    const value = tagAggregate(results, [tag], index, 'sum', math);
     if (value === null) {
       error = tagError([tag]);
       return match;
@@ -443,7 +457,7 @@ function createEngine() {
       let tags = parsed.tags;
       let tagScope = null;
       if (tags.length && !parsed.valid) {
-        const substituted = substituteTags(parsed, results, i);
+        const substituted = substituteTags(parsed, results, i, math);
         if (substituted.error) {
           results[i] = { type: 'error', value: substituted.error };
           continue;
@@ -455,7 +469,7 @@ function createEngine() {
       if (tags.length) {
         const mode = tagAggregateMode(parsed.code);
         if (mode) {
-          const value = tagAggregate(results, tags, i, mode);
+          const value = tagAggregate(results, tags, i, mode, math);
           if (value === null) {
             results[i] = { type: 'error', value: tagError(tags) };
             continue;

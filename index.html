@@ -175,7 +175,7 @@
           <div class="help-example" data-expr="Price: 10 + 5" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 15</span>
           </div>
-          <p>With no space, <code>#word</code> is a <b>tag</b>. A line that is only tags shows their total, and <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> (optionally <code>of</code>) before the tag also work. Tagged lines above are summed, wherever they are. Tags can also be used in calculations: <code>#food * 2</code>, <code>#food + #other</code>. Requesting a tag that has no tagged lines shows an error.</p>
+          <p>With no space, <code>#word</code> is a <b>tag</b>. A line that is only tags shows their total, and <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> (optionally <code>of</code>) before the tag also work. Tagged lines above are summed, wherever they are. A row with several tags is the full amount split equally between them, so each tag gets its share while the row and its group total keep the full price. Tags can also be used in calculations: <code>#food * 2</code>, <code>#food + #other</code>. Requesting a tag that has no tagged lines shows an error.</p>
           <div class="help-example" data-expr="20 #food&#10;30 #food&#10;#food" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">last line returns 50</span>
           </div>
@@ -734,8 +734,8 @@
 
       <section class="help-section">
         <h2>Restaurant bill split with tags</h2>
-        <p>Split a bar bill between four people. Each item is divided by the number of people who shared it and tagged with their names; the lines at the end total what each person owes.</p>
-        <div class="help-example" data-expr="At the bar:&#10;potato: 20 / 3 #name1 #name2 #name3&#10;burger: 50 #name1 #name3&#10;beer: 160 / 4 #name1 #name2 #name3 #name4&#10;end&#10;&#10;#name1&#10;#name2&#10;#name3&#10;#name4" tabindex="0" role="button" title="Click to add to the editor">
+        <p>Split a bar bill between four people. Write each item's full amount and tag everyone who shared it; each tag gets an equal share, while the group total keeps the full price.</p>
+        <div class="help-example" data-expr="At the bar:&#10;potato: 20 #name1 #name2 #name3&#10;burger: 2 * 50 #name1 #name3&#10;beer: 160 #name1 #name2 #name3 #name4&#10;end&#10;&#10;#name1&#10;#name2&#10;#name3&#10;#name4" tabindex="0" role="button" title="Click to add to the editor">
           <code></code><span class="help-returns">each #name returns a person's total</span>
         </div>
       </section>

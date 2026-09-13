@@ -52,7 +52,9 @@ Terms used throughout the codebase and this documentation.
 - **Tag** — `#word` (no space) labels a line; `#` followed by a space is a
   comment. A line that is only tags, or `sum`/`total`/`average`/`avg` (optionally
   `of`) before the tag, is an aggregate over the tagged value rows above it
-  (across the whole sheet); requesting a tag with no tagged rows is an error.
+  (across the whole sheet); requesting a tag with no tagged rows is an error. A
+  row carrying several tags is the full amount split equally between them, so
+  each tag gets its share while the row and the group total keep the full price.
   Tags can also appear in calculations (`#food * 2`, `#food + #other`), where
   each is replaced by its aggregate.
 - **Group** — a named block opened by a label-only line (`Groceries:`) and
