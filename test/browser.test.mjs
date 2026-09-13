@@ -1017,12 +1017,14 @@ test('the documentation page renders highlighted examples and wires its actions'
   const state = await page.evaluate(() => ({
     examples: document.querySelectorAll('.doc-example').length,
     variables: document.querySelectorAll('.doc-example code .variable').length,
+    lineNumbers: document.querySelectorAll('.doc-example .doc-line-number').length,
     copyLabels: [...document.querySelectorAll('[data-action="copy"]')].map((n) => n.textContent),
     navLinks: document.querySelectorAll('.doc-nav a').length,
     heading: document.querySelector('.doc-content h1').textContent,
   }));
   assert.ok(state.examples > 0);
   assert.ok(state.variables > 0, 'examples are colorized with the app highlighter');
+  assert.ok(state.lineNumbers >= state.examples, 'every example line carries a number');
   assert.ok(state.navLinks > 5);
   assert.equal(state.heading, 'Getting started');
   assert.deepEqual(errors, []);

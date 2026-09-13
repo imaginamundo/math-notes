@@ -7,14 +7,25 @@ import { collectVariableNames } from '/js/core/multiWordVariables.js';
 import { buildShareUrl } from '/js/share/shareLink.js';
 import { copyText } from '/js/util/clipboard.js';
 
+// Colour each line with the app's highlighter and, like the editor, put it in a
+// numbered gutter row so an example reads as a small sheet.
 function colorize(code) {
   const text = code.textContent;
   const lines = text.split('\n');
   const names = collectVariableNames(lines);
   code.textContent = '';
   lines.forEach((line, index) => {
-    code.appendChild(format.line(line, names));
-    if (index < lines.length - 1) code.appendChild(document.createTextNode('\n'));
+    const row = document.createElement('span');
+    row.className = 'doc-line';
+    const number = document.createElement('span');
+    number.className = 'doc-line-number';
+    number.setAttribute('aria-hidden', 'true');
+    number.textContent = String(index + 1);
+    const content = document.createElement('span');
+    content.className = 'doc-line-content';
+    content.appendChild(format.line(line, names));
+    row.append(number, content);
+    code.appendChild(row);
   });
 }
 

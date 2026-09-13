@@ -553,7 +553,10 @@ The site is multi-page per category and per language: `/docs` (English),
 breadcrumbed language switcher, canonical URL and `hreflang` alternates. A
 ` ```calc ` fence becomes a `<figure class="doc-example">` carrying the raw
 expression in `data-expr`; `docs.js` colours it with the app's own highlighter
-(`js/render/format.js`) and wires **Copy** and **Open in Math Notes**, the latter
+(`js/render/format.js`) and puts each line in a numbered gutter row using the
+editor's surfaces (`--color-primary` for the code, `--color-surface` and
+`--border-strong` for the number column), so an example reads like a small
+sheet. It also wires **Copy** and **Open in Math Notes**, the latter
 building a share link through `js/share/shareLink.js` so the example opens in the
 app. The pages load `style.css` for the colour tokens and themes plus a dedicated
 `docs.css`.
