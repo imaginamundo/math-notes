@@ -256,8 +256,8 @@
           <div class="help-example" data-expr="[1, 2] + [3, 4]" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">[4, 6]</span>
           </div>
-          <div class="help-example" data-expr="sum([1, 2, 3, 4])" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 10</span>
+          <div class="help-example" data-expr="expenses = [1200, 80, 45]&#10;sum(expenses)" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">last line returns 1325</span>
           </div>
           <div class="help-example" data-expr="mean(1:10)" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 5.5</span>
@@ -368,11 +368,11 @@
           <div class="help-example" data-expr="10 divided by 2" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 5</span>
           </div>
-          <div class="help-example" data-expr="3 with 4" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 7</span>
+          <div class="help-example" data-expr="2 hours with 30 minutes" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 150 minutes</span>
           </div>
-          <div class="help-example" data-expr="10 without 3" tabindex="0" role="button" title="Click to add to the editor">
-            <code></code><span class="help-returns">returns 7</span>
+          <div class="help-example" data-expr="2 hours without 30 minutes" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 90 minutes</span>
           </div>
           <div class="help-example" data-expr="3 mul 4" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 12</span>
@@ -402,6 +402,9 @@
           </div>
           <div class="help-example" data-expr="30 degC to degF" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns 86 degF</span>
+          </div>
+          <div class="help-example" data-expr="100 lb in kg" tabindex="0" role="button" title="Click to add to the editor">
+            <code></code><span class="help-returns">returns 45.36 kg</span>
           </div>
           <div class="help-example" data-expr="1 cm in px" tabindex="0" role="button" title="Click to add to the editor">
             <code></code><span class="help-returns">returns ≈ 37.8 px</span>
@@ -638,6 +641,14 @@
       </section>
 
       <section class="help-section">
+        <h2>Scale a recipe</h2>
+        <p>Scale ingredient amounts to a different number of servings, converting between volume and mass as you go.</p>
+        <div class="help-example" data-expr="scale = 6 / 4&#10;scale * 2 cups flour in grams&#10;scale * 300g butter in cups" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">397.5 g flour; ≈ 1.98 cups butter</span>
+        </div>
+      </section>
+
+      <section class="help-section">
         <h2>Hours of work</h2>
         <p>Gross pay for a given number of hours at an hourly rate.</p>
         <div class="help-example" data-expr="hours = 40&#10;rate = 25&#10;hours * rate" tabindex="0" role="button" title="Click to add to the editor">
@@ -646,10 +657,10 @@
       </section>
 
       <section class="help-section">
-        <h2>Rule of three</h2>
-        <p>Find the unknown term in a proportion: <code>a</code> is to <code>b</code> as <code>c</code> is to <code>x</code>.</p>
-        <div class="help-example" data-expr="a = 4&#10;b = 6&#10;c = 8&#10;b * c / a" tabindex="0" role="button" title="Click to add to the editor">
-          <code></code><span class="help-returns">last line returns 12</span>
+        <h2>Unit price comparison</h2>
+        <p>Compare two packs by their price per 100 g.</p>
+        <div class="help-example" data-expr="small = 3.99 / 500 * 100&#10;large = 6.49 / 1000 * 100" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">0.798 vs 0.649 — the large pack is cheaper</span>
         </div>
       </section>
 
@@ -658,6 +669,14 @@
         <p>Price after a percentage discount.</p>
         <div class="help-example" data-expr="price = 80&#10;discount = 15%&#10;price - price * discount" tabindex="0" role="button" title="Click to add to the editor">
           <code></code><span class="help-returns">last line returns 68</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Savings goal</h2>
+        <p>How many months to reach a goal at a fixed monthly amount.</p>
+        <div class="help-example" data-expr="goal = 5000&#10;monthly = 250&#10;goal / monthly" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">last line returns 20 months</span>
         </div>
       </section>
 
@@ -674,6 +693,22 @@
         <p>Cost of fuel for a distance at a given consumption and price per litre.</p>
         <div class="help-example" data-expr="distance = 300&#10;consumption = 8&#10;fuelPrice = 1.7&#10;distance / 100 * consumption * fuelPrice" tabindex="0" role="button" title="Click to add to the editor">
           <code></code><span class="help-returns">last line returns 40.8</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Running pace</h2>
+        <p>Your pace per kilometre, then the finish time for a longer race at that pace.</p>
+        <div class="help-example" data-expr="# Pace per km&#10;5 km in 25 min&#10;# Half-marathon at that pace&#10;21.1 km * prev" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">05:00/km, then 105.5 min</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Upload time</h2>
+        <p>How long a file takes to upload at a given speed.</p>
+        <div class="help-example" data-expr="time to upload 3 GB at 10 MB/s&#10;time to upload 3 GB at 2 MB/s" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">300 s, then 1,500 s</span>
         </div>
       </section>
 

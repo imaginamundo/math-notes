@@ -86,7 +86,8 @@ Based on [Numi](https://numi.app/).
   **Keep content** / **Clear content** to dismiss or empty it. Both are
   dismissible, and **Settings → Replay tutorial** brings the tour back.
 - **Examples** — the **Examples** button opens ready-made sheets (bill splits,
-  interest, BMI, fuel cost and more) that drop into the editor with one click.
+  recipe scaling, unit prices, savings goals, interest, fuel cost, running pace,
+  upload time, BMI and more) that drop into the editor with one click.
 - **Keyboard shortcuts** (see below).
 - Offline-first PWA via a service worker.
 
