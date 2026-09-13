@@ -89,10 +89,17 @@ display, so `30 hours at 10 km/hour` shows `300 km`, not `(hours km)/hour`.
 `js/eval/timespan.js` handles durations. Consecutive time components are joined
 with `+` (mathjs would multiply them) and `m` means minutes, so `3h 5m 10s`
 evaluates as a timespan. A line that is only a timespan, `X as timespan`, and
-`X in <unit> and <unit>` return a unit in a custom `timespan` unit (1 s) so the
-duration survives arithmetic (`line(4) + 1h`), and `formatResult` renders it as
-components (`5.5 minutes as timespan` → `5 min 30 s`,
-`12.5 minutes in minutes and seconds` → `12 min 30 s`).
+`X in <unit> and <unit>` mark the result (a `timespan` property on the Unit) so
+`formatResult` draws it as components; a duration in minutes/hours is drawn as
+components too, while seconds/days keep the unit that was asked for (`2h to s`
+stays `7,200 s`). `as` is accepted as a conversion alias for `to`/`in`
+(`... as minutes`), and such an explicit conversion marks the Unit
+(`__keepUnit`) so it keeps the requested unit instead of being drawn as a
+timespan. The value stays a real Unit, so it survives arithmetic
+(`line(4) + 1h`). To read the duration in seconds, `formatResult` inspects the
+unit keys and `.value` (base SI) instead of calling `.to('s')` /
+`.toNumber('s')`, which would change mathjs's preferred unit for later results
+(typing `as` mid-word once made every later duration read in attoseconds).
 
 The measurement system (`js/core/measurementSystem.js`) stores the preference
 (metric by default, US customary or Imperial; all three define a cup) and

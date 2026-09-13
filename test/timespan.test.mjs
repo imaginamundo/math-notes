@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluateLines } from '../js/core/calculate.js';
+import { evaluateLines, createEngine } from '../js/core/calculate.js';
 import formatResult from '../js/render/formatResult.js';
 import { preprocessTimespan } from '../js/eval/timespan.js';
 
@@ -57,4 +57,41 @@ test('a timespan is a duration that survives arithmetic', () => {
 
   const { results: doubled } = evaluateLines(['5.5 minutes as timespan', 'prev * 2']);
   assert.equal(formatResult(doubled[1].value), '11 min');
+});
+
+test('a computed duration displays as a timespan, explicit units do not', () => {
+  const { results } = evaluateLines(['5 km in 25 min', '21.1 km * prev']);
+  assert.equal(formatResult(results[1].value), '1 hour 45 minutes 30 seconds');
+  assert.equal(valueOf('1.5 hours'), '1 hour 30 minutes');
+  assert.equal(valueOf('2h to s'), '7,200 s');
+  assert.equal(valueOf('1 month in days'), '30.438… days');
+});
+
+test('as converts like to/in, so a duration can be shown in one unit', () => {
+  const minutes = evaluateLines(['5 km in 25 min', '21.1 km * prev as minutes']).results[1].value;
+  assert.equal(formatResult(minutes), '105.5 minutes');
+  const hours = evaluateLines(['5 km in 25 min', '21.1 km * prev as hours']).results[1].value;
+  assert.equal(hours.formatUnits(), 'hours');
+  assert.equal(valueOf('10 km as m'), '10,000 m');
+});
+
+test('deleting as timespan leaves no leaked unit', () => {
+  const engine = createEngine();
+  const withTimespan = engine.evaluateLines(['5 km in 25 min', '21.1 km * prev as timespan']);
+  assert.equal(formatResult(withTimespan.results[1].value), '1 hour 45 minutes 30 seconds');
+
+  const without = engine.evaluateLines(['5 km in 25 min', '21.1 km * prev']);
+  assert.equal(without.results[1].value.toString(), '105.5 min');
+  assert.equal(formatResult(without.results[1].value), '1 hour 45 minutes 30 seconds');
+});
+
+test('a partial unit typed and deleted does not corrupt later results', () => {
+  const engine = createEngine();
+  engine.evaluateLines(['5 km in 25 min', '21.1 km * prev as']);
+  const after = engine.evaluateLines(['5 km in 25 min', '21.1 km * prev']);
+  assert.equal(formatResult(after.results[1].value), '1 hour 45 minutes 30 seconds');
+  assert.equal(
+    formatResult(engine.evaluateLines(['1 month in days']).results[0].value),
+    '30.438… days'
+  );
 });

@@ -90,10 +90,56 @@ function formatNumber(n, precision) {
   return Math.abs(n - rounded) > tolerance ? `${text}…` : text;
 }
 
+const DURATION_UNITS = new Set([
+  'min',
+  'mins',
+  'minute',
+  'minutes',
+  'h',
+  'hr',
+  'hrs',
+  'hour',
+  'hours',
+]);
+
+// Seconds and the time unit for a pure-time Unit, or null. Reads `.value`
+// (base SI) and the unit keys rather than `.to('s')` / `.toNumber('s')`, which
+// change mathjs's preferred unit for later results (so typing `as` mid-word
+// once made every later duration read in attoseconds).
+function timeInfo(unit) {
+  const net = new Map();
+  let timeUnit = null;
+  for (const entry of unit.units) {
+    const key = entry.unit.base && entry.unit.base.key;
+    if (!key) return null;
+    net.set(key, (net.get(key) || 0) + entry.power);
+    if (key === 'TIME' && entry.power > 0) timeUnit = entry.unit.name;
+  }
+  let timePower = 0;
+  for (const [key, power] of net) {
+    if (power === 0) continue;
+    if (key !== 'TIME') return null;
+    timePower += power;
+  }
+  return timePower === 1 ? { seconds: unit.value, timeUnit } : null;
+}
+
 function formatUnit(unit, precision) {
-  // A timespan is a real duration; render it as components instead of seconds.
-  if (unit.formatUnits() === 'timespan') {
-    return formatTimespan(unit.toNumber(), unit.displayParts, (value) =>
+  // A pure time value renders as a timespan when it is a marked timespan, an
+  // explicit minutes/hours value, or a computed duration whose own time unit is
+  // minutes/hours (`21.1 km * prev`). Seconds/days keep the unit that was asked
+  // for, so `2h to s` still reads `7,200 s` and a transfer time stays `300 s`.
+  const info = timeInfo(unit);
+  const rawUnits = unit.formatUnits();
+  const compound = /[ /^]/.test(rawUnits);
+  if (
+    info &&
+    unit.keepUnit !== true &&
+    (unit.timespan === true ||
+      DURATION_UNITS.has(rawUnits) ||
+      (compound && info.timeUnit && DURATION_UNITS.has(info.timeUnit)))
+  ) {
+    return formatTimespan(info.seconds, unit.displayParts, (value) =>
       formatNumber(value, precision)
     );
   }

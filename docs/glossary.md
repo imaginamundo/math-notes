@@ -70,8 +70,10 @@ Terms used throughout the codebase and this documentation.
 - **Timespan** — a duration rendered as components (`5 min 30 s`,
   `10 weeks 2 days`). Consecutive time components and `m` for minutes are
   joined by `js/eval/timespan.js`; `as timespan` and `in <unit> and <unit>`
-  produce a unit in the custom `timespan` unit (1 s) so it survives arithmetic,
-  and `formatResult` draws the components.
+  mark the result, and a duration in minutes/hours renders as components too.
+  `as` also converts like `to`/`in` (`... as minutes`), which keeps the unit
+  instead of drawing a timespan. The value stays a real Unit, so arithmetic
+  (`line(4) + 1h`) works.
 - **Decimal precision** — how many decimal places results show (3 by default,
   stored by `js/core/decimalPrecision.js`). Display only: `formatResult` rounds
   and appends `…` when the value has more precision, but the engine keeps full

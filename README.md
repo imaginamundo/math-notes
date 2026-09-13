@@ -40,7 +40,8 @@ Based on [Numi](https://numi.app/).
   `sum`/`total`/`average`/`avg`, optionally `of`, before the tag) totals the
   tagged lines above, across the whole sheet. Tags can also be used in
   calculations (`#food * 2`, `#food + #other`).
-- **Unit conversion** (`1 cm to m`) including CSS units (`px`, `em`, `point`).
+- **Unit conversion** (`1 cm to m`, `10 km as m`) including CSS units (`px`,
+  `em`, `point`).
 - **Cooking & measures** — convert between dimensions with a free-form,
   optional subject label: `300g butter in cups`, `2 cups flour in grams`,
   `300g in cups` (subject optional), or `300g feathers in cups`. Known subjects
