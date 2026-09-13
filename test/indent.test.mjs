@@ -35,6 +35,15 @@ test('Shift+Tab outdents selected lines by up to one unit', () => {
   assert.equal(result.value, 'a\nb');
 });
 
+test('outdenting several lines does not extend the selection past the last line', () => {
+  const value = `${INDENT}a\n${INDENT}b\n${INDENT}c`;
+  // Selection through the end of line 1, before its newline.
+  const result = outdentSelection(value, 0, 7);
+  assert.equal(result.value, 'a\nb\n  c');
+  assert.equal(result.start, 0);
+  assert.equal(result.end, 3, 'the end stays before the newline');
+});
+
 test('outdent removes at most one unit of leading spaces', () => {
   const result = outdentSelection(`${INDENT}${INDENT}a`, 0, 0);
   assert.equal(result.value, `${INDENT}a`);

@@ -404,6 +404,32 @@ test('Tab indents and Shift+Tab outdents', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('Shift+Tab keeps the selection on the same lines', async () => {
+  await newPage();
+  await setContent('  a\n  b\n  c');
+  await page.focus('#content-editable');
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.setSelectionRange(0, 7); // through the end of "  b", before its newline
+  });
+  await page.keyboard.down('Shift');
+  await page.keyboard.press('Tab');
+  await page.keyboard.up('Shift');
+
+  const state = await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    return {
+      value: ed.value,
+      end: ed.selectionEnd,
+      endLine: ed.value.slice(0, ed.selectionEnd).split('\n').length - 1,
+    };
+  });
+  assert.equal(state.value, 'a\nb\n  c');
+  assert.equal(state.end, 3, 'the end stays before the newline');
+  assert.equal(state.endLine, 1, 'the selection does not grow onto the next line');
+  assert.deepEqual(errors, []);
+});
+
 test('a result on an overflowing line is reachable by horizontal scroll', async () => {
   await newPage();
   const longLine =

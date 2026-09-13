@@ -83,14 +83,17 @@ function outdentSelection(value, start, end, unit = INDENT) {
 
   if (!removals.length) return { value, start, end };
 
+  // Map an original offset through the removals. All comparisons use the
+  // original offset (never a progressively shifted one) so a position just
+  // before a newline cannot slide onto the next line.
   const shifted = (position) => {
-    let result = position;
+    let removedBefore = 0;
     for (const removal of removals) {
       if (removal.offset >= position) break;
-      if (result >= removal.offset + removal.length) result -= removal.length;
-      else result = removal.offset;
+      if (position <= removal.offset + removal.length) return removal.offset - removedBefore;
+      removedBefore += removal.length;
     }
-    return result;
+    return position - removedBefore;
   };
   return { value: next, start: shifted(start), end: shifted(end) };
 }
