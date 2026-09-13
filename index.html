@@ -819,6 +819,62 @@
           <code></code><span class="help-returns">last line returns ≈ 22.86</span>
         </div>
       </section>
+
+      <section class="help-section">
+        <h2>Age and elapsed time</h2>
+        <p>Measure the span from a date to today — first as calendar years, months and days, then as a plain day count.</p>
+        <div class="help-example" data-expr="1990-04-01 to today&#10;days since 1990-04-01" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">exact age, then total days</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Countdown to a birthday</h2>
+        <p>Days left until the next time a date comes around. Change the month and day to your own.</p>
+        <div class="help-example" data-expr="birthday = June 21&#10;days until birthday" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">days until the next 21 June</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Fuel cost with units</h2>
+        <p>The consumption and the price per litre cancel down to a total cost.</p>
+        <div class="help-example" data-expr="trip = 350 km&#10;economy = 7 l / 100 km&#10;price = 1.70 EUR/l&#10;trip * economy * price" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">€ 41.65</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Overtime pay</h2>
+        <p>Regular hours at the base rate, plus the extra hours at time and a half.</p>
+        <div class="help-example" data-expr="worked = 45&#10;rate = 25 USD/hour&#10;regular = 40 hours * rate&#10;overtime = (worked - 40) hours * rate * 1.5&#10;regular + overtime" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">US$ 1,187.5 for 40 h + 5 h overtime</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Meeting length</h2>
+        <p>Add the clock-time interval of each meeting and show the total as a timespan.</p>
+        <div class="help-example" data-expr="standup = 9:00 am to 9:15 am&#10;review = 2:00 pm to 3:30 pm&#10;standup + review as timespan" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">1 hour 45 minutes total</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Clock reminders</h2>
+        <p>Get a clock time a fixed offset after an anchor time — handy for alarms and reminders.</p>
+        <div class="help-example" data-expr="wake = 6:30 am&#10;wake + 45 minutes&#10;wake + 8 hours" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">07:15 and 14:30</span>
+        </div>
+      </section>
+
+      <section class="help-section">
+        <h2>Household budget by category</h2>
+        <p>Tag each expense with a category; a line that is only the tag totals that category, and tags add up too.</p>
+        <div class="help-example" data-expr="Budget:&#10;rent: 1200 #home&#10;utilities: 150 #home&#10;groceries: 480 #living&#10;transport: 120 #living&#10;end&#10;#home&#10;#living&#10;#home + #living" tabindex="0" role="button" title="Click to add to the editor">
+          <code></code><span class="help-returns">each #tag is a category total; the last adds them up</span>
+        </div>
+      </section>
     </div>
   </dialog>
 
