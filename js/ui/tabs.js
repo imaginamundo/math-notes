@@ -6,6 +6,8 @@ import {
   renameTab,
   setActiveTab,
   setContent,
+  setCaret,
+  normalizeCaret,
   moveTab,
   deriveNextTabNumber,
 } from '../core/tabsState.js';
@@ -74,11 +76,13 @@ function initTabs(editableNode, onUpdate) {
     flushDraft();
     flushSnapshot();
     state = setContent(state, state.activeId, editableNode.value);
+    captureCaret();
   }
 
   // Present `content` as the new active sheet: update the editor, persist,
   // repaint, evaluate, and notify every input-driven subscriber exactly once.
-  function present(content, { focus = true } = {}) {
+  // A saved caret is restored last (after focus) when it is valid.
+  function present(content, { focus = true, caret = null } = {}) {
     editableNode.value = content;
     lastValue = content;
     writer.persist();
@@ -86,6 +90,31 @@ function initTabs(editableNode, onUpdate) {
     onUpdate();
     editableNode.dispatchEvent(new Event('input', { bubbles: true }));
     if (focus) editableNode.focus();
+    restoreCaret(caret);
+  }
+
+  // Restore a tab's saved caret. `normalizeCaret` rejects anything that is not a
+  // valid in-range selection and the DOM call is guarded, so a bad value simply
+  // leaves the caret where the browser put it.
+  function restoreCaret(caret) {
+    const selection = normalizeCaret(caret, editableNode.value.length);
+    if (!selection) return;
+    try {
+      editableNode.setSelectionRange(selection.start, selection.end);
+    } catch {
+      // an unusable selection is ignored
+    }
+  }
+
+  // Remember the active tab's caret so it survives a reload. The selection is
+  // still readable when the editor is blurred, and `writer.schedule` coalesces
+  // the writes.
+  function captureCaret() {
+    const start = editableNode.selectionStart;
+    const end = editableNode.selectionEnd;
+    if (!Number.isInteger(start) || !Number.isInteger(end)) return;
+    state = setCaret(state, state.activeId, { start, end });
+    writer.schedule();
   }
 
   function setValue(value, caret = null) {
@@ -103,6 +132,7 @@ function initTabs(editableNode, onUpdate) {
     writer.persist();
     scheduleSnapshot();
     editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+    captureCaret();
   }
 
   function caret() {
@@ -134,11 +164,19 @@ function initTabs(editableNode, onUpdate) {
     state = setContent(state, state.activeId, value);
     writer.schedule();
     scheduleSnapshot();
+    captureCaret();
+  });
+
+  // Keep the stored caret current as the user moves it (arrow keys, a click, a
+  // selection). The persist is debounced, so this stays cheap.
+  document.addEventListener('selectionchange', () => {
+    if (document.activeElement === editableNode) captureCaret();
   });
 
   const flushPersist = () => writer.flush();
   const flushAll = () => {
     flushDraft();
+    captureCaret();
     flushPersist();
     flushSnapshot();
   };
@@ -176,7 +214,7 @@ function initTabs(editableNode, onUpdate) {
     leaveActiveTab();
     state = setActiveTab(state, id);
     const tab = state.tabs.find((entry) => entry.id === id);
-    present(tab.content);
+    present(tab.content, { caret: tab.caret });
   }
 
   function handleNew() {
@@ -218,7 +256,8 @@ function initTabs(editableNode, onUpdate) {
     if (!state.tabs.length)
       state = createTab(state, t('tabs.defaultName', { n: state.nextTabNumber }));
     history.remove(id);
-    present(getActiveTab().content);
+    const active = getActiveTab();
+    present(active.content, { caret: active.caret });
   }
 
   function switchTab({ index, offset } = {}) {
@@ -243,7 +282,8 @@ function initTabs(editableNode, onUpdate) {
     state = setActiveTab(state, targetId);
     state = { ...state, nextTabNumber: deriveNextTabNumber(state.tabs) };
     history.reset(targetId);
-    present(getActiveTab().content);
+    const restored = getActiveTab();
+    present(restored.content, { caret: restored.caret });
   }
 
   function restoreAll(snapshots) {
@@ -260,7 +300,8 @@ function initTabs(editableNode, onUpdate) {
       nextTabNumber: deriveNextTabNumber(tabs),
     };
     history.clear();
-    present(getActiveTab().content);
+    const restored = getActiveTab();
+    present(restored.content, { caret: restored.caret });
   }
 
   // If localStorage is unavailable or corrupt, rebuild the collection from the
@@ -277,6 +318,8 @@ function initTabs(editableNode, onUpdate) {
   view.render();
   onUpdate();
   editableNode.focus();
+  // Return to where the user left the active tab, when the saved caret is valid.
+  restoreCaret(getActiveTab().caret);
 
   // Re-render the tab bar (its aria-labels/titles) when the language changes.
   window.addEventListener('language:updated', () => view.render());
@@ -287,6 +330,15 @@ function initTabs(editableNode, onUpdate) {
 }
 
 export { STORAGE_KEY, LEGACY_KEY };
-export { createTab, closeTab, renameTab, setActiveTab, setContent, moveTab };
+export {
+  createTab,
+  closeTab,
+  renameTab,
+  setActiveTab,
+  setContent,
+  setCaret,
+  normalizeCaret,
+  moveTab,
+};
 export { deriveNextTabNumber };
 export default initTabs;

@@ -1,6 +1,6 @@
 import storage from '../util/storage.js';
 import debounce from '../util/debounce.js';
-import { generateId } from '../core/tabsState.js';
+import { generateId, normalizeCaret } from '../core/tabsState.js';
 
 // Persistence for the tab collection: the one-time load (with legacy-key
 // migration, and a `failed` flag when storage is missing or corrupt) plus a
@@ -24,18 +24,25 @@ function loadTabsState() {
     // make every subsequent setContent miss its tab and silently drop edits, so
     // repair it to the first tab when it no longer points at one.
     const hasActiveTab = saved.tabs.some((tab) => tab.id === saved.activeId);
+    // A saved caret is best-effort: keep it only when it is a valid selection
+    // inside its tab's content, so corrupt storage cannot break startup.
+    const tabs = saved.tabs.map((tab) => {
+      const content = typeof tab.content === 'string' ? tab.content : '';
+      return { ...tab, content, caret: normalizeCaret(tab.caret, content.length) };
+    });
     return {
       state: {
         ...saved,
-        activeId: hasActiveTab ? saved.activeId : saved.tabs[0].id,
-        nextTabNumber: saved.nextTabNumber || saved.tabs.length + 1,
+        tabs,
+        activeId: hasActiveTab ? saved.activeId : tabs[0].id,
+        nextTabNumber: saved.nextTabNumber || tabs.length + 1,
       },
       failed,
     };
   }
   const content = storage.get(LEGACY_KEY) || '';
   storage.remove(LEGACY_KEY);
-  const tab = { id: generateId(), name: 'Tab 1', content };
+  const tab = { id: generateId(), name: 'Tab 1', content, caret: null };
   return { state: { tabs: [tab], activeId: tab.id, nextTabNumber: 2 }, failed };
 }
 

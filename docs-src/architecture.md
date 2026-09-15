@@ -273,12 +273,16 @@ or dies; its engine receives live rate updates through the same
 ## Tabs and persistence
 
 Per-tab state is a single object `{ tabs, activeId, nextTabNumber }` held by the
-`js/ui/tabs.js` controller. Three side concerns are separate modules:
-persistence (`js/storage/tabsStore.js` — the one-time load with legacy-key
-migration, plus a debounced writer), the per-tab undo store
+`js/ui/tabs.js` controller; each tab is `{ id, name, content, caret }`, where
+`caret` is the last selection (`{start, end}`) or null. Three side concerns are
+separate modules: persistence (`js/storage/tabsStore.js` — the one-time load
+with legacy-key migration, plus a debounced writer), the per-tab undo store
 (`js/ui/tabsHistory.js`) and the tab-bar DOM (`js/ui/tabsView.js` — rendering,
 inline rename and drag-reorder, calling back into the controller). Current
-content persists to localStorage (debounced). Separately, versioned
+content persists to localStorage (debounced). The caret is captured as the user
+moves it and restored on load through `normalizeCaret`, which drops anything
+that is not a valid in-range selection, so a corrupt value simply leaves the
+caret where the browser put it. Separately, versioned
 **snapshots** of each tab (id, name, content, timestamp, capped at 10 per tab)
 are auto-saved to IndexedDB (`js/storage/snapshots.js`) on a pause in typing and
 on blur/tab-switch/close/pagehide; the content is stored deflated through

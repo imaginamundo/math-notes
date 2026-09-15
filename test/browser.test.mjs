@@ -215,6 +215,60 @@ test('undo keeps the view near the change in a large sheet', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('the caret position is restored when the page reloads', async () => {
+  await newPage();
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.value = 'aaaa\nbbbb\ncccc';
+    ed.dispatchEvent(new Event('input', { bubbles: true }));
+    ed.focus();
+    ed.setSelectionRange(6, 8);
+    document.dispatchEvent(new Event('selectionchange'));
+  });
+  await wait(900);
+  await page.reload({ waitUntil: 'load' });
+  await wait(400);
+
+  const caret = await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    return { value: ed.value, start: ed.selectionStart, end: ed.selectionEnd };
+  });
+  assert.equal(caret.value, 'aaaa\nbbbb\ncccc');
+  assert.equal(caret.start, 6);
+  assert.equal(caret.end, 8);
+  assert.deepEqual(errors, []);
+});
+
+test('a corrupt saved caret is ignored at startup', async () => {
+  if (context) await context.close();
+  context = await browser.createBrowserContext();
+  page = await context.newPage();
+  errors = [];
+  page.on('pageerror', (err) => errors.push(err.message));
+  await page.evaluateOnNewDocument(() => {
+    localStorage.setItem('math-notes-onboarded', '1');
+    localStorage.setItem(
+      'math-notes-tabs',
+      JSON.stringify({
+        tabs: [{ id: 't1', name: 'A', content: 'hello world', caret: { start: 9999, end: -1 } }],
+        activeId: 't1',
+        nextTabNumber: 2,
+      })
+    );
+  });
+  await page.goto(`http://localhost:${server.address().port}/`, { waitUntil: 'load' });
+  await wait(400);
+
+  const state = await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    return { value: ed.value, start: ed.selectionStart, end: ed.selectionEnd };
+  });
+  assert.equal(state.value, 'hello world');
+  assert.ok(state.start >= 0 && state.start <= state.value.length);
+  assert.ok(state.end >= 0 && state.end <= state.value.length);
+  assert.deepEqual(errors, []);
+});
+
 test('snapshots are saved to IndexedDB and recover corrupt localStorage', async () => {
   await newPage();
   await setContent('total = 42');

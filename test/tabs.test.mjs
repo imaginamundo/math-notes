@@ -6,6 +6,8 @@ import {
   renameTab,
   setActiveTab,
   setContent,
+  setCaret,
+  normalizeCaret,
   moveTab,
   deriveNextTabNumber,
 } from '../js/ui/tabs.js';
@@ -74,6 +76,25 @@ test('setContent updates only the target tab', () => {
   assert.equal(next.tabs[1].content, '2 + 2');
   assert.equal(next.tabs[0].content, '1');
   assert.equal(next.tabs[2].content, '3');
+});
+
+test('normalizeCaret accepts only a valid in-range selection', () => {
+  assert.deepEqual(normalizeCaret({ start: 2, end: 4 }, 5), { start: 2, end: 4 });
+  // A backwards selection is ordered.
+  assert.deepEqual(normalizeCaret({ start: 4, end: 2 }, 5), { start: 2, end: 4 });
+  assert.deepEqual(normalizeCaret({ start: 5, end: 5 }, 5), { start: 5, end: 5 });
+  assert.equal(normalizeCaret({ start: 6, end: 6 }, 5), null);
+  assert.equal(normalizeCaret({ start: -1, end: 0 }, 5), null);
+  assert.equal(normalizeCaret({ start: 1.5, end: 2 }, 5), null);
+  assert.equal(normalizeCaret(null, 5), null);
+  assert.equal(normalizeCaret('garbage', 5), null);
+});
+
+test('setCaret updates only the target tab and is a no-op when unchanged', () => {
+  const next = setCaret(baseState(), 'b', { start: 0, end: 1 });
+  assert.deepEqual(next.tabs[1].caret, { start: 0, end: 1 });
+  assert.equal(next.tabs[0].caret, undefined);
+  assert.equal(setCaret(next, 'b', { start: 0, end: 1 }), next);
 });
 
 test('moveTab reorders a tab to an earlier position', () => {
