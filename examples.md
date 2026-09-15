@@ -11,10 +11,10 @@
 
 ### Comments and labels
 
-2 + 2 # everything after a "# " is ignored
+2 + 2 # a note
 Price: 10 + 5
 
-### The running total
+### Running total
 
 10
 20
@@ -205,8 +205,9 @@ n[2] = 99
 [1, 2] + [3, 4]
 sort([3, 1, 2])
 concat([1, 2], [3, 4])
-m = [[1, 2], [3, 4]]
-m[2, 1]
+
+matrix = [[1, 2], [3, 4]]
+matrix[2, 1]
 
 ### Sequences
 
@@ -255,15 +256,10 @@ sum([1200, 80, 45])
 ### Rates
 
 90 km / 3 day
-
 30 hours at 10 km/hour
-
 100 km at 10 km/hour
-
 24 km a day for a year
-
 time to upload 3 GB at 10 MB/s
-
 5 km in 25 min
 
 ## Money
@@ -277,7 +273,7 @@ R$5 to EUR
 
 ### Currency results
 
-350usd  
+350usd
 100 USD/hour
 
 ## Dates & time
@@ -301,8 +297,6 @@ days until March 14, 2030
 days since 2025-07-15
 days between 2019-03-03 and 2019-05-30
 April 1 through April 30 in days
-
-The first two count from today.
 
 ### Date parts
 
