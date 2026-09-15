@@ -90,7 +90,7 @@ Uma taxa é uma unidade por outra. O mathjs faz a aritmética; estas frases faci
 24 km a day for a year
 ```
 
-```calc 300 s
+```calc 5 min
 time to upload 3 GB at 10 MB/s
 ```
 

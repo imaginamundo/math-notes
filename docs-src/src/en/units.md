@@ -90,7 +90,7 @@ A rate is one unit per another. mathjs does the arithmetic; these phrases make r
 24 km a day for a year
 ```
 
-```calc 300 s
+```calc 5 min
 time to upload 3 GB at 10 MB/s
 ```
 

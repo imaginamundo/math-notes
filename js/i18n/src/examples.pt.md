@@ -114,7 +114,7 @@ Seu ritmo por quilômetro e, depois, o tempo de chegada para uma corrida mais lo
 
 Quanto tempo um arquivo leva para subir a uma determinada velocidade.
 
-```calc 300 s, depois 1,500 s
+```calc 5 min, depois 25 min
 time to upload 3 GB at 10 MB/s
 time to upload 3 GB at 2 MB/s
 ```

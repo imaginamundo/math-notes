@@ -90,7 +90,7 @@ Una tasa es una unidad por otra. mathjs hace la aritmética; estas frases facili
 24 km a day for a year
 ```
 
-```calc 300 s
+```calc 5 min
 time to upload 3 GB at 10 MB/s
 ```
 

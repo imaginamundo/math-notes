@@ -41,7 +41,7 @@ test('evaluateLines multiplies and divides by a rate with at', () => {
 });
 
 test('evaluateLines computes transfer time', () => {
-  assert.equal(formatResult(valueOf('time to upload 3 GB at 10 MB/s')), '300 s');
+  assert.equal(formatResult(valueOf('time to upload 3 GB at 10 MB/s')), '5 min');
 });
 
 test('evaluateLines formats pace as mm:ss', () => {

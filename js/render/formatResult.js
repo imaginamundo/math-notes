@@ -131,18 +131,17 @@ function timeInfo(unit) {
 
 function formatUnit(unit, precision) {
   // A pure time value renders as a timespan when it is a marked timespan, an
-  // explicit minutes/hours value, or a computed duration whose own time unit is
-  // minutes/hours (`21.1 km * prev`). Seconds/days keep the unit that was asked
-  // for, so `2h to s` still reads `7,200 s` and a transfer time stays `300 s`.
+  // explicit minutes/hours value, or a compound that reduces to pure time (a
+  // computed duration like `time to upload 3 GB at 10 MB/s` -> `(GB s) / MB`).
+  // An explicit seconds/days value keeps the unit that was asked for, so
+  // `2h to s` still reads `7,200 s` and a transfer time stays `300 s`.
   const info = timeInfo(unit);
   const rawUnits = unit.formatUnits();
   const compound = /[ /^]/.test(rawUnits);
   if (
     info &&
     unit.keepUnit !== true &&
-    (unit.timespan === true ||
-      DURATION_UNITS.has(rawUnits) ||
-      (compound && info.timeUnit && DURATION_UNITS.has(info.timeUnit)))
+    (unit.timespan === true || DURATION_UNITS.has(rawUnits) || compound)
   ) {
     return formatTimespan(info.seconds, unit.displayParts, (value) =>
       formatNumber(value, precision)

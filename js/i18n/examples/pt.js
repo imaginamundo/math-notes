@@ -55,7 +55,7 @@ export default {
     {
       "id": "examples-tempo-de-upload",
       "nav": "Tempo de upload",
-      "html": "<p>Quanto tempo um arquivo leva para subir a uma determinada velocidade.</p>\n<div class=\"example-chip\" data-expr=\"time to upload 3 GB at 10 MB/s\ntime to upload 3 GB at 2 MB/s\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">300 s, depois 1,500 s</span></div>"
+      "html": "<p>Quanto tempo um arquivo leva para subir a uma determinada velocidade.</p>\n<div class=\"example-chip\" data-expr=\"time to upload 3 GB at 10 MB/s\ntime to upload 3 GB at 2 MB/s\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">5 min, depois 25 min</span></div>"
     },
     {
       "id": "examples-indice-de-massa-corporal",
