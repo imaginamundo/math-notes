@@ -297,6 +297,9 @@ Undo/redo is per tab, kept in memory only: edits are grouped into bursts
 except a burst that ends where it began, which is dropped. The pure helpers
 (`recordChange`/`commitDraft`/`applyUndo`/`applyRedo`) live in
 `js/core/history.js`; `js/ui/tabsHistory.js` is the per-tab store around them.
+After a step the caret is placed at the end of the changed region (`changeCaret`
+in `js/util/text.js`), so undoing a deletion leaves it after the restored text
+instead of at the old offset.
 The history is capped by both count (100 steps) and total size (2 MB), so a
 large sheet cannot retain an unbounded stack of full copies.
 

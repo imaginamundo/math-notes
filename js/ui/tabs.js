@@ -15,6 +15,7 @@ import { STORAGE_KEY, LEGACY_KEY, loadTabsState, createTabsWriter } from '../sto
 import createHistoryStore from './tabsHistory.js';
 import createTabsView from './tabsView.js';
 import debounce from '../util/debounce.js';
+import { changeCaret } from '../util/text.js';
 import { t } from '../i18n/index.js';
 
 // The tab controller: it holds the single `state`, owns activation, undo,
@@ -135,22 +136,20 @@ function initTabs(editableNode, onUpdate) {
     captureCaret();
   }
 
-  function caret() {
-    return { start: editableNode.selectionStart, end: editableNode.selectionEnd };
-  }
-
   function undo() {
     flushDraft();
     const value = history.undo(state.activeId, lastValue);
     if (value === null) return;
-    setValue(value, caret());
+    const position = changeCaret(lastValue, value);
+    setValue(value, { start: position, end: position });
   }
 
   function redo() {
     flushDraft();
     const value = history.redo(state.activeId, lastValue);
     if (value === null) return;
-    setValue(value, caret());
+    const position = changeCaret(lastValue, value);
+    setValue(value, { start: position, end: position });
   }
 
   editableNode.value = lastValue;

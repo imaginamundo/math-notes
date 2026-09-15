@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { indexOfLineAt, startOfLine, sheetLines } from '../js/util/text.js';
+import { indexOfLineAt, startOfLine, sheetLines, changeCaret } from '../js/util/text.js';
 
 const text = 'ab\ncd\n\nef';
 
@@ -27,4 +27,18 @@ test('sheetLines memoizes the split by text value', () => {
   assert.deepEqual(a, ['x', 'y']);
   assert.equal(sheetLines('x\ny'), a, 'the same text returns the same array');
   assert.deepEqual(sheetLines('x\nz'), ['x', 'z']);
+});
+
+test('changeCaret lands at the end of the changed region', () => {
+  // Undoing a deletion: the caret ends after the restored text.
+  assert.equal(changeCaret('5.5 minutes as time', '5.5 minutes as timespan'), 23);
+  // Undoing an insertion at the end: the caret ends where the text was removed.
+  assert.equal(changeCaret('5 + 6', '5 + '), 4);
+  assert.equal(changeCaret('5 + 6\n', '5 + \n'), 4);
+  // Undoing an insertion in the middle.
+  assert.equal(changeCaret('abcXdef', 'abcdef'), 3);
+  // Redo (the reverse direction) lands after the change too.
+  assert.equal(changeCaret('5.5 minutes as timespan', '5.5 minutes as time'), 19);
+  // No change.
+  assert.equal(changeCaret('abc', 'abc'), 3);
 });
