@@ -3,7 +3,7 @@
 // unit-testable without a document (js/ui/tabs.js wires it to the UI).
 
 /**
- * @typedef {{ id: string, name: string, content: string }} Tab
+ * @typedef {{ id: string, name: string, content: string, caret: {start: number, end: number}|null }} Tab
  * @typedef {{ tabs: Tab[], activeId: string|null, nextTabNumber: number }} TabState
  */
 
@@ -12,7 +12,7 @@ function generateId() {
 }
 
 function createTab(prev, name) {
-  const tab = { id: generateId(), name, content: '' };
+  const tab = { id: generateId(), name, content: '', caret: null };
   return {
     ...prev,
     tabs: [...prev.tabs, tab],
@@ -45,6 +45,33 @@ function setContent(prev, id, content) {
   return { ...prev, tabs: prev.tabs.map((tab) => (tab.id === id ? { ...tab, content } : tab)) };
 }
 
+// Trust a stored caret only when it is a pair of integers inside the content;
+// anything else (a corrupt value, an old schema, a shrunken sheet) is ignored
+// so restoring it can never throw or move the caret out of range.
+function normalizeCaret(caret, length) {
+  if (!caret || typeof caret !== 'object') return null;
+  const start = caret.start;
+  const end = caret.end === undefined ? caret.start : caret.end;
+  if (!Number.isInteger(start) || !Number.isInteger(end)) return null;
+  if (start < 0 || end < 0 || start > length || end > length) return null;
+  return { start: Math.min(start, end), end: Math.max(start, end) };
+}
+
+function sameCaret(a, b) {
+  if (!a || !b) return a === b;
+  return a.start === b.start && a.end === b.end;
+}
+
+function setCaret(prev, id, caret) {
+  let changed = false;
+  const tabs = prev.tabs.map((tab) => {
+    if (tab.id !== id || sameCaret(tab.caret, caret)) return tab;
+    changed = true;
+    return { ...tab, caret };
+  });
+  return changed ? { ...prev, tabs } : prev;
+}
+
 function moveTab(prev, id, toIndex) {
   const fromIndex = prev.tabs.findIndex((tab) => tab.id === id);
   if (fromIndex === -1 || fromIndex === toIndex) return prev;
@@ -71,6 +98,8 @@ export {
   renameTab,
   setActiveTab,
   setContent,
+  setCaret,
+  normalizeCaret,
   moveTab,
   deriveNextTabNumber,
 };

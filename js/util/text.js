@@ -32,4 +32,22 @@ function sheetLines(value) {
   return linesCache;
 }
 
-export { indexOfLineAt, startOfLine, sheetLines };
+// Where the caret belongs after `current` is replaced by `next`: at the end of
+// the changed region. Undoing a deletion leaves the caret after the restored
+// text, while undoing an insertion leaves it where the text was removed.
+function changeCaret(current, next) {
+  let prefix = 0;
+  const maxPrefix = Math.min(current.length, next.length);
+  while (prefix < maxPrefix && current[prefix] === next[prefix]) prefix++;
+  let suffix = 0;
+  const maxSuffix = Math.min(current.length - prefix, next.length - prefix);
+  while (
+    suffix < maxSuffix &&
+    current[current.length - 1 - suffix] === next[next.length - 1 - suffix]
+  ) {
+    suffix++;
+  }
+  return next.length - suffix;
+}
+
+export { indexOfLineAt, startOfLine, sheetLines, changeCaret };
