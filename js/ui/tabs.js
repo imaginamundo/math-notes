@@ -88,27 +88,39 @@ function initTabs(editableNode, onUpdate) {
     if (focus) editableNode.focus();
   }
 
-  function setValue(value) {
+  function setValue(value, caret = null) {
     lastValue = value;
     editableNode.value = value;
+    // Assigning `.value` collapses the caret to the end; restore it (clamped to
+    // the new length) before the input event repaints, so undo/redo keep the
+    // view near the change instead of jumping to the bottom of a large sheet.
+    if (caret) {
+      const start = Math.min(caret.start, value.length);
+      const end = Math.min(caret.end === undefined ? caret.start : caret.end, value.length);
+      editableNode.setSelectionRange(start, end);
+    }
     state = setContent(state, state.activeId, value);
     writer.persist();
     scheduleSnapshot();
     editableNode.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
+  function caret() {
+    return { start: editableNode.selectionStart, end: editableNode.selectionEnd };
+  }
+
   function undo() {
     flushDraft();
     const value = history.undo(state.activeId, lastValue);
     if (value === null) return;
-    setValue(value);
+    setValue(value, caret());
   }
 
   function redo() {
     flushDraft();
     const value = history.redo(state.activeId, lastValue);
     if (value === null) return;
-    setValue(value);
+    setValue(value, caret());
   }
 
   editableNode.value = lastValue;

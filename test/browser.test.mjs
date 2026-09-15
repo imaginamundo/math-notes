@@ -179,6 +179,42 @@ test('undo restores the sheet and redo brings the change back', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('undo keeps the view near the change in a large sheet', async () => {
+  await newPage();
+  const big = Array.from({ length: 300 }, (_, i) => `line ${i + 1} = ${i + 1}`).join('\n');
+  await setContent(big);
+  await wait(900);
+
+  // Insert at the very top, then undo it.
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.focus();
+    ed.setSelectionRange(0, 0);
+    document.execCommand('insertText', false, 'x');
+  });
+  await wait(900);
+  await page.evaluate(() =>
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'z', metaKey: true, bubbles: true, cancelable: true })
+    )
+  );
+  await wait(300);
+
+  const after = await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    const scroller = ed.closest('.editor-scroll');
+    return {
+      start: ed.selectionStart,
+      scrollTop: Math.round(scroller.scrollTop),
+      head: ed.value.slice(0, 6),
+    };
+  });
+  assert.equal(after.head, 'line 1', 'the edit was undone');
+  assert.ok(after.start <= 2, 'the caret stays near the change, not at the end');
+  assert.ok(after.scrollTop < 100, 'the view does not scroll to the end');
+  assert.deepEqual(errors, []);
+});
+
 test('snapshots are saved to IndexedDB and recover corrupt localStorage', async () => {
   await newPage();
   await setContent('total = 42');
