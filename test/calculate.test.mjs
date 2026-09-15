@@ -213,6 +213,17 @@ test('single unknown symbols keep the mathjs message', () => {
   assert.equal(evaluateLines(['sin x']).results[0].value, 'Undefined symbol x');
 });
 
+test('a variable shadowing a unit is named in the conversion error', () => {
+  const { results } = evaluateLines(['m = 5', '5km to m']);
+  assert.equal(results[1].type, 'error');
+  assert.equal(
+    results[1].value,
+    '"m" is a variable, so it cannot be used as a unit in a conversion. Rename the variable to convert to m.'
+  );
+  // Without the shadowing variable the conversion still works.
+  assert.equal(evaluateLines(['5km to m']).results[0].value.toNumber(), 5000);
+});
+
 test('non-ASCII groups, tags, names and date variables evaluate', () => {
   const group = evaluateLines(['Grupo ç:', '10', '20', 'end', 'prev']);
   assert.equal(group.results[0].value, 30);
