@@ -55,7 +55,7 @@ days until Christmas
 
 Peça uma parte específica de uma data com uma frase:
 
-```calc 29
+```calc 29 days
 days in February 2020
 ```
 

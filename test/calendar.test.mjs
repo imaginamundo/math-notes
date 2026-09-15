@@ -65,7 +65,7 @@ test('adding a duration to a duration variable still adds durations', () => {
 test('the interval between two dates', () => {
   assert.equal(valueOf('January 10 - February 5'), '3 weeks 5 days');
   assert.equal(valueOf('3 March to 30 May'), '2 months 3 weeks 6 days');
-  assert.equal(valueOf('April 1 through April 30 in days'), '30');
+  assert.equal(valueOf('April 1 through April 30 in days'), '30 days');
 });
 
 test('an explicit backward interval keeps its full span', () => {
@@ -76,12 +76,12 @@ test('an explicit backward interval keeps its full span', () => {
 });
 
 test('days until, since and between', () => {
-  assert.equal(valueOf('days between 3 March and 30 May'), '88');
+  assert.equal(valueOf('days between 3 March and 30 May'), '88 days');
 });
 
 test('date parts, week numbers and formatting', () => {
-  assert.equal(valueOf('days in February 2020'), '29');
-  assert.equal(valueOf('days in Q3'), '92');
+  assert.equal(valueOf('days in February 2020'), '29 days');
+  assert.equal(valueOf('days in Q3'), '92 days');
   assert.equal(valueOf('day number on March 15, 2024'), '75');
   assert.equal(valueOf('day of month on March 15, 2024'), '15');
   assert.equal(valueOf('week number on march 12, 2021'), '10');

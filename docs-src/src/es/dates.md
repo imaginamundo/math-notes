@@ -55,7 +55,7 @@ También se entienden `through … in days`, `midpoint between … and …` y `d
 
 Pide una parte concreta de una fecha con una frase:
 
-```calc 29
+```calc 29 days
 days in February 2020
 ```
 

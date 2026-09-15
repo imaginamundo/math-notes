@@ -55,7 +55,7 @@ days until Christmas
 
 Ask for a single part of a date with a phrase:
 
-```calc 29
+```calc 29 days
 days in February 2020
 ```
 
