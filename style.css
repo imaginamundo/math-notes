@@ -1,4 +1,7 @@
 :root {
+  /* Render native controls (the select/stepper indicators, carets, scrollbars)
+     for a dark surface. The light theme overrides this below. */
+  color-scheme: dark;
   /* Brand */
   --color-primary: #282c34;
   --color-primary-dim: rgba(0, 0, 0, 0.6);
@@ -141,6 +144,7 @@ html[data-theme='monokai'] {
 
 /* Light */
 html[data-theme='light'] {
+  color-scheme: light;
   --color-primary: #ffffff;
   --color-primary-dim: rgba(0, 0, 0, 0.25);
   --color-surface: #eef0f4;
@@ -351,6 +355,12 @@ html.i18n-pending .layout {
 input::placeholder {
   color: var(--color-text);
   opacity: 0.55;
+}
+/* Keep the text caret visible on the dark surfaces (iOS defaults it to black). */
+input,
+select,
+textarea {
+  caret-color: var(--color-text);
 }
 .view {
   z-index: 0;
