@@ -55,7 +55,7 @@ export default {
     {
       "id": "examples-upload-time",
       "nav": "Upload time",
-      "html": "<p>How long a file takes to upload at a given speed.</p>\n<div class=\"example-chip\" data-expr=\"time to upload 3 GB at 10 MB/s\ntime to upload 3 GB at 2 MB/s\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">300 s, then 1,500 s</span></div>"
+      "html": "<p>How long a file takes to upload at a given speed.</p>\n<div class=\"example-chip\" data-expr=\"time to upload 3 GB at 10 MB/s\ntime to upload 3 GB at 2 MB/s\" tabindex=\"0\" role=\"button\"><code></code><span class=\"example-result\">5 min, then 25 min</span></div>"
     },
     {
       "id": "examples-body-mass-index",

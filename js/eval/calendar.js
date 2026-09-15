@@ -561,12 +561,12 @@ function initCalendar(math) {
         return { type: 'calendarInterval', parts: dateDiff(from, to) };
       },
       __dateFormat: (date, pattern) => formatDatePattern(date, pattern),
-      __daysBetweenText: (a, b) => {
+      __daysBetweenText: (a, b, extra) => {
         const { a: from, b: to } = resolveInterval(a, b);
-        return daysBetween(from, to);
+        return math.unit(daysBetween(from, to) + (Number(extra) || 0), 'days');
       },
-      __daysInMonth: (text) => daysInMonth(text),
-      __daysInQuarter: (value) => daysInQuarter(value),
+      __daysInMonth: (text) => math.unit(daysInMonth(text), 'days'),
+      __daysInQuarter: (value) => math.unit(daysInQuarter(value), 'days'),
       __dayOfMonth: (date) => date.getDate(),
       __dayOfYear: (date) => dayOfYear(date),
       __weekNumber: (date) => isoWeek(date),
@@ -770,7 +770,7 @@ function preprocessCalendar(expression) {
   }
 
   if ((m = INCLUSIVE.exec(expr))) {
-    return `__daysBetweenText(${dateArg(m[1])}, ${dateArg(m[2])}) + 1`;
+    return `__daysBetweenText(${dateArg(m[1])}, ${dateArg(m[2])}, 1)`;
   }
 
   if ((m = MIDPOINT.exec(expr))) {

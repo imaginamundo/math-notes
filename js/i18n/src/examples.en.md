@@ -114,7 +114,7 @@ Your pace per kilometre, then the finish time for a longer race at that pace.
 
 How long a file takes to upload at a given speed.
 
-```calc 300 s, then 1,500 s
+```calc 5 min, then 25 min
 time to upload 3 GB at 10 MB/s
 time to upload 3 GB at 2 MB/s
 ```

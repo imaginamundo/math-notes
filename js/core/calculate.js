@@ -310,12 +310,35 @@ function createEngine() {
     return { type, result: result instanceof Error ? result.message : result, variable };
   }
 
+  // The identifier after `to`/`in`/`as` when it names a scope variable rather
+  // than a Unit, so a conversion error can point at the shadowing variable.
+  function conversionTarget(code, scope) {
+    const match = /(?:^|\s)(?:to|in|as)\s+([A-Za-z_]\w*)\s*$/i.exec(code.trim());
+    if (!match) return null;
+    const name = match[1];
+    const value = scope[name];
+    if (value === undefined || value === null) return null;
+    if (typeof value === 'object' && value.isUnit === true) return null;
+    return name;
+  }
+
   // Turn mathjs's terse "Undefined symbol x" into a phrase-level message when
   // the unknown symbol is part of a multi-word name (`monthly rent`) or a
   // mangled forward reference (`__var_monthly_rent`). Single unknowns keep the
   // original message.
   function friendlyError(error, code, scope) {
     const message = error && error.message ? error.message : String(error);
+
+    // `5km to m` after `m = …`: the variable shadows the metre unit, so mathjs
+    // hands a number to `to`. Name the variable instead of leaking the type
+    // error.
+    if (/Unexpected type of argument in function to\b/.test(message)) {
+      const target = conversionTarget(code, scope);
+      if (target) {
+        return `"${target}" is a variable, so it cannot be used as a unit in a conversion. Rename the variable to convert to ${target}.`;
+      }
+    }
+
     const match = new RegExp(`^Undefined symbol (${IDENTIFIER_SRC})$`, 'u').exec(message);
     if (!match) return message;
     const symbol = match[1];
