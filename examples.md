@@ -340,3 +340,100 @@ span + 30 minutes
 fromunix(1446587186)
 unix()
 1 month in days
+
+## Errors
+
+### Tags
+
+#nothing
+sum #missing
+average #nope
+
+### Groups
+
+end
+
+### References
+
+line(0)
+
+line(999)
+
+line(1) * 2
+
+### Variables
+
+foo + 1
+gross income * 12
+net price plus 5
+
+### Units
+
+1 banana
+kg L
+GB m
+2 kg * 3 m
+h^2
+m^0.5
+1 kg to m
+1 cm to kg
+
+### Money
+
+BRL hour
+USD EUR
+100 USD to kg
+100 USD to XYZ
+
+### Measures & rates
+
+300g butter in bananas
+300g butter to spoons
+1 l petrol in bananas
+time to upload 3 GB at bananas
+5 km in banana
+
+### Dates
+
+workdays in banana
+5 workdays after banana
+days until banana
+days in banana
+
+### Lists
+
+[1, 2][0]
+[1, 2][9]
+n = [1, 2]
+n[0]
+
+### Rounding
+
+5 rounded to nearest banana
+1/3 to bananas dp
+pi to banana digits
+
+### Functions
+
+(-1)!
+fact(-1)
+
+### Parsing
+
+(1 + 2
+1 +
+1 + * 2
+2 ** 3
+sqrt(
+
+### Shadowing
+
+m = 5
+5km to m
+
+### Odd values
+
+1/0
+0/0
+log(0)
+sqrt(-1)
