@@ -143,3 +143,33 @@ test('a crashed worker falls back to the main thread for the in-flight request',
   assert.equal(renders.length, 2, 'later updates keep using the fallback');
   assert.equal(busy[busy.length - 1], false, 'busy flag cleared after the crash');
 });
+
+test('a stale reply does not consume a pending precision force', async () => {
+  const { client, renders } = setup();
+  await client.update(); // creates the worker
+  const worker = WorkerStub.latest;
+  worker.autoReply = false;
+  renders.length = 0;
+
+  const evaluateIds = () => worker.sent.filter((m) => m.type === 'evaluate').map((m) => m.id);
+
+  const r1 = client.update();
+  const id1 = evaluateIds().at(-1);
+  client.syncPrecision(5);
+  const r2 = client.update();
+  const id2 = evaluateIds().at(-1);
+  assert.notEqual(id1, id2);
+
+  const reply = (id) =>
+    worker.emit('message', {
+      data: { id, type: 'result', results: [], total: 4, startLine: -1 },
+    });
+  reply(id1);
+  await r1;
+  reply(id2);
+  await r2;
+
+  assert.equal(renders.length, 2);
+  assert.equal(renders[0].data.startLine, -1, 'the pre-change reply is not forced');
+  assert.equal(renders[1].data.startLine, 0, 'the post-change reply forces a full render');
+});

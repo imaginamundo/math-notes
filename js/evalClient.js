@@ -195,20 +195,20 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     if (pendingUpdates === 1) setBusy(true);
     const text = editableNode.value;
     const lines = sheetLines(text);
+    // A display-option change only reformats results, so the engine reports "no
+    // change" (startLine -1). Snapshot the dirty flags for THIS request and clear
+    // them immediately: a stale in-flight reply must not consume a force that
+    // belongs to the request issued after the change.
+    const forceRender = precisionDirty || clockFormatDirty;
+    precisionDirty = false;
+    clockFormatDirty = false;
     try {
       // Draw the input first so a slow sheet never hides what you just typed;
       // the results fill in when the reply lands (or not at all if stale).
       if (onTextRender) onTextRender(lines);
       const { data } = await requestEvaluate(lines);
       if (editableNode.value !== text) return;
-      if (precisionDirty) {
-        data.startLine = 0;
-        precisionDirty = false;
-      }
-      if (clockFormatDirty) {
-        data.startLine = 0;
-        clockFormatDirty = false;
-      }
+      if (forceRender) data.startLine = 0;
       onRender(lines, data);
     } catch (error) {
       console.error('Failed to update the sheet:', error);
