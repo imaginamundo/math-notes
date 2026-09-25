@@ -18,7 +18,7 @@ import initGoToLine from './ui/goToLine.js';
 import initIndent from './ui/indent.js';
 import initAutocomplete from './ui/autocomplete.js';
 import initStarterPrompt from './ui/starterPrompt.js';
-import initTotalMode from './ui/totalMode.js';
+import initTotalMode from './ui/totalModeControl.js';
 import initLoadingIndicator from './ui/loading.js';
 import initEditorScroll from './ui/editor.js';
 import { readClockFormat, setClockFormat } from './core/clockFormat.js';
