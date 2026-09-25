@@ -18,7 +18,7 @@ import initGoToLine from './ui/goToLine.js';
 import initIndent from './ui/indent.js';
 import initAutocomplete from './ui/autocomplete.js';
 import initStarterPrompt from './ui/starterPrompt.js';
-import initTotalMode from './ui/totalMode.js';
+import initTotalMode from './ui/totalModeControl.js';
 import initLoadingIndicator from './ui/loading.js';
 import initEditorScroll from './ui/editor.js';
 import { readClockFormat, setClockFormat } from './core/clockFormat.js';
@@ -135,33 +135,34 @@ window.addEventListener('currency:error', () => {
   showCurrencyStatus(t('status.ratesUnavailable'));
 });
 
+// A setting change forwards the new value to the engine, then recomputes. The
+// per-call comments below explain any extra sequencing.
+function onSettingUpdated(name, apply) {
+  window.addEventListener(name, (event) => {
+    apply(event.detail, event);
+    evalClient.update();
+  });
+}
+
 // Switching measurement system re-registers the volume units in the worker and
 // the main-thread fallback, then recomputes every line.
-window.addEventListener('measurement:updated', (event) => {
-  evalClient.syncMeasurement(event.detail);
-  evalClient.update();
-});
+onSettingUpdated('measurement:updated', (value) => evalClient.syncMeasurement(value));
 
 // Changing the display precision only reformats results, but the worker does
 // the formatting, so it needs the new value before the recompute.
-window.addEventListener('precision:updated', (event) => {
-  setDecimalPrecision(event.detail);
-  evalClient.syncPrecision(event.detail);
-  evalClient.update();
+onSettingUpdated('precision:updated', (value) => {
+  setDecimalPrecision(value);
+  evalClient.syncPrecision(value);
 });
 
 // Switching the total aggregate recomputes the total (the lines are unchanged,
 // but the worker recomputes the total on every evaluation).
-window.addEventListener('total-mode:updated', (event) => {
-  evalClient.syncTotalMode(event.detail);
-  evalClient.update();
-});
+onSettingUpdated('total-mode:updated', (value) => evalClient.syncTotalMode(value));
 
 // Changing the clock format only reformats clock-time results.
-window.addEventListener('clock-format:updated', (event) => {
-  setClockFormat(event.detail);
-  evalClient.syncClockFormat(event.detail);
-  evalClient.update();
+onSettingUpdated('clock-format:updated', (value) => {
+  setClockFormat(value);
+  evalClient.syncClockFormat(value);
 });
 
 let statusTimer = null;

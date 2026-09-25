@@ -15,8 +15,8 @@ let sheetLines = [];
 
 self.addEventListener('message', (event) => {
   const { id, type, lines, from, data } = event.data || {};
-  if (type === 'evaluate') {
-    try {
+  try {
+    if (type === 'evaluate') {
       sheetLines = applyLinePatch(sheetLines, from, lines);
       const { results, total, startLine } = evaluateLines(sheetLines);
       // Values are pre-formatted to strings so no mathjs class instances
@@ -41,18 +41,24 @@ self.addEventListener('message', (event) => {
         total: serializedTotal,
         startLine,
       });
-    } catch (error) {
-      self.postMessage({ id, type: 'error', message: error.message });
+    } else if (type === 'rates') {
+      registerCurrencyRates(data);
+    } else if (type === 'measurement') {
+      registerMeasurementSystem(data);
+    } else if (type === 'total-mode') {
+      registerTotalMode(data);
+    } else if (type === 'precision') {
+      precision = normalizeDecimalPrecision(data);
+    } else if (type === 'clock-format') {
+      setClockFormat(data);
     }
-  } else if (type === 'rates') {
-    registerCurrencyRates(data);
-  } else if (type === 'measurement') {
-    registerMeasurementSystem(data);
-  } else if (type === 'total-mode') {
-    registerTotalMode(data);
-  } else if (type === 'precision') {
-    precision = normalizeDecimalPrecision(data);
-  } else if (type === 'clock-format') {
-    setClockFormat(data);
+  } catch (error) {
+    // Only an evaluate request carries an id to report against. A malformed
+    // settings payload must not take the worker down for the whole session.
+    if (type === 'evaluate') {
+      self.postMessage({ id, type: 'error', message: error.message });
+    } else {
+      console.error('worker message failed:', error, event.data);
+    }
   }
 });

@@ -8,6 +8,8 @@
 // formatResult renders as components. Consecutive time components are joined
 // with `+` (mathjs would otherwise multiply them), and `m` means minutes.
 
+import { BEFORE_WORD, AFTER_WORD, WORD } from '../core/identifiers.js';
+
 const UNIT_SECONDS = {
   year: 365.2425 * 86400,
   month: 30.436875 * 86400,
@@ -90,9 +92,12 @@ const MINUTE_HOUR_UNITS = new Set([
   'hour',
   'hours',
 ]);
-const COMPONENT_SOURCE = `\\d+(?:\\.\\d+)?\\s*(?:${UNIT_ALT})(?![A-Za-z])`;
+const COMPONENT_SOURCE = `${BEFORE_WORD}\\d+(?:\\.\\d+)?\\s*(?:${UNIT_ALT})${AFTER_WORD}`;
 const RUN_SOURCE = `${COMPONENT_SOURCE}(?:\\s+${COMPONENT_SOURCE})+`;
 const WHOLE_RUN = new RegExp(`^\\s*${RUN_SOURCE}\\s*$`, 'i');
+// A number followed by `min` is minutes, but not inside a name (`top5min`) or
+// before the mathjs min() function (`min(2, 3)`).
+const MINUTE = new RegExp(`${BEFORE_WORD}(\\d+(?:\\.\\d+)?)\\s*min(?![${WORD}_.(])`, 'giu');
 
 // `3h 5m 10s` -> `3 hours + 5 minutes + 10 seconds`.
 function joinTimeComponents(expression) {
@@ -113,7 +118,7 @@ function preprocessTimespan(expression) {
   // (handled below) and `as a %` (percentage, already consumed).
   const converted = expression.replace(/\s+as\s+(?!timespan\b|a\s+%)/gi, ' to ');
   // mathjs reads `min` as the min() function; a number before it is a minute.
-  const normalized = converted.replace(/(\d+(?:\.\d+)?)\s*min(?![\w(])/gi, '$1 minutes');
+  const normalized = converted.replace(MINUTE, '$1 minutes');
 
   // A line that is nothing but time components displays as a timespan.
   if (WHOLE_RUN.test(normalized)) {

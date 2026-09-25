@@ -130,56 +130,95 @@ function timeInfo(unit) {
 }
 
 function formatUnit(unit, precision) {
-  // A pure time value renders as a timespan when it is a marked timespan, an
-  // explicit minutes/hours value, or a compound that reduces to pure time (a
-  // computed duration like `time to upload 3 GB at 10 MB/s` -> `(GB s) / MB`).
-  // An explicit seconds/days value keeps the unit that was asked for, so
-  // `2h to s` still reads `7,200 s` and a transfer time stays `300 s`.
-  const info = timeInfo(unit);
   const rawUnits = unit.formatUnits();
-  const compound = /[ /^]/.test(rawUnits);
-  if (
-    info &&
-    unit.keepUnit !== true &&
-    (unit.timespan === true || DURATION_UNITS.has(rawUnits) || compound)
-  ) {
-    return formatTimespan(info.seconds, unit.displayParts, (value) =>
-      formatNumber(value, precision)
-    );
+  let simple = null;
+  const context = {
+    unit,
+    precision,
+    rawUnits,
+    info: timeInfo(unit),
+    compound: /[ /^]/.test(rawUnits),
+    // Deferred: only the rules that need it call simplify(), which can fold a
+    // compound into a surprising unit.
+    get simple() {
+      return (simple ??= typeof unit.simplify === 'function' ? unit.simplify() : unit);
+    },
+  };
+  for (const rule of UNIT_FORMAT_RULES) {
+    if (rule.test(context)) return rule.format(context);
   }
-  // A currency amount is written with its symbol. Read it before simplify():
-  // simplifying folds a currency into mathjs's base currency.
-  const currency = currencyOf(unit);
-  if (currency) return formatCurrency(currency, numericValue(unit), precision);
-  // A currency rate reads as a phrase: `R$ 12 per day`, `US$ 33 per hour`.
-  const rate = currencyRate(unit);
-  if (rate) {
-    const formatted = formatAmount(numericValue(unit), precision);
-    return `${rate.symbol} ${formatted} per ${rate.denominator}`;
-  }
-  // Compound rates keep their original factors until simplified
-  // (`(hours km) / hour` -> `km`). A plain ratio (`l/km`, `GB/h`, `kg/m^3`) is
-  // shown as written instead: simplifying it can fold related dimensions into a
-  // surprising one (`l/km` is length², so `7 l / 100 km` would read as an area).
-  const simple = typeof unit.simplify === 'function' ? unit.simplify() : unit;
-  const units = simple.formatUnits();
-  const pace = /^min\s*\/\s*(km|mi)$/.exec(units);
-  if (pace) return formatPace(simple, pace[1]);
-  // A compound that cancels down to a currency (`$24 a day for a year`, or
-  // `2h * prev` where prev is a rate) is a plain amount. Show it in the currency
-  // that was written, not the base currency simplify() picked.
-  if (currencyOf(simple)) {
-    const code = leadingCurrency(unit);
-    const symbol = code ? CURRENCY_DISPLAY[code] : null;
-    if (symbol) return formatCurrency(symbol, convertTo(unit, code), precision);
-  }
-  // Repeated same-unit factors read as a power (`m * m * m` -> `m^3`).
-  const power = sameUnitPower(unit);
-  if (power) return `${formatAmount(numericValue(unit), precision)} ${power}`;
-  const display = isPlainRatio(unit) ? unit : simple;
-  const formatted = formatAmount(numericValue(display), precision);
-  return `${formatted} ${cleanUnits(withCurrencySymbols(display.formatUnits()))}`;
+  return null; // unreachable: the last rule always matches
 }
+
+// Ordered unit-display policies: the first rule whose `test` passes formats the
+// value. A list rather than an if-chain, so a new policy is one entry here
+// (mirroring preprocess.js's STEPS).
+const PACE = /^min\s*\/\s*(km|mi)$/;
+const UNIT_FORMAT_RULES = [
+  {
+    // A pure time value renders as a timespan when it is a marked timespan, an
+    // explicit minutes/hours value, or a compound that reduces to pure time (a
+    // computed duration like `time to upload 3 GB at 10 MB/s` -> `(GB s) / MB`).
+    // An explicit seconds/days value keeps its unit, so `2h to s` stays `7,200 s`.
+    test: ({ unit, info, rawUnits, compound }) =>
+      Boolean(info) &&
+      unit.keepUnit !== true &&
+      (unit.timespan === true || DURATION_UNITS.has(rawUnits) || compound),
+    format: ({ unit, info, precision }) =>
+      formatTimespan(info.seconds, unit.displayParts, (value) => formatNumber(value, precision)),
+  },
+  {
+    // A currency amount is written with its symbol. Read it before simplify(),
+    // which folds a currency into mathjs's base currency.
+    test: ({ unit }) => currencyOf(unit) !== null,
+    format: ({ unit, precision }) =>
+      formatCurrency(currencyOf(unit), numericValue(unit), precision),
+  },
+  {
+    // A currency rate reads as a phrase: `R$ 12 per day`, `US$ 33 per hour`.
+    test: ({ unit }) => currencyRate(unit) !== null,
+    format: ({ unit, precision }) => {
+      const rate = currencyRate(unit);
+      return `${rate.symbol} ${formatAmount(numericValue(unit), precision)} per ${rate.denominator}`;
+    },
+  },
+  {
+    // A pace (`min/km`, `min/mi`) is shown as mm:ss.
+    test: ({ simple }) => PACE.test(simple.formatUnits()),
+    format: ({ simple }) => formatPace(simple, PACE.exec(simple.formatUnits())[1]),
+  },
+  {
+    // A compound that cancels down to a currency (`$24 a day for a year`, or
+    // `2h * prev` where prev is a rate) is a plain amount. Show it in the
+    // currency that was written, not the base currency simplify() picked.
+    test: ({ unit, simple }) => {
+      if (currencyOf(simple) === null) return false;
+      const code = leadingCurrency(unit);
+      return Boolean(code && CURRENCY_DISPLAY[code]);
+    },
+    format: ({ unit, precision }) => {
+      const code = leadingCurrency(unit);
+      return formatCurrency(CURRENCY_DISPLAY[code], convertTo(unit, code), precision);
+    },
+  },
+  {
+    // Repeated same-unit factors read as a power (`m * m * m` -> `m^3`).
+    test: ({ unit }) => sameUnitPower(unit) !== null,
+    format: ({ unit, precision }) =>
+      `${formatAmount(numericValue(unit), precision)} ${sameUnitPower(unit)}`,
+  },
+  {
+    // Everything else. A plain ratio (`l/km`, `GB/h`, `kg/m^3`) is shown as
+    // written instead of simplified: `l/km` is length², so `7 l / 100 km` would
+    // otherwise read as an area.
+    test: () => true,
+    format: ({ unit, precision, simple }) => {
+      const display = isPlainRatio(unit) ? unit : simple;
+      const formatted = formatAmount(numericValue(display), precision);
+      return `${formatted} ${cleanUnits(withCurrencySymbols(display.formatUnits()))}`;
+    },
+  },
+];
 
 // When every factor is the same unit (`m * m * m`, `m^2 * m`), combine them into
 // a single power (`m^3`). mathjs's simplify() would otherwise render `m^3` as an

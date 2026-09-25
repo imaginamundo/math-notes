@@ -8,7 +8,13 @@
 
 import { IDENTIFIER_SRC, WORD } from './identifiers.js';
 
-const NAME_WORDS = new RegExp(`^\\s*(${IDENTIFIER_SRC}(?:\\s+${IDENTIFIER_SRC})+)\\s*=(?!=)`, 'u');
+// An assignment whose name contains whitespace. A leading `Label:` prefix (the
+// parser splits a label from its code) is skipped, so `Total: monthly rent = 1500`
+// still defines `monthly rent`.
+const NAME_WORDS = new RegExp(
+  `^\\s*(?:[^\\n#:]*:\\s*)?(${IDENTIFIER_SRC}(?:\\s+${IDENTIFIER_SRC})+)\\s*=(?!=)`,
+  'u'
+);
 const MANGLE_PREFIX = '__var_';
 
 function escapeRegExp(text) {

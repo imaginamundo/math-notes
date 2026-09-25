@@ -88,9 +88,10 @@ function initStarterPrompt(editableNode) {
   // React to edits: leaving the starter sheet hides the control and remembers
   // it was dealt with, so the prompt never nags again. Returning to the
   // untouched starter sheet keeps it available until a button or an edit
-  // settles it.
-  editableNode.addEventListener('input', () => {
-    if (isStarterSheet(editableNode.value)) {
+  // settles it. A programmatic write (a tab switch, undo/redo, restore) is not
+  // a user edit, so it never settles the prompt.
+  editableNode.addEventListener('input', (event) => {
+    if (event.programmatic || isStarterSheet(editableNode.value)) {
       refresh();
       return;
     }

@@ -20,17 +20,38 @@ import { mangleLines, unmangleName } from './multiWordVariables.js';
 import { IDENTIFIER_SRC, TAG_NAME_SRC, WORD } from './identifiers.js';
 
 /**
+ * One row's result. Every `results[i]` is exactly one of these variants:
+ *
+ * - `{ type: 'value', value }` — a normal computed row. `value` is a plain
+ *   number/Unit/Date/list/object on the engine path, and an already formatted
+ *   string on the worker path (see `worker.js`). It is `undefined` for a blank
+ *   or comment row, and for a group's closing `end` row.
+ * - `{ type: 'value', value, aggregate: true }` — an aggregate row: a group
+ *   header's subtotal, a bare `sum`/`average`/`total`/`avg` row, or a line that
+ *   is only `#tags`. `aggregate` keeps it out of the running total so the rows
+ *   it sums are not counted twice.
+ * - `{ type: 'assignment', value, assigned }` — an assignment. `assigned` is
+ *   the value to store (functions and Dates survive there); `value` mirrors it
+ *   for display.
+ * - `{ type: 'error', value }` — `value` is the human-readable message.
+ *
+ * `tags` is present (non-empty) only on rows that carry `#tags`. `group` is
+ * present only on the rows of a closed group (`'header'`, `'body'`, `'end'`),
+ * so the renderer can shade the block.
+ *
  * @typedef {Object} LineResult
  * @property {('value'|'assignment'|'error')} type
- * @property {*} value  Display value; for the worker path this is a pre-formatted string.
- * @property {*} [assigned]  The value stored for an assignment (functions survive here).
- * @property {boolean} [aggregate]  True for aggregate (`sum`/`average`) rows.
+ * @property {*} value
+ * @property {*} [assigned]
+ * @property {boolean} [aggregate]
+ * @property {string[]} [tags]
+ * @property {('header'|'body'|'end')} [group]
  */
 
 /**
  * @typedef {Object} SheetResult
  * @property {LineResult[]} results
- * @property {number|null} total
+ * @property {*} total  The running total (number, Unit, or formatted string).
  * @property {number} startLine  First line that changed (-1 when input is unchanged).
  */
 
@@ -436,7 +457,7 @@ function createEngine() {
 
     for (let i = 0; i < startLine; i++) {
       const line = lines[i];
-      if (line.trim() === '') lastBlankIndex = i;
+      if (line.trim() === '' && !groups.groupOfLine.has(i)) lastBlankIndex = i;
       const parsed = parseLine(line);
       if (parsed.isAssignment) {
         const stored = results[i];
@@ -466,7 +487,7 @@ function createEngine() {
 
     for (let i = startLine; i < lines.length; i++) {
       const line = lines[i];
-      if (line.trim() === '') lastBlankIndex = i;
+      if (line.trim() === '' && !groups.groupOfLine.has(i)) lastBlankIndex = i;
 
       let parsed = parseLine(line);
       // The raw label, before mangleLines rewrote multi-word names.

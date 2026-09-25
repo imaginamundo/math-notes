@@ -47,7 +47,14 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
   // The worker is created on the first evaluation rather than at import time,
   // so loading the page does not parse the mathjs bundle until it is needed.
   function startWorker() {
-    const created = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+    let created;
+    try {
+      created = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+    } catch {
+      // Module workers are unsupported; use the main-thread evaluator.
+      workerUnavailable = true;
+      return null;
+    }
     created.addEventListener('message', (event) => {
       const callback = pending.get(event.data.id);
       if (!callback) return;
@@ -107,31 +114,20 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
    */
   function requestEvaluate(lines) {
     const active = ensureWorker();
-    if (active) {
-      return new Promise((resolve, reject) => {
-        const id = ++latestId;
-        const timer = setTimeout(() => {
-          pending.delete(id);
-          reject(new Error('Evaluation timed out'));
-        }, EVALUATE_TIMEOUT);
-        pending.set(id, (data) => {
-          clearTimeout(timer);
-          if (data.type === 'error') reject(new Error(data.message));
-          else resolve({ id, data });
-        });
-        // Send only the suffix from the first changed line. `from` is -1 when
-        // nothing changed, in which case the worker rebuilds the same sheet.
-        const from = lastSentLines ? firstDifference(lastSentLines, lines) : 0;
-        const suffix = from > 0 ? lines.slice(from) : from === 0 ? lines : [];
-        active.postMessage({
-          id,
-          type: 'evaluate',
-          lines: suffix,
-          from: from === -1 ? lines.length : from,
-        });
-        lastSentLines = lines;
-      });
-    }
+    if (!active) return fallbackEvaluate(lines);
+    // If the worker cannot load (common offline, when its module graph was
+    // never fetched) or crashes, evaluate this request on the main thread
+    // instead of leaving the sheet blank, and fall back for later requests.
+    return workerEvaluate(active, lines).catch(() => {
+      if (worker === active) dropWorker();
+      return fallbackEvaluate(lines);
+    });
+  }
+
+  // Evaluate on the main thread when there is no worker or it failed. The raw
+  // values this resolves with are formatted by `patchResults`, which accepts
+  // both the worker's pre-formatted strings and these numbers/units.
+  function fallbackEvaluate(lines) {
     const load = fallbackModule
       ? Promise.resolve(fallbackModule)
       : import('./core/calculate.js').then((mod) => (fallbackModule = mod));
@@ -139,6 +135,32 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
       load.then((mod) => ({ id: 0, data: mod.evaluateLines(lines) })),
       EVALUATE_TIMEOUT
     );
+  }
+
+  function workerEvaluate(worker, lines) {
+    return new Promise((resolve, reject) => {
+      const id = ++latestId;
+      const timer = setTimeout(() => {
+        pending.delete(id);
+        reject(new Error('Evaluation timed out'));
+      }, EVALUATE_TIMEOUT);
+      pending.set(id, (data) => {
+        clearTimeout(timer);
+        if (data.type === 'error') reject(new Error(data.message));
+        else resolve({ id, data });
+      });
+      // Send only the suffix from the first changed line. `from` is -1 when
+      // nothing changed, in which case the worker rebuilds the same sheet.
+      const from = lastSentLines ? firstDifference(lastSentLines, lines) : 0;
+      const suffix = from > 0 ? lines.slice(from) : from === 0 ? lines : [];
+      worker.postMessage({
+        id,
+        type: 'evaluate',
+        lines: suffix,
+        from: from === -1 ? lines.length : from,
+      });
+      lastSentLines = lines;
+    });
   }
 
   // Reject when a promise does not settle in time (clears the timer so a late
@@ -173,20 +195,20 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     if (pendingUpdates === 1) setBusy(true);
     const text = editableNode.value;
     const lines = sheetLines(text);
+    // A display-option change only reformats results, so the engine reports "no
+    // change" (startLine -1). Snapshot the dirty flags for THIS request and clear
+    // them immediately: a stale in-flight reply must not consume a force that
+    // belongs to the request issued after the change.
+    const forceRender = precisionDirty || clockFormatDirty;
+    precisionDirty = false;
+    clockFormatDirty = false;
     try {
       // Draw the input first so a slow sheet never hides what you just typed;
       // the results fill in when the reply lands (or not at all if stale).
       if (onTextRender) onTextRender(lines);
       const { data } = await requestEvaluate(lines);
       if (editableNode.value !== text) return;
-      if (precisionDirty) {
-        data.startLine = 0;
-        precisionDirty = false;
-      }
-      if (clockFormatDirty) {
-        data.startLine = 0;
-        clockFormatDirty = false;
-      }
+      if (forceRender) data.startLine = 0;
       onRender(lines, data);
     } catch (error) {
       console.error('Failed to update the sheet:', error);

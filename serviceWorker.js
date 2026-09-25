@@ -1,6 +1,6 @@
 // Served from the site root so its scope is `/` and it can cache the app shell
 // and the documentation (a worker under /js/ could only control /js/).
-const cacheName = 'math-notes-v38';
+const cacheName = 'math-notes-v41';
 const urlsToCache = [
   './index.html',
   './style.css',
@@ -25,6 +25,10 @@ const urlsToCache = [
   './js/core/vocabulary.js',
   './js/eval/aliases.js',
   './js/eval/calendar.js',
+  './js/eval/calendarArithmetic.js',
+  './js/eval/calendarDate.js',
+  './js/eval/calendarFormat.js',
+  './js/eval/calendarGrammar.js',
   './js/eval/cssUnits.js',
   './js/eval/currency.js',
   './js/eval/datetime.js',
@@ -79,7 +83,7 @@ const urlsToCache = [
   './js/ui/tabs.js',
   './js/ui/tabsHistory.js',
   './js/ui/tabsView.js',
-  './js/ui/totalMode.js',
+  './js/ui/totalModeControl.js',
   './js/util/clipboard.js',
   './js/util/compress.js',
   './js/util/debounce.js',
@@ -91,7 +95,13 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(cacheName).then((cache) => cache.addAll(urlsToCache)));
+  // Add each asset on its own so one failure (a transient network error) cannot
+  // abort the whole install and leave the app without an offline shell.
+  event.waitUntil(
+    caches
+      .open(cacheName)
+      .then((cache) => Promise.allSettled(urlsToCache.map((url) => cache.add(url))))
+  );
   self.skipWaiting();
 });
 

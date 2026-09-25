@@ -1,13 +1,13 @@
 const WORD_OPERATORS = [
-  [/ multiplied by /g, ' * '],
-  [/ divided by /g, ' / '],
-  [/ divide by /g, ' / '],
-  [/ times /g, ' * '],
-  [/ without /g, ' - '],
-  [/ with /g, ' + '],
-  [/ plus /g, ' + '],
-  [/ minus /g, ' - '],
-  [/ mul /g, ' * '],
+  [/ multiplied by /gi, ' * '],
+  [/ divided by /gi, ' / '],
+  [/ divide by /gi, ' / '],
+  [/ times /gi, ' * '],
+  [/ without /gi, ' - '],
+  [/ with /gi, ' + '],
+  [/ plus /gi, ' + '],
+  [/ minus /gi, ' - '],
+  [/ mul /gi, ' * '],
 ];
 
 // Note: `and` is intentionally not mapped to `+` because mathjs defines
