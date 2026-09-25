@@ -50,6 +50,12 @@ export default {
   'tabs.new': 'Nova aba',
   'tabs.defaultName': 'Aba {n}',
   'tabs.closeConfirm': 'Fechar "{name}"? O conteúdo será perdido.',
+  'tabs.templates': 'Folhas iniciais',
+  'template.budget': 'Orçamento',
+  'template.trip': 'Custo da viagem',
+  'template.invoice': 'Fatura',
+  'template.savings': 'Meta de poupança',
+  'template.split': 'Dividir a conta',
 
   'find.placeholder': 'Localizar na planilha',
   'find.matchCase': 'Diferenciar maiúsculas',

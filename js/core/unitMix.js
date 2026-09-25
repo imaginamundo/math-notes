@@ -1,5 +1,6 @@
 import { isCurrencyCode } from './currencySymbols.js';
 import { readableUnit } from './unitNames.js';
+import { decodeUnitName } from './userUnits.js';
 
 const LENGTH = 'LENGTH';
 
@@ -53,7 +54,7 @@ export function unitMixError(value) {
 
 function labelOf(entry) {
   const prefix = entry.prefix && entry.prefix.name ? entry.prefix.name : '';
-  return prefix + entry.unit.name;
+  return decodeUnitName(prefix + entry.unit.name) || prefix + entry.unit.name;
 }
 
 // Build the message from the units the user wrote, so it names what clashed.

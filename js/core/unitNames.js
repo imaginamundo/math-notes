@@ -1,5 +1,6 @@
 // Readable unit labels for prose (`per day`, not `per days` or `per d`).
 // Shared by the result formatter and the money-mix error.
+import { decodeUnitName } from './userUnits.js';
 
 const READABLE = {
   // Plurals.
@@ -28,5 +29,6 @@ const READABLE = {
 };
 
 export function readableUnit(name) {
-  return READABLE[name] || name;
+  const decoded = decodeUnitName(name) || name;
+  return READABLE[decoded] || decoded;
 }

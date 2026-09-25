@@ -28,6 +28,9 @@ function initTabs(editableNode, onUpdate) {
   // Per-instance state, held in the closure rather than at module scope so a
   // second initTabs() would get its own tabs instead of sharing a global.
   let state = null;
+  // Set by reset(): persistence is stopped so the reload that follows starts
+  // from a genuinely empty first-run state.
+  let resetting = false;
   const tabBarNode = document.getElementById('tabs-bar');
   const { state: loadedState, failed: storageFailed } = loadTabsState();
   state = loadedState;
@@ -42,6 +45,7 @@ function initTabs(editableNode, onUpdate) {
     activate,
     close: handleClose,
     create: handleNew,
+    newFromTemplate: (template) => openSheet(template),
     rename: handleRename,
     reorder: handleReorder,
     dragged: () => writer.persist(),
@@ -55,12 +59,14 @@ function initTabs(editableNode, onUpdate) {
   const snapshot = debounce(saveActiveSnapshot, SNAPSHOT_DELAY);
 
   function saveActiveSnapshot() {
+    if (resetting) return;
     const tab = getActiveTab();
     if (!tab) return;
     saveSnapshot({ id: tab.id, name: tab.name, content: tab.content }).catch(() => {});
   }
 
   function scheduleSnapshot() {
+    if (resetting) return;
     snapshot.schedule();
   }
 
@@ -120,6 +126,7 @@ function initTabs(editableNode, onUpdate) {
   // still readable when the editor is blurred, and `writer.schedule` coalesces
   // the writes.
   function captureCaret() {
+    if (resetting) return;
     const start = editableNode.selectionStart;
     const end = editableNode.selectionEnd;
     if (!Number.isInteger(start) || !Number.isInteger(end)) return;
@@ -164,6 +171,7 @@ function initTabs(editableNode, onUpdate) {
   editableNode.value = lastValue;
 
   editableNode.addEventListener('input', () => {
+    if (resetting) return;
     const value = editableNode.value;
     if (value === lastValue) return;
     history.record(state.activeId, lastValue, value);
@@ -183,6 +191,7 @@ function initTabs(editableNode, onUpdate) {
 
   const flushPersist = () => writer.flush();
   const flushAll = () => {
+    if (resetting) return;
     flushDraft();
     captureCaret();
     flushPersist();
@@ -253,6 +262,26 @@ function initTabs(editableNode, onUpdate) {
     state = setContent(state, state.activeId, content);
     history.reset(state.activeId);
     present(content, { focus: false });
+  }
+
+  // Return to a first-run state: drop every tab, its undo history and any
+  // pending write, and stop persisting. The reload that follows (Reset data)
+  // then starts empty, so onboarding re-seeds the Welcome sheet and the tab
+  // counter is back at 2. Without this the pagehide/blur flush would write the
+  // in-memory tabs back over the storage Reset data just removed.
+  function reset() {
+    resetting = true;
+    burst.cancel();
+    snapshot.cancel();
+    writer.cancel();
+    history.clear();
+    const tab = {
+      id: generateId(),
+      name: t('tabs.defaultName', { n: 1 }),
+      content: '',
+      caret: null,
+    };
+    state = { tabs: [tab], activeId: tab.id, nextTabNumber: 2 };
   }
 
   function handleClose(id) {
@@ -334,7 +363,7 @@ function initTabs(editableNode, onUpdate) {
 
   if (storageFailed) recoverFromSnapshots();
 
-  return { switchTab, restoreTab, restoreAll, openSheet, getActiveSheet, seedSheet };
+  return { switchTab, restoreTab, restoreAll, openSheet, getActiveSheet, seedSheet, reset };
 }
 
 export { STORAGE_KEY, LEGACY_KEY };

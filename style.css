@@ -257,19 +257,83 @@ html.i18n-pending .layout {
   background: transparent;
   color: inherit;
 }
-.tab-new {
+/* The create/template actions stay pinned to the right edge of the scrolling
+   bar, so they remain reachable however many tabs there are. */
+.tab-actions {
+  position: sticky;
+  right: 0;
+  z-index: 2;
   margin-left: auto;
-  align-self: stretch;
-  padding: 0 0.9em;
+  display: flex;
+  align-items: stretch;
+  background: var(--color-footer);
+}
+.tab-new,
+.tab-template {
+  display: flex;
+  align-items: center;
   border: 0;
+  border-left: 1px solid var(--border-faint);
   background: transparent;
   color: var(--color-text);
-  font-size: 1.5em;
-  line-height: 1;
   cursor: pointer;
 }
-.tab-new:hover {
+.tab-new {
+  padding: 0 0.6em;
+  font-size: 1.5em;
+  line-height: 1;
+}
+.tab-template {
+  justify-content: center;
+  padding: 0 0.7em;
+  font-size: 1.1em;
+}
+/* A chevron drawn as an SVG so it is centred exactly, unlike the `⌄` glyph
+   which sits high in its em box. */
+.tab-caret {
+  display: block;
+  width: 0.7em;
+  height: 0.47em;
+}
+.tab-caret svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.tab-new:hover,
+.tab-template:hover {
   color: var(--color-operator);
+}
+/* The starter-sheet menu: fixed so the tab bar's horizontal scroll cannot clip
+   it, and positioned against its button by tabsView.js. */
+.tab-template-menu {
+  position: fixed;
+  z-index: 20;
+  min-width: 10rem;
+  padding: 0.3em;
+  background: var(--color-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px var(--shadow-modal, rgba(0, 0, 0, 0.4));
+}
+.tab-template-menu[hidden] {
+  display: none;
+}
+.tab-template-option {
+  display: block;
+  width: 100%;
+  padding: 0.45em 0.6em;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.tab-template-option:hover,
+.tab-template-option:focus-visible {
+  background: var(--surface-chip);
 }
 .tab-rename {
   font: inherit;

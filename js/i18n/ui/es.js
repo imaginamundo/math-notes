@@ -50,6 +50,12 @@ export default {
   'tabs.new': 'Nueva pestaña',
   'tabs.defaultName': 'Hoja {n}',
   'tabs.closeConfirm': '¿Cerrar "{name}"? Su contenido se perderá.',
+  'tabs.templates': 'Hojas iniciales',
+  'template.budget': 'Presupuesto',
+  'template.trip': 'Coste del viaje',
+  'template.invoice': 'Factura',
+  'template.savings': 'Meta de ahorro',
+  'template.split': 'Dividir la cuenta',
 
   'find.placeholder': 'Buscar en la hoja',
   'find.matchCase': 'Distinguir mayúsculas',

@@ -56,6 +56,8 @@ function createTabsWriter(getState) {
     schedule: () => debounced.schedule(),
     // Write now only if one is pending.
     flush: () => debounced.flush(),
+    // Drop a pending write without running it (used by Reset data).
+    cancel: () => debounced.cancel(),
   };
 }
 

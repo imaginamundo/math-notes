@@ -6,6 +6,7 @@ import {
   collectTags,
 } from '../core/autocomplete.js';
 import { VOCABULARY } from '../core/vocabulary.js';
+import { collectUnitDefinitions } from '../core/userUnits.js';
 import { setEditorValue } from './editorInput.js';
 import { sheetLines } from '../util/text.js';
 import { t } from '../i18n/index.js';
@@ -85,10 +86,13 @@ function initAutocomplete(editableNode, editorScroll) {
     }
 
     const variables = collectAssignments(lines).map((text) => ({ text, kind: 'variable' }));
+    const customUnits = collectUnitDefinitions(lines).flatMap(({ name, aliases }) =>
+      [name, ...aliases].map((text) => ({ text, kind: 'unit', detail: 'custom unit' }))
+    );
     const tags = collectTags(lines).map((text) => ({ text: `#${text}`, kind: 'tag' }));
     cachedValue = value;
     cachedLines = lines;
-    cachedEntries = [...variables, ...tags, ...VOCABULARY];
+    cachedEntries = [...variables, ...customUnits, ...tags, ...VOCABULARY];
     return cachedEntries;
   }
 

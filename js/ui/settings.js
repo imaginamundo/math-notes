@@ -241,6 +241,10 @@ function initSettings(contentEditableNode, tabsApi) {
   resetButton.addEventListener('click', async () => {
     if (!window.confirm(t('settings.resetConfirm'))) return;
     RESET_KEYS.forEach((key) => storage.remove(key));
+    // Drop the in-memory tabs and their pending writes before clearing
+    // snapshots, so the reload below is a genuine first run and the Welcome
+    // sheet is seeded again.
+    tabsApi.reset();
     try {
       const { clearSnapshots } = await import('../storage/snapshots.js');
       await clearSnapshots();

@@ -49,9 +49,9 @@
       <nav class="doc-lang" aria-label="Language"><a href="/docs/writing-a-sheet/" hreflang="en" class="is-active" aria-current="page">English</a><a href="/docs/pt/writing-a-sheet/" hreflang="pt">Português</a><a href="/docs/es/writing-a-sheet/" hreflang="es">Español</a></nav>
       <a class="doc-app" href="/">Open Math Notes</a>
     </div>
+    <button class="doc-menu-toggle" type="button" aria-label="Documentation menu" aria-expanded="false" aria-controls="doc-sidebar">Menu</button>
   </header>
   <div class="doc-layout">
-    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Documentation menu</button>
     <aside class="doc-sidebar" id="doc-sidebar">
       <nav class="doc-nav" aria-label="Documentation menu"><ul><li class="doc-nav-item"><a href="/docs/">Home</a></li><li class="doc-nav-item"><a href="/docs/getting-started/">Getting started</a></li><li class="doc-nav-item is-active"><a href="/docs/writing-a-sheet/" aria-current="page">Writing a sheet</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">On this page</li><li><a href="#comments-and-labels">Comments and labels</a></li><li><a href="#tags">Tags</a></li><li><a href="#variables">Variables</a></li><li><a href="#objects">Objects</a></li><li><a href="#references">References</a></li><li><a href="#reserved-words">Reserved words</a></li><li><a href="#blank-lines">Blank lines</a></li></ul></li><li class="doc-nav-item"><a href="/docs/numbers/">Numbers &amp; operators</a></li><li class="doc-nav-item"><a href="/docs/lists/">Lists &amp; sequences</a></li><li class="doc-nav-item"><a href="/docs/groups/">Groups &amp; totals</a></li><li class="doc-nav-item"><a href="/docs/units/">Units &amp; measures</a></li><li class="doc-nav-item"><a href="/docs/money/">Money &amp; currencies</a></li><li class="doc-nav-item"><a href="/docs/dates/">Dates &amp; time</a></li><li class="doc-nav-item"><a href="/docs/files/">Files, sharing &amp; data</a></li><li class="doc-nav-item"><a href="/docs/settings/">Settings &amp; appearance</a></li><li class="doc-nav-item"><a href="/docs/app/">App &amp; platform</a></li><li class="doc-nav-item"><a href="/docs/reference/">Reference</a></li><li class="doc-nav-item"><a href="/docs/about/">About</a></li></ul></nav>
     </aside>
@@ -113,11 +113,13 @@ prev + 1</code></pre><figcaption class="doc-example-result">last line returns 11
 <p>A few names cannot be used as variables:</p>
 <ul>
 <li><code>prev</code> (the previous result)</li>
+<li><code>total</code> (the running-total aggregate)</li>
+<li><code>unit</code> — opens a user-defined unit (<code>unit widget = 3.5 kg</code>)</li>
 <li>the unconditional date words <code>today</code>, <code>now</code>, <code>yesterday</code>, <code>tomorrow</code>, <code>christmas</code>, <code>halloween</code></li>
 <li>any name starting with <code>__</code> (the editor&#39;s internal helpers)</li>
 <li><code>end</code> closes a group</li>
 </ul>
-<p>Variables otherwise share one scope with the built-in names, so a variable can shadow a unit or function: after <code>m = 5</code>, <code>2 m</code> is <code>2 × m</code>, not two metres. The aggregate keywords <code>sum</code>, <code>total</code>, <code>average</code> and <code>avg</code> work the same way: after <code>total = 5</code>, a later <code>total</code> line reads the variable instead of aggregating.</p>
+<p>Variables otherwise share one scope with the built-in names, so a variable can shadow a unit or function: after <code>m = 5</code>, <code>2 m</code> is <code>2 × m</code>, not two metres. The other aggregate keywords <code>sum</code>, <code>average</code> and <code>avg</code> can still be shadowed: after <code>avg = 5</code>, a later <code>avg</code> line reads the variable instead of aggregating.</p>
 <h2 id="blank-lines">Blank lines<a class="doc-anchor" href="#blank-lines" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p>A blank line ends the block that <code>sum</code>, <code>average</code> and the other aggregates look at, and it separates sections of a sheet. Use it to keep aggregates scoped to the lines you mean.</p>
       </article>
