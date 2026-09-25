@@ -34,14 +34,23 @@ function unitRatio(entry, targetName) {
   }
 }
 
-function buildUnit(entry, amount) {
-  if (!entry || typeof entry.sample.multiply !== 'function') return null;
-  const sampleAmount = entry.sampleAmount;
+// Build the group's total as a Unit. Uses a sample entry with a non-zero
+// magnitude, so a leading zero amount (`0 km`, then `500 m`) does not discard
+// the rest of the group. Prefers the display entry, then any entry with a real
+// sample, and converts the result into the display unit.
+function buildUnit(group, target, amount) {
+  const scale = sampleEntry(group);
+  if (!scale || typeof scale.sample.multiply !== 'function') return null;
+  const sampleAmount = scale.sampleAmount;
   try {
     if (!Number.isFinite(sampleAmount) || sampleAmount === 0) {
-      return amount === 0 ? entry.sample.multiply(0) : null;
+      return amount === 0 ? scale.sample.multiply(0) : null;
     }
-    return entry.sample.multiply(amount / sampleAmount);
+    // `unitRatio(scale, target.unit)` is how many display units one scale unit
+    // is worth, so express `amount` in the scale's own unit and scale its sample.
+    const ratio = unitRatio(scale, target.unit);
+    const unit = scale.sample.multiply(amount / ratio / sampleAmount);
+    return scale.unit === target.unit ? unit : unit.to(target.unit);
   } catch {
     return null;
   }
@@ -138,6 +147,17 @@ function referenceEntry(group) {
   return group.units.values().next().value;
 }
 
+// A sample with a usable (non-zero) magnitude: the display entry when it has
+// one, otherwise the first entry that does.
+function sampleEntry(group) {
+  const target = targetEntry(group);
+  if (target.sampleAmount) return target;
+  for (const entry of group.units.values()) {
+    if (entry.sampleAmount) return entry;
+  }
+  return target;
+}
+
 // The group's summed amount, converted into its display unit.
 function groupAmount(group) {
   const target = targetEntry(group);
@@ -180,14 +200,14 @@ function combine(summary, mode, empty) {
       }
       for (const value of numbers) values.push(value * fold);
       if (values.length) {
-        const value = buildUnit(target, median(values));
+        const value = buildUnit(group, target, median(values));
         if (value !== null) return value;
       }
     } else {
       const combined = groupAmount(group) + (numericSum ?? 0) * fold;
       const count = groupCount(group) + numericCount;
       const amount = mode === 'average' ? (count ? combined / count : 0) : combined;
-      const value = buildUnit(target, amount);
+      const value = buildUnit(group, target, amount);
       if (value !== null) return value;
     }
   }

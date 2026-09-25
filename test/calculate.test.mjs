@@ -437,6 +437,23 @@ test('bare numbers are read in the first unit used for the dimension', () => {
   assert.ok(Math.abs(mass.toNumber() - 2.51) < 1e-9);
 });
 
+test('a leading zero amount does not discard the rest of a unit group', () => {
+  const length = evaluateLines(['0 km', '500 m']);
+  assert.equal(length.total.formatUnits(), 'km');
+  assert.ok(Math.abs(length.total.toNumber() - 0.5) < 1e-9);
+
+  const sum = evaluateLines(['0 km', '500 m', 'sum']).results.at(-1).value;
+  assert.equal(sum.formatUnits(), 'km');
+  assert.ok(Math.abs(sum.toNumber() - 0.5) < 1e-9);
+
+  const mass = evaluateLines(['0 kg', '500 g']).total;
+  assert.equal(mass.formatUnits(), 'kg');
+  assert.ok(Math.abs(mass.toNumber() - 0.5) < 1e-9);
+
+  // Still fine when the larger unit carries the non-zero amount.
+  assert.ok(Math.abs(evaluateLines(['0 m', '5 km']).total.toNumber() - 5) < 1e-9);
+});
+
 test('appending a larger unit adds exactly that unit to the total', () => {
   const base = evaluateLines(['3 days + 4 hours in hours', '10']).total;
   assert.equal(base.formatUnits(), 'hours');
