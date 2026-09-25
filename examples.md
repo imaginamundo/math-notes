@@ -107,6 +107,37 @@ people = 4
 monthly rent = 1500
 monthly rent * 12
 
+### Names containing digits and units
+
+top10k = 5
+top10k * 2
+
+x2k = 3
+x2k + 1
+
+top10usd = 5
+top10usd * 2
+
+top5min = 3
+top5min + 1
+
+foo2min = 4
+foo2min
+
+### Non-ASCII names
+
+açai = 5
+açai * 2
+
+preço final = 10
+preço final * 2
+
+açai2k = 7
+açai2k + 1
+
+picolé = 6
+picolé * 2
+
 ### Functions
 
 double = f(x) = x * 2
@@ -173,6 +204,10 @@ end
 20 #food
 30 #food
 #food * 2
+
+20 #aáeáãd
+30 #aáeáãd
+#aáeáãd
 
 burger: 2 * 50 #ana #bob
 #ana
