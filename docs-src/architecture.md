@@ -135,7 +135,11 @@ unit keys and `.value` (base SI) instead of calling `.to('s')` /
 `.toNumber('s')`, which would change mathjs's preferred unit for later results
 (typing `as` mid-word once made every later duration read in attoseconds).
 
-`js/eval/calendar.js` handles dates. `preprocessCalendar` recognises date
+Dates live under `js/eval/calendar*.js`, split by concern: the facade
+`calendar.js` registers the helpers, `calendarGrammar.js` owns
+`preprocessCalendar`, `calendarDate.js` the parsers and Date primitives,
+`calendarArithmetic.js` the date/clock/workday math, and `calendarFormat.js` the
+rendering. `preprocessCalendar` recognises date
 literals (`10 June`, `2019-04-01`, `12/02/1988`), `today`/`now`/`yesterday`/
 `tomorrow`, fixed-date holidays, and the operations around them (add/subtract a
 duration, `N units after/before`, `N days from now`/`today`/`ago`, intervals, `days
