@@ -10,4 +10,10 @@ const WORD = '\\p{L}\\p{N}\\p{M}';
 const IDENTIFIER_SRC = `[${LETTER}_][${WORD}_]*`;
 const TAG_NAME_SRC = `[${WORD}_-]+`;
 
-export { LETTER, WORD, IDENTIFIER_SRC, TAG_NAME_SRC };
+// Unicode-aware token boundaries for rewriting a word inside an expression.
+// A token must not touch another identifier character (`WORD`, underscore) or a
+// dot, so `top10k` stays a variable while `2k` and `x + 2k` still rewrite.
+const BEFORE_WORD = `(?<![${WORD}_.])`;
+const AFTER_WORD = `(?![${WORD}_.])`;
+
+export { LETTER, WORD, IDENTIFIER_SRC, TAG_NAME_SRC, BEFORE_WORD, AFTER_WORD };

@@ -1,17 +1,20 @@
 import { CURRENCY_SYMBOLS, SYMBOL_SOURCE, isCurrencyCode } from '../core/currencySymbols.js';
+import { BEFORE_WORD, AFTER_WORD } from '../core/identifiers.js';
 
 const SYMBOL_AFTER_NUMBER = new RegExp(`(\\d[\\d.]*)\\s*(${SYMBOL_SOURCE})`, 'g');
 const SYMBOL_BEFORE_NUMBER = new RegExp(`(${SYMBOL_SOURCE})\\s*(\\d[\\d.]*)`, 'g');
 
 // Currency codes only become units in currency contexts (amounts and `to`/`in`
 // conversions), so bare codes used as identifiers keep their case, e.g.
-// `usd = 5` stays a variable assignment instead of `USD = 5`.
+// `usd = 5` stays a variable assignment instead of `USD = 5`. The shared
+// boundaries keep a name like `top10usd` intact while `10USD` and `USD 10`
+// still rewrite.
 const CODE = '[A-Za-z]{3}';
-const CODE_AFTER_NUMBER = new RegExp(`(\\d[\\d.]*)\\s*(${CODE})(?!\\w)`, 'g');
-const CODE_BEFORE_NUMBER = new RegExp(`(?<![\\w.])(${CODE})\\s*(\\d[\\d.]*)`, 'g');
-const CODE_BEFORE_TO = new RegExp(`(?<![\\w.])(${CODE})(\\s+)to\\b`, 'gi');
-const CODE_AFTER_TO = new RegExp(`\\bto(\\s+)(${CODE})(?!\\w)`, 'gi');
-const CODE_AFTER_IN = new RegExp(`\\bin(\\s+)(${CODE})(?!\\w)`, 'gi');
+const CODE_AFTER_NUMBER = new RegExp(`${BEFORE_WORD}(\\d[\\d.]*)\\s*(${CODE})${AFTER_WORD}`, 'gu');
+const CODE_BEFORE_NUMBER = new RegExp(`${BEFORE_WORD}(${CODE})\\s*(\\d[\\d.]*)`, 'gu');
+const CODE_BEFORE_TO = new RegExp(`${BEFORE_WORD}(${CODE})(\\s+)to\\b`, 'giu');
+const CODE_AFTER_TO = new RegExp(`\\bto(\\s+)(${CODE})${AFTER_WORD}`, 'giu');
+const CODE_AFTER_IN = new RegExp(`\\bin(\\s+)(${CODE})${AFTER_WORD}`, 'giu');
 
 // The codes that act as currency units live in core/currencySymbols.js, so the
 // domain (aggregate/unitMix) and this evaluator read one vocabulary.
