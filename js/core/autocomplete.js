@@ -1,5 +1,6 @@
 import parseLine from './parseLine.js';
 import { LETTER, WORD } from './identifiers.js';
+import { isUnitDefinition } from './userUnits.js';
 
 // Pure completion logic: find the word under the caret, rank vocabulary
 // matches, and apply a chosen completion. No DOM, so it is unit-tested
@@ -109,10 +110,12 @@ function applyCompletion(value, range, text, options = {}) {
   return { value: next, caret: range.start + insert.length };
 }
 
-// Every assigned name in the sheet (`x = 1`, `monthly rent = 1500`).
+// Every assigned name in the sheet (`x = 1`, `monthly rent = 1500`). A `unit`
+// definition names a unit, not a variable, so it is offered separately.
 function collectAssignments(lines) {
   const names = new Set();
   for (const line of lines) {
+    if (isUnitDefinition(line)) continue;
     const { isAssignment, label } = parseLine(line);
     if (isAssignment && label) names.add(label);
   }

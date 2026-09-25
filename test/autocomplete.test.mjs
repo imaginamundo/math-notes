@@ -8,6 +8,7 @@ import {
   collectTags,
 } from '../js/core/autocomplete.js';
 import { VOCABULARY } from '../js/core/vocabulary.js';
+import { collectUnitDefinitions } from '../js/core/userUnits.js';
 
 test('wordRangeAt finds the word around the caret', () => {
   assert.deepEqual(wordRangeAt('100 usd', 7), {
@@ -144,10 +145,17 @@ test('applyCompletion replaces the word, bracketing functions', () => {
 });
 
 test('collectAssignments lists assigned names, single and multi word', () => {
-  assert.deepEqual(collectAssignments(['x = 1', 'monthly rent = 1500', 'Price: 2', 'y = 3']), [
-    'x',
-    'monthly rent',
-    'y',
+  assert.deepEqual(
+    collectAssignments(['x = 1', 'monthly rent = 1500', 'Price: 2', 'y = 3', 'unit box = 12']),
+    ['x', 'monthly rent', 'y'],
+    'a unit definition is not a variable'
+  );
+});
+
+test('collectUnitDefinitions lists custom units with their plurals', () => {
+  assert.deepEqual(collectUnitDefinitions(['unit widget = 3.5 kg', 'unit monthly rent = 1500']), [
+    { name: 'widget', aliases: ['widgets'] },
+    { name: 'monthly rent', aliases: ['monthly rents'] },
   ]);
 });
 

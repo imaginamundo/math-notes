@@ -113,11 +113,13 @@ prev + 1</code></pre><figcaption class="doc-example-result">la última línea de
 <p>Algunos nombres no se pueden usar como variables:</p>
 <ul>
 <li><code>prev</code> (el resultado anterior)</li>
+<li><code>total</code> (la agregación del total general)</li>
+<li><code>unit</code> — abre la definición de una unidad personalizada (<code>unit widget = 3.5 kg</code>)</li>
 <li>las palabras de fecha incondicionales <code>today</code>, <code>now</code>, <code>yesterday</code>, <code>tomorrow</code>, <code>christmas</code>, <code>halloween</code></li>
 <li>cualquier nombre que empiece por <code>__</code> (los ayudantes internos del editor)</li>
 <li><code>end</code> cierra un grupo</li>
 </ul>
-<p>Por lo demás, las variables comparten un ámbito con los nombres integrados, así que una variable puede tapar una unidad o función: tras <code>m = 5</code>, <code>2 m</code> es <code>2 × m</code>, no dos metros. Las palabras clave de agregación <code>sum</code>, <code>total</code>, <code>average</code> y <code>avg</code> funcionan igual: tras <code>total = 5</code>, una línea <code>total</code> posterior lee la variable en vez de agregar.</p>
+<p>Por lo demás, las variables comparten un ámbito con los nombres integrados, así que una variable puede tapar una unidad o función: tras <code>m = 5</code>, <code>2 m</code> es <code>2 × m</code>, no dos metros. Las demás palabras clave de agregación <code>sum</code>, <code>average</code> y <code>avg</code> todavía pueden taparse: tras <code>avg = 5</code>, una línea <code>avg</code> posterior lee la variable en vez de agregar.</p>
 <h2 id="lineas-en-blanco">Líneas en blanco<a class="doc-anchor" href="#lineas-en-blanco" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <p>Una línea en blanco cierra el bloque que examinan <code>sum</code>, <code>average</code> y las demás agregaciones, y separa secciones de la hoja. Úsala para ceñir las agregaciones a las líneas que quieres.</p>
       </article>

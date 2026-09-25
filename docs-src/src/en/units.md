@@ -98,6 +98,35 @@ time to upload 3 GB at 10 MB/s
 5 km in 25 min
 ```
 
+## Custom units
+
+Define your own unit with `unit <name> = <amount>`. It then behaves like a built-in one: the plural works, it converts to the units it was defined from, and it merges with them. Change the definition and every use follows.
+
+```calc 2 widgets
+unit widget = 3.5 kg
+2 widgets
+```
+
+```calc 7 kg
+unit widget = 3.5 kg
+2 widgets in kg
+```
+
+A name may contain several words or accents, and a unit can be built from another.
+
+```calc 3,000
+unit monthly rent = 1500
+2 monthly rents
+```
+
+```calc 84 kg
+unit widget = 3.5 kg
+unit box = 12 widgets
+2 boxes in kg
+```
+
+Definitions are scoped to the sheet that contains them, so removing the line removes the unit. `unit` and `total` are reserved words.
+
 ## The unit rule
 
 Units only combine in shapes that mean something. `kg L`, `BRL hour`, `h^2` and `m^0.5` are reported as errors rather than as strange combined units. Money only forms ratios (`USD/hour`, `USD/km`), so use a rate when you want to convert a currency across time or distance.

@@ -98,6 +98,35 @@ time to upload 3 GB at 10 MB/s
 5 km in 25 min
 ```
 
+## Unidades personalizadas
+
+Define tu propia unidad con `unit <nombre> = <cantidad>`. Después se comporta como una nativa: funciona el plural, convierte a las unidades desde las que se definió y se combina con ellas. Cambia la definición y todos los usos la siguen.
+
+```calc 2 widgets
+unit widget = 3.5 kg
+2 widgets
+```
+
+```calc 7 kg
+unit widget = 3.5 kg
+2 widgets in kg
+```
+
+El nombre puede tener varias palabras o acentos, y una unidad puede construirse a partir de otra.
+
+```calc 3,000
+unit monthly rent = 1500
+2 monthly rents
+```
+
+```calc 84 kg
+unit widget = 3.5 kg
+unit box = 12 widgets
+2 boxes in kg
+```
+
+Las definiciones pertenecen a la hoja que las contiene, así que quitar la línea quita la unidad. `unit` y `total` son palabras reservadas.
+
 ## La regla de las unidades
 
 Las unidades solo se combinan en formas que tienen sentido. `kg L`, `BRL hour`, `h^2` y `m^0.5` se informan como errores, no como unidades combinadas extrañas. El dinero solo forma razones (`USD/hour`, `USD/km`), así que usa una tasa cuando quieras convertir una moneda a lo largo del tiempo o la distancia.

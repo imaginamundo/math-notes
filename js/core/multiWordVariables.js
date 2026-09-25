@@ -6,7 +6,8 @@
 // highlighter (which draws a whole name as one variable token). Pure: no mathjs
 // import.
 
-import { IDENTIFIER_SRC, WORD } from './identifiers.js';
+import { IDENTIFIER_SRC, LETTER, WORD } from './identifiers.js';
+import { isUnitDefinition, collectUnitDefinitions, registeredName } from './userUnits.js';
 
 // An assignment whose name contains whitespace. A leading `Label:` prefix (the
 // parser splits a label from its code) is skipped, so `Total: monthly rent = 1500`
@@ -63,11 +64,27 @@ function anchoredNamePattern(name) {
 function collectVariableNames(lines) {
   const names = new Set();
   for (const line of lines) {
+    // A unit definition's name is not a variable (`unit monthly rent = 1500`).
+    if (isUnitDefinition(line)) continue;
     const match = NAME_WORDS.exec(line.split('#')[0]);
     if (match) names.add(match[1].replace(/\s+/g, ' '));
   }
   // Longest first so `net price` wins over a `price` defined elsewhere.
   return [...names].sort((a, b) => b.length - a.length);
+}
+
+// Readable user-unit names and plurals that mathjs cannot register directly,
+// mapped to the encoded name they are stored under. Plain names are left for
+// mathjs to resolve, so only the encoded ones appear here.
+function collectUnitMappings(lines) {
+  const mappings = [];
+  for (const { name, aliases } of collectUnitDefinitions(lines)) {
+    for (const phrase of [name, ...aliases]) {
+      const token = registeredName(phrase);
+      if (token !== phrase) mappings.push({ phrase, token });
+    }
+  }
+  return mappings;
 }
 
 // Whether a line defines a multi-word name (`monthly rent = 1500`). Cheap, so
@@ -79,19 +96,36 @@ function isMultiWordDefinition(line) {
 
 function mangleLines(lines) {
   const names = collectVariableNames(lines);
-  if (!names.length) return lines;
-  const mangled = new Map(names.map((name) => [name, mangleName(name)]));
-  // One alternation (longest name first) instead of a regex per name per line,
-  // so a sheet with many multi-word names stays linear in the line count.
-  const pattern = new RegExp(
-    `(?<![${WORD}_])(?:${names.map(nameSource).join('|')})(?![${WORD}_])`,
-    'gu'
-  );
+  const units = collectUnitMappings(lines);
+  if (!names.length && !units.length) return lines;
+
+  // One alternation (longest phrase first) instead of a regex per name per line,
+  // so a sheet with many multi-word names stays linear in the line count. A unit
+  // name may follow a digit without a space (`2widgets`), so its boundary only
+  // rejects a preceding letter or dot.
+  const replacements = new Map();
+  const alternatives = [
+    ...names.map((name) => ({ phrase: name, token: mangleName(name), unit: false })),
+    ...units.map(({ phrase, token }) => ({ phrase, token, unit: true })),
+  ]
+    .sort((a, b) => b.phrase.length - a.phrase.length)
+    .map((entry) => {
+      replacements.set(entry.phrase, entry.token);
+      const source = nameSource(entry.phrase);
+      return entry.unit
+        ? `(?<![${LETTER}_.])${source}(?![${WORD}_.])`
+        : `(?<![${WORD}_])${source}(?![${WORD}_])`;
+    });
+  const pattern = new RegExp(alternatives.join('|'), 'gu');
+
   return lines.map((line) => {
     const hash = line.indexOf('#');
     const code = hash === -1 ? line : line.slice(0, hash);
     const comment = hash === -1 ? '' : line.slice(hash);
-    const out = code.replace(pattern, (match) => mangled.get(match.replace(/\s+/g, ' ')) || match);
+    const out = code.replace(
+      pattern,
+      (match) => replacements.get(match.replace(/\s+/g, ' ')) || match
+    );
     return out + comment;
   });
 }

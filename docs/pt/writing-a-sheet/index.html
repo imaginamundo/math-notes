@@ -113,11 +113,13 @@ prev + 1</code></pre><figcaption class="doc-example-result">a última linha reto
 <p>Alguns nomes não podem ser usados como variáveis:</p>
 <ul>
 <li><code>prev</code> (o resultado anterior)</li>
+<li><code>total</code> (a agregação do total geral)</li>
+<li><code>unit</code> — abre a definição de uma unidade personalizada (<code>unit widget = 3.5 kg</code>)</li>
 <li>as palavras de data incondicionais <code>today</code>, <code>now</code>, <code>yesterday</code>, <code>tomorrow</code>, <code>christmas</code>, <code>halloween</code></li>
 <li>qualquer nome que comece com <code>__</code> (os auxiliares internos do editor)</li>
 <li><code>end</code> fecha um grupo</li>
 </ul>
-<p>Fora isso, as variáveis compartilham um escopo com os nomes internos, então uma variável pode sombrear uma unidade ou função: depois de <code>m = 5</code>, <code>2 m</code> é <code>2 × m</code>, não dois metros. As palavras-chave de agregação <code>sum</code>, <code>total</code>, <code>average</code> e <code>avg</code> funcionam da mesma forma: depois de <code>total = 5</code>, uma linha <code>total</code> posterior lê a variável em vez de agregar.</p>
+<p>Fora isso, as variáveis compartilham um escopo com os nomes internos, então uma variável pode sombrear uma unidade ou função: depois de <code>m = 5</code>, <code>2 m</code> é <code>2 × m</code>, não dois metros. As restantes palavras-chave de agregação <code>sum</code>, <code>average</code> e <code>avg</code> ainda podem ser sombreadas: depois de <code>avg = 5</code>, uma linha <code>avg</code> posterior lê a variável em vez de agregar.</p>
 <h2 id="linhas-em-branco">Linhas em branco<a class="doc-anchor" href="#linhas-em-branco" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
 <p>Uma linha em branco encerra o bloco que <code>sum</code>, <code>average</code> e as outras agregações examinam, e separa seções da planilha. Use-a para manter as agregações restritas às linhas que você quer.</p>
       </article>

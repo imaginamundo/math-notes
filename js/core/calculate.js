@@ -17,6 +17,8 @@ import { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal } from './aggregate.js
 import { unitMixError } from './unitMix.js';
 import { firstDifference } from '../util/sequence.js';
 import { mangleLines, unmangleName } from './multiWordVariables.js';
+import { unitDefinition } from './userUnits.js';
+import { createUserUnit, removeUserUnit } from '../eval/userUnits.js';
 import { IDENTIFIER_SRC, TAG_NAME_SRC, WORD } from './identifiers.js';
 
 /**
@@ -30,6 +32,10 @@ import { IDENTIFIER_SRC, TAG_NAME_SRC, WORD } from './identifiers.js';
  *   header's subtotal, a bare `sum`/`average`/`total`/`avg` row, or a line that
  *   is only `#tags`. `aggregate` keeps it out of the running total so the rows
  *   it sums are not counted twice.
+ * - `{ type: 'value', value, aggregate: true, unitDef: true }` — a user-defined
+ *   unit line (`unit widget = 3.5 kg`). `value` is the definition, shown as the
+ *   row's result but kept out of totals and `prev`. Also tracked on the engine so
+ *   the unit can be re-registered when the definition changes.
  * - `{ type: 'assignment', value, assigned }` — an assignment. `assigned` is
  *   the value to store (functions and Dates survive there); `value` mirrors it
  *   for display.
@@ -82,6 +88,9 @@ const RESERVED_LABELS = new Set([
   'tomorrow',
   'christmas',
   'halloween',
+  // `total` is the running-total aggregate and `unit` opens a unit definition.
+  'total',
+  'unit',
 ]);
 
 function isReservedLabel(label) {
@@ -262,6 +271,10 @@ function createEngine() {
   // per-line cache, so it is read fresh on each evaluation.
   let totalMode = readTotalMode();
 
+  // The user-defined units of the current sheet, in definition order, so they
+  // can be deleted and rebuilt when the definitions change.
+  let userUnits = [];
+
   function assertBoundedExpression(expression, scope) {
     // Only a list literal or a range can materialise unboundedly; skip the
     // extra parse for every other expression.
@@ -329,6 +342,50 @@ function createEngine() {
     const variable = isAssignment && value !== undefined ? { label, value } : null;
 
     return { type, result: result instanceof Error ? result.message : result, variable };
+  }
+
+  function isUnitValue(value) {
+    return value !== null && typeof value === 'object' && value.isUnit === true;
+  }
+
+  // Remove every user-defined unit so the sheet's definitions can be rebuilt
+  // from scratch (editing or deleting a definition must not leave a stale unit).
+  function resetUserUnits() {
+    for (let i = userUnits.length - 1; i >= 0; i--) removeUserUnit(math, userUnits[i]);
+    userUnits = [];
+  }
+
+  // Re-register a unit from a cached definition while rebuilding the context
+  // before the first changed line (no re-evaluation needed).
+  function rebuildUserUnit(name, value) {
+    try {
+      userUnits.push(createUserUnit(math, name, value, { valueIsUnit: isUnitValue(value) }));
+    } catch {
+      // The use sites will report the missing unit.
+    }
+  }
+
+  // Evaluate a definition line's value and register the unit. Returns the value
+  // to display, or an error message.
+  function defineUserUnit(name, definition, scope) {
+    if (isReservedLabel(name) || name.toLowerCase() === 'end') {
+      return { error: `"${name}" is a reserved word` };
+    }
+    const evaluated = evaluateLine(
+      { code: definition, label: '', isAssignment: false, rhs: '' },
+      scope
+    );
+    if (evaluated.type === 'error') return { error: evaluated.result };
+    const value = evaluated.result;
+    if (!isUnitValue(value) && (typeof value !== 'number' || !Number.isFinite(value))) {
+      return { error: 'A unit definition must be a number or a unit' };
+    }
+    try {
+      userUnits.push(createUserUnit(math, name, value, { valueIsUnit: isUnitValue(value) }));
+    } catch (error) {
+      return { error: error.message };
+    }
+    return { value };
   }
 
   // The identifier after `to`/`in`/`as` when it names a scope variable rather
@@ -443,6 +500,11 @@ function createEngine() {
       if (startLine > group.start && startLine <= group.end) startLine = group.start;
     }
 
+    // Rebuild the sheet's user-defined units from scratch: drop the previous
+    // set, then recreate the definitions before the first changed line from the
+    // cache and the rest while evaluating.
+    resetUserUnits();
+
     // Reuse the results of unchanged lines and rebuild the evaluation context up
     // to the first changed line from the cached values (no mathjs evaluation).
     const results = cache.results.slice(0, startLine);
@@ -458,6 +520,14 @@ function createEngine() {
     for (let i = 0; i < startLine; i++) {
       const line = lines[i];
       if (line.trim() === '' && !groups.groupOfLine.has(i)) lastBlankIndex = i;
+
+      const unit = unitDefinition(inputLines[i]);
+      if (unit) {
+        const stored = results[i];
+        if (stored && stored.value !== undefined) rebuildUserUnit(unit.name, stored.value);
+        continue;
+      }
+
       const parsed = parseLine(line);
       if (parsed.isAssignment) {
         const stored = results[i];
@@ -508,6 +578,18 @@ function createEngine() {
       // An `end` row with no open group is a mistake, not an unknown symbol.
       if (parsed.code.trim() === 'end') {
         results[i] = { type: 'error', value: '"end" without a matching group header' };
+        continue;
+      }
+
+      // A `unit <name> = <expression>` line registers a custom unit. The raw
+      // line names it; the rewritten line carries the definition, with any other
+      // custom units already rewritten to their registered names.
+      const unit = unitDefinition(inputLines[i]);
+      if (unit) {
+        const outcome = defineUserUnit(unit.name, parseLine(lines[i]).rhs, { ...variables });
+        results[i] = outcome.error
+          ? { type: 'error', value: outcome.error }
+          : { type: 'value', value: outcome.value, aggregate: true, unitDef: true };
         continue;
       }
 

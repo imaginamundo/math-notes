@@ -82,4 +82,4 @@ Palavras de data `today`, `now`, `yesterday`, `tomorrow`, `christmas`, `hallowee
 
 ## Palavras reservadas
 
-`prev`, `today`, `now`, `yesterday`, `tomorrow`, `christmas`, `halloween`, `end`, e qualquer nome que comece com `__` não podem ser usados como variáveis.
+`prev`, `total`, `unit`, `today`, `now`, `yesterday`, `tomorrow`, `christmas`, `halloween`, `end`, e qualquer nome que comece com `__` não podem ser usados como variáveis. `unit` abre uma [unidade personalizada](/docs/units/#custom-units).

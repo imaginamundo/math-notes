@@ -82,4 +82,4 @@ Date words `today`, `now`, `yesterday`, `tomorrow`, `christmas`, `halloween`; ph
 
 ## Reserved words
 
-`prev`, `today`, `now`, `yesterday`, `tomorrow`, `christmas`, `halloween`, `end`, and any name starting with `__` cannot be used as variable names.
+`prev`, `total`, `unit`, `today`, `now`, `yesterday`, `tomorrow`, `christmas`, `halloween`, `end`, and any name starting with `__` cannot be used as variable names. `unit` opens a [custom unit](/docs/units/#custom-units).

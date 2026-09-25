@@ -271,7 +271,7 @@ test('a corrupt saved caret is ignored at startup', async () => {
 
 test('snapshots are saved to IndexedDB and recover corrupt localStorage', async () => {
   await newPage();
-  await setContent('total = 42');
+  await setContent('x = 42');
   await wait(100);
   await page.evaluate(() => document.getElementById('content-editable').blur());
   await waitFor(async () =>
@@ -296,12 +296,12 @@ test('snapshots are saved to IndexedDB and recover corrupt localStorage', async 
         return new TextDecoder().decode(await new Response(stream).arrayBuffer());
       };
       const texts = await Promise.all(all.map(decode));
-      return texts.some((text) => text.includes('total = 42'));
+      return texts.some((text) => text.includes('x = 42'));
     })
   );
   await page.evaluate(() => localStorage.setItem('math-notes-tabs', '{not json'));
   await page.reload({ waitUntil: 'load' });
-  await waitFor(async () => (await value()) === 'total = 42');
+  await waitFor(async () => (await value()) === 'x = 42');
   assert.deepEqual(errors, []);
 });
 
@@ -571,6 +571,33 @@ test('the total keeps a shared unit and falls back to plain numbers', async () =
 
   await setContent('10 cm\n5 kg\n10\n10');
   await waitFor(() => page.evaluate(() => document.getElementById('total').textContent === '20'));
+  assert.deepEqual(errors, []);
+});
+
+test('a custom unit is registered in the worker and shown readably', async () => {
+  await newPage();
+  await setContent('unit widget = 3.5 kg\n2 widgets');
+  await waitFor(() =>
+    page.evaluate(() => {
+      const rows = document.querySelectorAll('#view .line-row');
+      const ghost = rows[1] && rows[1].querySelector('.ghost-result');
+      return Boolean(ghost && ghost.textContent === '→ 2 widgets');
+    })
+  );
+  assert.equal(
+    await page.evaluate(() => document.getElementById('total').textContent),
+    '2 widgets'
+  );
+
+  // A multi-word name is shown readably even though it is encoded for mathjs.
+  await setContent('unit monthly rent = 1500\n2 monthly rents');
+  await waitFor(() =>
+    page.evaluate(() => {
+      const rows = document.querySelectorAll('#view .line-row');
+      const ghost = rows[1] && rows[1].querySelector('.ghost-result');
+      return Boolean(ghost && ghost.textContent === '→ 3,000');
+    })
+  );
   assert.deepEqual(errors, []);
 });
 
@@ -1243,6 +1270,8 @@ test('the documentation headings anchor and the sidebar tracks scrolling', async
 
 test('the documentation search filters the generated index', async () => {
   await newPage();
+  // The search sits in the header on desktop (it moves into the drawer on phones).
+  await page.setViewport({ width: 1024, height: 800 });
   await page.goto(`http://localhost:${server.address().port}/docs/groups/`, {
     waitUntil: 'load',
   });
@@ -1256,6 +1285,46 @@ test('the documentation search filters the generated index', async () => {
   assert.equal(first, 'Aggregate keywords');
   const href = await page.$eval('.doc-search-result', (node) => node.getAttribute('href'));
   assert.equal(href, '/docs/groups/#aggregate-keywords');
+  assert.deepEqual(errors, []);
+});
+
+test('the mobile header stays compact and the drawer closes after navigating', async () => {
+  await newPage();
+  await page.setViewport({ width: 360, height: 844, isMobile: true });
+  await page.goto(`http://localhost:${server.address().port}/docs/groups/`, { waitUntil: 'load' });
+  await waitFor(() => page.$('.doc-menu-toggle'));
+
+  const headerHeight = await page.$eval(
+    '.doc-header',
+    (node) => node.getBoundingClientRect().height
+  );
+  assert.ok(headerHeight < 90, `the sticky header stays one compact row (${headerHeight}px)`);
+  assert.ok(
+    await page.evaluate(() =>
+      document.getElementById('doc-sidebar').contains(document.querySelector('.doc-header-actions'))
+    ),
+    'the search and language controls live in the drawer'
+  );
+  assert.equal(
+    await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth),
+    0,
+    'the page does not scroll horizontally'
+  );
+
+  await page.click('.doc-menu-toggle');
+  await waitFor(() => page.$('.doc-sidebar.is-open'));
+  await page.type('.doc-search-input', 'aggregate keywords');
+  await waitFor(() => page.$('.doc-search-result'));
+
+  await page.click('.doc-nav-sub a');
+  await waitFor(async () =>
+    page.evaluate(() => !document.getElementById('doc-sidebar').classList.contains('is-open'))
+  );
+  assert.equal(
+    await page.$eval('.doc-menu-toggle', (node) => node.getAttribute('aria-expanded')),
+    'false',
+    'the toggle reports the closed state'
+  );
   assert.deepEqual(errors, []);
 });
 

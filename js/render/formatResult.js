@@ -3,6 +3,7 @@ import { formatDate, formatInterval } from '../eval/calendar.js';
 import { isCurrencyCode, CURRENCY_DISPLAY } from '../core/currencySymbols.js';
 import { DEFAULT_PRECISION } from '../core/decimalPrecision.js';
 import { readableUnit } from '../core/unitNames.js';
+import { decodeUserUnits } from '../core/userUnits.js';
 
 const formatters = new Map();
 const LIST_SHOW = 12;
@@ -26,7 +27,7 @@ function formatValue(value, depth, precision) {
   if (typeof value === 'number') return formatNumber(value, precision);
   if (value instanceof Date) return formatDate(value);
   if (value && value.type === 'calendarInterval') return formatInterval(value.parts);
-  if (value && value.isUnit === true) return formatUnit(value, precision);
+  if (value && value.isUnit === true) return decodeUserUnits(formatUnit(value, precision));
   // mathjs Fraction stringifies to its decimal; show the fraction instead.
   if (value && value.type === 'Fraction' && typeof value.toFraction === 'function') {
     return value.toFraction();

@@ -107,11 +107,13 @@ prev + 1
 Algunos nombres no se pueden usar como variables:
 
 - `prev` (el resultado anterior)
+- `total` (la agregación del total general)
+- `unit` — abre la definición de una unidad personalizada (`unit widget = 3.5 kg`)
 - las palabras de fecha incondicionales `today`, `now`, `yesterday`, `tomorrow`, `christmas`, `halloween`
 - cualquier nombre que empiece por `__` (los ayudantes internos del editor)
 - `end` cierra un grupo
 
-Por lo demás, las variables comparten un ámbito con los nombres integrados, así que una variable puede tapar una unidad o función: tras `m = 5`, `2 m` es `2 × m`, no dos metros. Las palabras clave de agregación `sum`, `total`, `average` y `avg` funcionan igual: tras `total = 5`, una línea `total` posterior lee la variable en vez de agregar.
+Por lo demás, las variables comparten un ámbito con los nombres integrados, así que una variable puede tapar una unidad o función: tras `m = 5`, `2 m` es `2 × m`, no dos metros. Las demás palabras clave de agregación `sum`, `average` y `avg` todavía pueden taparse: tras `avg = 5`, una línea `avg` posterior lee la variable en vez de agregar.
 
 ## Líneas en blanco
 

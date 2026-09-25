@@ -45,6 +45,9 @@ Price: 10 + 5
 3 mul 4
 2 hours with 30 minutes
 2 hours without 30 minutes
+8 Times 9
+2 PLUS 3
+10 Divided By 2
 
 ### Number scales
 
@@ -107,6 +110,9 @@ people = 4
 monthly rent = 1500
 monthly rent * 12
 
+Total: monthly rent = 1500
+Total: monthly rent * 12
+
 ### Names containing digits and units
 
 top10k = 5
@@ -168,6 +174,10 @@ prev + 1
 20
 sum
 
+0 km
+500 m
+sum
+
 4
 8
 average
@@ -189,6 +199,13 @@ Groceries:
 3.20
 2.40
 end
+
+Groceries:
+10
+
+20
+end
+sum
 
 Trip:
 10 cm
@@ -278,6 +295,22 @@ sum([1200, 80, 45])
 1 cm in px
 2 em in px
 
+### Custom units
+
+unit widget = 3.5 kg
+2 widgets
+2 widgets in kg
+
+unit monthly rent = 1500
+2 monthly rents
+
+unit açai = 2 kg
+3 açais
+
+unit widget = 3.5 kg
+unit box = 12 widgets
+2 boxes in kg
+
 ### Cooking & measures
 
 300g butter in cups
@@ -331,6 +364,7 @@ January 10 - February 5
 days until March 14, 2030
 days since 2025-07-15
 days between 2019-03-03 and 2019-05-30
+days between 2025-06-01 and 2025-01-01
 April 1 through April 30 in days
 
 ### Date parts

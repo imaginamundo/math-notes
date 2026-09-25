@@ -660,32 +660,34 @@ test('evaluateLines keeps the mathjs sum function callable', () => {
   assert.equal(evaluateLines(['sum([1, 2, 3])']).results[0].value, 6);
 });
 
-test('a variable can shadow an aggregate keyword', () => {
-  const { results } = evaluateLines(['total = 5', 'total * 2']);
+test('a variable can shadow a shadowable aggregate keyword', () => {
+  const { results } = evaluateLines(['avg = 5', 'avg * 2']);
   assert.equal(results[0].type, 'assignment');
   assert.equal(results[1].value, 10);
 
   // Without a definition, the keyword still aggregates.
-  assert.equal(evaluateLines(['10', '20', 'total']).results[2].value, 30);
+  assert.equal(evaluateLines(['10', '20', 'avg']).results[2].value, 15);
 
   // A shadowed keyword leaves the other aggregate keywords alone.
-  assert.equal(evaluateLines(['total = 5', '10', 'total + sum']).results[2].value, 15);
+  assert.equal(evaluateLines(['sum = 5', '10', 'sum + avg']).results[2].value, 15);
 });
 
-test('evaluateLines rejects assigning to prev, date keywords and internals', () => {
+test('evaluateLines rejects assigning to prev, total, unit, date keywords and internals', () => {
   const { results } = evaluateLines([
     'prev = 5',
     'today = 5',
+    'total = 5',
+    'unit = 5',
     '__rate = 5',
     '__var_a_b = 5',
     '3',
     'prev',
   ]);
-  for (const index of [0, 1, 2, 3]) {
+  for (const index of [0, 1, 2, 3, 4, 5]) {
     assert.equal(results[index].type, 'error', `line ${index} is rejected`);
     assert.match(results[index].value, /reserved/);
   }
-  assert.equal(results[5].value, 3, 'prev still resolves after the errors');
+  assert.equal(results[7].value, 3, 'prev still resolves after the errors');
 });
 
 test('a multi-word name containing a keyword is still a variable', () => {

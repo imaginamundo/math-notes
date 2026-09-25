@@ -47,6 +47,13 @@ Based on [Numi](https://numi.app/) and [Soulver](https://soulver.app/).
   Tags can also be used in calculations (`#food * 2`, `#food + #other`).
 - **Unit conversion** (`1 cm to m`, `10 km as m`) including CSS units (`px`,
   `em`, `point`).
+- **Custom units** — `unit widget = 3.5 kg` defines a unit you can use like any
+  other: `2 widgets` is `2 widgets`, and it merges with real units in the total
+  (`2 widgets + 1 kg` → 8 kg). Names may be multi-word or non-ASCII
+  (`unit monthly rent = 1500`, then `2 monthly rents`) and a unit can be built
+  from another (`unit box = 12 widgets`). Definitions are sheet-scoped, so
+  removing the line removes the unit. `unit` and `total` cannot be variable
+  names.
 - **Cooking & measures** — convert between dimensions with a free-form,
   optional subject label: `300g butter in cups`, `2 cups flour in grams`,
   `300g in cups` (subject optional), or `300g feathers in cups`. Known subjects
@@ -166,15 +173,16 @@ in the footer opens the full user guide at
 
 ## Reserved words
 
-`prev`, the unconditional date words (`today`, `now`, `yesterday`, `tomorrow`,
-`christmas`, `halloween`) and any name starting with `__` (the editor's internal
-helpers and generated names) cannot be used as variable names. `end` closes a
-group (and mathjs reserves it anyway).
+`prev`, `total`, `unit`, the unconditional date words (`today`, `now`,
+`yesterday`, `tomorrow`, `christmas`, `halloween`) and any name starting with
+`__` (the editor's internal helpers and generated names) cannot be used as
+variable names. `end` closes a group (and mathjs reserves it anyway), and `unit`
+opens a user-defined unit definition.
 
 Variables otherwise share one scope with mathjs names, so a variable can shadow
-a unit or function: after `m = 5`, `2 m` is `2 × m`, not two metres. The
-aggregate keywords (`sum`, `total`, `average`, `avg`) work the same way: after
-`total = 5`, later `total` lines read the variable instead of aggregating.
+a unit or function: after `m = 5`, `2 m` is `2 × m`, not two metres. The other
+aggregate keywords (`sum`, `average`, `avg`) can still be shadowed: after
+`avg = 5`, later `avg` lines read the variable instead of aggregating.
 
 ## Development
 

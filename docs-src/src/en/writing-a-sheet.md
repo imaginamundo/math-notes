@@ -107,11 +107,13 @@ prev + 1
 A few names cannot be used as variables:
 
 - `prev` (the previous result)
+- `total` (the running-total aggregate)
+- `unit` — opens a user-defined unit (`unit widget = 3.5 kg`)
 - the unconditional date words `today`, `now`, `yesterday`, `tomorrow`, `christmas`, `halloween`
 - any name starting with `__` (the editor's internal helpers)
 - `end` closes a group
 
-Variables otherwise share one scope with the built-in names, so a variable can shadow a unit or function: after `m = 5`, `2 m` is `2 × m`, not two metres. The aggregate keywords `sum`, `total`, `average` and `avg` work the same way: after `total = 5`, a later `total` line reads the variable instead of aggregating.
+Variables otherwise share one scope with the built-in names, so a variable can shadow a unit or function: after `m = 5`, `2 m` is `2 × m`, not two metres. The other aggregate keywords `sum`, `average` and `avg` can still be shadowed: after `avg = 5`, a later `avg` line reads the variable instead of aggregating.
 
 ## Blank lines
 
