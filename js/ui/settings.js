@@ -6,7 +6,8 @@ import { FONT_KEY } from './cosmetic.js';
 import { STORAGE_KEY as TABS_KEY, LEGACY_KEY as LEGACY_TABS_KEY } from './tabs.js';
 import { STORAGE_KEY as CURRENCY_KEY } from '../eval/currency.js';
 import { MEASUREMENT_SYSTEMS } from '../core/measures.js';
-import { SUPPORTED_LANGUAGES } from '../core/language.js';
+import { SUPPORTED_LANGUAGES, STORAGE_KEY as LANGUAGE_KEY } from '../core/language.js';
+import { STORAGE_KEY as TOTAL_MODE_KEY } from '../core/totalMode.js';
 import {
   STORAGE_KEY as MEASUREMENT_KEY,
   readMeasurementSystem,
@@ -40,6 +41,8 @@ const RESET_KEYS = [
   MEASUREMENT_KEY,
   PRECISION_KEY,
   CLOCK_KEY,
+  TOTAL_MODE_KEY,
+  LANGUAGE_KEY,
   // So "Reset data" genuinely returns the app to a first run.
   ONBOARDED_KEY,
   // A first run should also offer the starter-content actions again.

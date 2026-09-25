@@ -1013,6 +1013,32 @@ test('Settings switches the interface language and remembers it', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('Reset data clears the total-mode and language settings too', async () => {
+  await newPage();
+  await page.evaluate(() => {
+    localStorage.setItem('math-notes-language', 'pt');
+    localStorage.setItem('math-notes-total-mode', 'average');
+  });
+  await page.reload({ waitUntil: 'load' });
+  await wait(300);
+
+  page.on('dialog', (dialog) => dialog.accept());
+  await page.click('#settings-button');
+  await wait(200);
+  await page.click('#reset-data-button');
+  await wait(900);
+
+  const state = await page.evaluate(() => ({
+    language: localStorage.getItem('math-notes-language'),
+    totalMode: localStorage.getItem('math-notes-total-mode'),
+  }));
+  // The harness re-seeds `en` on the reload; the point is that `pt` is gone.
+  assert.equal(state.language, 'en');
+  assert.equal(state.totalMode, null);
+  assert.equal(await page.evaluate(() => document.documentElement.lang), 'en');
+  assert.deepEqual(errors, []);
+});
+
 test('the Examples content follows the language and its examples still work', async () => {
   await newPage();
   await page.click('#settings-button');
