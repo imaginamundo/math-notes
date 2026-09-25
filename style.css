@@ -468,8 +468,15 @@ textarea {
   cursor: pointer;
 }
 .total {
+  flex: 1 1 auto;
+  min-width: 0;
   font-weight: 700;
   color: var(--color-text);
+  /* Keep the running total on one line; truncate with an ellipsis instead of
+     wrapping onto extra rows, which is especially important on mobile. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .variable {
   color: var(--color-variable);
