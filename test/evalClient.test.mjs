@@ -126,9 +126,7 @@ test('a stale reply is not rendered', async () => {
   assert.equal(renders.length, 0, 'text moved on, so the reply must be dropped');
 });
 
-test('a crashed worker rejects in flight and falls back to the main thread', async () => {
-  const originalError = console.error;
-  console.error = () => {};
+test('a crashed worker falls back to the main thread for the in-flight request', async () => {
   const { client, renders, busy } = setup();
   await client.update(); // creates the worker
   renders.length = 0;
@@ -138,10 +136,10 @@ test('a crashed worker rejects in flight and falls back to the main thread', asy
   const pending = client.update();
   worker.crash();
   await pending;
+  assert.equal(renders.length, 1, 'the in-flight request still renders via the fallback');
+  assert.equal(renders[0].data.total, 2, 'main-thread engine evaluated 1 + 1');
 
   await client.update();
-  console.error = originalError;
-  assert.equal(renders.length, 1, 'fallback path still renders');
-  assert.equal(renders[0].data.total, 2, 'main-thread engine evaluated 1 + 1');
+  assert.equal(renders.length, 2, 'later updates keep using the fallback');
   assert.equal(busy[busy.length - 1], false, 'busy flag cleared after the crash');
 });

@@ -1199,3 +1199,30 @@ test('the documentation search filters the generated index', async () => {
   assert.equal(href, '/docs/groups/#aggregate-keywords');
   assert.deepEqual(errors, []);
 });
+
+test('the main-thread engine renders when the evaluation worker cannot load', async () => {
+  if (context) await context.close();
+  context = await browser.createBrowserContext();
+  page = await context.newPage();
+  errors = [];
+  page.on('pageerror', (err) => errors.push(err.message));
+  // Make the worker script fail as it would offline when its module graph was
+  // never cached; the app must fall back to the main-thread evaluator.
+  await page.setRequestInterception(true);
+  page.on('request', (request) => {
+    if (request.url().endsWith('/js/worker.js')) request.abort();
+    else request.continue();
+  });
+  await page.evaluateOnNewDocument(() => localStorage.setItem('math-notes-onboarded', '1'));
+  await page.goto(`http://localhost:${server.address().port}/`, { waitUntil: 'load' });
+  await wait(400);
+
+  await setContent('2 * 21');
+  await wait(800);
+  assert.match(
+    await page.evaluate(() => document.getElementById('view').textContent),
+    /42/,
+    'the sheet still evaluates without the worker'
+  );
+  assert.deepEqual(errors, []);
+});

@@ -254,9 +254,10 @@ a few lines instead of the whole document. `update()` draws the typed input
 first (phase one) and then, on reply, applies the results — but only if the
 sheet text is still unchanged, so a stale reply is never rendered and two
 back-to-back requests for the same text cannot both be dropped. Every request
-also has a timeout so a hung worker can't freeze the sheet, and if the worker
-fails to load or crashes its in-flight requests are rejected and later
-evaluations fall back to the main-thread engine instead of stalling.
+also has a timeout so a hung worker can't freeze the sheet. If the worker fails
+to load (its module graph was never cached, which is common offline) or crashes,
+the failing request is re-run on the main-thread engine and every later
+evaluation uses it, so the sheet still evaluates instead of staying blank.
 
 **Serialization:** mathjs `Unit`, `BigNumber`, etc. lose their prototypes in
 structured clone. The worker therefore pre-formats every result value into a
@@ -531,7 +532,9 @@ as the documentation. A worker under `/js/` could only ever control `/js/`
 only. It precaches the shell and every module (except the build-only
 `js/i18n/build.js` and `js/lib/math.js` / `math.bundle.js`) into a versioned
 cache and serves same-origin GETs stale-while-revalidate; the Examples content
-is cached too, so the modal works on a first offline visit. Both the app
+is cached too, so the modal works on a first offline visit. Each asset is added
+to the cache independently, so one transient failure cannot abort the whole
+install. Both the app
 (`js/registerServiceWorker.js`) and the docs (`docs-src/src/docs.js`) register
 it; `test/browser.test.mjs` asserts the registration scope is the whole origin.
 

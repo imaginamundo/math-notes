@@ -1,6 +1,6 @@
 // Served from the site root so its scope is `/` and it can cache the app shell
 // and the documentation (a worker under /js/ could only control /js/).
-const cacheName = 'math-notes-v38';
+const cacheName = 'math-notes-v39';
 const urlsToCache = [
   './index.html',
   './style.css',
@@ -91,7 +91,13 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(cacheName).then((cache) => cache.addAll(urlsToCache)));
+  // Add each asset on its own so one failure (a transient network error) cannot
+  // abort the whole install and leave the app without an offline shell.
+  event.waitUntil(
+    caches
+      .open(cacheName)
+      .then((cache) => Promise.allSettled(urlsToCache.map((url) => cache.add(url))))
+  );
   self.skipWaiting();
 });
 
