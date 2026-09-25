@@ -23,6 +23,13 @@ test('preprocessWordOps leaves mathjs logical and alone', () => {
   assert.equal(preprocessWordOps('true and false'), 'true and false');
 });
 
+test('preprocessWordOps is case-insensitive', () => {
+  assert.equal(preprocessWordOps('8 Times 9'), '8 * 9');
+  assert.equal(preprocessWordOps('2 PLUS 3'), '2 + 3');
+  assert.equal(preprocessWordOps('6 Multiplied By 7'), '6 * 7');
+  assert.equal(preprocessWordOps('20 Divided by 4'), '20 / 4');
+});
+
 test('preprocessWordOps ignores words inside identifiers', () => {
   assert.equal(preprocessWordOps('command'), 'command');
   assert.equal(preprocessWordOps('within'), 'within');
@@ -36,6 +43,9 @@ test('evaluateLines evaluates word operators', () => {
   assert.equal(valueOf('5 with 2'), 7);
   assert.equal(valueOf('6 multiplied by 7'), 42);
   assert.equal(valueOf('20 divided by 4'), 5);
+  assert.equal(valueOf('8 Times 9'), 72);
+  assert.equal(valueOf('10 Divided by 2'), 5);
+  assert.equal(valueOf('6 Multiplied by 7'), 42);
 });
 
 test('evaluateLines keeps logical and working', () => {
