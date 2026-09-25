@@ -189,6 +189,13 @@ test('evaluateLines supports multi-word variable names', () => {
   assert.equal(total, 18000);
 });
 
+test('a label may precede a multi-word name', () => {
+  const { results } = evaluateLines(['Total: monthly rent = 1500', 'Total: monthly rent * 12']);
+  assert.equal(results[0].type, 'assignment');
+  assert.equal(results[0].assigned, 1500);
+  assert.equal(results[1].value, 18000);
+});
+
 test('multi-word names are not confused with word operators or aggregates', () => {
   assert.equal(evaluateLines(['total cost = 50', 'total cost + 10']).results[1].value, 60);
   assert.equal(evaluateLines(['net price = 100', 'net price plus 5']).results[1].value, 105);
