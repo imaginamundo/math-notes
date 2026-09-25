@@ -74,6 +74,24 @@ test('generated pages carry navigation, examples and language metadata', () => {
   assert.match(page, /<h2 id="/);
 });
 
+test('the menu toggle lives in the sticky header and tables scroll in place', () => {
+  const page = readFileSync(join(docs, 'reference', 'index.html'), 'utf8');
+  const header = page.slice(page.indexOf('<header'), page.indexOf('</header>'));
+  assert.match(header, /class="doc-menu-toggle"/, 'the toggle is in the sticky header');
+  assert.doesNotMatch(
+    page.slice(page.indexOf('<div class="doc-layout">'), page.indexOf('<aside')),
+    /doc-menu-toggle/,
+    'the toggle is no longer stranded in the scrolling layout'
+  );
+  assert.match(page, /<div class="doc-table">/, 'wide tables get their own scroll box');
+});
+
+test('the docs stylesheet respects motion and nested-scroll preferences', () => {
+  const css = readFileSync(join(docs, 'docs.css'), 'utf8');
+  assert.match(css, /@media \(prefers-reduced-motion: no-preference\)/);
+  assert.match(css, /\.doc-sidebar\s*\{[^}]*overscroll-behavior: contain/);
+});
+
 test('every internal /docs link in the generated pages resolves', () => {
   for (const lang of availableLangs()) {
     const prefix = prefixFor(lang);

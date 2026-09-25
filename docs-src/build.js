@@ -24,6 +24,7 @@ const UI = {
     copied: 'Copied',
     open: 'Open in Math Notes',
     menu: 'Documentation menu',
+    menuShort: 'Menu',
     language: 'Language',
     footer: 'Math Notes — a browser-based inline calculator.',
     guide: 'User guide',
@@ -42,6 +43,7 @@ const UI = {
     copied: 'Copiado',
     open: 'Abrir no Math Notes',
     menu: 'Menu da documentação',
+    menuShort: 'Menu',
     language: 'Idioma',
     footer: 'Math Notes — uma calculadora em linha no navegador.',
     guide: 'Guia de utilização',
@@ -60,6 +62,7 @@ const UI = {
     copied: 'Copiado',
     open: 'Abrir en Math Notes',
     menu: 'Menú de la documentación',
+    menuShort: 'Menú',
     language: 'Idioma',
     footer: 'Math Notes — una calculadora en línea en el navegador.',
     guide: 'Guía de uso',
@@ -150,7 +153,17 @@ function addHeadingIds(html, ui) {
 
 function renderMarkdown(md, ui) {
   currentUi = ui;
-  return addHeadingIds(marked.parse(md).trim(), ui);
+  const { html, toc } = addHeadingIds(marked.parse(md).trim(), ui);
+  return { html: wrapTables(html), toc };
+}
+
+// Tables can be wider than a phone viewport (the Reference page's shortcuts
+// table). Give each one its own scroll container so the overflow stays inside
+// the table instead of widening the whole page.
+function wrapTables(html) {
+  return html
+    .replace(/<table>/g, '<div class="doc-table">\n<table>')
+    .replace(/<\/table>/g, '</table>\n</div>');
 }
 
 function titleOf(md, fallback) {
@@ -333,9 +346,9 @@ function pageHtml(lang, slug, page) {
       ${langSwitchHtml(lang, slug)}
       <a class="doc-app" href="/">${escapeHtml(ui.app)}</a>
     </div>
+    <button class="doc-menu-toggle" type="button" aria-label="${escapeAttr(ui.menu)}" aria-expanded="false" aria-controls="doc-sidebar">${escapeHtml(ui.menuShort)}</button>
   </header>
   <div class="doc-layout">
-    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">${escapeHtml(ui.menu)}</button>
     <aside class="doc-sidebar" id="doc-sidebar">
       ${navHtml(lang, slug, page.toc)}
     </aside>

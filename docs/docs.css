@@ -2,8 +2,15 @@
    variables and themes, then overrides the app's global layout. */
 
 html {
-  scroll-behavior: smooth;
   scroll-padding-top: 5rem;
+}
+
+/* Respect the reader's motion preference: anchor jumps and scroll-spy animate
+   only when they have not asked their OS to reduce motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
@@ -47,6 +54,7 @@ body {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
+  white-space: nowrap;
   text-decoration: none;
   color: var(--color-text-strong);
 }
@@ -186,6 +194,8 @@ body {
   top: 4.5rem;
   max-height: calc(100vh - 6rem);
   overflow-y: auto;
+  /* Keep a sidebar scroll from chaining into the page behind it. */
+  overscroll-behavior: contain;
   font-size: 0.94em;
 }
 
@@ -334,9 +344,16 @@ body {
   background: transparent;
   font-size: 0.9em;
 }
+/* A table can be wider than a phone viewport (the Reference page's shortcuts
+   table); let it scroll inside its own box instead of widening the page. */
+.doc-table {
+  max-width: 100%;
+  margin: 0.8em 0 1.2em;
+  overflow-x: auto;
+}
 .doc-content table {
   width: 100%;
-  margin: 0.8em 0 1.2em;
+  margin: 0;
   border-collapse: collapse;
   font-size: 0.94em;
 }
@@ -460,13 +477,18 @@ body {
   border-color: var(--color-operator);
 }
 
-.doc-cards {
+/* Scoped to beat `.doc-content ul`, which adds a list indent. */
+.doc-content .doc-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
   gap: 0.9rem;
   list-style: none;
   margin: 1.4em 0 0;
   padding: 0;
+}
+/* Drop the prose list spacing so the grid gap is equal both ways. */
+.doc-content .doc-cards > li {
+  margin: 0;
 }
 .doc-cards a {
   display: block;
@@ -523,21 +545,30 @@ body {
   .doc-sidebar {
     position: static;
     max-height: none;
+    /* Let the search dropdown escape the drawer box rather than be clipped. */
+    overflow: visible;
     display: none;
   }
   .doc-sidebar.is-open {
     display: block;
   }
   .doc-header {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+  }
+  /* Keep the bar one row: the tag is the first thing to go. */
+  .doc-brand-tag {
+    display: none;
   }
   .doc-header-actions {
-    flex: 1 1 100%;
-    flex-wrap: wrap;
+    /* docs.js reparents this into the drawer on phones; stack it above the nav. */
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-soft);
   }
-  .doc-search {
-    flex: 1 1 100%;
-  }
+  .doc-search,
   .doc-search-input {
     width: 100%;
     max-width: none;

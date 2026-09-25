@@ -49,9 +49,9 @@
       <nav class="doc-lang" aria-label="Language"><a href="/docs/reference/" hreflang="en" class="is-active" aria-current="page">English</a><a href="/docs/pt/reference/" hreflang="pt">Português</a><a href="/docs/es/reference/" hreflang="es">Español</a></nav>
       <a class="doc-app" href="/">Open Math Notes</a>
     </div>
+    <button class="doc-menu-toggle" type="button" aria-label="Documentation menu" aria-expanded="false" aria-controls="doc-sidebar">Menu</button>
   </header>
   <div class="doc-layout">
-    <button class="doc-menu-toggle" type="button" aria-expanded="false" aria-controls="doc-sidebar">Documentation menu</button>
     <aside class="doc-sidebar" id="doc-sidebar">
       <nav class="doc-nav" aria-label="Documentation menu"><ul><li class="doc-nav-item"><a href="/docs/">Home</a></li><li class="doc-nav-item"><a href="/docs/getting-started/">Getting started</a></li><li class="doc-nav-item"><a href="/docs/writing-a-sheet/">Writing a sheet</a></li><li class="doc-nav-item"><a href="/docs/numbers/">Numbers &amp; operators</a></li><li class="doc-nav-item"><a href="/docs/lists/">Lists &amp; sequences</a></li><li class="doc-nav-item"><a href="/docs/groups/">Groups &amp; totals</a></li><li class="doc-nav-item"><a href="/docs/units/">Units &amp; measures</a></li><li class="doc-nav-item"><a href="/docs/money/">Money &amp; currencies</a></li><li class="doc-nav-item"><a href="/docs/dates/">Dates &amp; time</a></li><li class="doc-nav-item"><a href="/docs/files/">Files, sharing &amp; data</a></li><li class="doc-nav-item"><a href="/docs/settings/">Settings &amp; appearance</a></li><li class="doc-nav-item"><a href="/docs/app/">App &amp; platform</a></li><li class="doc-nav-item is-active"><a href="/docs/reference/" aria-current="page">Reference</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">On this page</li><li><a href="#operators">Operators</a></li><li><a href="#word-operators">Word operators</a></li><li><a href="#keywords">Keywords</a></li><li><a href="#function-aliases">Function aliases</a></li><li><a href="#constants">Constants</a></li><li><a href="#units">Units</a></li><li><a href="#currencies">Currencies</a></li><li><a href="#calendar">Calendar</a></li><li><a href="#rounding">Rounding</a></li><li><a href="#keyboard-shortcuts">Keyboard shortcuts</a></li><li><a href="#reserved-words">Reserved words</a></li></ul></li><li class="doc-nav-item"><a href="/docs/about/">About</a></li></ul></nav>
     </aside>
@@ -60,6 +60,7 @@
 <h1>Reference</h1>
 <p>A compact reference for the syntax. Every heading links from the sidebar for quick access.</p>
 <h2 id="operators">Operators<a class="doc-anchor" href="#operators" aria-label="Link to this section" title="Link to this section">#</a></h2>
+<div class="doc-table">
 <table>
 <thead>
 <tr>
@@ -100,9 +101,11 @@
 <td>Range or step</td>
 </tr>
 </tbody></table>
+</div>
 <h2 id="word-operators">Word operators<a class="doc-anchor" href="#word-operators" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p><code>plus</code>, <code>minus</code>, <code>times</code>, <code>multiplied by</code>, <code>divided by</code>, <code>with</code>, <code>without</code>, <code>mul</code>.</p>
 <h2 id="keywords">Keywords<a class="doc-anchor" href="#keywords" aria-label="Link to this section" title="Link to this section">#</a></h2>
+<div class="doc-table">
 <table>
 <thead>
 <tr>
@@ -131,7 +134,9 @@
 <td>Close a <a href="/docs/groups/">group</a></td>
 </tr>
 </tbody></table>
+</div>
 <h2 id="function-aliases">Function aliases<a class="doc-anchor" href="#function-aliases" aria-label="Link to this section" title="Link to this section">#</a></h2>
+<div class="doc-table">
 <table>
 <thead>
 <tr>
@@ -164,6 +169,7 @@
 <td>The current Unix timestamp</td>
 </tr>
 </tbody></table>
+</div>
 <p>The standard mathjs functions (<code>sqrt</code>, <code>abs</code>, <code>round</code>, <code>ceil</code>, <code>floor</code>, <code>sin</code>, <code>cos</code>, <code>mean</code>, <code>sum</code>, <code>min</code>, <code>max</code>, <code>sort</code>, <code>concat</code>, …) are also available.</p>
 <h2 id="constants">Constants<a class="doc-anchor" href="#constants" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p><code>pi</code>, <code>π</code>, <code>e</code>.</p>
@@ -176,6 +182,7 @@
 <h2 id="rounding">Rounding<a class="doc-anchor" href="#rounding" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p><code>to n dp</code>, <code>to n digits</code>, <code>rounded</code>, <code>rounded up</code>, <code>rounded down</code>, <code>to nearest n</code> (including fractions such as <code>to nearest 16th</code>).</p>
 <h2 id="keyboard-shortcuts">Keyboard shortcuts<a class="doc-anchor" href="#keyboard-shortcuts" aria-label="Link to this section" title="Link to this section">#</a></h2>
+<div class="doc-table">
 <table>
 <thead>
 <tr>
@@ -236,6 +243,7 @@
 <td>Clear the active sheet</td>
 </tr>
 </tbody></table>
+</div>
 <h2 id="reserved-words">Reserved words<a class="doc-anchor" href="#reserved-words" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p><code>prev</code>, <code>today</code>, <code>now</code>, <code>yesterday</code>, <code>tomorrow</code>, <code>christmas</code>, <code>halloween</code>, <code>end</code>, and any name starting with <code>__</code> cannot be used as variable names.</p>
       </article>

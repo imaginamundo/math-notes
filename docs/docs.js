@@ -74,9 +74,35 @@ function wireMenu() {
   const toggle = document.querySelector('.doc-menu-toggle');
   const sidebar = document.getElementById('doc-sidebar');
   if (!toggle || !sidebar) return;
-  toggle.addEventListener('click', () => {
-    const open = sidebar.classList.toggle('is-open');
+
+  // On phones the header is a single compact row (brand + toggle); the search,
+  // language switcher and app link move to the top of the drawer, so the sticky
+  // bar never eats a quarter of the screen. On wider screens they sit in the
+  // header. One node is reparented instead of duplicated.
+  const header = document.querySelector('.doc-header');
+  const actions = document.querySelector('.doc-header-actions');
+  const mobile = window.matchMedia('(max-width: 900px)');
+  const placeActions = () => {
+    if (!actions) return;
+    if (mobile.matches) sidebar.prepend(actions);
+    else if (header) header.append(actions);
+  };
+  placeActions();
+  mobile.addEventListener('change', placeActions);
+
+  const setOpen = (open) => {
+    sidebar.classList.toggle('is-open', open);
     toggle.setAttribute('aria-expanded', String(open));
+  };
+
+  toggle.addEventListener('click', () => {
+    setOpen(!sidebar.classList.contains('is-open'));
+  });
+
+  // Tapping any link in the drawer navigates (or jumps to a section) and closes
+  // it, so returning to the top never reveals a stale open menu.
+  sidebar.addEventListener('click', (event) => {
+    if (event.target.closest('a')) setOpen(false);
   });
 }
 
