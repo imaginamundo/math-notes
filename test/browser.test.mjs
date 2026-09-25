@@ -959,6 +959,39 @@ test('a first-run seed is not repeated on reload', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('switching tabs does not dismiss the starter prompt', async () => {
+  await newPage({ firstRun: true });
+  await waitFor(() => page.$('.starter-prompt.visible'));
+
+  // Add a second tab: the Welcome tab keeps the prompt, the new tab hides it.
+  await page.click('#tabs-bar .tab-new');
+  await wait(200);
+  assert.equal(
+    await page.evaluate(() =>
+      document.querySelector('.starter-prompt').classList.contains('visible')
+    ),
+    false,
+    'the prompt is hidden on the other tab'
+  );
+  assert.equal(
+    await page.evaluate(() => localStorage.getItem('math-notes-starter-dismissed')),
+    null,
+    'switching tabs must not settle the prompt'
+  );
+
+  // Back on the Welcome tab the prompt is available again.
+  await page.click('#tabs-bar .tab');
+  await wait(200);
+  assert.equal(
+    await page.evaluate(() =>
+      document.querySelector('.starter-prompt').classList.contains('visible')
+    ),
+    true,
+    'the prompt returns with the Welcome tab'
+  );
+  assert.deepEqual(errors, []);
+});
+
 test('a returning visitor with existing tabs is never seeded', async () => {
   // Only the tabs key is set — no onboarding flag. Someone who cleared that
   // one key must not have their sheet overwritten.

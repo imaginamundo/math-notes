@@ -83,6 +83,14 @@ function initTabs(editableNode, onUpdate) {
 
   // Present `content` as the new active sheet: update the editor, persist,
   // repaint, evaluate, and notify every input-driven subscriber exactly once.
+  // A programmatic write (tab switch, undo/redo, restore, seed) must not look
+  // like a user edit to features that key off the `input` event.
+  function dispatchInput() {
+    const event = new Event('input', { bubbles: true });
+    event.programmatic = true;
+    editableNode.dispatchEvent(event);
+  }
+
   // A saved caret is restored last (after focus) when it is valid.
   function present(content, { focus = true, caret = null } = {}) {
     editableNode.value = content;
@@ -90,7 +98,7 @@ function initTabs(editableNode, onUpdate) {
     writer.persist();
     view.render();
     onUpdate();
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+    dispatchInput();
     if (focus) editableNode.focus();
     restoreCaret(caret);
   }
@@ -133,7 +141,7 @@ function initTabs(editableNode, onUpdate) {
     state = setContent(state, state.activeId, value);
     writer.persist();
     scheduleSnapshot();
-    editableNode.dispatchEvent(new Event('input', { bubbles: true }));
+    dispatchInput();
     captureCaret();
   }
 
