@@ -56,9 +56,12 @@ function initCalendar(math) {
         return { type: 'calendarInterval', parts: dateDiff(from, to) };
       },
       __dateFormat: (date, pattern) => formatDatePattern(date, pattern),
-      __daysBetweenText: (a, b, extra) => {
+      __daysBetweenText: (a, b, extra, absolute) => {
+        // `days between`/`through ... in days` describe a span, so an explicit
+        // backward pair reports its magnitude; `days since`/`until` stay signed.
         const { a: from, b: to } = resolveInterval(a, b);
-        return math.unit(daysBetween(from, to) + (Number(extra) || 0), 'days');
+        const span = daysBetween(from, to);
+        return math.unit((absolute ? Math.abs(span) : span) + (Number(extra) || 0), 'days');
       },
       __daysInMonth: (text) => math.unit(daysInMonth(text), 'days'),
       __daysInQuarter: (value) => math.unit(daysInQuarter(value), 'days'),

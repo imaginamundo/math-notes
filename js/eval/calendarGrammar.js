@@ -179,7 +179,7 @@ function preprocessCalendar(expression) {
     const verb = m[1].toLowerCase();
     const pair = DATE_AND_DATE.exec(m[2]);
     if (verb === 'between' && pair) {
-      return `__daysBetweenText(${dateArg(pair[1])}, ${dateArg(pair[2])})`;
+      return `__daysBetweenText(${dateArg(pair[1])}, ${dateArg(pair[2])}, 0, 1)`;
     }
     const single = DATE_ONLY.exec(m[2]) || (IDENT_ONLY.test(m[2]) ? [null, m[2]] : null);
     if (single && verb !== 'between') {
@@ -191,7 +191,7 @@ function preprocessCalendar(expression) {
   }
 
   if ((m = INCLUSIVE.exec(expr))) {
-    return `__daysBetweenText(${dateArg(m[1])}, ${dateArg(m[2])}, 1)`;
+    return `__daysBetweenText(${dateArg(m[1])}, ${dateArg(m[2])}, 1, 1)`;
   }
 
   if ((m = MIDPOINT.exec(expr))) {

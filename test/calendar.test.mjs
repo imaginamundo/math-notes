@@ -77,6 +77,8 @@ test('an explicit backward interval keeps its full span', () => {
 
 test('days until, since and between', () => {
   assert.equal(valueOf('days between 3 March and 30 May'), '88 days');
+  // A span is reported as a magnitude, even from an explicit backward pair.
+  assert.equal(valueOf('days between 2025-06-01 and 2025-01-01'), '151 days');
 });
 
 test('date parts, week numbers and formatting', () => {
