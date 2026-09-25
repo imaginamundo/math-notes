@@ -477,6 +477,17 @@ test('a group ignores blank lines and scopes sum to itself', () => {
   assert.equal(results[5].value, undefined);
 });
 
+test('a blank line inside a group does not shift a later aggregate block', () => {
+  const without = evaluateLines(['Groceries:', '10', '20', 'end', '5', 'sum']);
+  const blankInside = evaluateLines(['Groceries:', '10', '', '20', 'end', '5', 'sum']);
+  assert.equal(without.results.at(-1).value, 35);
+  assert.equal(
+    blankInside.results.at(-1).value,
+    35,
+    'the inner blank is ignored outside the group'
+  );
+});
+
 test('an unterminated header is just a label', () => {
   const { results, total } = evaluateLines(['Groceries:', '10']);
   assert.equal(results[0].value, undefined);

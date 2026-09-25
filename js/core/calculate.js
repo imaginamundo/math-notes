@@ -457,7 +457,7 @@ function createEngine() {
 
     for (let i = 0; i < startLine; i++) {
       const line = lines[i];
-      if (line.trim() === '') lastBlankIndex = i;
+      if (line.trim() === '' && !groups.groupOfLine.has(i)) lastBlankIndex = i;
       const parsed = parseLine(line);
       if (parsed.isAssignment) {
         const stored = results[i];
@@ -487,7 +487,7 @@ function createEngine() {
 
     for (let i = startLine; i < lines.length; i++) {
       const line = lines[i];
-      if (line.trim() === '') lastBlankIndex = i;
+      if (line.trim() === '' && !groups.groupOfLine.has(i)) lastBlankIndex = i;
 
       let parsed = parseLine(line);
       // The raw label, before mangleLines rewrote multi-word names.
