@@ -126,3 +126,22 @@ test('formatResult compacts long objects and leaves non-plain objects alone', ()
   const complex = math.evaluate('1 + 2i');
   assert.equal(formatResult(complex), String(complex));
 });
+
+// The unit-display rules are an ordered list; these pin the order where more
+// than one rule could apply, so a future reorder is caught.
+test('formatUnit applies its rules in order', () => {
+  // A computed duration (a compound that reduces to time) is a timespan...
+  assert.equal(formatResult(math.evaluate('3 GB / (10 MB / s)')), '5 min');
+  // ...but an explicit seconds conversion keeps its unit.
+  assert.equal(formatResult(math.evaluate('2 h to s')), '7,200 s');
+  // A currency amount is a symbol before it is a generic unit.
+  assert.equal(formatResult(math.evaluate('350 USD')), 'US$ 350');
+  // A currency rate is a phrase.
+  assert.equal(formatResult(math.evaluate('100 USD / hour')), 'US$ 100 per hour');
+  // A compound that cancels to a currency keeps the written currency.
+  assert.equal(formatResult(math.evaluate('24 USD / day * 1 year')), 'US$ 8,766');
+  // A repeated same-unit product is a power before the simplified volume unit.
+  assert.equal(formatResult(math.evaluate('2 m * 3 m * 4 m')), '24 m^3');
+  // A plain ratio stays as written rather than simplifying to an area.
+  assert.equal(formatResult(math.evaluate('7 l / 100 km')), '0.07 l/km');
+});
