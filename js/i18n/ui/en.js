@@ -51,6 +51,12 @@ export default {
   'tabs.new': 'New tab',
   'tabs.defaultName': 'Tab {n}',
   'tabs.closeConfirm': 'Close "{name}"? Its content will be lost.',
+  'tabs.templates': 'Starter sheets',
+  'template.budget': 'Budget',
+  'template.trip': 'Trip cost',
+  'template.invoice': 'Invoice',
+  'template.savings': 'Savings goal',
+  'template.split': 'Split a bill',
 
   'find.placeholder': 'Find in sheet',
   'find.matchCase': 'Match case',

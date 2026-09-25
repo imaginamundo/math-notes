@@ -333,6 +333,73 @@ test('tabs can be reordered by dragging', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('the new-tab button stays reachable when tabs overflow', async () => {
+  await newPage();
+  await page.evaluate(() => {
+    for (let i = 0; i < 20; i++) document.querySelector('.tab-new').click();
+  });
+  await waitFor(() =>
+    page.evaluate(() => {
+      const bar = document.getElementById('tabs-bar');
+      return bar.scrollWidth > bar.clientWidth;
+    })
+  );
+
+  const buttonsInView = () =>
+    page.evaluate(() => {
+      const bar = document.getElementById('tabs-bar').getBoundingClientRect();
+      const buttons = [
+        ...document.querySelectorAll('.tab-actions .tab-template, .tab-actions .tab-new'),
+      ];
+      return (
+        buttons.length === 2 &&
+        buttons.every((button) => {
+          const rect = button.getBoundingClientRect();
+          return rect.width > 0 && rect.left >= bar.left && rect.right <= bar.right + 1;
+        })
+      );
+    });
+  assert.equal(await buttonsInView(), true, 'both action buttons are visible before scrolling');
+
+  await page.evaluate(() => {
+    const bar = document.getElementById('tabs-bar');
+    bar.scrollLeft = bar.scrollWidth;
+  });
+  await wait(100);
+  assert.equal(await buttonsInView(), true, 'both action buttons are visible after scrolling');
+
+  const before = await page.evaluate(() => document.querySelectorAll('.tab').length);
+  await page.evaluate(() => document.querySelector('.tab-new').click());
+  await wait(150);
+  const after = await page.evaluate(() => document.querySelectorAll('.tab').length);
+  assert.equal(after, before + 1, 'clicking it still creates a tab');
+  assert.deepEqual(errors, []);
+});
+
+test('the starter-sheet menu opens a new tab with the template', async () => {
+  await newPage();
+  await page.click('.tab-template');
+  await waitFor(() => page.$('.tab-template-menu:not([hidden])'));
+  const options = await page.$$eval('.tab-template-option', (nodes) =>
+    nodes.map((node) => node.textContent)
+  );
+  assert.ok(options.includes('Budget'), `expected a Budget template, got ${options.join(', ')}`);
+
+  await page.$$eval('.tab-template-option', (nodes) => {
+    nodes.find((node) => node.textContent === 'Budget').click();
+  });
+  await waitFor(async () => page.evaluate(() => document.querySelectorAll('.tab').length === 2));
+  const state = await page.evaluate(() => ({
+    active: document.querySelector('.tab.active .tab-name')?.textContent,
+    content: document.getElementById('content-editable').value,
+    menuHidden: document.querySelector('.tab-template-menu').hidden,
+  }));
+  assert.equal(state.active, 'Budget');
+  assert.ok(state.content.includes('income = 3200'));
+  assert.equal(state.menuHidden, true, 'the menu closes after choosing');
+  assert.deepEqual(errors, []);
+});
+
 test('find marks wrap typed text and ignore ghost results', async () => {
   await newPage();
   await setContent('1 + 1\nhello world\n20');

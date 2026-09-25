@@ -45,6 +45,7 @@ function initTabs(editableNode, onUpdate) {
     activate,
     close: handleClose,
     create: handleNew,
+    newFromTemplate: (template) => openSheet(template),
     rename: handleRename,
     reorder: handleReorder,
     dragged: () => writer.persist(),

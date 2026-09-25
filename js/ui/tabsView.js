@@ -6,18 +6,23 @@
 // handlers: { getState, focusEditor, activate(id), close(id), create(),
 //             rename(id, name), reorder(ids), dragged() }
 import { t } from '../i18n/index.js';
+import { getTabTemplates } from './tabTemplates.js';
 
 function createTabsView(tabBarNode, handlers) {
   let drag = null;
   let lastDragTime = 0;
+  let menu = null;
+  let menuAnchor = null;
 
   function render() {
+    closeMenu();
     const state = handlers.getState();
     tabBarNode.innerHTML = '';
     tabBarNode.setAttribute('role', 'tablist');
     tabBarNode.setAttribute('aria-label', t('tabs.list'));
     state.tabs.forEach((tab) => tabBarNode.appendChild(renderTab(tab, state.activeId)));
-    tabBarNode.appendChild(renderNewButton());
+    tabBarNode.appendChild(renderActions());
+    fillMenu();
     const panel = document.getElementById('editor-panel');
     if (panel) panel.setAttribute('aria-labelledby', state.activeId);
   }
@@ -56,6 +61,108 @@ function createTabsView(tabBarNode, handlers) {
     button.title = t('tabs.new');
     button.setAttribute('aria-label', t('tabs.new'));
     return button;
+  }
+
+  // The action cluster: a starter-sheet menu button and the new-tab button,
+  // pinned together at the right edge of the bar.
+  function renderActions() {
+    const actions = document.createElement('div');
+    actions.className = 'tab-actions';
+
+    const templates = document.createElement('button');
+    templates.type = 'button';
+    templates.className = 'tab-template';
+    templates.title = t('tabs.templates');
+    templates.setAttribute('aria-label', t('tabs.templates'));
+    templates.setAttribute('aria-haspopup', 'menu');
+    templates.setAttribute('aria-expanded', 'false');
+    const caret = document.createElement('span');
+    caret.className = 'tab-caret';
+    caret.setAttribute('aria-hidden', 'true');
+    caret.innerHTML =
+      '<svg viewBox="0 0 12 8" fill="none" aria-hidden="true" focusable="false">' +
+      '<path d="M1.5 2 L6 6 L10.5 2" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    templates.appendChild(caret);
+
+    actions.append(templates, renderNewButton());
+    return actions;
+  }
+
+  function ensureMenu() {
+    if (menu) return menu;
+    menu = document.createElement('div');
+    menu.className = 'tab-template-menu';
+    menu.hidden = true;
+    menu.setAttribute('role', 'menu');
+    menu.setAttribute('aria-label', t('tabs.templates'));
+    document.body.appendChild(menu);
+
+    document.addEventListener('pointerdown', (event) => {
+      if (menu.hidden) return;
+      if (menu.contains(event.target) || (menuAnchor && menuAnchor.contains(event.target))) return;
+      closeMenu();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (menu.hidden || event.key !== 'Escape') return;
+      const anchor = menuAnchor;
+      closeMenu();
+      if (anchor) anchor.focus();
+    });
+    window.addEventListener('resize', closeMenu);
+    tabBarNode.addEventListener('scroll', closeMenu);
+    return menu;
+  }
+
+  // Rebuild the options so their labels follow the active language.
+  function fillMenu() {
+    const node = ensureMenu();
+    node.textContent = '';
+    for (const template of getTabTemplates()) {
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.className = 'tab-template-option';
+      option.setAttribute('role', 'menuitem');
+      option.textContent = template.name;
+      option.addEventListener('click', () => {
+        closeMenu();
+        handlers.newFromTemplate(template);
+      });
+      node.appendChild(option);
+    }
+  }
+
+  function positionMenu(anchor) {
+    const rect = anchor.getBoundingClientRect();
+    menu.style.left = `${rect.left}px`;
+    menu.style.top = `${rect.bottom + 4}px`;
+    const box = menu.getBoundingClientRect();
+    if (box.right > window.innerWidth - 8) {
+      menu.style.left = `${Math.max(8, window.innerWidth - 8 - box.width)}px`;
+    }
+    if (box.bottom > window.innerHeight - 8) {
+      menu.style.top = `${Math.max(8, rect.top - box.height - 4)}px`;
+    }
+  }
+
+  function openMenu(anchor) {
+    ensureMenu();
+    menuAnchor = anchor;
+    menu.hidden = false;
+    anchor.setAttribute('aria-expanded', 'true');
+    positionMenu(anchor);
+  }
+
+  function closeMenu() {
+    if (!menu || menu.hidden) return;
+    menu.hidden = true;
+    if (menuAnchor) menuAnchor.setAttribute('aria-expanded', 'false');
+    menuAnchor = null;
+  }
+
+  function toggleMenu(anchor) {
+    if (menu && !menu.hidden && menuAnchor === anchor) closeMenu();
+    else openMenu(anchor);
   }
 
   function beginRename(id, nameNode) {
@@ -99,6 +206,11 @@ function createTabsView(tabBarNode, handlers) {
     const tabElement = event.target.closest('.tab');
     if (tabElement) {
       handlers.activate(tabElement.dataset.id);
+      return;
+    }
+    const templateButton = event.target.closest('.tab-template');
+    if (templateButton) {
+      toggleMenu(templateButton);
       return;
     }
     if (event.target.closest('.tab-new')) handlers.create();
@@ -175,7 +287,7 @@ function createTabsView(tabBarNode, handlers) {
     }
     const draggedEl = tabBarNode.querySelector(`.tab[data-id="${drag.id}"]`);
     if (!draggedEl) return;
-    const anchor = others[target] || tabBarNode.querySelector('.tab-new');
+    const anchor = others[target] || tabBarNode.querySelector('.tab-actions');
     if (draggedEl.nextSibling === anchor) return;
     tabBarNode.insertBefore(draggedEl, anchor);
     handlers.reorder([...tabBarNode.querySelectorAll('.tab')].map((tab) => tab.dataset.id));
