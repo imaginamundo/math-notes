@@ -1099,6 +1099,57 @@ test('Reset data clears the total-mode and language settings too', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('Reset data removes every tab, seeds Welcome and restarts the counter', async () => {
+  // A fresh context: the shared harness injects storage on every navigation,
+  // which would defeat a genuine first-run reset.
+  if (context) await context.close();
+  context = await browser.createBrowserContext();
+  page = await context.newPage();
+  errors = [];
+  page.on('pageerror', (err) => errors.push(err.message));
+  await page.goto(`http://localhost:${server.address().port}/`, { waitUntil: 'load' });
+  await wait(400);
+  await page.evaluate(() => {
+    try {
+      localStorage.setItem('math-notes-onboarded', '1');
+      localStorage.setItem('math-notes-language', 'en');
+    } catch {
+      // storage unavailable
+    }
+  });
+  await page.evaluate(() => document.querySelector('.tab-new').click());
+  await wait(150);
+  await page.evaluate(() => document.querySelector('.tab-new').click());
+  await wait(150);
+  assert.equal(
+    await page.evaluate(() => document.querySelectorAll('.tab').length),
+    3,
+    'the extra tabs are present before the reset'
+  );
+
+  page.on('dialog', (dialog) => dialog.accept());
+  await page.click('#settings-button');
+  await wait(200);
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: 'load' }),
+    page.click('#reset-data-button'),
+  ]);
+  await wait(500);
+
+  const state = await page.evaluate(() => {
+    const stored = JSON.parse(localStorage.getItem('math-notes-tabs') || 'null');
+    return {
+      tabs: document.querySelectorAll('.tab').length,
+      content: document.getElementById('content-editable').value,
+      nextTabNumber: stored ? stored.nextTabNumber : null,
+    };
+  });
+  assert.equal(state.tabs, 1, 'only the Welcome tab remains');
+  assert.ok(state.content.includes('people = 4'), 'the Welcome sheet is displayed');
+  assert.equal(state.nextTabNumber, 2, 'the tab counter restarted');
+  assert.deepEqual(errors, []);
+});
+
 test('the Examples content follows the language and its examples still work', async () => {
   await newPage();
   await page.click('#settings-button');
