@@ -24,9 +24,10 @@ import { t } from '../i18n/index.js';
 // (tabsHistory.js) and the tab-bar DOM (tabsView.js).
 const SNAPSHOT_DELAY = 2000;
 
-let state = null;
-
 function initTabs(editableNode, onUpdate) {
+  // Per-instance state, held in the closure rather than at module scope so a
+  // second initTabs() would get its own tabs instead of sharing a global.
+  let state = null;
   const tabBarNode = document.getElementById('tabs-bar');
   const { state: loadedState, failed: storageFailed } = loadTabsState();
   state = loadedState;
