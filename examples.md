@@ -96,6 +96,26 @@ pi to 5 digits
 50 as a % of 100
 5% of what is 6
 
+## Complex numbers
+
+i
+i^2
+i * i
+sqrt(-1)
+sqrt(-4)
+2i
+2 + 3i
+(2 + 3i) + (1 - i)
+(2 + 3i) * (1 - i)
+(1 + i)^2
+(3 + 4i) / (1 - 2i)
+abs(3 + 4i)
+arg(1 + i)
+conj(2 + 3i)
+re(2 + 3i)
+im(2 + 3i)
+e^(i * pi)
+
 ## Variables & references
 
 ### Variables
