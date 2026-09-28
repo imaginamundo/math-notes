@@ -114,7 +114,7 @@ arg(1 + i)
 conj(2 + 3i)
 re(2 + 3i)
 im(2 + 3i)
-e^(i * pi)
+e^(i * pi) + 1
 
 ## Variables & references
 
@@ -215,21 +215,21 @@ sum
 ### Groups
 
 Groceries:
-4.50
-3.20
-2.40
+  4.50
+  3.20
+  2.40
 end
 
 Groceries:
-10
+  10
 
-20
+  20
 end
 sum
 
 Trip:
-10 cm
-1 m
+  10 cm
+  1 m
 end
 
 ### Tags
@@ -251,9 +251,9 @@ burger: 2 * 50 #ana #bob
 #bob
 
 Budget:
-rent: 1200 #home
-utilities: 150 #home
-groceries: 480 #living
+  rent: 1200 #home
+  utilities: 150 #home
+  groceries: 480 #living
 end
 #home
 #living
