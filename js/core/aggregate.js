@@ -7,6 +7,12 @@ const AGGREGATE_KEYWORDS = {
   avg: 'average',
 };
 
+// A regex alternation of the keyword words, longest first, so a single source
+// (AGGREGATE_KEYWORDS) drives every matcher that looks for them.
+const AGGREGATE_WORD_SOURCE = Object.keys(AGGREGATE_KEYWORDS)
+  .sort((a, b) => b.length - a.length)
+  .join('|');
+
 // Affine units (offset scales) must never be merged with anything: adding
 // absolute temperatures is meaningless. Each stays its own group.
 const AFFINE_UNITS = new Set(['degc', 'celsius', 'degf', 'fahrenheit']);
@@ -248,4 +254,4 @@ function computeTotal(results, mode = 'sum') {
   return combine(scan(results), mode, null);
 }
 
-export { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal, median };
+export { AGGREGATE_KEYWORDS, AGGREGATE_WORD_SOURCE, aggregateAbove, computeTotal, median };

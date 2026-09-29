@@ -13,7 +13,12 @@ import initCalendar from '../eval/calendar.js';
 import { readMeasurementSystem } from './measurementSystem.js';
 import { readTotalMode } from './totalMode.js';
 import preprocess from './preprocess.js';
-import { AGGREGATE_KEYWORDS, aggregateAbove, computeTotal } from './aggregate.js';
+import {
+  AGGREGATE_KEYWORDS,
+  AGGREGATE_WORD_SOURCE,
+  aggregateAbove,
+  computeTotal,
+} from './aggregate.js';
 import { unitMixError } from './unitMix.js';
 import { firstDifference } from '../util/sequence.js';
 import { mangleLines, unmangleName } from './multiWordVariables.js';
@@ -68,9 +73,11 @@ import { IDENTIFIER_SRC, TAG_NAME_SRC, WORD } from './identifiers.js';
 const MAX_LIST_LENGTH = 100;
 
 // Matches a standalone aggregate keyword, i.e. not a mathjs function call
-// like `sum([1, 2, 3])`.
-const AGGREGATE_WORD = /\b(?:sum|total|average|avg)\b(?!\s*\()/i;
-const AGGREGATE_WORD_ALL = /\b(sum|total|average|avg)\b(?!\s*\()/gi;
+// like `sum([1, 2, 3])`. The words come from AGGREGATE_KEYWORDS.
+const AGGREGATE_WORD = new RegExp(`\\b(?:${AGGREGATE_WORD_SOURCE})\\b(?!\\s*\\()`, 'i');
+const AGGREGATE_WORD_ALL = new RegExp(`\\b(${AGGREGATE_WORD_SOURCE})\\b(?!\\s*\\()`, 'gi');
+// A tag request line's `sum|average` prefix (`sum #food`).
+const TAG_AGGREGATE = new RegExp(`^(${AGGREGATE_WORD_SOURCE})\\s*(of)?$`, 'i');
 
 // Labels a line may not assign to: `prev` and the unconditional date keywords
 // (rewritten before mathjs, so a variable of that name could never be read
@@ -127,9 +134,9 @@ function findGroups(lines) {
 function tagAggregateMode(code) {
   const text = code.trim();
   if (text === '') return 'sum';
-  const match = /^(sum|total|average|avg)\s*(of)?$/i.exec(text);
+  const match = TAG_AGGREGATE.exec(text);
   if (!match) return null;
-  return match[1].toLowerCase().startsWith('a') ? 'average' : 'sum';
+  return AGGREGATE_KEYWORDS[match[1].toLowerCase()];
 }
 
 // Combine every tagged value row above the request, using the same unit rules
