@@ -123,11 +123,14 @@ contentEditableNode.classList.add('ready');
 window.addEventListener('currency:updated', (event) => {
   evalClient.syncRates(event.detail && event.detail.data);
   evalClient.update();
-  showCurrencyStatus(
-    event.detail && event.detail.source === 'cached'
-      ? t('status.ratesCached')
-      : t('status.ratesLive')
-  );
+  const source = event.detail && event.detail.source;
+  const key =
+    source === 'cached'
+      ? 'status.ratesCached'
+      : source === 'stale'
+        ? 'status.ratesStale'
+        : 'status.ratesLive';
+  showCurrencyStatus(t(key));
 });
 
 window.addEventListener('currency:error', () => {

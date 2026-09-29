@@ -31,6 +31,7 @@ export default {
   'modal.closeSettings': 'Close settings',
 
   'status.ratesCached': 'rates: cached',
+  'status.ratesStale': 'rates: stale (kept from earlier)',
   'status.ratesLive': 'rates: live',
   'status.ratesUnavailable': 'exchange rates unavailable',
   'status.storageFull': 'storage is full — recent changes may not be saved',

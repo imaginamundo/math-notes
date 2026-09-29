@@ -30,6 +30,7 @@ export default {
   'modal.closeSettings': 'Cerrar los ajustes',
 
   'status.ratesCached': 'tasas: en caché',
+  'status.ratesStale': 'tasas: antiguas (conservadas)',
   'status.ratesLive': 'tasas: en vivo',
   'status.ratesUnavailable': 'tasas de cambio no disponibles',
   'status.storageFull': 'almacenamiento lleno — puede que los cambios recientes no se guarden',

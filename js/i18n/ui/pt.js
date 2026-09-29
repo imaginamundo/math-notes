@@ -30,6 +30,7 @@ export default {
   'modal.closeSettings': 'Fechar as configurações',
 
   'status.ratesCached': 'cotações: em cache',
+  'status.ratesStale': 'cotações: antigas (mantidas)',
   'status.ratesLive': 'cotações: ao vivo',
   'status.ratesUnavailable': 'cotações indisponíveis',
   'status.storageFull': 'armazenamento cheio — as alterações recentes podem não ser guardadas',
