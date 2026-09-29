@@ -23,16 +23,14 @@ function applyMarks(root, matches, activeIndex) {
   const entries = textNodesInOrder(root);
   const starts = entries.map((entry) => entry.start);
 
+  // Matches are ascending and wrapped from the end, so the containing entry only
+  // moves left: one pointer instead of a scan per match.
+  let entryIndex = entries.length - 1;
   for (let matchIndex = matches.length - 1; matchIndex >= 0; matchIndex--) {
     const match = matches[matchIndex];
-    let startIndex = -1;
-    for (let i = 0; i < entries.length; i++) {
-      if (starts[i] + entries[i].node.textContent.length > match.start) {
-        startIndex = i;
-        break;
-      }
-    }
-    if (startIndex === -1) continue;
+    while (entryIndex > 0 && starts[entryIndex] > match.start) entryIndex--;
+    const startIndex = entryIndex;
+    if (starts[startIndex] + entries[startIndex].node.textContent.length <= match.start) continue;
 
     let endIndex = startIndex;
     while (endIndex + 1 < entries.length && starts[endIndex + 1] < match.end) endIndex++;

@@ -30,8 +30,10 @@ export default {
   'modal.closeSettings': 'Cerrar los ajustes',
 
   'status.ratesCached': 'tasas: en caché',
+  'status.ratesStale': 'tasas: antiguas (conservadas)',
   'status.ratesLive': 'tasas: en vivo',
   'status.ratesUnavailable': 'tasas de cambio no disponibles',
+  'status.storageFull': 'almacenamiento lleno — puede que los cambios recientes no se guarden',
 
   'share.buildFailed': 'No se pudo crear un enlace para esta hoja',
   'share.copiedLong': 'Enlace copiado — es largo, algunas apps pueden cortarlo',
@@ -43,6 +45,7 @@ export default {
   'share.defaultName': 'Hoja compartida',
 
   'io.importConfirm': 'La importación reemplazará el contenido de la pestaña actual. ¿Continuar?',
+  'io.importTooLarge': 'Ese archivo es demasiado grande para importarlo',
 
   'tabs.list': 'Hojas',
   'tabs.rename': 'Doble clic para renombrar',

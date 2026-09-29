@@ -14,6 +14,9 @@ import { preprocessRounding } from '../eval/rounding.js';
 // phrases are consumed first; calendar before timespans so a date's `as`
 // pattern is not read as a conversion; rounding last, so it wraps the
 // normalised value.
+//
+// `context` is passed to every step (most ignore it); the currency step uses
+// `context.names` to leave a code that is a defined variable alone.
 const STEPS = [
   preprocessMeasures,
   preprocessScales,
@@ -26,8 +29,8 @@ const STEPS = [
   preprocessRounding,
 ];
 
-function preprocess(expression) {
-  return STEPS.reduce((result, step) => step(result), expression);
+function preprocess(expression, context) {
+  return STEPS.reduce((result, step) => step(result, context), expression);
 }
 
 export { STEPS };

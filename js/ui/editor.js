@@ -11,6 +11,16 @@ function initEditorScroll(editableNode) {
   let cachedGutterInset = null;
   let metricsCache = null;
   let extentCache = null;
+  // The scroller's client size, refreshed by a ResizeObserver, plus the last
+  // values written, so a keystroke does not read or invalidate layout.
+  let scrollerSize = null;
+  let lastLineHeight = null;
+  let lastWidth = null;
+  let lastHeight = null;
+
+  function measureScroller() {
+    scrollerSize = { width: scroller.clientWidth, height: scroller.clientHeight };
+  }
 
   // The editor's font-derived metrics. They only change with the font, theme or
   // viewport, so they are cached (and invalidated by refreshMetrics/resize)
@@ -68,10 +78,24 @@ function initEditorScroll(editableNode) {
 
   function syncSize() {
     const m = metrics();
-    document.documentElement.style.setProperty('--editor-line-height', `${m.lineHeight}px`);
+    if (m.lineHeight !== lastLineHeight) {
+      lastLineHeight = m.lineHeight;
+      document.documentElement.style.setProperty('--editor-line-height', `${m.lineHeight}px`);
+    }
     const { width, height } = contentExtent(m);
-    editableNode.style.width = width > scroller.clientWidth ? `${Math.ceil(width)}px` : '';
-    editableNode.style.height = height > scroller.clientHeight ? `${Math.ceil(height)}px` : '';
+    // Use the cached scroller size so a keystroke does not read layout, and only
+    // write a size that actually changed so the browser is not invalidated twice.
+    if (!scrollerSize) measureScroller();
+    const widthValue = width > scrollerSize.width ? `${Math.ceil(width)}px` : '';
+    const heightValue = height > scrollerSize.height ? `${Math.ceil(height)}px` : '';
+    if (widthValue !== lastWidth) {
+      lastWidth = widthValue;
+      editableNode.style.width = widthValue;
+    }
+    if (heightValue !== lastHeight) {
+      lastHeight = heightValue;
+      editableNode.style.height = heightValue;
+    }
     editableNode.scrollTop = 0;
     editableNode.scrollLeft = 0;
   }
@@ -102,13 +126,15 @@ function initEditorScroll(editableNode) {
     // only the vertical scroll), so the left inset must clear its right edge —
     // otherwise scrolling to the start of a line hides the caret behind it.
     const leftInset = gutterInset() + margin;
+    const viewWidth = scrollerSize ? scrollerSize.width : scroller.clientWidth;
+    const viewHeight = scrollerSize ? scrollerSize.height : scroller.clientHeight;
     if (x < scroller.scrollLeft + leftInset) scroller.scrollLeft = Math.max(0, x - leftInset);
-    else if (x > scroller.scrollLeft + scroller.clientWidth - margin) {
-      scroller.scrollLeft = x - scroller.clientWidth + margin;
+    else if (x > scroller.scrollLeft + viewWidth - margin) {
+      scroller.scrollLeft = x - viewWidth + margin;
     }
     if (y < scroller.scrollTop + margin) scroller.scrollTop = Math.max(0, y - margin);
-    else if (y > scroller.scrollTop + scroller.clientHeight - margin) {
-      scroller.scrollTop = y - scroller.clientHeight + margin;
+    else if (y > scroller.scrollTop + viewHeight - margin) {
+      scroller.scrollTop = y - viewHeight + margin;
     }
   }
 
@@ -145,8 +171,18 @@ function initEditorScroll(editableNode) {
     cachedGutterInset = null;
     metricsCache = null;
     extentCache = null;
+    scrollerSize = null;
     syncSize();
   });
+
+  // Keep the cached scroller size current without reading layout on every
+  // keystroke.
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(() => {
+      measureScroller();
+      syncSize();
+    }).observe(scroller);
+  }
 
   // The caret's position relative to the scroll content, so an overlay (the
   // autocomplete popup) can sit under it. Uses the same glyph/line metrics as
@@ -177,6 +213,7 @@ function initEditorScroll(editableNode) {
       cachedGutterInset = null;
       metricsCache = null;
       extentCache = null;
+      scrollerSize = null;
       syncSize();
     },
   };

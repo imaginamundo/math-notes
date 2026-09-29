@@ -36,12 +36,17 @@ function initFind(editableNode, viewNode) {
   refreshLabels();
   window.addEventListener('language:updated', refreshLabels);
 
-  editableNode.parentElement.appendChild(barNode);
+  // Anchor the bar to the editor box (`.input`), not the scrolling content, so
+  // it stays pinned at the top-right while the sheet scrolls.
+  (editableNode.closest('.input') || editableNode.parentElement).appendChild(barNode);
 
   let query = '';
   let caseSensitive = false;
   let matches = [];
   let activeIndex = -1;
+  // Where a replace just ended, so the re-mark picks the next match after it
+  // instead of wrapping back onto a match inside the inserted text.
+  let replaceAnchor = null;
 
   function open() {
     const selected = editableNode.value.slice(
@@ -70,10 +75,13 @@ function initFind(editableNode, viewNode) {
   // worker round-trip. The view is rebuilt on the editor's input event, which
   // is why this also runs (without scrolling) when the sheet changes.
   function refresh(scrollTo) {
-    const prevAnchor =
-      activeIndex !== -1 && matches[activeIndex]
+    const replacing = replaceAnchor !== null;
+    const prevAnchor = replacing
+      ? replaceAnchor
+      : activeIndex !== -1 && matches[activeIndex]
         ? matches[activeIndex].start
         : editableNode.selectionStart;
+    replaceAnchor = null;
     query = findInput.value;
     if (!query) {
       matches = [];
@@ -89,7 +97,11 @@ function initFind(editableNode, viewNode) {
       updateCounter();
       return;
     }
-    activeIndex = nearestIndex(matches, prevAnchor);
+    // A replace continues from the inserted text: wrapping back would keep
+    // matching a replacement that contains the query and grow it forever.
+    activeIndex = replacing
+      ? matches.findIndex((match) => match.start >= prevAnchor)
+      : nearestIndex(matches, prevAnchor);
     applyMarks(viewNode, matches, activeIndex);
     updateCounter();
     if (scrollTo) scrollToActive();
@@ -122,6 +134,7 @@ function initFind(editableNode, viewNode) {
     const value =
       editableNode.value.slice(0, match.start) + replacement + editableNode.value.slice(match.end);
     const caret = match.start + replacement.length;
+    replaceAnchor = caret;
     setEditorValue(editableNode, value, { start: caret, end: caret });
     scrollToActive();
     replaceInput.focus();
@@ -288,18 +301,42 @@ function button(className, label, title) {
  * @param {boolean} caseSensitive
  * @returns {Array<{ start: number, end: number }>}
  */
+// The lowercased sheet is cached between keystrokes, so a search is one indexOf
+// scan rather than slicing and lowercasing at every position.
+let lowerCache = { text: null, value: '' };
+
+function lowerOf(text) {
+  if (lowerCache.text !== text) lowerCache = { text, value: text.toLowerCase() };
+  return lowerCache.value;
+}
+
+// Non-overlapping occurrences of `needle` in `haystack`, in order.
+function scan(haystack, needle) {
+  const list = [];
+  const length = needle.length;
+  let from = 0;
+  for (;;) {
+    const index = haystack.indexOf(needle, from);
+    if (index === -1) return list;
+    list.push({ start: index, end: index + length });
+    from = index + length;
+  }
+}
+
 function computeMatches(text, query, caseSensitive) {
   if (!query || query.includes('\n')) return [];
+  if (caseSensitive) return scan(text, query);
+  const lower = lowerOf(text);
+  // Lowercasing can change length for rare Unicode; fall back to a per-position
+  // match so the offsets still index the original text.
+  if (lower.length === text.length) return scan(lower, query.toLowerCase());
+  const needle = query.toLowerCase();
   const list = [];
-  const needle = caseSensitive ? query : query.toLowerCase();
-  const qlen = query.length;
   let from = 0;
-  while (from + qlen <= text.length) {
-    const candidate = text.slice(from, from + qlen);
-    const hit = caseSensitive ? candidate === query : candidate.toLowerCase() === needle;
-    if (hit) {
-      list.push({ start: from, end: from + qlen });
-      from += qlen;
+  while (from + query.length <= text.length) {
+    if (text.slice(from, from + query.length).toLowerCase() === needle) {
+      list.push({ start: from, end: from + query.length });
+      from += query.length;
     } else {
       from++;
     }

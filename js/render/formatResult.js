@@ -24,7 +24,10 @@ function formatResult(value, precision = DEFAULT_PRECISION) {
 }
 
 function formatValue(value, depth, precision) {
+  if (value instanceof Error) return value.message;
   if (typeof value === 'number') return formatNumber(value, precision);
+  // BigNumber is formatted through the same precision as a plain number.
+  if (value && value.isBigNumber === true) return formatNumber(Number(value), precision);
   if (value instanceof Date) return formatDate(value);
   if (value && value.type === 'calendarInterval') return formatInterval(value.parts);
   if (value && value.isUnit === true) return decodeUserUnits(formatUnit(value, precision));

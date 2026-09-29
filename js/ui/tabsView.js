@@ -247,13 +247,22 @@ function createTabsView(tabBarNode, handlers) {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       handlers.activate(tabElement.dataset.id);
+      return;
+    }
+
+    // Keyboard close, matching the mouse `×`.
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+      event.preventDefault();
+      handlers.close(tabElement.dataset.id);
     }
   });
 
   // Drag to reorder tabs: pointer down on a tab starts a candidate, a move past
-  // the threshold turns it into a drag that live-reorders the bar.
+  // the threshold turns it into a drag that live-reorders the bar. Mouse only —
+  // on touch the bar scrolls instead (touch-action: pan-x), which is what a
+  // finger swipe should do.
   tabBarNode.addEventListener('pointerdown', (event) => {
-    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    if (event.pointerType !== 'mouse' || event.button !== 0) return;
     const tabElement = event.target.closest('.tab');
     if (!tabElement || event.target.closest('.tab-close')) return;
     drag = {

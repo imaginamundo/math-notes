@@ -17,11 +17,30 @@ function get(key) {
   }
 }
 
+// Tell the UI a write failed (usually the storage quota is full) instead of
+// losing the edit silently. Guarded so a worker/test without a window is fine.
+function notifyFailure(key) {
+  try {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('storage:error', { detail: { key } }));
+    }
+  } catch {
+    // no window, or events unavailable
+  }
+}
+
+// Returns whether the write succeeded, so callers that care can react.
 function set(key, value) {
   try {
-    if (available()) globalThis.localStorage.setItem(key, value);
+    if (!available()) {
+      notifyFailure(key);
+      return false;
+    }
+    globalThis.localStorage.setItem(key, value);
+    return true;
   } catch {
-    // storage unavailable or full; treat as a no-op
+    notifyFailure(key);
+    return false;
   }
 }
 

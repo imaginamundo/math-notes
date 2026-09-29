@@ -178,7 +178,12 @@ function initAutocomplete(editableNode, editorScroll) {
   function accept(index = activeIndex) {
     const entry = items[index];
     if (!entry || !range) return close();
-    const next = applyCompletion(editableNode.value, range, entry.text, {
+    // Recompute from the live caret: the popup can stay open while the caret
+    // moves (Home/End, arrow keys, a tab switch), and the stored range would
+    // then rewrite the wrong word.
+    const live = wordRangeAt(editableNode.value, editableNode.selectionStart);
+    if (!live || live.start !== range.start) return close();
+    const next = applyCompletion(editableNode.value, live, entry.text, {
       paren: entry.kind === 'function',
     });
     suppress = true;
@@ -203,6 +208,13 @@ function initAutocomplete(editableNode, editorScroll) {
   }
 
   editableNode.addEventListener('input', () => refresh(false));
+  // The popup follows the word it opened on; if the caret leaves that word
+  // (arrow keys, Home/End, a tab switch), close it rather than complete stale.
+  document.addEventListener('selectionchange', () => {
+    if (!isOpen() || document.activeElement !== editableNode) return;
+    const live = wordRangeAt(editableNode.value, editableNode.selectionStart);
+    if (!live || live.start !== range.start) close();
+  });
   editableNode.addEventListener('keydown', (event) => {
     if (event.isComposing) return;
     const mod = event.metaKey || event.ctrlKey;

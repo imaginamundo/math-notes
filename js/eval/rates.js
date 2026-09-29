@@ -12,9 +12,10 @@ const TIME_TO = /^\s*time\s+to\s+\w+\s+(.+?)\s+at\s+(.+)$/i;
 const PACE = /^(.+?)\s+in\s+(.+)$/i;
 const AT = /^(.+\S)\s+at\s+(\S.+)$/i;
 const FOR = /\s+for\s+(a|an|\d+(?:\.\d+)?)\s+([A-Za-zµ][A-Za-zµ0-9]*)\b/gi;
-const PER = /\s+(?:per|a|an)\s+([A-Za-zµ][A-Za-zµ0-9]*)\b/gi;
+const PER = /\s+(per|a|an)\s+([A-Za-zµ][A-Za-zµ0-9]*)\b/gi;
 
-function preprocessRates(expression) {
+function preprocessRates(expression, context) {
+  const names = context && context.names;
   let expr = expression.trim();
 
   const timeTo = TIME_TO.exec(expr);
@@ -34,7 +35,12 @@ function preprocessRates(expression) {
     FOR,
     (match, amount, unit) => ` * ${amount === 'a' || amount === 'an' ? 1 : amount} ${unit}`
   );
-  expr = expr.replace(PER, ' / $1');
+  expr = expr.replace(PER, (match, connector, unit) => {
+    // `a`/`an` between two variables is not a rate (`x a y`); only `per` always
+    // means division.
+    if (connector.toLowerCase() !== 'per' && names && names.has(unit)) return match;
+    return ` / ${unit}`;
+  });
   return expr;
 }
 

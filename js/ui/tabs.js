@@ -1,4 +1,4 @@
-import { saveSnapshot, latestPerTab } from '../storage/snapshots.js';
+import { saveSnapshot, latestPerTab, deleteSnapshots } from '../storage/snapshots.js';
 import {
   generateId,
   createTab,
@@ -31,13 +31,23 @@ function initTabs(editableNode, onUpdate) {
   // Set by reset(): persistence is stopped so the reload that follows starts
   // from a genuinely empty first-run state.
   let resetting = false;
+  // A local edit whose debounced tab write has not landed yet. Another window's
+  // save must not clobber it, so the cross-window sync waits until it is saved.
+  let dirty = false;
   const tabBarNode = document.getElementById('tabs-bar');
   const { state: loadedState, failed: storageFailed } = loadTabsState();
   state = loadedState;
 
-  const writer = createTabsWriter(() => state);
+  const writer = createTabsWriter(
+    () => state,
+    () => {
+      dirty = false;
+    }
+  );
   const history = createHistoryStore();
-  writer.persist();
+  // When the saved collection was unreadable, do not write over it yet: back it
+  // up (loadTabsState did) and try the snapshots first, then persist.
+  if (!storageFailed) writer.persist();
 
   const view = createTabsView(tabBarNode, {
     getState: () => state,
@@ -150,6 +160,9 @@ function initTabs(editableNode, onUpdate) {
     scheduleSnapshot();
     dispatchInput();
     captureCaret();
+    // The input event deliberately skips the debounced evaluate for programmatic
+    // writes, so evaluate now.
+    onUpdate();
   }
 
   function undo() {
@@ -174,6 +187,7 @@ function initTabs(editableNode, onUpdate) {
     if (resetting) return;
     const value = editableNode.value;
     if (value === lastValue) return;
+    dirty = true;
     history.record(state.activeId, lastValue, value);
     lastValue = value;
     burst.schedule();
@@ -293,6 +307,9 @@ function initTabs(editableNode, onUpdate) {
     if (!state.tabs.length)
       state = createTab(state, t('tabs.defaultName', { n: state.nextTabNumber }));
     history.remove(id);
+    // Forget the tab's snapshots too, so "Restore all" cannot resurrect a tab
+    // the user closed.
+    deleteSnapshots(id).catch(() => {});
     const active = getActiveTab();
     present(active.content, { caret: active.caret });
   }
@@ -361,7 +378,22 @@ function initTabs(editableNode, onUpdate) {
   // Re-render the tab bar (its aria-labels/titles) when the language changes.
   window.addEventListener('language:updated', () => view.render());
 
-  if (storageFailed) recoverFromSnapshots();
+  // Two open windows share one saved collection. When another window saves the
+  // tab collection, adopt it here — unless this window has an edit that has not
+  // been written yet, so the local write wins.
+  window.addEventListener('storage', (event) => {
+    if (event.key !== STORAGE_KEY || event.newValue === null) return;
+    if (dirty) return;
+    const { state: incoming } = loadTabsState();
+    if (!incoming || !incoming.tabs.length) return;
+    if (JSON.stringify(incoming) === JSON.stringify(state)) return;
+    state = incoming;
+    history.clear();
+    const active = getActiveTab();
+    present(active.content, { focus: false, caret: active.caret });
+  });
+
+  if (storageFailed) recoverFromSnapshots().finally(() => writer.persist());
 
   return { switchTab, restoreTab, restoreAll, openSheet, getActiveSheet, seedSheet, reset };
 }

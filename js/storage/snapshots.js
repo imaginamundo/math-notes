@@ -131,4 +131,29 @@ async function clearSnapshots() {
   });
 }
 
-export { saveSnapshot, listSnapshots, latestPerTab, clearSnapshots, SNAPSHOT_LIMIT };
+// Drop every snapshot of one tab. Called when a tab is closed, so a later
+// "Restore all" cannot bring back a tab the user deliberately closed.
+function deleteSnapshots(tabId) {
+  return openDb().then(
+    (db) =>
+      new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE, 'readwrite');
+        const store = tx.objectStore(STORE);
+        const request = store.index('tabId').getAllKeys(tabId);
+        request.onsuccess = () => {
+          for (const key of request.result) store.delete(key);
+        };
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+      })
+  );
+}
+
+export {
+  saveSnapshot,
+  listSnapshots,
+  latestPerTab,
+  clearSnapshots,
+  deleteSnapshots,
+  SNAPSHOT_LIMIT,
+};

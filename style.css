@@ -229,7 +229,8 @@ html.i18n-pending .layout {
   border-top: 1px solid transparent;
   border-right: 1px solid var(--border-faint);
   white-space: nowrap;
-  touch-action: none;
+  /* Let a finger swipe scroll the bar instead of starting a drag-reorder. */
+  touch-action: pan-x;
 }
 .tab.dragging {
   opacity: 0.5;
@@ -776,7 +777,7 @@ button:hover {
 .find-bar {
   position: absolute;
   top: 0.5em;
-  right: calc(1em + var(--safe-right));
+  right: calc(1.5em + var(--safe-right));
   z-index: 2;
   display: none;
   flex-direction: column;
@@ -1117,6 +1118,15 @@ code {
 .settings-files {
   display: flex;
   gap: 0.5em;
+}
+.snapshot-heading {
+  margin: 0.75em 0 0.3em;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+.snapshot-heading:first-child {
+  margin-top: 0;
 }
 .snapshot-row {
   display: flex;

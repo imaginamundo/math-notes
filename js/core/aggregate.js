@@ -174,10 +174,24 @@ function groupCount(group) {
   return count;
 }
 
+// Combining different currencies used to fall through to the plain-number sum
+// (usually 0), which hides the mistake. Report it instead: the values must be
+// converted to one currency first.
+function currencyConflict(groups) {
+  const currencies = groups.filter((group) => group.kind === 'currency');
+  if (currencies.length < 2) return null;
+  const names = currencies.map((group) => group.name);
+  const last = names.pop();
+  return new Error(`Cannot combine ${names.join(', ')} and ${last} — convert them first`);
+}
+
 // Apply the shared total/aggregate rules to a scan. `empty` is what an empty
 // range yields (0 for an aggregate row, null for the running total).
 function combine(summary, mode, empty) {
   const { numericSum, numericCount, numbers, groups } = summary;
+
+  const conflict = currencyConflict(groups);
+  if (conflict) return conflict;
 
   // Exactly one unit group: plain numbers fold into it. Several groups
   // (different dimensions, currencies or affine units) are ignored, leaving

@@ -1,7 +1,9 @@
 // Served from the site root so its scope is `/` and it can cache the app shell
 // and the documentation (a worker under /js/ could only control /js/).
-const cacheName = 'math-notes-v41';
+const cacheName = 'math-notes-v42';
+const APP_SHELL = './index.html';
 const urlsToCache = [
+  './',
   './index.html',
   './style.css',
   './js/core/aggregate.js',
@@ -22,6 +24,7 @@ const urlsToCache = [
   './js/core/totalMode.js',
   './js/core/unitMix.js',
   './js/core/unitNames.js',
+  './js/core/userUnits.js',
   './js/core/vocabulary.js',
   './js/eval/aliases.js',
   './js/eval/calendar.js',
@@ -40,6 +43,7 @@ const urlsToCache = [
   './js/eval/symbols.js',
   './js/eval/timespan.js',
   './js/eval/units.js',
+  './js/eval/userUnits.js',
   './js/eval/wordOperators.js',
   './js/evalClient.js',
   './js/i18n/examples/en.js',
@@ -80,6 +84,7 @@ const urlsToCache = [
   './js/ui/share.js',
   './js/ui/shortcuts.js',
   './js/ui/starterPrompt.js',
+  './js/ui/tabTemplates.js',
   './js/ui/tabs.js',
   './js/ui/tabsHistory.js',
   './js/ui/tabsView.js',
@@ -95,14 +100,22 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', (event) => {
-  // Add each asset on its own so one failure (a transient network error) cannot
-  // abort the whole install and leave the app without an offline shell.
+  // Fail the install if any asset is missing: a half-cached version could mix
+  // new and old modules. The browser retries the install on the next visit.
   event.waitUntil(
-    caches
-      .open(cacheName)
-      .then((cache) => Promise.allSettled(urlsToCache.map((url) => cache.add(url))))
+    caches.open(cacheName).then((cache) =>
+      Promise.all(
+        urlsToCache.map((url) =>
+          cache.add(url).catch((error) => {
+            throw new Error(`Precache failed for ${url}: ${error && error.message}`);
+          })
+        )
+      )
+    )
   );
-  self.skipWaiting();
+  // Deliberately no skipWaiting(): a new version waits until every tab closes,
+  // so an open page keeps one consistent set of modules instead of loading new
+  // ones mid-session.
 });
 
 self.addEventListener('activate', (event) => {
@@ -112,33 +125,33 @@ self.addEventListener('activate', (event) => {
       .then((keys) =>
         Promise.all(keys.filter((key) => key !== cacheName).map((key) => caches.delete(key)))
       )
-      .then(() => self.clients.claim())
   );
 });
 
-// Stale-while-revalidate for same-origin GETs: a cached asset answers
-// immediately (so repeat loads are instant and offline works), while a
-// background fetch refreshes the copy for next time. Uncached requests wait on
-// the network and are cached on success.
+// Cache-first for same-origin GETs: a version's modules are immutable until the
+// next service worker install, so a session never mixes versions. Uncached
+// requests go to the network and are cached on success.
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET' || !request.url.startsWith(self.location.origin)) return;
+
   event.respondWith(
     caches.match(request).then((cached) => {
-      const network = fetch(request).then((response) => {
-        if (response && response.ok) {
-          const copy = response.clone();
-          caches.open(cacheName).then((cache) => cache.put(request, copy));
-        }
-        return response;
-      });
-      if (cached) {
-        // Keep the worker alive until the revalidation settles, but do not make
-        // the page wait on it.
-        event.waitUntil(network.catch(() => {}));
-        return cached;
-      }
-      return network;
+      if (cached) return cached;
+      return fetch(request)
+        .then((response) => {
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(cacheName).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() =>
+          // A navigation offline must show the app shell, not the browser error.
+          request.mode === 'navigate'
+            ? caches.match(APP_SHELL).then((shell) => shell || Response.error())
+            : Response.error()
+        );
     })
   );
 });

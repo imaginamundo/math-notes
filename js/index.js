@@ -68,10 +68,12 @@ const evalClient = createEvalClient(
 
 // Trigger changes: redraw what you typed immediately, then evaluate in the
 // worker on a debounce and fill the results in when it replies.
-contentEditableNode.addEventListener('input', () => {
+contentEditableNode.addEventListener('input', (event) => {
   renderTextLayer(sheetLines(contentEditableNode.value));
   rowRenderer.updateActiveLine(activeLine());
-  evalClient.schedule();
+  // A programmatic write (tab switch, undo/redo, seed) is evaluated immediately
+  // by the tab controller, so only a user edit needs the debounced schedule.
+  if (!event.programmatic) evalClient.schedule();
 });
 contentEditableNode.addEventListener('click', () => rowRenderer.updateActiveLine(activeLine()));
 contentEditableNode.addEventListener('keyup', () => rowRenderer.updateActiveLine(activeLine()));
@@ -123,16 +125,29 @@ contentEditableNode.classList.add('ready');
 window.addEventListener('currency:updated', (event) => {
   evalClient.syncRates(event.detail && event.detail.data);
   evalClient.update();
-  showCurrencyStatus(
-    event.detail && event.detail.source === 'cached'
-      ? t('status.ratesCached')
-      : t('status.ratesLive')
-  );
+  const source = event.detail && event.detail.source;
+  const key =
+    source === 'cached'
+      ? 'status.ratesCached'
+      : source === 'stale'
+        ? 'status.ratesStale'
+        : 'status.ratesLive';
+  showCurrencyStatus(t(key));
 });
 
 window.addEventListener('currency:error', () => {
   evalClient.update();
   showCurrencyStatus(t('status.ratesUnavailable'));
+});
+
+// A failed localStorage write (usually the quota is full) must not be silent.
+window.addEventListener('storage:error', () => {
+  showCurrencyStatus(t('status.storageFull'));
+});
+
+// A generic status line, so features without their own indicator can report one.
+window.addEventListener('status:message', (event) => {
+  if (event.detail) showCurrencyStatus(event.detail);
 });
 
 // A setting change forwards the new value to the engine, then recomputes. The

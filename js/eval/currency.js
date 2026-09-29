@@ -4,6 +4,9 @@ import storage from '../util/storage.js';
 const BASE = 'EUR';
 const API_URL = 'https://api.frankfurter.dev/v1/latest?from=' + BASE;
 const STORAGE_KEY = 'math-notes-currency-rates';
+const FETCH_TIMEOUT = 10000;
+// Re-check for a fresh day's rates while a window stays open (the API is daily).
+const REFRESH_INTERVAL = 60 * 60 * 1000;
 
 function ensureBaseUnit(math) {
   try {
@@ -17,6 +20,8 @@ function registerRates(math, data) {
   if (!math.createUnit || !data || data.base !== BASE || !data.rates) return;
   ensureBaseUnit(math);
   for (const [code, perBase] of Object.entries(data.rates)) {
+    // A missing or non-positive rate would register an Infinity unit, so skip it.
+    if (!Number.isFinite(perBase) || perBase <= 0) continue;
     if (code.toUpperCase() === BASE) continue;
     registerCurrencyCode(code);
     try {
@@ -59,7 +64,9 @@ function fetchRates() {
     notify('currency:updated', { source: 'cached', data: cached });
     return;
   }
-  fetch(API_URL)
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timer = controller ? setTimeout(() => controller.abort(), FETCH_TIMEOUT) : null;
+  fetch(API_URL, controller ? { signal: controller.signal } : undefined)
     .then((res) => {
       if (!res.ok) throw new Error(String(res.status));
       return res.json();
@@ -69,8 +76,21 @@ function fetchRates() {
       notify('currency:updated', { source: 'live', data });
     })
     .catch(() => {
-      if (!cached) notify('currency:error');
+      // Keep working with yesterday's rates, but say they are stale.
+      if (cached) notify('currency:updated', { source: 'stale', data: cached });
+      else notify('currency:error');
+    })
+    .finally(() => {
+      if (timer) clearTimeout(timer);
     });
+}
+
+// A long-open window should pick up a new day's rates without a reload.
+function startRateRefresh() {
+  if (typeof window === 'undefined' || typeof setInterval !== 'function') return;
+  setInterval(() => {
+    if (!isFresh(loadCached())) fetchRates();
+  }, REFRESH_INTERVAL);
 }
 
 function initCurrency(math) {
@@ -85,5 +105,5 @@ function initCurrency(math) {
   });
 }
 
-export { registerRates, loadCached, fetchRates, STORAGE_KEY };
+export { registerRates, loadCached, fetchRates, startRateRefresh, STORAGE_KEY };
 export default initCurrency;

@@ -1,8 +1,11 @@
 import { CURRENCY_SYMBOLS, SYMBOL_SOURCE, isCurrencyCode } from '../core/currencySymbols.js';
-import { BEFORE_WORD, AFTER_WORD } from '../core/identifiers.js';
+import { BEFORE_WORD, AFTER_WORD, WORD } from '../core/identifiers.js';
 
-const SYMBOL_AFTER_NUMBER = new RegExp(`(\\d[\\d.]*)\\s*(${SYMBOL_SOURCE})`, 'g');
-const SYMBOL_BEFORE_NUMBER = new RegExp(`(${SYMBOL_SOURCE})\\s*(\\d[\\d.]*)`, 'g');
+// The boundaries keep a symbol from matching inside a word (`2 leite` must not
+// read `lei`), while still allowing no space (`R$5`, `350usd`). A digit before
+// the symbol is fine, so only letters/digits/underscore are rejected.
+const SYMBOL_AFTER_NUMBER = new RegExp(`(\\d[\\d.]*)\\s*(${SYMBOL_SOURCE})(?![${WORD}_])`, 'gu');
+const SYMBOL_BEFORE_NUMBER = new RegExp(`(?<![${WORD}_])(${SYMBOL_SOURCE})\\s*(\\d[\\d.]*)`, 'gu');
 
 // Currency codes only become units in currency contexts (amounts and `to`/`in`
 // conversions), so bare codes used as identifiers keep their case, e.g.
@@ -19,7 +22,8 @@ const CODE_AFTER_IN = new RegExp(`\\bin(\\s+)(${CODE})${AFTER_WORD}`, 'giu');
 // The codes that act as currency units live in core/currencySymbols.js, so the
 // domain (aggregate/unitMix) and this evaluator read one vocabulary.
 
-function preprocessSymbols(expression) {
+function preprocessSymbols(expression, context) {
+  const names = context && context.names;
   return uppercaseCurrencyCodes(
     expression
       .replace(
@@ -29,24 +33,36 @@ function preprocessSymbols(expression) {
       .replace(
         SYMBOL_BEFORE_NUMBER,
         (match, symbol, number) => `${number} ${CURRENCY_SYMBOLS[symbol]}`
-      )
+      ),
+    names
   );
 }
 
-function uppercaseCurrencyCodes(expression) {
+function uppercaseCurrencyCodes(expression, names) {
+  // A 3-letter token that is a variable must keep its case: `cad = 4` then
+  // `2 cad` is the variable, not the Canadian dollar.
+  const defined = (code) => Boolean(names && names.has(code));
   return (
     expression
-      .replace(CODE_AFTER_NUMBER, (match, number, code) => `${number} ${uppercaseCode(code)}`)
+      .replace(CODE_AFTER_NUMBER, (match, number, code) =>
+        defined(code) ? match : `${number} ${uppercaseCode(code)}`
+      )
       // A currency code before its amount is flipped so the amount leads
       // (`BRL 360 / 30 days` -> `360 BRL / 30 days`), which mathjs reads as the
       // rate `BRL/day` rather than `BRL * days`. Non-currency identifiers are
       // left alone.
       .replace(CODE_BEFORE_NUMBER, (match, code, number) =>
-        isCurrencyCode(code) ? `${number} ${uppercaseCode(code)}` : match
+        !defined(code) && isCurrencyCode(code) ? `${number} ${uppercaseCode(code)}` : match
       )
-      .replace(CODE_BEFORE_TO, (match, code, space) => `${uppercaseCode(code)}${space}to`)
-      .replace(CODE_AFTER_TO, (match, space, code) => `to${space}${uppercaseCode(code)}`)
-      .replace(CODE_AFTER_IN, (match, space, code) => `in${space}${uppercaseCode(code)}`)
+      .replace(CODE_BEFORE_TO, (match, code, space) =>
+        defined(code) ? match : `${uppercaseCode(code)}${space}to`
+      )
+      .replace(CODE_AFTER_TO, (match, space, code) =>
+        defined(code) ? match : `to${space}${uppercaseCode(code)}`
+      )
+      .replace(CODE_AFTER_IN, (match, space, code) =>
+        defined(code) ? match : `in${space}${uppercaseCode(code)}`
+      )
   );
 }
 

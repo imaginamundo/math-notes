@@ -8,6 +8,9 @@ import { generateId, normalizeCaret } from '../core/tabsState.js';
 // store, and the writer reads a live getter rather than holding a stale state.
 const STORAGE_KEY = 'math-notes-tabs';
 const LEGACY_KEY = 'input';
+// Where an unreadable saved collection is copied before the app can overwrite
+// it, so a corrupt value is still recoverable by hand.
+const BACKUP_KEY = 'math-notes-tabs-backup';
 
 function loadTabsState() {
   let saved = null;
@@ -17,6 +20,8 @@ function loadTabsState() {
   } catch {
     // malformed saved collection, fall back to the default below
     failed = true;
+    const raw = storage.get(STORAGE_KEY);
+    if (raw) storage.set(BACKUP_KEY, raw);
   }
   if (!storage.available()) failed = true;
   if (saved && Array.isArray(saved.tabs) && saved.tabs.length) {
@@ -46,8 +51,11 @@ function loadTabsState() {
   return { state: { tabs: [tab], activeId: tab.id, nextTabNumber: 2 }, failed };
 }
 
-function createTabsWriter(getState) {
-  const write = () => storage.set(STORAGE_KEY, JSON.stringify(getState()));
+function createTabsWriter(getState, onWrite) {
+  const write = () => {
+    storage.set(STORAGE_KEY, JSON.stringify(getState()));
+    if (onWrite) onWrite();
+  };
   const debounced = debounce(write, 400);
   return {
     // Write now, regardless of any pending schedule.
@@ -61,4 +69,4 @@ function createTabsWriter(getState) {
   };
 }
 
-export { STORAGE_KEY, LEGACY_KEY, loadTabsState, createTabsWriter };
+export { STORAGE_KEY, LEGACY_KEY, BACKUP_KEY, loadTabsState, createTabsWriter };
