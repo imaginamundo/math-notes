@@ -130,7 +130,7 @@ body {
   background: var(--surface-chip);
   color: var(--color-text);
   font: inherit;
-  font-size: 0.9em;
+  font-size: inherit;
 }
 .doc-search-input::placeholder {
   color: var(--color-text-muted);
