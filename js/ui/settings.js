@@ -260,42 +260,59 @@ function initSettings(contentEditableNode, tabsApi) {
     const container = document.getElementById('snapshot-history');
     const restoreAllButton = document.getElementById('restore-all-button');
     let snapshots = [];
+    let latest = [];
     try {
-      const { latestPerTab } = await import('../storage/snapshots.js');
-      snapshots = await latestPerTab();
+      const mod = await import('../storage/snapshots.js');
+      snapshots = await mod.listSnapshots();
+      latest = await mod.latestPerTab();
     } catch {
       // storage unavailable
     }
     container.textContent = '';
-    restoreAllButton.disabled = !snapshots.length;
+    restoreAllButton.disabled = !latest.length;
     if (!snapshots.length) {
       container.textContent = t('settings.noSnapshots');
       return;
     }
+
+    // Show every snapshot, grouped by tab, so the older ones are reachable.
+    const groups = new Map();
     for (const snapshot of snapshots) {
-      const row = document.createElement('div');
-      row.className = 'snapshot-row';
-
-      const label = document.createElement('span');
-      label.textContent = `${snapshot.name} — ${timeAgo(snapshot.timestamp)}`;
-
-      const restore = document.createElement('button');
-      restore.type = 'button';
-      restore.textContent = t('settings.restore');
-      restore.addEventListener('click', () => {
-        const confirm = window.confirm(
-          t('settings.restoreConfirm', { name: snapshot.name, ago: timeAgo(snapshot.timestamp) })
-        );
-        if (confirm) tabsApi.restoreTab(snapshot);
-      });
-
-      row.appendChild(label);
-      row.appendChild(restore);
-      container.appendChild(row);
+      if (!groups.has(snapshot.tabId)) groups.set(snapshot.tabId, []);
+      groups.get(snapshot.tabId).push(snapshot);
     }
+    for (const entries of groups.values()) {
+      const heading = document.createElement('div');
+      heading.className = 'snapshot-heading';
+      heading.textContent = entries[0].name;
+      container.appendChild(heading);
+
+      for (const snapshot of entries) {
+        const row = document.createElement('div');
+        row.className = 'snapshot-row';
+
+        const label = document.createElement('span');
+        label.textContent = timeAgo(snapshot.timestamp);
+
+        const restore = document.createElement('button');
+        restore.type = 'button';
+        restore.textContent = t('settings.restore');
+        restore.addEventListener('click', () => {
+          const confirm = window.confirm(
+            t('settings.restoreConfirm', { name: snapshot.name, ago: timeAgo(snapshot.timestamp) })
+          );
+          if (confirm) tabsApi.restoreTab(snapshot);
+        });
+
+        row.appendChild(label);
+        row.appendChild(restore);
+        container.appendChild(row);
+      }
+    }
+
     restoreAllButton.onclick = () => {
-      if (!snapshots.length) return;
-      if (window.confirm(t('settings.restoreAllConfirm'))) tabsApi.restoreAll(snapshots);
+      if (!latest.length) return;
+      if (window.confirm(t('settings.restoreAllConfirm'))) tabsApi.restoreAll(latest);
     };
   }
 }

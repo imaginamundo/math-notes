@@ -332,6 +332,23 @@ test('snapshots are saved to IndexedDB and recover corrupt localStorage', async 
   assert.deepEqual(errors, []);
 });
 
+test('snapshots are deleted with their tab', async () => {
+  await newPage();
+  const result = await page.evaluate(async () => {
+    const mod = await import('/js/storage/snapshots.js');
+    await mod.saveSnapshot({ id: 'tab-x', name: 'X', content: 'a' });
+    await mod.saveSnapshot({ id: 'tab-y', name: 'Y', content: 'b' });
+    const before = (await mod.listSnapshots()).map((s) => s.tabId).sort();
+    await mod.deleteSnapshots('tab-x');
+    const after = (await mod.listSnapshots()).map((s) => s.tabId).sort();
+    await mod.clearSnapshots();
+    return { before, after };
+  });
+  assert.deepEqual(result.before, ['tab-x', 'tab-y']);
+  assert.deepEqual(result.after, ['tab-y']);
+  assert.deepEqual(errors, []);
+});
+
 test('tabs can be reordered by dragging', async () => {
   await newPage();
   await page.evaluate(() => document.querySelector('.tab-new').click());

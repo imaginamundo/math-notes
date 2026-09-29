@@ -1,4 +1,4 @@
-import { saveSnapshot, latestPerTab } from '../storage/snapshots.js';
+import { saveSnapshot, latestPerTab, deleteSnapshots } from '../storage/snapshots.js';
 import {
   generateId,
   createTab,
@@ -304,6 +304,9 @@ function initTabs(editableNode, onUpdate) {
     if (!state.tabs.length)
       state = createTab(state, t('tabs.defaultName', { n: state.nextTabNumber }));
     history.remove(id);
+    // Forget the tab's snapshots too, so "Restore all" cannot resurrect a tab
+    // the user closed.
+    deleteSnapshots(id).catch(() => {});
     const active = getActiveTab();
     present(active.content, { caret: active.caret });
   }
