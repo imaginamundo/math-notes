@@ -1065,6 +1065,25 @@ test('deleting a line keeps the row nodes below it', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('the active line result is announced to screen readers', async () => {
+  await newPage();
+  await setContent('1 + 1\n2 + 2');
+  await waitFor(() =>
+    page.evaluate(() => {
+      const live = document.querySelector('.result-live');
+      return Boolean(
+        live && live.getAttribute('aria-live') === 'polite' && live.textContent === '4'
+      );
+    })
+  );
+  assert.equal(
+    await page.evaluate(() => document.querySelector('.result-live').textContent),
+    '4',
+    'the caret is on the second line, so its result is announced'
+  );
+  assert.deepEqual(errors, []);
+});
+
 test('blank lines keep the ghost rows aligned with the input', async () => {
   await newPage();
   await setContent('pizza = 4\npeople = 4');

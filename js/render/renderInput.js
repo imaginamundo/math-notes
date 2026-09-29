@@ -20,6 +20,7 @@ function createRowRenderer(view) {
   let patched = null; // lines[] whose results are currently shown, or null
   let dirtyFrom = null; // first row whose result is still outstanding
   let activeRow = -1; // row the caret is on, for the expanded-error treatment
+  let currentResults = null; // the results currently shown, for announcement
 
   function createRow(line) {
     const row = document.createElement('div');
@@ -187,6 +188,8 @@ function createRowRenderer(view) {
     layoutGroups(from);
     patched = textLines.slice();
     dirtyFrom = null;
+    currentResults = results || null;
+    announceActive();
   }
 
   function setGroupClass(row, group) {
@@ -297,6 +300,43 @@ function createRowRenderer(view) {
     if (rows[index]) rows[index].classList.toggle('active', true);
     // After a patch the active row's ghost has been reset to its short form.
     setExpanded(index, true);
+    announceActive();
+  }
+
+  // Announce the active line's result through a polite live region, so a screen
+  // reader hears the answer for the line the caret is on (the total bar only
+  // announces the whole-sheet total). Debounced, and only when the text changes.
+  const ANNOUNCE_DELAY = 800;
+  let announceTimer = null;
+  let announcedText = '';
+
+  function activeResultText() {
+    if (activeRow < 0 || !currentResults) return '';
+    const text = ghostText(currentResults[activeRow]);
+    if (!text) return '';
+    return text.error ? text.full : text.value.replace(/^→\s*/, '');
+  }
+
+  function announceActive() {
+    const text = activeResultText();
+    clearTimeout(announceTimer);
+    announceTimer = setTimeout(() => {
+      if (text === announcedText) return;
+      announcedText = text;
+      liveRegion().textContent = text;
+    }, ANNOUNCE_DELAY);
+  }
+
+  function liveRegion() {
+    let live = document.querySelector('.result-live');
+    if (!live) {
+      live = document.createElement('span');
+      live.className = 'sr-only result-live';
+      live.setAttribute('role', 'status');
+      live.setAttribute('aria-live', 'polite');
+      document.body.appendChild(live);
+    }
+    return live;
   }
 
   function patchRow(row, result) {
