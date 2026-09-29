@@ -3,7 +3,6 @@ import {
   DEFAULT_LANGUAGE,
   normalizeLanguage,
   readStoredLanguage,
-  setLanguage as setCoreLanguage,
   writeLanguage as persistLanguage,
 } from '../core/language.js';
 import en from './ui/en.js';
@@ -82,7 +81,6 @@ function getLocale() {
 // lang>), then let the dynamically built UI redraw itself.
 function setLocale(language, { persist = true } = {}) {
   current = normalizeLanguage(language);
-  setCoreLanguage(current);
   if (persist) persistLanguage(current);
   if (typeof document !== 'undefined') {
     applyTranslations(document);
