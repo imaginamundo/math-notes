@@ -299,18 +299,42 @@ function button(className, label, title) {
  * @param {boolean} caseSensitive
  * @returns {Array<{ start: number, end: number }>}
  */
+// The lowercased sheet is cached between keystrokes, so a search is one indexOf
+// scan rather than slicing and lowercasing at every position.
+let lowerCache = { text: null, value: '' };
+
+function lowerOf(text) {
+  if (lowerCache.text !== text) lowerCache = { text, value: text.toLowerCase() };
+  return lowerCache.value;
+}
+
+// Non-overlapping occurrences of `needle` in `haystack`, in order.
+function scan(haystack, needle) {
+  const list = [];
+  const length = needle.length;
+  let from = 0;
+  for (;;) {
+    const index = haystack.indexOf(needle, from);
+    if (index === -1) return list;
+    list.push({ start: index, end: index + length });
+    from = index + length;
+  }
+}
+
 function computeMatches(text, query, caseSensitive) {
   if (!query || query.includes('\n')) return [];
+  if (caseSensitive) return scan(text, query);
+  const lower = lowerOf(text);
+  // Lowercasing can change length for rare Unicode; fall back to a per-position
+  // match so the offsets still index the original text.
+  if (lower.length === text.length) return scan(lower, query.toLowerCase());
+  const needle = query.toLowerCase();
   const list = [];
-  const needle = caseSensitive ? query : query.toLowerCase();
-  const qlen = query.length;
   let from = 0;
-  while (from + qlen <= text.length) {
-    const candidate = text.slice(from, from + qlen);
-    const hit = caseSensitive ? candidate === query : candidate.toLowerCase() === needle;
-    if (hit) {
-      list.push({ start: from, end: from + qlen });
-      from += qlen;
+  while (from + query.length <= text.length) {
+    if (text.slice(from, from + query.length).toLowerCase() === needle) {
+      list.push({ start: from, end: from + query.length });
+      from += query.length;
     } else {
       from++;
     }
