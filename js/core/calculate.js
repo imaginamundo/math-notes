@@ -603,6 +603,11 @@ function createEngine() {
       const endGroup = groups.byEnd.get(i);
       if (endGroup) {
         const value = aggregateAbove(results, endGroup.start + 1, i, 'sum');
+        if (value instanceof Error) {
+          results[endGroup.start] = { type: 'error', value: value.message };
+          results[i] = { type: 'value', value: undefined };
+          continue;
+        }
         results[endGroup.start] = { type: 'value', value, aggregate: true };
         results[i] = { type: 'value', value: undefined };
         if (value !== undefined) previousResult = value;
@@ -647,6 +652,10 @@ function createEngine() {
         const mode = tagAggregateMode(parsed.code);
         if (mode) {
           const value = tagAggregate(results, tags, i, mode, math);
+          if (value instanceof Error) {
+            results[i] = { type: 'error', value: value.message };
+            continue;
+          }
           if (value === null) {
             results[i] = { type: 'error', value: tagError(tags) };
             continue;
@@ -671,6 +680,10 @@ function createEngine() {
 
       if (keyword) {
         const value = aggregateAbove(results, blockStart, i, keyword);
+        if (value instanceof Error) {
+          results[i] = { type: 'error', value: value.message };
+          continue;
+        }
         results[i] = { type: 'value', value, aggregate: true };
         if (value !== undefined) previousResult = value;
         continue;
@@ -685,6 +698,16 @@ function createEngine() {
       if (AGGREGATE_WORD.test(parsed.code)) {
         const blockSum = aggregateAbove(results, blockStart, i, 'sum');
         const blockAvg = aggregateAbove(results, blockStart, i, 'average');
+        const conflict =
+          blockSum instanceof Error ? blockSum : blockAvg instanceof Error ? blockAvg : null;
+        if (conflict) {
+          results[i] = {
+            type: 'error',
+            value: conflict.message,
+            tags: tags.length ? tags : undefined,
+          };
+          continue;
+        }
         const substituted = substituteAggregates(parsed, blockSum, blockAvg, variables);
         parsedLine = substituted.parsed;
         aggregateValues = substituted.values;

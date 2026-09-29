@@ -24,6 +24,7 @@ function formatResult(value, precision = DEFAULT_PRECISION) {
 }
 
 function formatValue(value, depth, precision) {
+  if (value instanceof Error) return value.message;
   if (typeof value === 'number') return formatNumber(value, precision);
   if (value instanceof Date) return formatDate(value);
   if (value && value.type === 'calendarInterval') return formatInterval(value.parts);

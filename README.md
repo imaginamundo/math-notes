@@ -12,8 +12,9 @@ Based on [Numi](https://numi.app/) and [Soulver](https://soulver.app/).
   A bare number is read in the first unit used for its dimension (so appending a
   larger unit adds to the total instead of reinterpreting the earlier numbers),
   compatible units (e.g. `cm` + `m`) merge into the largest present for display,
-  and mixed currencies/units fall back to the plain numeric sum. The total bar's
-  dropdown switches it between the sum, average and median.
+  mixed dimensions fall back to the plain numeric sum, and mixing two currencies
+  is an error (convert to one first). The total bar's dropdown switches it
+  between the sum, average and median.
 - **Tabs** for separate worksheets — rename by double-clicking a tab, close with
   `×` (you're asked to confirm), add with `+`, or drag a tab to reorder it.
   Switch with `Ctrl+Tab` or `⌘1…9` / `Ctrl+1…9`. Everything is saved locally.
