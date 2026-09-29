@@ -571,6 +571,161 @@ function createEngine() {
     return { variables, previousResult, lastBlankIndex };
   }
 
+  // The per-line cases, in order. A handler returns true when it has produced
+  // the row, so the caller stops; `handleExpression` always handles, so no line
+  // falls through. They share one `context` object because the cases build on
+  // each other (a tag line is rewritten before it is evaluated).
+  function handleGroupEnd(ctx) {
+    const endGroup = ctx.groups.byEnd.get(ctx.i);
+    if (!endGroup) return false;
+    const value = aggregateAbove(ctx.results, endGroup.start + 1, ctx.i, 'sum');
+    if (value instanceof Error) {
+      ctx.results[endGroup.start] = { type: 'error', value: value.message };
+      ctx.results[ctx.i] = { type: 'value', value: undefined };
+      return true;
+    }
+    ctx.results[endGroup.start] = { type: 'value', value, aggregate: true };
+    ctx.results[ctx.i] = { type: 'value', value: undefined };
+    if (value !== undefined) ctx.previousResult = value;
+    return true;
+  }
+
+  function handleStrayEnd(ctx) {
+    if (ctx.parsed.code.trim() !== 'end') return false;
+    ctx.results[ctx.i] = { type: 'error', value: '"end" without a matching group header' };
+    return true;
+  }
+
+  function handleUnitDefinition(ctx) {
+    const unit = unitDefinition(ctx.inputLines[ctx.i]);
+    if (!unit) return false;
+    const outcome = defineUserUnit(unit.name, parseLine(ctx.line).rhs, { ...ctx.variables });
+    ctx.results[ctx.i] = outcome.error
+      ? { type: 'error', value: outcome.error }
+      : { type: 'value', value: outcome.value, aggregate: true, unitDef: true };
+    return true;
+  }
+
+  // A tag used in a calculation (`#food * 2`) is substituted with the tag's
+  // aggregate and then handled by the later cases, so this one returns false.
+  function handleTagSubstitution(ctx) {
+    if (!(ctx.tags.length && !ctx.parsed.valid)) return false;
+    const substituted = substituteTags(ctx.parsed, ctx.results, ctx.i, math);
+    if (substituted.error) {
+      ctx.results[ctx.i] = { type: 'error', value: substituted.error };
+      return true;
+    }
+    ctx.tagScope = substituted.values;
+    ctx.parsed = parseLine(substituted.text);
+    ctx.tags = [];
+    return false;
+  }
+
+  function handleTagAggregate(ctx) {
+    if (!ctx.tags.length) return false;
+    const mode = tagAggregateMode(ctx.parsed.code);
+    if (!mode) return false;
+    const value = tagAggregate(ctx.results, ctx.tags, ctx.i, mode, math);
+    if (value instanceof Error) {
+      ctx.results[ctx.i] = { type: 'error', value: value.message };
+      return true;
+    }
+    if (value === null) {
+      ctx.results[ctx.i] = { type: 'error', value: tagError(ctx.tags) };
+      return true;
+    }
+    ctx.results[ctx.i] = { type: 'value', value, aggregate: true };
+    if (value !== undefined) ctx.previousResult = value;
+    return true;
+  }
+
+  function handleReservedLabel(ctx) {
+    if (!(ctx.original.isAssignment && isReservedLabel(ctx.original.label))) return false;
+    ctx.results[ctx.i] = { type: 'error', value: `"${ctx.original.label}" is a reserved word` };
+    return true;
+  }
+
+  function handleBareAggregate(ctx) {
+    const group = ctx.groups.groupOfLine.get(ctx.i);
+    const blockStart = group ? group.start + 1 : ctx.lastBlankIndex + 1;
+    const bare = ctx.parsed.code.trim();
+    // A variable named like an aggregate keyword shadows it (`total = 5`).
+    const keyword =
+      ctx.variables[bare] === undefined ? AGGREGATE_KEYWORDS[bare.toLowerCase()] : undefined;
+    if (!keyword) return false;
+    const value = aggregateAbove(ctx.results, blockStart, ctx.i, keyword);
+    if (value instanceof Error) {
+      ctx.results[ctx.i] = { type: 'error', value: value.message };
+      return true;
+    }
+    ctx.results[ctx.i] = { type: 'value', value, aggregate: true };
+    if (value !== undefined) ctx.previousResult = value;
+    return true;
+  }
+
+  function handleExpression(ctx) {
+    const group = ctx.groups.groupOfLine.get(ctx.i);
+    const blockStart = group ? group.start + 1 : ctx.lastBlankIndex + 1;
+    const scope = { ...ctx.variables };
+    if (ctx.tagScope) Object.assign(scope, ctx.tagScope);
+    if (ctx.previousResult !== undefined) scope.prev = ctx.previousResult;
+
+    let parsedLine = ctx.parsed;
+    let aggregateValues = null;
+    if (AGGREGATE_WORD.test(ctx.parsed.code)) {
+      const blockSum = aggregateAbove(ctx.results, blockStart, ctx.i, 'sum');
+      const blockAvg = aggregateAbove(ctx.results, blockStart, ctx.i, 'average');
+      const conflict =
+        blockSum instanceof Error ? blockSum : blockAvg instanceof Error ? blockAvg : null;
+      if (conflict) {
+        ctx.results[ctx.i] = {
+          type: 'error',
+          value: conflict.message,
+          tags: ctx.tags.length ? ctx.tags : undefined,
+        };
+        return true;
+      }
+      const substituted = substituteAggregates(ctx.parsed, blockSum, blockAvg, ctx.variables);
+      parsedLine = substituted.parsed;
+      aggregateValues = substituted.values;
+    }
+
+    const resolved = resolveLineRefs(parsedLine, ctx.results, ctx.i);
+    if (resolved.error) {
+      ctx.results[ctx.i] = {
+        type: 'error',
+        value: resolved.error,
+        tags: ctx.tags.length ? ctx.tags : undefined,
+      };
+      return true;
+    }
+    parsedLine = resolved.parsed;
+    Object.assign(scope, resolved.values);
+    if (aggregateValues) Object.assign(scope, aggregateValues);
+
+    const { type, result, variable } = evaluateLine(parsedLine, scope);
+    if (variable) ctx.variables[variable.label] = variable.value;
+    ctx.results[ctx.i] = {
+      type,
+      value: result,
+      assigned: variable ? variable.value : undefined,
+      tags: ctx.tags.length ? ctx.tags : undefined,
+    };
+    if (feedsPrev(ctx.results[ctx.i])) ctx.previousResult = result;
+    return true;
+  }
+
+  const LINE_HANDLERS = [
+    handleGroupEnd,
+    handleStrayEnd,
+    handleUnitDefinition,
+    handleTagSubstitution,
+    handleTagAggregate,
+    handleReservedLabel,
+    handleBareAggregate,
+    handleExpression,
+  ];
+
   /**
    * Evaluate a sheet line by line.
    * @param {string[]} inputLines
@@ -611,160 +766,34 @@ function createEngine() {
     // Reuse the results of unchanged lines and rebuild the evaluation context up
     // to the first changed line from the cached values (no mathjs evaluation).
     const results = cache.results.slice(0, startLine);
-    let { variables, previousResult, lastBlankIndex } = replayContext(
+    const replayed = replayContext(lines, inputLines, results, groups, startLine);
+    const context = {
       lines,
       inputLines,
       results,
       groups,
-      startLine
-    );
+      variables: replayed.variables,
+      previousResult: replayed.previousResult,
+      lastBlankIndex: replayed.lastBlankIndex,
+      i: 0,
+      line: '',
+      parsed: null,
+      original: null,
+      tags: [],
+      tagScope: null,
+    };
 
     for (let i = startLine; i < lines.length; i++) {
-      const line = lines[i];
-      if (line.trim() === '' && !groups.groupOfLine.has(i)) lastBlankIndex = i;
-
-      let parsed = parseLine(line);
-      // The raw label, before mangleLines rewrote multi-word names.
-      const original = parseLine(inputLines[i]);
-
-      // A closing `end` row finalises the group: the subtotal is shown on the
-      // header row (an aggregate result, so it never double counts in the
-      // running total), while the `end` row itself stays inert.
-      const endGroup = groups.byEnd.get(i);
-      if (endGroup) {
-        const value = aggregateAbove(results, endGroup.start + 1, i, 'sum');
-        if (value instanceof Error) {
-          results[endGroup.start] = { type: 'error', value: value.message };
-          results[i] = { type: 'value', value: undefined };
-          continue;
-        }
-        results[endGroup.start] = { type: 'value', value, aggregate: true };
-        results[i] = { type: 'value', value: undefined };
-        if (value !== undefined) previousResult = value;
-        continue;
+      context.i = i;
+      context.line = lines[i];
+      if (context.line.trim() === '' && !groups.groupOfLine.has(i)) context.lastBlankIndex = i;
+      context.parsed = parseLine(context.line);
+      context.original = parseLine(inputLines[i]);
+      context.tags = context.parsed.tags;
+      context.tagScope = null;
+      for (const handle of LINE_HANDLERS) {
+        if (handle(context)) break;
       }
-
-      // An `end` row with no open group is a mistake, not an unknown symbol.
-      if (parsed.code.trim() === 'end') {
-        results[i] = { type: 'error', value: '"end" without a matching group header' };
-        continue;
-      }
-
-      // A `unit <name> = <expression>` line registers a custom unit. The raw
-      // line names it; the rewritten line carries the definition, with any other
-      // custom units already rewritten to their registered names.
-      const unit = unitDefinition(inputLines[i]);
-      if (unit) {
-        const outcome = defineUserUnit(unit.name, parseLine(lines[i]).rhs, { ...variables });
-        results[i] = outcome.error
-          ? { type: 'error', value: outcome.error }
-          : { type: 'value', value: outcome.value, aggregate: true, unitDef: true };
-        continue;
-      }
-
-      // Tags. A trailing tag (`20 #food`) labels this line, and a line that is
-      // only tags (`#food`, or `sum #food`) aggregates the tagged rows above.
-      // Tags used inside a calculation (`#food * 2`, `#food + #other`) are
-      // substituted with their aggregate values and the line is evaluated.
-      let tags = parsed.tags;
-      let tagScope = null;
-      if (tags.length && !parsed.valid) {
-        const substituted = substituteTags(parsed, results, i, math);
-        if (substituted.error) {
-          results[i] = { type: 'error', value: substituted.error };
-          continue;
-        }
-        tagScope = substituted.values;
-        parsed = parseLine(substituted.text);
-        tags = [];
-      }
-      if (tags.length) {
-        const mode = tagAggregateMode(parsed.code);
-        if (mode) {
-          const value = tagAggregate(results, tags, i, mode, math);
-          if (value instanceof Error) {
-            results[i] = { type: 'error', value: value.message };
-            continue;
-          }
-          if (value === null) {
-            results[i] = { type: 'error', value: tagError(tags) };
-            continue;
-          }
-          results[i] = { type: 'value', value, aggregate: true };
-          if (value !== undefined) previousResult = value;
-          continue;
-        }
-      }
-
-      if (original.isAssignment && isReservedLabel(original.label)) {
-        results[i] = { type: 'error', value: `"${original.label}" is a reserved word` };
-        continue;
-      }
-
-      const group = groups.groupOfLine.get(i);
-      const blockStart = group ? group.start + 1 : lastBlankIndex + 1;
-      const bare = parsed.code.trim();
-      // A variable named like an aggregate keyword shadows it (`total = 5`).
-      const keyword =
-        variables[bare] === undefined ? AGGREGATE_KEYWORDS[bare.toLowerCase()] : undefined;
-
-      if (keyword) {
-        const value = aggregateAbove(results, blockStart, i, keyword);
-        if (value instanceof Error) {
-          results[i] = { type: 'error', value: value.message };
-          continue;
-        }
-        results[i] = { type: 'value', value, aggregate: true };
-        if (value !== undefined) previousResult = value;
-        continue;
-      }
-
-      const scope = { ...variables };
-      if (tagScope) Object.assign(scope, tagScope);
-      if (previousResult !== undefined) scope.prev = previousResult;
-
-      let parsedLine = parsed;
-      let aggregateValues = null;
-      if (AGGREGATE_WORD.test(parsed.code)) {
-        const blockSum = aggregateAbove(results, blockStart, i, 'sum');
-        const blockAvg = aggregateAbove(results, blockStart, i, 'average');
-        const conflict =
-          blockSum instanceof Error ? blockSum : blockAvg instanceof Error ? blockAvg : null;
-        if (conflict) {
-          results[i] = {
-            type: 'error',
-            value: conflict.message,
-            tags: tags.length ? tags : undefined,
-          };
-          continue;
-        }
-        const substituted = substituteAggregates(parsed, blockSum, blockAvg, variables);
-        parsedLine = substituted.parsed;
-        aggregateValues = substituted.values;
-      }
-
-      const resolved = resolveLineRefs(parsedLine, results, i);
-      if (resolved.error) {
-        results[i] = {
-          type: 'error',
-          value: resolved.error,
-          tags: tags.length ? tags : undefined,
-        };
-        continue;
-      }
-      parsedLine = resolved.parsed;
-      Object.assign(scope, resolved.values);
-      if (aggregateValues) Object.assign(scope, aggregateValues);
-
-      const { type, result, variable } = evaluateLine(parsedLine, scope);
-      if (variable) variables[variable.label] = variable.value;
-      results[i] = {
-        type,
-        value: result,
-        assigned: variable ? variable.value : undefined,
-        tags: tags.length ? tags : undefined,
-      };
-      if (feedsPrev(results[i])) previousResult = result;
     }
 
     cache.lines = lines;
