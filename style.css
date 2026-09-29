@@ -1178,8 +1178,7 @@ a:hover {
     min-width: 44px;
     min-height: 44px;
   }
-  .footer button,
-  .footer .docs {
+  .footer button {
     min-height: 44px;
   }
   #total-mode {
