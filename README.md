@@ -15,8 +15,10 @@ Based on [Numi](https://numi.app/) and [Soulver](https://soulver.app/).
   mixed dimensions fall back to the plain numeric sum, and mixing two currencies
   is an error (convert to one first). The total bar's dropdown switches it
   between the sum, average and median.
-- **Tabs** for separate worksheets — rename by double-clicking a tab, close with
-  `×` (you're asked to confirm), add with `+`, or drag a tab to reorder it.
+- **Tabs** for separate worksheets — rename by double-clicking a tab (or `F2` on
+  a focused tab, or press-and-hold on touch), close with `×` (you're asked to
+  confirm), add with `+`, start from a template with the `⌄` beside it (budget,
+  trip cost, invoice, savings goal, split a bill), or drag a tab to reorder it.
   Switch with `Ctrl+Tab` or `⌘1…9` / `Ctrl+1…9`. Everything is saved locally.
 - **Undo / redo** per tab — `⌘Z` / `Ctrl+Z` (and `⇧⌘Z` to redo) restores the
   last change, with a separate history for every tab.

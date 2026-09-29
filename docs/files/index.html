@@ -64,9 +64,9 @@
 <ul>
 <li><strong>Switch</strong> — click a tab (or use <code>←</code>/<code>→</code> once focused, or <code>Ctrl+Tab</code>).</li>
 <li><strong>Reorder</strong> — click and drag a tab to a new position.</li>
-<li><strong>Rename</strong> — double-click the tab name.</li>
+<li><strong>Rename</strong> — double-click the tab name (or press <code>F2</code> on a focused tab; on a touchscreen, press and hold).</li>
 <li><strong>Close</strong> — click the <code>×</code> (you are asked to confirm).</li>
-<li><strong>Add</strong> — click the <code>+</code> tab.</li>
+<li><strong>Add</strong> — click the <code>+</code> tab, or the <code>⌄</code> beside it to start from a template (budget, trip cost, invoice, savings goal, split a bill).</li>
 </ul>
 <h2 id="export-and-import">Export and import<a class="doc-anchor" href="#export-and-import" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p>Use <strong>Settings → Files</strong> to download the active sheet as a text file, or load one from a file. The same actions are on <code>⇧⌘E</code> / <code>Ctrl+Shift+E</code> (export) and <code>⇧⌘I</code> / <code>Ctrl+Shift+I</code> (import).</p>
@@ -74,10 +74,10 @@
 <p>The <strong>Share</strong> button copies a link that carries the active sheet inside it. Anyone who opens it is asked whether to open the sheet in a new tab; it never replaces what they already have.</p>
 <p>Nothing is uploaded. The sheet travels in the link&#39;s <code>#</code> fragment, which browsers never send to a server — it does not land in an access log and is not forwarded in a <code>Referer</code> header.</p>
 <h2 id="auto-saved-snapshots">Auto-saved snapshots<a class="doc-anchor" href="#auto-saved-snapshots" aria-label="Link to this section" title="Link to this section">#</a></h2>
-<p>Every tab&#39;s edits are backed up to IndexedDB as versioned snapshots. Open <strong>Settings → Recover</strong> to see the history and restore a snapshot, or use <strong>Restore all from latest backup</strong> to bring back every tab. Snapshots are stored deflated to keep them small.</p>
-<p>If localStorage is unavailable or corrupt, sheets are rebuilt automatically from the backups.</p>
+<p>Every tab&#39;s edits are backed up to IndexedDB as versioned snapshots. Open <strong>Settings → Recover</strong> to see every snapshot, grouped by tab, and restore any of them, or use <strong>Restore all from latest backup</strong> to bring back every tab. Closing a tab also removes its snapshots. Snapshots are stored deflated to keep them small.</p>
+<p>If localStorage is unavailable or corrupt, sheets are rebuilt automatically from the backups, and a corrupt value is copied aside rather than lost.</p>
 <h2 id="reset">Reset<a class="doc-anchor" href="#reset" aria-label="Link to this section" title="Link to this section">#</a></h2>
-<p><strong>Settings → Reset → Reset data</strong> clears the theme, tabs and all stored data back to their defaults. Export anything you want to keep first.</p>
+<p><strong>Settings → Reset → Reset data</strong> clears the theme, tabs and all stored data back to their defaults, then opens a fresh <strong>Welcome</strong> sheet and restarts the tab counter. Export anything you want to keep first.</p>
 <h2 id="privacy">Privacy<a class="doc-anchor" href="#privacy" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p>Sheets stay on your device. The only network request the app makes is for currency rates, and those are cached for offline use. See <a href="/docs/about/">About</a> for the libraries involved.</p>
       </article>

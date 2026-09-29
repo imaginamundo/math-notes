@@ -8,9 +8,9 @@ Use the tabs at the top to keep separate worksheets. Every tab is saved automati
 
 - **Switch** — click a tab (or use `←`/`→` once focused, or `Ctrl+Tab`).
 - **Reorder** — click and drag a tab to a new position.
-- **Rename** — double-click the tab name.
+- **Rename** — double-click the tab name (or press `F2` on a focused tab; on a touchscreen, press and hold).
 - **Close** — click the `×` (you are asked to confirm).
-- **Add** — click the `+` tab.
+- **Add** — click the `+` tab, or the `⌄` beside it to start from a template (budget, trip cost, invoice, savings goal, split a bill).
 
 ## Export and import
 
@@ -24,13 +24,13 @@ Nothing is uploaded. The sheet travels in the link's `#` fragment, which browser
 
 ## Auto-saved snapshots
 
-Every tab's edits are backed up to IndexedDB as versioned snapshots. Open **Settings → Recover** to see the history and restore a snapshot, or use **Restore all from latest backup** to bring back every tab. Snapshots are stored deflated to keep them small.
+Every tab's edits are backed up to IndexedDB as versioned snapshots. Open **Settings → Recover** to see every snapshot, grouped by tab, and restore any of them, or use **Restore all from latest backup** to bring back every tab. Closing a tab also removes its snapshots. Snapshots are stored deflated to keep them small.
 
-If localStorage is unavailable or corrupt, sheets are rebuilt automatically from the backups.
+If localStorage is unavailable or corrupt, sheets are rebuilt automatically from the backups, and a corrupt value is copied aside rather than lost.
 
 ## Reset
 
-**Settings → Reset → Reset data** clears the theme, tabs and all stored data back to their defaults. Export anything you want to keep first.
+**Settings → Reset → Reset data** clears the theme, tabs and all stored data back to their defaults, then opens a fresh **Welcome** sheet and restarts the tab counter. Export anything you want to keep first.
 
 ## Privacy
 

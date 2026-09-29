@@ -8,9 +8,9 @@ Usa las pestañas de arriba para mantener hojas separadas. Cada pestaña se guar
 
 - **Cambiar** — haz clic en una pestaña (o usa `←`/`→` con ella enfocada, o `Ctrl+Tab`).
 - **Reordenar** — haz clic y arrastra una pestaña a otra posición.
-- **Renombrar** — haz doble clic en el nombre de la pestaña.
+- **Renombrar** — haz doble clic en el nombre de la pestaña (o pulsa `F2` con la pestaña enfocada; en una pantalla táctil, mantén pulsado).
 - **Cerrar** — haz clic en la `×` (se te pedirá confirmación).
-- **Añadir** — haz clic en la pestaña `+`.
+- **Añadir** — haz clic en la pestaña `+`, o en el `⌄` de al lado para empezar desde una plantilla (presupuesto, coste del viaje, factura, meta de ahorro, dividir la cuenta).
 
 ## Exportar e importar
 
@@ -24,13 +24,13 @@ No se sube nada. La hoja viaja en el fragmento `#` del enlace, que los navegador
 
 ## Copias automáticas
 
-Las ediciones de cada pestaña se copian a IndexedDB como snapshots versionados. Abre **Ajustes → Recuperar** para ver el historial y restaurar un snapshot, o usa **Restaurar todo desde la última copia** para recuperar todas las pestañas. Los snapshots se guardan comprimidos para ocupar poco.
+Las ediciones de cada pestaña se copian a IndexedDB como snapshots versionados. Abre **Ajustes → Recuperar** para ver todos los snapshots, agrupados por pestaña, y restaurar cualquiera de ellos, o usa **Restaurar todo desde la última copia** para recuperar todas las pestañas. Cerrar una pestaña también elimina sus snapshots. Los snapshots se guardan comprimidos para ocupar poco.
 
-Si localStorage no está disponible o está corrupto, las hojas se reconstruyen automáticamente desde las copias de seguridad.
+Si localStorage no está disponible o está corrupto, las hojas se reconstruyen automáticamente desde las copias de seguridad, y un valor corrupto se copia aparte en vez de perderse.
 
 ## Restablecer
 
-**Ajustes → Restablecer → Restablecer datos** borra el tema, las pestañas y todos los datos guardados, volviendo a los valores predeterminados. Exporta antes lo que quieras conservar.
+**Ajustes → Restablecer → Restablecer datos** borra el tema, las pestañas y todos los datos guardados, volviendo a los valores predeterminados, y después abre una hoja de **Bienvenida** nueva y reinicia el contador de pestañas. Exporta antes lo que quieras conservar.
 
 ## Privacidad
 
