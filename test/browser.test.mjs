@@ -1014,6 +1014,28 @@ test('the horizontal scroll clears the gutter at the start of an overflowing lin
   assert.deepEqual(errors, []);
 });
 
+test('deleting a line keeps the row nodes below it', async () => {
+  await newPage();
+  await setContent('a\nb\nc\nd');
+  await wait(250);
+  const before = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll('#view .line-row')];
+    rows[rows.length - 1].dataset.probe = 'keep';
+    return rows.length;
+  });
+  assert.equal(before, 4);
+
+  await setContent('a\nc\nd'); // delete the second line
+  await wait(250);
+  const state = await page.evaluate(() => ({
+    rows: document.querySelectorAll('#view .line-row').length,
+    kept: document.querySelector('#view .line-row[data-probe="keep"]')?.textContent,
+  }));
+  assert.equal(state.rows, 3);
+  assert.ok(state.kept && state.kept.includes('d'), 'the last row node was reused');
+  assert.deepEqual(errors, []);
+});
+
 test('blank lines keep the ghost rows aligned with the input', async () => {
   await newPage();
   await setContent('pizza = 4\npeople = 4');

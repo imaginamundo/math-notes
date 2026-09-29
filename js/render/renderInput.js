@@ -44,6 +44,13 @@ function createRowRenderer(view) {
 
   // Replace just the highlighted `.line` of a row, keeping its ghost and group
   // classes in place, so typing inside a line never tears down the view.
+  function setRowLine(row, line) {
+    const fresh = format.line(line, variableNames);
+    const current = row.firstChild;
+    if (current) row.replaceChild(fresh, current);
+    else row.appendChild(fresh);
+  }
+
   function updateRow(index, line) {
     const row = rows[index];
     if (!row) {
@@ -52,16 +59,50 @@ function createRowRenderer(view) {
       rows[index] = created;
       return;
     }
-    const fresh = format.line(line, variableNames);
-    const current = row.firstChild;
-    if (current) row.replaceChild(fresh, current);
-    else row.appendChild(fresh);
+    setRowLine(row, line);
+  }
+
+  // Update the changed window of rows in place: reuse the existing nodes and
+  // only create/remove the ones a length change adds or drops. The unchanged
+  // suffix keeps its nodes (and their measured boxes), so inserting or deleting
+  // a line no longer rebuilds every row below it.
+  function spliceRows(start, oldEnd, textLines) {
+    const suffixLength = rows.length - oldEnd;
+    const newEnd = textLines.length - suffixLength;
+    const oldWindow = rows.slice(start, oldEnd);
+    const suffix = rows.slice(oldEnd);
+    const window = [];
+
+    for (let i = 0; i < newEnd - start; i++) {
+      const line = textLines[start + i];
+      if (i < oldWindow.length) {
+        // Skip the re-highlight when the text is genuinely unchanged.
+        if (lines[start + i] !== line) setRowLine(oldWindow[i], line);
+        window.push(oldWindow[i]);
+      } else {
+        window.push(createRow(line));
+      }
+    }
+
+    // Brand-new nodes go immediately before the unchanged suffix (null appends).
+    const anchor = suffix[0] || null;
+    for (let i = oldWindow.length; i < window.length; i++) {
+      view.insertBefore(window[i], anchor);
+    }
+    // A deletion drops the old nodes the window no longer needs.
+    for (let i = newEnd - start; i < oldWindow.length; i++) {
+      oldWindow[i].remove();
+    }
+
+    rows.length = start;
+    rows.push(...window, ...suffix);
   }
 
   /**
    * Phase one: redraw the highlighted input rows. Rows from the first changed
-   * line on are rebuilt; the unchanged prefix above them is left alone,
-   * keeping whatever results it already shows.
+   * line to the last changed one are updated in place; the unchanged prefix and
+   * suffix keep their nodes and results, so inserting or deleting a line does
+   * not rebuild everything below it.
    * @param {string[]} textLines
    */
   function renderText(textLines) {
@@ -95,15 +136,20 @@ function createRowRenderer(view) {
       }
     }
 
-    if (textLines.length === lines.length) {
-      // Same shape: patch only the lines whose text changed, leaving every
-      // other row (and its result/box) untouched.
-      for (let i = start; i < textLines.length; i++) {
-        if (lines[i] !== textLines[i]) updateRow(i, textLines[i]);
-      }
-    } else {
-      buildRows(start, textLines);
+    // Trim the identical suffix so an insertion or deletion only touches the
+    // window between the change and that suffix.
+    const oldLen = lines.length;
+    const newLen = textLines.length;
+    let end = 0;
+    while (
+      end < oldLen - start &&
+      end < newLen - start &&
+      lines[oldLen - 1 - end] === textLines[newLen - 1 - end]
+    ) {
+      end++;
     }
+    spliceRows(start, oldLen - end, textLines);
+
     lines = textLines.slice();
     patched = null;
     dirtyFrom = dirtyFrom === null ? start : Math.min(dirtyFrom, start);
@@ -265,12 +311,23 @@ function createRowRenderer(view) {
       if (ghost) ghost.remove();
       return;
     }
+    const className = 'ghost-result' + (text.error ? ' error' : '');
+    // Leave an unchanged ghost alone so a bulk patch does not restyle rows whose
+    // result did not move.
+    if (
+      ghost &&
+      ghost.textContent === text.value &&
+      ghost.className === className &&
+      (!text.error || text.full === undefined || ghost.title === text.full)
+    ) {
+      return;
+    }
     if (!ghost) {
       ghost = document.createElement('span');
       row.appendChild(ghost);
     }
     ghost.textContent = text.value;
-    ghost.className = 'ghost-result' + (text.error ? ' error' : '');
+    ghost.className = className;
     // Remember a truncated error's full text so the UI can reveal it when the
     // line is active (and put it in a native hover title as a bonus).
     if (text.error && text.full !== text.value) {
