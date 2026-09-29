@@ -152,6 +152,35 @@ test('find highlights every match and replace-all rewrites the sheet', async () 
   assert.deepEqual(errors, []);
 });
 
+test('the find bar stays pinned while the sheet scrolls', async () => {
+  await newPage();
+  const lines = Array.from({ length: 80 }, (_, i) => `line ${i} = ${i}`);
+  await setContent(lines.join('\n'));
+  await wait(300);
+  await page.evaluate(() =>
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'f', metaKey: true, bubbles: true, cancelable: true })
+    )
+  );
+  await wait(100);
+
+  const barInsideEditor = () =>
+    page.evaluate(() => {
+      const bar = document.querySelector('.find-bar').getBoundingClientRect();
+      const editor = document.getElementById('input').getBoundingClientRect();
+      return bar.top >= editor.top - 1 && bar.bottom <= editor.bottom + 1;
+    });
+  assert.equal(await barInsideEditor(), true, 'the bar sits inside the editor initially');
+
+  await page.evaluate(() => {
+    const scroller = document.querySelector('.editor-scroll');
+    scroller.scrollTop = scroller.scrollHeight;
+  });
+  await wait(100);
+  assert.equal(await barInsideEditor(), true, 'the bar stays pinned after scrolling to the end');
+  assert.deepEqual(errors, []);
+});
+
 test('replace does not grow when the replacement contains the query', async () => {
   await newPage();
   await setContent('a');

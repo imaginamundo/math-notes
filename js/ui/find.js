@@ -36,7 +36,9 @@ function initFind(editableNode, viewNode) {
   refreshLabels();
   window.addEventListener('language:updated', refreshLabels);
 
-  editableNode.parentElement.appendChild(barNode);
+  // Anchor the bar to the editor box (`.input`), not the scrolling content, so
+  // it stays pinned at the top-right while the sheet scrolls.
+  (editableNode.closest('.input') || editableNode.parentElement).appendChild(barNode);
 
   let query = '';
   let caseSensitive = false;

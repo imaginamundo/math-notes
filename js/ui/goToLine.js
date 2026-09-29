@@ -4,7 +4,8 @@ import { t } from '../i18n/index.js';
 
 function initGoToLine(editableNode) {
   const barNode = buildBar();
-  editableNode.parentElement.appendChild(barNode);
+  // Anchored to the editor box, not the scrolling content, so it stays pinned.
+  (editableNode.closest('.input') || editableNode.parentElement).appendChild(barNode);
 
   const inputNode = barNode.querySelector('.go-to-input');
   const countNode = barNode.querySelector('.go-to-count');
