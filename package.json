@@ -21,7 +21,7 @@
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.11.0",
     "mathjs": "15.2.0",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.9",
     "puppeteer": "^24.43.1"
   }
 }
