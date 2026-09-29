@@ -9,7 +9,7 @@
     "build:i18n": "make -C js/i18n",
     "build:docs": "make -C docs-src",
     "dev": "node scripts/dev.mjs",
-    "test": "node --test",
+    "test": "node --test --test-concurrency=1",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
