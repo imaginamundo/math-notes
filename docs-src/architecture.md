@@ -192,6 +192,12 @@ incremental cache. A lazy shared instance is exported as the module's
 `evaluateLines`, so importing the module never constructs the mathjs bundle and
 tests or embedders can build isolated engines.
 
+Despite the `core/` name this file is not strictly pure: it is the composition
+root for the engine, reads stored settings (total mode, measurement system) and,
+on the main thread, subscribes to settings events. The rules it wires —
+parsing, preprocessing, aggregation, unit checks — are pure and live in the
+sibling modules; the assembly is kept here rather than in a separate layer.
+
 `evaluateLines(lines)` parses each line, evaluates it against a `variables`
 scope (with `prev` and aggregate blocks), and returns
 `{ results, total, startLine }`. Each engine keeps a per-input cache of the

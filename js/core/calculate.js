@@ -502,6 +502,68 @@ function createEngine() {
     };
   }
 
+  // Whether a result row becomes the `prev` for later lines. A group header's
+  // subtotal is an aggregate, so it only counts as `prev` when the matching
+  // `end` is reached (handled by the caller); errors and functions never count.
+  // One definition, used by both the replay and the evaluate loops, so their
+  // notion of `prev` cannot drift apart.
+  function feedsPrev(result) {
+    return Boolean(
+      result &&
+      result.type !== 'error' &&
+      result.value !== undefined &&
+      typeof result.value !== 'function'
+    );
+  }
+
+  // Rebuild the evaluation context up to the first changed line from the cached
+  // results (no mathjs evaluation): the variables in scope, the running `prev`,
+  // and the last blank line that starts an aggregate block.
+  function replayContext(lines, inputLines, results, groups, startLine) {
+    const variables = {};
+    let previousResult;
+    let lastBlankIndex = -1;
+    // A group header's cached value is the group subtotal, but the main loop
+    // only feeds it to `previousResult` when the matching `end` is reached, not
+    // at the header line. Mirror that here or a `prev` after the group would see
+    // the stale last body value.
+    const headerStarts = new Set([...groups.byEnd.values()].map((group) => group.start));
+
+    for (let i = 0; i < startLine; i++) {
+      const line = lines[i];
+      if (line.trim() === '' && !groups.groupOfLine.has(i)) lastBlankIndex = i;
+
+      const unit = unitDefinition(inputLines[i]);
+      if (unit) {
+        const stored = results[i];
+        if (stored && stored.value !== undefined) rebuildUserUnit(unit.name, stored.value);
+        continue;
+      }
+
+      const parsed = parseLine(line);
+      if (parsed.isAssignment) {
+        const stored = results[i];
+        const assigned = stored
+          ? stored.assigned !== undefined
+            ? stored.assigned
+            : stored.value
+          : undefined;
+        if (assigned !== undefined) variables[parsed.label] = assigned;
+      }
+      const endGroup = groups.byEnd.get(i);
+      const result = results[i];
+      if (endGroup) {
+        // A closed group leaves `prev` at the subtotal shown on its header.
+        const header = results[endGroup.start];
+        if (header && header.value !== undefined) previousResult = header.value;
+      } else if (!headerStarts.has(i) && feedsPrev(result)) {
+        previousResult = result.value;
+      }
+    }
+
+    return { variables, previousResult, lastBlankIndex };
+  }
+
   /**
    * Evaluate a sheet line by line.
    * @param {string[]} inputLines
@@ -542,52 +604,13 @@ function createEngine() {
     // Reuse the results of unchanged lines and rebuild the evaluation context up
     // to the first changed line from the cached values (no mathjs evaluation).
     const results = cache.results.slice(0, startLine);
-    const variables = {};
-    let previousResult;
-    let lastBlankIndex = -1;
-    // A group header's cached value is the group subtotal, but the main loop
-    // only feeds it to `previousResult` when the matching `end` is reached, not
-    // at the header line. Mirror that here or a `prev` after the group would see
-    // the stale last body value.
-    const headerStarts = new Set([...groups.byEnd.values()].map((group) => group.start));
-
-    for (let i = 0; i < startLine; i++) {
-      const line = lines[i];
-      if (line.trim() === '' && !groups.groupOfLine.has(i)) lastBlankIndex = i;
-
-      const unit = unitDefinition(inputLines[i]);
-      if (unit) {
-        const stored = results[i];
-        if (stored && stored.value !== undefined) rebuildUserUnit(unit.name, stored.value);
-        continue;
-      }
-
-      const parsed = parseLine(line);
-      if (parsed.isAssignment) {
-        const stored = results[i];
-        const assigned = stored
-          ? stored.assigned !== undefined
-            ? stored.assigned
-            : stored.value
-          : undefined;
-        if (assigned !== undefined) variables[parsed.label] = assigned;
-      }
-      const endGroup = groups.byEnd.get(i);
-      const result = results[i];
-      if (endGroup) {
-        // A closed group leaves `prev` at the subtotal shown on its header.
-        const header = results[endGroup.start];
-        if (header && header.value !== undefined) previousResult = header.value;
-      } else if (
-        !headerStarts.has(i) &&
-        result &&
-        result.type !== 'error' &&
-        result.value !== undefined &&
-        typeof result.value !== 'function'
-      ) {
-        previousResult = result.value;
-      }
-    }
+    let { variables, previousResult, lastBlankIndex } = replayContext(
+      lines,
+      inputLines,
+      results,
+      groups,
+      startLine
+    );
 
     for (let i = startLine; i < lines.length; i++) {
       const line = lines[i];
@@ -734,9 +757,7 @@ function createEngine() {
         assigned: variable ? variable.value : undefined,
         tags: tags.length ? tags : undefined,
       };
-      if (type !== 'error' && result !== undefined && typeof result !== 'function') {
-        previousResult = result;
-      }
+      if (feedsPrev(results[i])) previousResult = result;
     }
 
     cache.lines = lines;
