@@ -16,6 +16,10 @@ class WorkerStub {
     (this.listeners[type] ||= []).push(fn);
   }
   postMessage(message) {
+    if (this.throwOnEvaluate && message.type === 'evaluate') {
+      this.throwOnEvaluate = false;
+      throw new Error('postMessage failed');
+    }
     this.sent.push(message);
     if (this.autoReply && message.type === 'evaluate') this.reply(message);
   }
@@ -124,6 +128,25 @@ test('a stale reply is not rendered', async () => {
   worker.reply(worker.sent[worker.sent.length - 1]);
   await pending;
   assert.equal(renders.length, 0, 'text moved on, so the reply must be dropped');
+});
+
+test('a failed worker restart retries instead of falling back permanently', async () => {
+  const { client, node, renders } = setup();
+  await client.update(); // creates worker #1
+  const first = WorkerStub.latest;
+  first.autoReply = false;
+  first.throwOnEvaluate = true;
+  renders.length = 0;
+
+  node.value = '2 + 2';
+  await client.update();
+  assert.notEqual(WorkerStub.latest, first, 'a fresh worker replaces the failed one');
+  assert.equal(renders.length, 1, 'the retried request still renders on the worker');
+  assert.equal(renders[0].data.total, 4);
+
+  // Later updates keep using the worker path.
+  await client.update();
+  assert.equal(renders.length, 2);
 });
 
 test('a crashed worker falls back to the main thread for the in-flight request', async () => {

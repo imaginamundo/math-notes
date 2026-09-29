@@ -95,6 +95,8 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     return worker;
   }
 
+  // The worker could not load, or it crashed: use the main-thread evaluator for
+  // the rest of the session.
   function dropWorker() {
     if (!worker) return;
     workerUnavailable = true;
@@ -106,21 +108,41 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     }
   }
 
+  // A request timed out (or the worker failed mid-request): drop it so the next
+  // update starts a fresh worker, but do not give up on the worker for the whole
+  // session. A single slow sheet must not move every later keystroke onto the
+  // main thread.
+  function restartWorker() {
+    if (!worker) return;
+    const failed = worker;
+    worker = null;
+    failed.terminate();
+    for (const [id, callback] of pending) {
+      pending.delete(id);
+      callback({ type: 'error', message: 'The evaluation worker timed out' });
+    }
+    lastSentLines = null;
+  }
+
   /**
    * Evaluate lines via the worker, or the lazy main-thread fallback when
    * workers are unavailable. Resolves with the payload and a correlation id.
    * @param {string[]} lines
+   * @param {boolean} [retried]  Set for the one retry after a worker restart.
    * @returns {Promise<{ id: number, data: SheetResult }>}
    */
-  function requestEvaluate(lines) {
+  function requestEvaluate(lines, retried = false) {
     const active = ensureWorker();
     if (!active) return fallbackEvaluate(lines);
     // If the worker cannot load (common offline, when its module graph was
     // never fetched) or crashes, evaluate this request on the main thread
     // instead of leaving the sheet blank, and fall back for later requests.
     return workerEvaluate(active, lines).catch(() => {
-      if (worker === active) dropWorker();
-      return fallbackEvaluate(lines);
+      // A failed load/crash is permanent; a timeout just needs a fresh worker.
+      if (workerUnavailable) return fallbackEvaluate(lines);
+      if (worker === active) restartWorker();
+      if (retried) return fallbackEvaluate(lines);
+      return requestEvaluate(lines, true);
     });
   }
 
