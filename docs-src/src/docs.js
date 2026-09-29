@@ -74,12 +74,14 @@ function wireMenu() {
   const toggle = document.querySelector('.doc-menu-toggle');
   const sidebar = document.getElementById('doc-sidebar');
   if (!toggle || !sidebar) return;
+  const backdrop = document.querySelector('.doc-backdrop');
+  const header = document.querySelector('.doc-header');
+  const root = document.documentElement;
 
   // On phones the header is a single compact row (brand + toggle); the search,
   // language switcher and app link move to the top of the drawer, so the sticky
   // bar never eats a quarter of the screen. On wider screens they sit in the
   // header. One node is reparented instead of duplicated.
-  const header = document.querySelector('.doc-header');
   const actions = document.querySelector('.doc-header-actions');
   const mobile = window.matchMedia('(max-width: 900px)');
   const placeActions = () => {
@@ -88,21 +90,61 @@ function wireMenu() {
     else if (header) header.append(actions);
   };
   placeActions();
-  mobile.addEventListener('change', placeActions);
+
+  // The fixed drawer starts below the header; keep that offset current.
+  const sizeHeader = () => {
+    if (header) root.style.setProperty('--doc-header-height', `${header.offsetHeight}px`);
+  };
+  sizeHeader();
+
+  const focusables = () =>
+    [...sidebar.querySelectorAll('a[href], button, input, select, textarea')].filter(
+      (node) => node.offsetParent !== null
+    );
 
   const setOpen = (open) => {
     sidebar.classList.toggle('is-open', open);
+    if (backdrop) backdrop.classList.toggle('is-open', open);
+    // Lock the page so it cannot scroll behind the drawer.
+    root.classList.toggle('doc-menu-open', open);
     toggle.setAttribute('aria-expanded', String(open));
+    if (open) {
+      sizeHeader();
+      // Focus lands in the drawer, then the current page's entry is brought
+      // into view (otherwise the reader starts at the top of the list).
+      const first = sidebar.querySelector('.doc-search-input') || focusables()[0];
+      if (first) first.focus();
+      const current =
+        sidebar.querySelector('.doc-nav-sub a.is-active') ||
+        sidebar.querySelector('.doc-nav-item.is-active');
+      if (current) current.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    } else {
+      toggle.focus();
+    }
   };
 
-  toggle.addEventListener('click', () => {
-    setOpen(!sidebar.classList.contains('is-open'));
-  });
+  toggle.addEventListener('click', () => setOpen(!sidebar.classList.contains('is-open')));
+  if (backdrop) backdrop.addEventListener('click', () => setOpen(false));
 
   // Tapping any link in the drawer navigates (or jumps to a section) and closes
-  // it, so returning to the top never reveals a stale open menu.
+  // it. Scroll is unlocked here, before the browser runs the default jump, so
+  // the anchor lands at the right heading.
   sidebar.addEventListener('click', (event) => {
     if (event.target.closest('a')) setOpen(false);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && sidebar.classList.contains('is-open')) {
+      event.preventDefault();
+      setOpen(false);
+    }
+  });
+
+  window.addEventListener('resize', sizeHeader);
+  mobile.addEventListener('change', () => {
+    placeActions();
+    if (mobile.matches) sizeHeader();
+    else if (sidebar.classList.contains('is-open')) setOpen(false);
   });
 }
 

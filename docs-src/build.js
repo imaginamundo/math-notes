@@ -364,6 +364,7 @@ function pageHtml(lang, slug, page) {
     </div>
     <button class="doc-menu-toggle" type="button" aria-label="${escapeAttr(ui.menu)}" aria-expanded="false" aria-controls="doc-sidebar">${escapeHtml(ui.menuShort)}</button>
   </header>
+  <div class="doc-backdrop" aria-hidden="true"></div>
   <div class="doc-layout">
     <aside class="doc-sidebar" id="doc-sidebar">
       ${navHtml(lang, slug, page.toc)}

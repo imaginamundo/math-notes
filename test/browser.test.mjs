@@ -1695,6 +1695,105 @@ test('the mobile header stays compact and the drawer closes after navigating', a
   assert.deepEqual(errors, []);
 });
 
+test('the mobile drawer overlays the page and closes on Esc, backdrop and links', async () => {
+  await newPage();
+  await page.setViewport({ width: 390, height: 844, isMobile: true });
+  await page.goto(`http://localhost:${server.address().port}/docs/units/`, { waitUntil: 'load' });
+  await waitFor(() => page.$('.doc-menu-toggle'));
+  // Disable smooth scrolling so anchor jumps settle immediately.
+  await page.addStyleTag({ content: 'html { scroll-behavior: auto !important; }' });
+
+  await page.evaluate(() => window.scrollTo(0, 2600));
+  await wait(300);
+  const before = await page.evaluate(() => window.scrollY);
+  assert.ok(before > 800, 'the page is scrolled down before the menu opens');
+
+  const isOpen = () =>
+    page.evaluate(() => document.getElementById('doc-sidebar').classList.contains('is-open'));
+  const openMenu = async () => {
+    await page.click('.doc-menu-toggle');
+    await waitFor(isOpen);
+    await wait(250); // let the slide-in transition finish
+  };
+
+  await openMenu();
+
+  const box = await page.$eval('#doc-sidebar', (node) => {
+    const rect = node.getBoundingClientRect();
+    return {
+      top: rect.top,
+      left: rect.left,
+      right: rect.right,
+      bottom: rect.bottom,
+      width: rect.width,
+    };
+  });
+  const view = await page.evaluate(() => ({ w: window.innerWidth, h: window.innerHeight }));
+  assert.ok(box.width > 0 && box.top >= 0 && box.left >= 0, 'the drawer is on screen');
+  assert.ok(box.bottom <= view.h + 1, `the drawer stays in the viewport (${box.bottom}px)`);
+  assert.ok(box.width < view.w, 'the page stays visible beside the side sheet');
+
+  assert.ok(
+    await page.evaluate(
+      () =>
+        document.documentElement.classList.contains('doc-menu-open') &&
+        getComputedStyle(document.documentElement).overflow === 'hidden'
+    ),
+    'the page behind the drawer is locked'
+  );
+  assert.ok(
+    await page.evaluate(() =>
+      document.getElementById('doc-sidebar').contains(document.activeElement)
+    ),
+    'focus moves into the drawer'
+  );
+  assert.ok(
+    await page.evaluate(() => {
+      const active = document.querySelector('#doc-sidebar .doc-nav-sub a.is-active');
+      if (!active) return true;
+      const a = active.getBoundingClientRect();
+      const d = document.getElementById('doc-sidebar').getBoundingClientRect();
+      return a.top >= d.top - 1 && a.bottom <= d.bottom + 1;
+    }),
+    'the current section is revealed inside the drawer'
+  );
+
+  // Esc closes it and returns focus to the Menu button.
+  await page.keyboard.press('Escape');
+  await waitFor(async () => !(await isOpen()));
+  assert.ok(
+    await page.evaluate(() => document.activeElement.classList.contains('doc-menu-toggle')),
+    'focus returns to the Menu button'
+  );
+  assert.ok(
+    await page.evaluate(() => !document.documentElement.classList.contains('doc-menu-open')),
+    'the page is unlocked again'
+  );
+
+  // The backdrop closes it too.
+  await openMenu();
+  await page.mouse.click(view.w - 5, Math.round(view.h / 2));
+  await waitFor(async () => !(await isOpen()));
+
+  // A section link closes the drawer and still lands at the right heading.
+  await openMenu();
+  const target = await page.$eval('#doc-sidebar .doc-nav-sub a[href^="#"]', (node) =>
+    node.getAttribute('href')
+  );
+  await page.click(`#doc-sidebar .doc-nav-sub a[href="${target}"]`);
+  await waitFor(async () => !(await isOpen()));
+  await wait(300);
+  const landed = await page.evaluate((hash) => {
+    const heading = document.getElementById(decodeURIComponent(hash.slice(1)));
+    return heading ? heading.getBoundingClientRect().top : null;
+  }, target);
+  assert.ok(
+    landed !== null && landed >= 0 && landed < 140,
+    `the section lands at its heading (top ${landed}px)`
+  );
+  assert.deepEqual(errors, []);
+});
+
 test('the main-thread engine renders when the evaluation worker cannot load', async () => {
   if (context) await context.close();
   context = await browser.createBrowserContext();
