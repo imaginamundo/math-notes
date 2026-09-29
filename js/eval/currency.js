@@ -1,4 +1,3 @@
-import { registerCurrencyCode } from '../core/currencySymbols.js';
 import { BASE, loadCached } from '../storage/currencyRates.js';
 
 function ensureBaseUnit(math) {
@@ -16,7 +15,6 @@ function registerRates(math, data) {
     // A missing or non-positive rate would register an Infinity unit, so skip it.
     if (!Number.isFinite(perBase) || perBase <= 0) continue;
     if (code.toUpperCase() === BASE) continue;
-    registerCurrencyCode(code);
     try {
       math.createUnit(code, { definition: `${1 / perBase} ${BASE}` }, { override: true });
     } catch {

@@ -71,11 +71,12 @@ const SYMBOL_SOURCE = SYMBOLS.map((symbol) => symbol.replace(/[.*+?^${}()|[\]\\]
   '|'
 );
 
-// The codes that act as currency units, extended at runtime with whatever rates
-// are registered. Kept private behind registerCurrencyCode so no other module
-// can mutate the recognizer's vocabulary out from under it.
+// The ISO codes the app treats as currencies (the ECB reference set the rate
+// API returns). A fixed vocabulary rather than one that grows as rates are
+// registered, so the recognizer is the same for every engine instance.
 const CURRENCY_CODES = new Set([
   'AUD',
+  'BGN',
   'BRL',
   'CAD',
   'CHF',
@@ -107,12 +108,8 @@ const CURRENCY_CODES = new Set([
   'ZAR',
 ]);
 
-function registerCurrencyCode(code) {
-  CURRENCY_CODES.add(String(code).toUpperCase());
-}
-
 function isCurrencyCode(code) {
   return CURRENCY_CODES.has(String(code).toUpperCase());
 }
 
-export { CURRENCY_SYMBOLS, CURRENCY_DISPLAY, SYMBOL_SOURCE, registerCurrencyCode, isCurrencyCode };
+export { CURRENCY_SYMBOLS, CURRENCY_DISPLAY, SYMBOL_SOURCE, isCurrencyCode };
