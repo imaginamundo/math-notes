@@ -15,7 +15,6 @@ const TEMPLATES = [
       'Food: 480 + 160',
       'Transport: 120',
       'Savings: 400',
-      '',
       'sum',
       'income - sum',
     ],
