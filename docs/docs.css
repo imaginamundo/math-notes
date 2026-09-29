@@ -2,6 +2,10 @@
    variables and themes, then overrides the app's global layout. */
 
 html {
+  /* Scale the whole document from the reader's browser/device font size (the
+     `1rem` base) and the app's own text-size preference, so every rem-based
+     size follows both instead of only the inheriting body text. */
+  font-size: calc(1rem * var(--app-font-scale, 1));
   scroll-padding-top: 5rem;
 }
 
@@ -19,7 +23,9 @@ body {
   background: var(--color-primary);
   color: var(--color-text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  font-size: calc(1rem * var(--app-font-scale, 1));
+  /* Explicit so the app's body rule (loaded from /style.css first) cannot scale
+     the already-scaled root a second time. */
+  font-size: 1rem;
   line-height: 1.65;
 }
 
@@ -124,7 +130,7 @@ body {
   background: var(--surface-chip);
   color: var(--color-text);
   font: inherit;
-  font-size: 0.9em;
+  font-size: inherit;
 }
 .doc-search-input::placeholder {
   color: var(--color-text-muted);
