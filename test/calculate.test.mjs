@@ -615,6 +615,13 @@ test('evaluateLines bounds huge ranges but allows empty ones', () => {
   assert.equal(empty.results[1].type, 'value');
 });
 
+test('evaluateLines bounds huge ranges and constructors inside calls', () => {
+  assert.match(evaluateLines(['range(1, 1e9)']).results[0].value, /limited/);
+  assert.match(evaluateLines(['ones(1e5, 1e5)']).results[0].value, /limited/);
+  assert.match(evaluateLines(['zeros(50, 50)']).results[0].value, /limited/);
+  assert.equal(evaluateLines(['range(1, 10)']).results[0].type, 'value');
+});
+
 test('evaluateLines sum stops at an empty line', () => {
   assert.equal(evaluateLines(['10', '', '20', 'sum']).results[3].value, 20);
 });
@@ -660,6 +667,14 @@ test('evaluateLines keeps the mathjs sum function callable', () => {
   assert.equal(evaluateLines(['sum([1, 2, 3])']).results[0].value, 6);
 });
 
+test('an aggregate inside an expression keeps operator precedence and units', () => {
+  // The value is a scope variable, not pasted text, so `-5^2` cannot happen.
+  assert.equal(evaluateLines(['-5', 'sum^2']).results[1].value, 25);
+  const units = evaluateLines(['2 kg', '3 kg', 'sum * 2']).results[2].value;
+  assert.equal(units.isUnit, true);
+  assert.ok(Math.abs(units.to('kg').toNumber() - 10) < 1e-9);
+});
+
 test('a variable can shadow a shadowable aggregate keyword', () => {
   const { results } = evaluateLines(['avg = 5', 'avg * 2']);
   assert.equal(results[0].type, 'assignment');
@@ -695,6 +710,18 @@ test('a multi-word name containing a keyword is still a variable', () => {
   assert.equal(results[0].type, 'assignment');
   assert.equal(results[2].value, 10);
   assert.equal(results[3].value, 6);
+});
+
+test('a currency-code-like variable is not upcased into a currency', () => {
+  assert.equal(evaluateLines(['cad = 4', '2 cad']).results[1].value, 8);
+  assert.equal(evaluateLines(['try = 5', '2 try']).results[1].value, 10);
+});
+
+test('a currency symbol inside a word is not read as a currency', () => {
+  const { results } = evaluateLines(['2 leite']);
+  assert.equal(results[0].type, 'error');
+  assert.match(results[0].value, /leite/);
+  assert.doesNotMatch(results[0].value, /RON/);
 });
 
 test('evaluateLines supports Numi function aliases', () => {

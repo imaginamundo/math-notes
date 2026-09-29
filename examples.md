@@ -95,6 +95,7 @@ pi to 5 digits
 6% off 40
 50 as a % of 100
 5% of what is 6
+.5% of 200
 
 ## Complex numbers
 
@@ -209,6 +210,10 @@ sum
 1
 2
 sum
+
+10
+20
+sum * 2
 
 ## Groups & tags
 
@@ -420,6 +425,7 @@ now + 3 hours 15 minutes
 72 days as timespan
 3h 5m 10s
 3h 5m 10s in seconds
+3h 5m 10s * 2
 12.5 minutes in minutes and seconds
 span = 2 hours
 span + 30 minutes

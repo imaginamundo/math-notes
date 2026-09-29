@@ -58,6 +58,22 @@ test('preprocessSymbols leaves plain expressions untouched', () => {
   assert.equal(preprocessSymbols('1cm to m'), '1cm to m');
 });
 
+test('preprocessSymbols only matches a symbol at a word boundary', () => {
+  assert.equal(preprocessSymbols('2 leite'), '2 leite');
+  assert.equal(preprocessSymbols('2 Rpm'), '2 Rpm');
+  assert.equal(preprocessSymbols('RMB'), 'RMB');
+  assert.equal(preprocessSymbols('2 lei'), '2 RON');
+});
+
+test('preprocessSymbols leaves a code that is a defined variable', () => {
+  const names = new Set(['cad', 'try']);
+  const context = { names };
+  assert.equal(preprocessSymbols('2 cad', context), '2 cad');
+  assert.equal(preprocessSymbols('2 try', context), '2 try');
+  assert.equal(preprocessSymbols('2 cad to usd', context), '2 cad to USD');
+  assert.equal(preprocessSymbols('2 eur', context), '2 EUR');
+});
+
 test('preprocessSymbols uppercases currency codes', () => {
   assert.equal(preprocessSymbols('5usd to brl'), '5 USD to BRL');
   assert.equal(preprocessSymbols('100 usd to eur'), '100 USD to EUR');

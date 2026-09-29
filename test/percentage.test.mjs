@@ -11,6 +11,8 @@ test('preprocessPercent rewrites percentage value phrases', () => {
   assert.equal(preprocessPercent('20% of 10'), '(10) * 20%');
   assert.equal(preprocessPercent('5% on 30'), '(30) + 5%');
   assert.equal(preprocessPercent('6% off 40'), '(40) - 6%');
+  // A leading-dot percentage is still a percentage phrase.
+  assert.equal(preprocessPercent('.5% of 10'), '(10) * .5%');
 });
 
 test('preprocessPercent rewrites relative percentage phrases', () => {
@@ -37,6 +39,7 @@ test('evaluateLines evaluates percentage phrases', () => {
   assert.equal(valueOf('6% off 40'), 37.6);
   assert.equal(valueOf('50 as a % of 100'), 50);
   assert.equal(valueOf('5% of what is 6'), 120);
+  assert.equal(valueOf('.5% of 200'), 1);
   assert.ok(Math.abs(valueOf('5% on what is 6') - 6 / 1.05) < 1e-9);
   assert.ok(Math.abs(valueOf('5% off what is 6') - 6 / 0.95) < 1e-9);
 });

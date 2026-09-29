@@ -276,9 +276,9 @@ function createEngine() {
   let userUnits = [];
 
   function assertBoundedExpression(expression, scope) {
-    // Only a list literal or a range can materialise unboundedly; skip the
-    // extra parse for every other expression.
-    if (!/\[|:/.test(expression)) return;
+    // Only a list literal, a range or a size-taking constructor can materialise
+    // unboundedly; skip the extra parse for every other expression.
+    if (!/\[|:/.test(expression) && !/\b(?:range|ones|zeros)\s*\(/i.test(expression)) return;
     let tree;
     try {
       tree = math.parse(expression);
@@ -311,6 +311,31 @@ function createEngine() {
           }
         }
       }
+      // `range(1, 1e9)` and `ones(1e5, 1e5)` bypass the node checks above because
+      // the size is inside a function call, not a literal.
+      if (node.isFunctionNode) {
+        const name = node.fn && node.fn.name;
+        if (name === 'range') {
+          const args = node.args.map((arg) => resolve(arg, null));
+          const start = args.length >= 2 ? args[0] : 1;
+          const end = args.length >= 2 ? args[1] : args[0];
+          const step = args.length >= 3 ? args[2] : 1;
+          if (start !== null && end !== null && step !== null) {
+            const count = Math.max(0, Math.floor((end - start) / step) + 1);
+            if (count > MAX_LIST_LENGTH) {
+              throw new Error(`Ranges are limited to ${MAX_LIST_LENGTH} items`);
+            }
+          }
+        } else if (name === 'ones' || name === 'zeros') {
+          const sizes = node.args.map((arg) => resolve(arg, null));
+          if (sizes.length && sizes.every((size) => size !== null)) {
+            const count = sizes.reduce((total, size) => total * Math.max(0, Math.floor(size)), 1);
+            if (count > MAX_LIST_LENGTH) {
+              throw new Error(`Lists are limited to ${MAX_LIST_LENGTH} items`);
+            }
+          }
+        }
+      }
     });
   }
 
@@ -322,7 +347,7 @@ function createEngine() {
     let result;
 
     try {
-      const expression = preprocess(code);
+      const expression = preprocess(code, scope && { names: new Set(Object.keys(scope)) });
       assertBoundedExpression(expression, scope);
       result = math.evaluate(expression, scope);
       const mixError = unitMixError(result);
@@ -446,25 +471,34 @@ function createEngine() {
     return message;
   }
 
-  // Replace aggregate keywords in an expression with the block's values so they
-  // work inside expressions too, e.g. `a = sum` or `sum * 2`. A keyword the user
+  // Replace aggregate keywords in an expression with scope variables holding the
+  // block's values, rather than pasting the value into the text. Pasting broke
+  // precedence (`-5` then `sum^2` read as `-5^2`) and units (`sum * 2 kg`); a
+  // scope variable is a real value, exactly like `line(n)`. A keyword the user
   // has redefined as a variable is left alone, so the variable shadows it.
   function substituteAggregates(parsed, sum, average, variables) {
+    const values = {};
+    let count = 0;
     const replace = (expression) =>
-      expression.replace(AGGREGATE_WORD_ALL, (word) =>
-        variables[word] !== undefined
-          ? word
-          : String(AGGREGATE_KEYWORDS[word.toLowerCase()] === 'average' ? average : sum)
-      );
+      expression.replace(AGGREGATE_WORD_ALL, (word) => {
+        if (variables[word] !== undefined) return word;
+        const value = AGGREGATE_KEYWORDS[word.toLowerCase()] === 'average' ? average : sum;
+        const token = `__agg_${count++}`;
+        values[token] = value;
+        return token;
+      });
 
     if (parsed.isAssignment) {
       const rhs = replace(parsed.rhs);
-      return { ...parsed, code: `${parsed.label} = ${rhs}`, rhs };
+      return { parsed: { ...parsed, code: `${parsed.label} = ${rhs}`, rhs }, values };
     }
     return {
-      ...parsed,
-      code: replace(parsed.code),
-      rhs: parsed.rhs ? replace(parsed.rhs) : parsed.rhs,
+      parsed: {
+        ...parsed,
+        code: replace(parsed.code),
+        rhs: parsed.rhs ? replace(parsed.rhs) : parsed.rhs,
+      },
+      values,
     };
   }
 
@@ -647,10 +681,13 @@ function createEngine() {
       if (previousResult !== undefined) scope.prev = previousResult;
 
       let parsedLine = parsed;
+      let aggregateValues = null;
       if (AGGREGATE_WORD.test(parsed.code)) {
         const blockSum = aggregateAbove(results, blockStart, i, 'sum');
         const blockAvg = aggregateAbove(results, blockStart, i, 'average');
-        parsedLine = substituteAggregates(parsed, blockSum, blockAvg, variables);
+        const substituted = substituteAggregates(parsed, blockSum, blockAvg, variables);
+        parsedLine = substituted.parsed;
+        aggregateValues = substituted.values;
       }
 
       const resolved = resolveLineRefs(parsedLine, results, i);
@@ -664,6 +701,7 @@ function createEngine() {
       }
       parsedLine = resolved.parsed;
       Object.assign(scope, resolved.values);
+      if (aggregateValues) Object.assign(scope, aggregateValues);
 
       const { type, result, variable } = evaluateLine(parsedLine, scope);
       if (variable) variables[variable.label] = variable.value;

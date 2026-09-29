@@ -17,13 +17,18 @@ test('preprocessTimespan rewrites as timespan and double time units', () => {
 });
 
 test('preprocessTimespan joins consecutive time components', () => {
-  assert.equal(preprocessTimespan('3h 5m 10s'), '__timespan(3 hours + 5 minutes + 10 seconds)');
+  assert.equal(preprocessTimespan('3h 5m 10s'), '__timespan((3 hours + 5 minutes + 10 seconds))');
   assert.equal(
     preprocessTimespan('3h 5m 10s in seconds'),
-    '3 hours + 5 minutes + 10 seconds in seconds'
+    '(3 hours + 5 minutes + 10 seconds) in seconds'
   );
   assert.equal(preprocessTimespan('1 cm to m'), '1 cm to m');
   assert.equal(preprocessTimespan('min(1, 2)'), 'min(1, 2)');
+});
+
+test('a duration multiplied keeps every component', () => {
+  assert.equal(valueOf('3h 5m 10s * 2'), '6 hours 10 minutes 20 seconds');
+  assert.equal(valueOf('2 * 1h 30m'), '3 hours');
 });
 
 test('as timespan decomposes a duration', () => {

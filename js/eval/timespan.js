@@ -109,7 +109,9 @@ function joinTimeComponents(expression) {
     while ((m = component.exec(match)) !== null) {
       parts.push(`${m[1]} ${COMPONENT_UNIT[m[2].toLowerCase()]}`);
     }
-    return parts.join(' + ');
+    // Parenthesised so the whole run is one operand: without this
+    // `3h 5m 10s * 2` multiplies only the last component.
+    return `(${parts.join(' + ')})`;
   });
 }
 
