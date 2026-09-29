@@ -20,6 +20,7 @@ const urlsToCache = [
   './js/core/multiWordVariables.js',
   './js/core/parseLine.js',
   './js/core/preprocess.js',
+  './js/core/setting.js',
   './js/core/tabsState.js',
   './js/core/totalMode.js',
   './js/core/unitMix.js',

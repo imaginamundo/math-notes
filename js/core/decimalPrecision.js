@@ -1,16 +1,10 @@
-import storage from '../util/storage.js';
+import defineSetting from './setting.js';
 
 // How many decimal places results show. Display only: calculations keep full
 // precision.
-const STORAGE_KEY = 'math-notes-decimal-precision';
 const DEFAULT_PRECISION = 3;
 const MIN_PRECISION = 0;
 const MAX_PRECISION = 10;
-
-// The precision the renderers format with, kept in memory so drawing a row does
-// not read localStorage on every result (the worker holds its own copy, sent as
-// a message). Set at startup and on `precision:updated`.
-let current = DEFAULT_PRECISION;
 
 function normalizeDecimalPrecision(value) {
   if (value === '' || value === null || value === undefined) return DEFAULT_PRECISION;
@@ -19,25 +13,21 @@ function normalizeDecimalPrecision(value) {
   return Math.min(MAX_PRECISION, Math.max(MIN_PRECISION, n));
 }
 
-function readDecimalPrecision() {
-  const raw = storage.get(STORAGE_KEY);
-  if (raw === null || raw === undefined) return DEFAULT_PRECISION;
-  return normalizeDecimalPrecision(raw);
-}
+// The precision the renderers format with is kept in memory so drawing a row
+// does not read storage (the worker holds its own copy, sent as a message).
+const setting = defineSetting({
+  key: 'math-notes-decimal-precision',
+  defaultValue: DEFAULT_PRECISION,
+  normalize: normalizeDecimalPrecision,
+  format: String,
+  inMemory: true,
+});
 
-function writeDecimalPrecision(value) {
-  const normalized = normalizeDecimalPrecision(value);
-  storage.set(STORAGE_KEY, String(normalized));
-  current = normalized;
-}
-
-function getDecimalPrecision() {
-  return current;
-}
-
-function setDecimalPrecision(value) {
-  current = normalizeDecimalPrecision(value);
-}
+const STORAGE_KEY = setting.key;
+const readDecimalPrecision = setting.read;
+const writeDecimalPrecision = setting.write;
+const getDecimalPrecision = setting.get;
+const setDecimalPrecision = setting.set;
 
 export {
   STORAGE_KEY,
