@@ -1655,6 +1655,35 @@ test('the documentation search filters the generated index', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('the desktop sidebar stays put while the content scrolls', async () => {
+  await newPage();
+  await page.setViewport({ width: 1200, height: 800 });
+  await page.goto(`http://localhost:${server.address().port}/docs/units/`, { waitUntil: 'load' });
+  await waitFor(() => page.$('.doc-sidebar'));
+  await page.addStyleTag({ content: 'html { scroll-behavior: auto !important; }' });
+
+  const top = () => page.$eval('.doc-sidebar', (node) => node.getBoundingClientRect().top);
+
+  const start = await top();
+  assert.ok(start > 0, `the sidebar starts below the header (top ${start}px)`);
+  await page.evaluate(() => window.scrollTo(0, 200));
+  await wait(100);
+  const afterSmall = await top();
+  assert.ok(
+    Math.abs(afterSmall - start) <= 1,
+    `the sidebar does not drift at the start (${start} → ${afterSmall})`
+  );
+
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await wait(100);
+  const atEnd = await top();
+  assert.ok(
+    Math.abs(atEnd - afterSmall) <= 1,
+    `the sidebar does not roll up at the end (${afterSmall} → ${atEnd})`
+  );
+  assert.deepEqual(errors, []);
+});
+
 test('the mobile header stays compact and the drawer closes after navigating', async () => {
   await newPage();
   await page.setViewport({ width: 360, height: 844, isMobile: true });

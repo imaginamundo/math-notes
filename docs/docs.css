@@ -185,14 +185,19 @@ body {
   gap: 2.5rem;
   max-width: 78rem;
   margin: 0 auto;
-  padding: 1.5rem 1.25rem 4rem;
+  /* Bottom space lives on .doc-main, not here: the sticky sidebar is clamped to
+     the grid area, which excludes this container's padding. */
+  padding: 1.5rem 1.25rem 0;
   align-items: start;
 }
 
 .doc-sidebar {
   position: sticky;
-  top: 4.5rem;
-  max-height: calc(100vh - 6rem);
+  /* Match the sidebar's natural top (header + the layout's top padding) so it
+     pins immediately instead of drifting on the first scroll. */
+  top: calc(var(--doc-header-height, 3.5rem) + 1.5rem);
+  max-height: calc(100vh - var(--doc-header-height, 3.5rem) - 3rem);
+  max-height: calc(100dvh - var(--doc-header-height, 3.5rem) - 3rem);
   overflow-y: auto;
   /* Keep a sidebar scroll from chaining into the page behind it. */
   overscroll-behavior: contain;
@@ -258,6 +263,8 @@ body {
 
 .doc-main {
   min-width: 0;
+  /* Extends the grid area so the sticky sidebar can reach the page bottom. */
+  padding-bottom: 4rem;
 }
 
 .doc-content {
