@@ -10,6 +10,7 @@ import { collectUnitDefinitions } from '../core/userUnits.js';
 import { setEditorValue } from './editorInput.js';
 import { sheetLines } from '../util/text.js';
 import { t } from '../i18n/index.js';
+import { LANGUAGE_UPDATED } from '../util/events.js';
 
 // A caret-anchored suggestion popup. It opens while a word is being typed (at
 // least MIN_PREFIX characters) and on Ctrl/Cmd+Space, completes variables and
@@ -34,7 +35,14 @@ function initAutocomplete(editableNode, editorScroll) {
   popup.setAttribute('aria-label', t('autocomplete.label'));
   popup.hidden = true;
   scroller.appendChild(popup);
-  window.addEventListener('language:updated', () =>
+  // The editor is a combobox whose listbox is the popup. It is a multiline
+  // input, so this is the closest ARIA pattern; `aria-expanded` tracks the popup.
+  editableNode.setAttribute('role', 'combobox');
+  editableNode.setAttribute('aria-controls', 'autocomplete-list');
+  editableNode.setAttribute('aria-autocomplete', 'list');
+  editableNode.setAttribute('aria-haspopup', 'listbox');
+  editableNode.setAttribute('aria-expanded', 'false');
+  window.addEventListener(LANGUAGE_UPDATED, () =>
     popup.setAttribute('aria-label', t('autocomplete.label'))
   );
 
@@ -108,6 +116,7 @@ function initAutocomplete(editableNode, editorScroll) {
     activeIndex = 0;
     render();
     popup.hidden = false;
+    editableNode.setAttribute('aria-expanded', 'true');
     position();
   }
 
@@ -118,6 +127,7 @@ function initAutocomplete(editableNode, editorScroll) {
     items = [];
     range = null;
     editableNode.removeAttribute('aria-activedescendant');
+    editableNode.setAttribute('aria-expanded', 'false');
   }
 
   function render() {

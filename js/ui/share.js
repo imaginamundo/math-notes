@@ -1,6 +1,7 @@
 import { buildShareUrl, decodeSheet, parseShareHash } from '../share/shareLink.js';
 import { copyText } from '../util/clipboard.js';
 import { t } from '../i18n/index.js';
+import { SHARE_COPY } from '../util/events.js';
 
 const STATUS_TIMEOUT = 6000;
 
@@ -58,7 +59,7 @@ function initShare(tabsApi) {
   }
 
   buttonNode.addEventListener('click', share);
-  document.addEventListener('share:copy', share);
+  document.addEventListener(SHARE_COPY, share);
 
   async function importFromHash() {
     const token = parseShareHash(window.location.hash);

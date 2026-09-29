@@ -109,6 +109,20 @@ function createTabsView(tabBarNode, handlers) {
       closeMenu();
       if (anchor) anchor.focus();
     });
+    // Arrow keys move between the starter-sheet options.
+    menu.addEventListener('keydown', (event) => {
+      const options = [...menu.querySelectorAll('.tab-template-option')];
+      const index = options.indexOf(document.activeElement);
+      let next = -1;
+      if (event.key === 'ArrowDown') next = (index + 1) % options.length;
+      else if (event.key === 'ArrowUp') next = (index - 1 + options.length) % options.length;
+      else if (event.key === 'Home') next = 0;
+      else if (event.key === 'End') next = options.length - 1;
+      if (next >= 0) {
+        event.preventDefault();
+        options[next].focus();
+      }
+    });
     window.addEventListener('resize', closeMenu);
     tabBarNode.addEventListener('scroll', closeMenu);
     return menu;
@@ -151,6 +165,9 @@ function createTabsView(tabBarNode, handlers) {
     menu.hidden = false;
     anchor.setAttribute('aria-expanded', 'true');
     positionMenu(anchor);
+    // Move focus into the menu so it is usable from the keyboard.
+    const first = menu.querySelector('.tab-template-option');
+    if (first) first.focus();
   }
 
   function closeMenu() {
@@ -244,6 +261,12 @@ function createTabsView(tabBarNode, handlers) {
       return;
     }
 
+    if (event.key === 'F2') {
+      event.preventDefault();
+      beginRename(tabElement.dataset.id, tabElement.querySelector('.tab-name'));
+      return;
+    }
+
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       handlers.activate(tabElement.dataset.id);
@@ -260,9 +283,28 @@ function createTabsView(tabBarNode, handlers) {
   // Drag to reorder tabs: pointer down on a tab starts a candidate, a move past
   // the threshold turns it into a drag that live-reorders the bar. Mouse only —
   // on touch the bar scrolls instead (touch-action: pan-x), which is what a
-  // finger swipe should do.
+  // finger swipe should do. A touch long-press on a tab name renames it, since a
+  // finger cannot reliably double-click.
+  let pressTimer = null;
+  const cancelPress = () => {
+    clearTimeout(pressTimer);
+    pressTimer = null;
+  };
+
   tabBarNode.addEventListener('pointerdown', (event) => {
-    if (event.pointerType !== 'mouse' || event.button !== 0) return;
+    if (event.pointerType !== 'mouse') {
+      const nameElement = event.target.closest('.tab-name');
+      const tabElement = event.target.closest('.tab');
+      cancelPress();
+      if (nameElement && tabElement) {
+        pressTimer = setTimeout(() => {
+          pressTimer = null;
+          beginRename(tabElement.dataset.id, nameElement);
+        }, 500);
+      }
+      return;
+    }
+    if (event.button !== 0) return;
     const tabElement = event.target.closest('.tab');
     if (!tabElement || event.target.closest('.tab-close')) return;
     drag = {
@@ -273,6 +315,9 @@ function createTabsView(tabBarNode, handlers) {
       active: false,
     };
   });
+
+  document.addEventListener('pointerup', cancelPress);
+  document.addEventListener('pointercancel', cancelPress);
 
   document.addEventListener('pointermove', (event) => {
     if (!drag || event.pointerId !== drag.pointerId) return;

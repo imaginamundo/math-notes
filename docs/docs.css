@@ -185,14 +185,19 @@ body {
   gap: 2.5rem;
   max-width: 78rem;
   margin: 0 auto;
-  padding: 1.5rem 1.25rem 4rem;
+  /* Bottom space lives on .doc-main, not here: the sticky sidebar is clamped to
+     the grid area, which excludes this container's padding. */
+  padding: 1.5rem 1.25rem 0;
   align-items: start;
 }
 
 .doc-sidebar {
   position: sticky;
-  top: 4.5rem;
-  max-height: calc(100vh - 6rem);
+  /* Match the sidebar's natural top (header + the layout's top padding) so it
+     pins immediately instead of drifting on the first scroll. */
+  top: calc(var(--doc-header-height, 3.5rem) + 1.5rem);
+  max-height: calc(100vh - var(--doc-header-height, 3.5rem) - 3rem);
+  max-height: calc(100dvh - var(--doc-header-height, 3.5rem) - 3rem);
   overflow-y: auto;
   /* Keep a sidebar scroll from chaining into the page behind it. */
   overscroll-behavior: contain;
@@ -258,6 +263,8 @@ body {
 
 .doc-main {
   min-width: 0;
+  /* Extends the grid area so the sticky sidebar can reach the page bottom. */
+  padding-bottom: 4rem;
 }
 
 .doc-content {
@@ -542,15 +549,70 @@ body {
     font: inherit;
     cursor: pointer;
   }
+  /* The drawer is a real overlay below the sticky header: fixed, slide-in,
+     with a dimmed backdrop. `--doc-header-height` is set by docs.js so the
+     header (and its Menu button) stays visible above the drawer. */
   .doc-sidebar {
-    position: static;
+    position: fixed;
+    top: var(--doc-header-height, 3.5rem);
+    left: 0;
+    bottom: 0;
+    z-index: 6;
+    width: min(88vw, 22rem);
     max-height: none;
-    /* Let the search dropdown escape the drawer box rather than be clipped. */
-    overflow: visible;
-    display: none;
+    padding: 1rem 1rem 2rem;
+    background: var(--color-primary);
+    border-right: 1px solid var(--border-strong);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transform: translateX(-100%);
+    visibility: hidden;
   }
   .doc-sidebar.is-open {
-    display: block;
+    transform: translateX(0);
+    visibility: visible;
+  }
+  /* Sits below the header (z-index 5) so the Menu button stays clickable, and
+     below the drawer so it is not dimmed. */
+  .doc-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    visibility: hidden;
+  }
+  .doc-backdrop.is-open {
+    opacity: 1;
+    visibility: visible;
+  }
+  /* Lock the page behind the drawer. */
+  html.doc-menu-open {
+    overflow: hidden;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    /* Visibility flips at once when opening (so the drawer is focusable), and
+       only after the slide when closing (so it does not vanish mid-animation). */
+    .doc-sidebar {
+      transition:
+        transform 0.2s ease,
+        visibility 0s 0.2s;
+    }
+    .doc-sidebar.is-open {
+      transition:
+        transform 0.2s ease,
+        visibility 0s;
+    }
+    .doc-backdrop {
+      transition:
+        opacity 0.2s ease,
+        visibility 0s 0.2s;
+    }
+    .doc-backdrop.is-open {
+      transition:
+        opacity 0.2s ease,
+        visibility 0s;
+    }
   }
   .doc-header {
     flex-wrap: nowrap;
@@ -574,8 +636,10 @@ body {
     max-width: none;
   }
   .doc-search-results {
-    left: 0;
-    right: 0;
+    /* Inline below the box: an absolute dropdown would be clipped by the
+       drawer's own scroll area. */
+    position: static;
     width: auto;
+    max-height: 12rem;
   }
 }

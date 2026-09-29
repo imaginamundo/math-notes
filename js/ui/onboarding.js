@@ -1,8 +1,8 @@
 import storage from '../util/storage.js';
+import { STORAGE_KEY as TABS_KEY } from '../storage/tabsStore.js';
 import { t } from '../i18n/index.js';
 
 const ONBOARDED_KEY = 'math-notes-onboarded';
-const TABS_KEY = 'math-notes-tabs';
 
 // A working mini-tutorial rather than a wall of prose: every line evaluates, so
 // the very first screen demonstrates the app. The comment lines follow the

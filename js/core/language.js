@@ -20,22 +20,10 @@ function readStoredLanguage() {
   return raw ? normalizeLanguage(raw) : null;
 }
 
-// The language the rest of the app reads. Kept in memory so lookups do not hit
-// storage (the worker has no storage; it receives the value as a message).
-let current = DEFAULT_LANGUAGE;
-
-function getLanguage() {
-  return current;
-}
-
-function setLanguage(value) {
-  current = normalizeLanguage(value);
-}
-
+// Persist a language choice. The language is UI-only (the worker never needs
+// it), so it is not kept in module state.
 function writeLanguage(value) {
-  const normalized = normalizeLanguage(value);
-  storage.set(STORAGE_KEY, normalized);
-  current = normalized;
+  storage.set(STORAGE_KEY, normalizeLanguage(value));
 }
 
 export {
@@ -44,7 +32,5 @@ export {
   DEFAULT_LANGUAGE,
   normalizeLanguage,
   readStoredLanguage,
-  getLanguage,
-  setLanguage,
   writeLanguage,
 };

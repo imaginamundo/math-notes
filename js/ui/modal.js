@@ -26,6 +26,8 @@ function initModal(dialogNode, openButtonNode, { onOpen, onClose } = {}) {
 
   dialogNode.addEventListener('close', () => {
     if (onClose) onClose();
+    // Standard dialog behaviour: return focus to the control that opened it.
+    openButtonNode.focus();
   });
 
   return { open, close };

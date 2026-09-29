@@ -1,9 +1,9 @@
 // Rendering dates, clock times and calendar intervals as strings.
-import { getClockFormat } from '../core/clockFormat.js';
+import { DEFAULT_CLOCK_FORMAT } from '../core/clockFormat.js';
 import { MONTH_NAMES, MONTH_ABBR, WEEKDAYS, WEEKDAY_ABBR, atNoon, DAY_MS } from './calendarDate.js';
 
-function formatDate(date) {
-  if (date.clock) return formatClock(date);
+function formatDate(date, clockFormat = DEFAULT_CLOCK_FORMAT) {
+  if (date.clock) return formatClock(date, clockFormat);
   const year = date.getFullYear();
   const suffix = year === new Date().getFullYear() ? '' : ` ${year}`;
   return `${date.getDate()} ${MONTH_NAMES[date.getMonth()]}${suffix}`;
@@ -11,11 +11,11 @@ function formatDate(date) {
 
 // `19:12` or `7:12 pm` (per the Clock setting), with the day when the clock
 // time is not today.
-function formatClock(date, now = new Date()) {
+function formatClock(date, clockFormat = DEFAULT_CLOCK_FORMAT, now = new Date()) {
   const hours = date.getHours();
   const minutes = String(date.getMinutes()).padStart(2, '0');
   const time =
-    getClockFormat() === '12'
+    clockFormat === '12'
       ? `${hours % 12 === 0 ? 12 : hours % 12}:${minutes} ${hours < 12 ? 'am' : 'pm'}`
       : `${String(hours).padStart(2, '0')}:${minutes}`;
   const day = Math.round((atNoon(date) - atNoon(now)) / DAY_MS);

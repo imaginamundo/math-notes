@@ -1,6 +1,7 @@
 // A quick "Go to line" bar, styled like the find bar (it reuses .find-bar's
 // visuals) but anchored to the content start. Opened with Cmd/Ctrl+G.
 import { t } from '../i18n/index.js';
+import { LANGUAGE_UPDATED } from '../util/events.js';
 
 function initGoToLine(editableNode) {
   const barNode = buildBar();
@@ -20,7 +21,7 @@ function initGoToLine(editableNode) {
     closeNode.setAttribute('aria-label', t('find.close'));
   }
   refreshLabels();
-  window.addEventListener('language:updated', refreshLabels);
+  window.addEventListener(LANGUAGE_UPDATED, refreshLabels);
 
   function totalLines() {
     return editableNode.value.split('\n').length;

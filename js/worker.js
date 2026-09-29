@@ -5,16 +5,32 @@ import {
   registerTotalMode,
 } from './core/calculate.js';
 import { DEFAULT_PRECISION, normalizeDecimalPrecision } from './core/decimalPrecision.js';
-import { setClockFormat } from './core/clockFormat.js';
+import { DEFAULT_CLOCK_FORMAT } from './core/clockFormat.js';
 import formatResult from './render/formatResult.js';
 import { applyLinePatch } from './util/sequence.js';
 
 let precision = DEFAULT_PRECISION;
+let clockFormat = DEFAULT_CLOCK_FORMAT;
 // The full sheet, reconstructed from the suffix patches the client sends.
 let sheetLines = [];
 
+// Every non-display setting arrives as one `{ type: 'setting', name, value }`
+// message and is routed here, so adding one is a single entry rather than a new
+// message type on both sides.
+const SETTINGS = {
+  rates: (value) => registerCurrencyRates(value),
+  measurement: (value) => registerMeasurementSystem(value),
+  'total-mode': (value) => registerTotalMode(value),
+  precision: (value) => {
+    precision = normalizeDecimalPrecision(value);
+  },
+  'clock-format': (value) => {
+    clockFormat = value;
+  },
+};
+
 self.addEventListener('message', (event) => {
-  const { id, type, lines, from, data } = event.data || {};
+  const { id, type, lines, from, name, value } = event.data || {};
   try {
     if (type === 'evaluate') {
       sheetLines = applyLinePatch(sheetLines, from, lines);
@@ -28,12 +44,12 @@ self.addEventListener('message', (event) => {
             ? undefined
             : result.type === 'error'
               ? result.value
-              : formatResult(result.value, precision),
+              : formatResult(result.value, precision, clockFormat),
         group: result.group,
       }));
       // The total may be a Unit (same-unit sheet) and must be serialized too.
       const serializedTotal =
-        total === null || total === undefined ? total : formatResult(total, precision);
+        total === null || total === undefined ? total : formatResult(total, precision, clockFormat);
       self.postMessage({
         id,
         type: 'result',
@@ -41,16 +57,9 @@ self.addEventListener('message', (event) => {
         total: serializedTotal,
         startLine,
       });
-    } else if (type === 'rates') {
-      registerCurrencyRates(data);
-    } else if (type === 'measurement') {
-      registerMeasurementSystem(data);
-    } else if (type === 'total-mode') {
-      registerTotalMode(data);
-    } else if (type === 'precision') {
-      precision = normalizeDecimalPrecision(data);
-    } else if (type === 'clock-format') {
-      setClockFormat(data);
+    } else if (type === 'setting') {
+      const apply = SETTINGS[name];
+      if (apply) apply(value);
     }
   } catch (error) {
     // Only an evaluate request carries an id to report against. A malformed

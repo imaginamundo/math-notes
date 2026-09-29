@@ -1,21 +1,16 @@
-import storage from '../util/storage.js';
+import defineSetting from './setting.js';
 import { MEASUREMENT_SYSTEMS, DEFAULT_MEASUREMENT_SYSTEM } from './measures.js';
 
 // The user's preferred system for cooking volume units. Metric is the default.
-const STORAGE_KEY = 'math-notes-measurement-system';
+const setting = defineSetting({
+  key: 'math-notes-measurement-system',
+  values: MEASUREMENT_SYSTEMS,
+  defaultValue: DEFAULT_MEASUREMENT_SYSTEM,
+});
 
-function normalizeMeasurementSystem(system) {
-  return MEASUREMENT_SYSTEMS.includes(system) ? system : DEFAULT_MEASUREMENT_SYSTEM;
-}
-
-// Reads through the storage wrapper, so an unavailable localStorage (or the
-// worker, which has none) falls back to the default.
-function readMeasurementSystem() {
-  return normalizeMeasurementSystem(storage.get(STORAGE_KEY));
-}
-
-function writeMeasurementSystem(system) {
-  storage.set(STORAGE_KEY, normalizeMeasurementSystem(system));
-}
+const STORAGE_KEY = setting.key;
+const normalizeMeasurementSystem = setting.normalize;
+const readMeasurementSystem = setting.read;
+const writeMeasurementSystem = setting.write;
 
 export { STORAGE_KEY, normalizeMeasurementSystem, readMeasurementSystem, writeMeasurementSystem };

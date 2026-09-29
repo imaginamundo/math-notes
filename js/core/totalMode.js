@@ -1,21 +1,19 @@
-import storage from '../util/storage.js';
+import defineSetting from './setting.js';
 
 // Which aggregate the bottom total bar shows. `sum` is the default.
-const STORAGE_KEY = 'math-notes-total-mode';
 const TOTAL_MODES = ['sum', 'average', 'median'];
 const DEFAULT_TOTAL_MODE = 'sum';
 
-function normalizeTotalMode(value) {
-  return TOTAL_MODES.includes(value) ? value : DEFAULT_TOTAL_MODE;
-}
+const setting = defineSetting({
+  key: 'math-notes-total-mode',
+  values: TOTAL_MODES,
+  defaultValue: DEFAULT_TOTAL_MODE,
+});
 
-function readTotalMode() {
-  return normalizeTotalMode(storage.get(STORAGE_KEY));
-}
-
-function writeTotalMode(value) {
-  storage.set(STORAGE_KEY, normalizeTotalMode(value));
-}
+const STORAGE_KEY = setting.key;
+const normalizeTotalMode = setting.normalize;
+const readTotalMode = setting.read;
+const writeTotalMode = setting.write;
 
 export {
   STORAGE_KEY,

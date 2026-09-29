@@ -3,12 +3,12 @@ import {
   DEFAULT_LANGUAGE,
   normalizeLanguage,
   readStoredLanguage,
-  setLanguage as setCoreLanguage,
   writeLanguage as persistLanguage,
 } from '../core/language.js';
 import en from './ui/en.js';
 import pt from './ui/pt.js';
 import es from './ui/es.js';
+import { LANGUAGE_UPDATED } from '../util/events.js';
 
 // The chrome strings. The Examples content is generated from Markdown into
 // ./examples/ and lazy-loaded by the Examples modal (js/ui/recipes.js), so it
@@ -82,7 +82,6 @@ function getLocale() {
 // lang>), then let the dynamically built UI redraw itself.
 function setLocale(language, { persist = true } = {}) {
   current = normalizeLanguage(language);
-  setCoreLanguage(current);
   if (persist) persistLanguage(current);
   if (typeof document !== 'undefined') {
     applyTranslations(document);
@@ -90,7 +89,7 @@ function setLocale(language, { persist = true } = {}) {
     document.documentElement.classList.remove('i18n-pending');
   }
   if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('language:updated', { detail: current }));
+    window.dispatchEvent(new CustomEvent(LANGUAGE_UPDATED, { detail: current }));
   }
 }
 

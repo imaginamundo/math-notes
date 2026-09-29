@@ -1,6 +1,7 @@
 import initModal from './modal.js';
 import initExamples from './examples.js';
 import { getLocale } from '../i18n/index.js';
+import { LANGUAGE_UPDATED } from '../util/events.js';
 
 // The Examples modal. Its sections are rendered from the lazy-loaded, generated
 // content for the active language; a language's module is only fetched the first
@@ -26,7 +27,6 @@ function initRecipes(contentEditableNode) {
 
   const { close } = initModal(recipesModalNode, recipesButtonNode, {
     onOpen: ensureRendered,
-    onClose: () => contentEditableNode.focus(),
   });
 
   function sectionNode(section) {
@@ -55,7 +55,7 @@ function initRecipes(contentEditableNode) {
     renderedLang = lang;
   }
 
-  window.addEventListener('language:updated', () => {
+  window.addEventListener(LANGUAGE_UPDATED, () => {
     renderedLang = null;
     if (recipesModalNode.open) ensureRendered();
   });

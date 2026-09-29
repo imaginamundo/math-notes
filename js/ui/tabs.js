@@ -1,4 +1,5 @@
 import { saveSnapshot, latestPerTab, deleteSnapshots } from '../storage/snapshots.js';
+import { LANGUAGE_UPDATED } from '../util/events.js';
 import {
   generateId,
   createTab,
@@ -376,7 +377,7 @@ function initTabs(editableNode, onUpdate) {
   restoreCaret(getActiveTab().caret);
 
   // Re-render the tab bar (its aria-labels/titles) when the language changes.
-  window.addEventListener('language:updated', () => view.render());
+  window.addEventListener(LANGUAGE_UPDATED, () => view.render());
 
   // Two open windows share one saved collection. When another window saves the
   // tab collection, adopt it here — unless this window has an edit that has not

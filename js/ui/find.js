@@ -1,6 +1,7 @@
 import { clearMarks, applyMarks } from '../render/marks.js';
 import { setEditorValue } from './editorInput.js';
 import { t } from '../i18n/index.js';
+import { LANGUAGE_UPDATED } from '../util/events.js';
 
 function initFind(editableNode, viewNode) {
   const barNode = buildBar();
@@ -34,7 +35,7 @@ function initFind(editableNode, viewNode) {
     label(replaceAllButton, t('find.replaceAll'));
   }
   refreshLabels();
-  window.addEventListener('language:updated', refreshLabels);
+  window.addEventListener(LANGUAGE_UPDATED, refreshLabels);
 
   // Anchor the bar to the editor box (`.input`), not the scrolling content, so
   // it stays pinned at the top-right while the sheet scrolls.

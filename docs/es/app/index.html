@@ -51,6 +51,7 @@
     </div>
     <button class="doc-menu-toggle" type="button" aria-label="Menú de la documentación" aria-expanded="false" aria-controls="doc-sidebar">Menú</button>
   </header>
+  <div class="doc-backdrop" aria-hidden="true"></div>
   <div class="doc-layout">
     <aside class="doc-sidebar" id="doc-sidebar">
       <nav class="doc-nav" aria-label="Menú de la documentación"><ul><li class="doc-nav-item"><a href="/docs/es/">Inicio</a></li><li class="doc-nav-item"><a href="/docs/es/getting-started/">Primeros pasos</a></li><li class="doc-nav-item"><a href="/docs/es/writing-a-sheet/">Escribir una hoja</a></li><li class="doc-nav-item"><a href="/docs/es/numbers/">Números &amp; operadores</a></li><li class="doc-nav-item"><a href="/docs/es/lists/">Listas &amp; secuencias</a></li><li class="doc-nav-item"><a href="/docs/es/groups/">Grupos &amp; totales</a></li><li class="doc-nav-item"><a href="/docs/es/units/">Unidades &amp; medidas</a></li><li class="doc-nav-item"><a href="/docs/es/money/">Dinero &amp; monedas</a></li><li class="doc-nav-item"><a href="/docs/es/dates/">Fechas &amp; tiempo</a></li><li class="doc-nav-item"><a href="/docs/es/files/">Archivos, compartir &amp; datos</a></li><li class="doc-nav-item"><a href="/docs/es/settings/">Ajustes &amp; apariencia</a></li><li class="doc-nav-item is-active"><a href="/docs/es/app/" aria-current="page">App &amp; plataforma</a><ul class="doc-nav-sub"><li class="doc-nav-sub-title">En esta página</li><li><a href="#instalar">Instalar</a></li><li><a href="#sin-conexion">Sin conexión</a></li><li><a href="#atajos-de-teclado">Atajos de teclado</a></li><li><a href="#accesibilidad">Accesibilidad</a></li></ul></li><li class="doc-nav-item"><a href="/docs/es/reference/">Referencia</a></li><li class="doc-nav-item"><a href="/docs/es/about/">Acerca de</a></li></ul></nav>
@@ -62,7 +63,7 @@
 <h2 id="instalar">Instalar<a class="doc-anchor" href="#instalar" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <p>Abre la app en un navegador moderno y usa la acción <strong>Instalar</strong> o <strong>Añadir a la pantalla de inicio</strong> del navegador. Una vez instalada, se abre en su propia ventana, sin barra de direcciones ni interfaz del navegador.</p>
 <h2 id="sin-conexion">Sin conexión<a class="doc-anchor" href="#sin-conexion" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
-<p>Un service worker mantiene la app disponible sin conexión. Tras la primera visita, la estructura y el código de la app se sirven desde la caché y se actualizan en segundo plano, así que las visitas siguientes son instantáneas y una conexión perdida no interrumpe tu trabajo.</p>
+<p>Un service worker mantiene la app disponible sin conexión. Tras la primera visita, la estructura y el código de la app se sirven desde la caché; una versión nueva se instala en segundo plano y toma el control en una visita posterior, cuando todas las pestañas se hayan cerrado, así que una página abierta nunca mezcla versiones.</p>
 <p>Las tasas de cambio también se guardan en caché, así que las conversiones siguen funcionando sin conexión con las tasas más recientes que haya visto la app.</p>
 <h2 id="atajos-de-teclado">Atajos de teclado<a class="doc-anchor" href="#atajos-de-teclado" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <p>Toda acción tiene un atajo; la lista completa está en la <a href="/docs/es/reference/">Referencia</a>. Los más comunes:</p>
@@ -111,7 +112,9 @@
 <h2 id="accesibilidad">Accesibilidad<a class="doc-anchor" href="#accesibilidad" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <ul>
 <li>El control de tamaño del texto escala desde el tamaño predeterminado del navegador, así que honra tu preferencia del sistema.</li>
-<li>El editor tiene una etiqueta accesible, la barra de estado anuncia el estado con <code>aria-live</code>, y las ventanas son elementos <code>&lt;dialog&gt;</code> nativos con cabecera etiquetada y botón de cierre alcanzable por teclado.</li>
+<li>El editor tiene una etiqueta accesible, la barra de estado anuncia el estado con <code>aria-live</code>, y el resultado de la línea activa se anuncia mediante una región viva aparte.</li>
+<li>El autocompletado se expone como combobox (<code>aria-expanded</code>, <code>aria-controls</code>, <code>aria-activedescendant</code>), y las pestañas pueden renombrarse con el teclado (<code>F2</code>) o por toque (mantén pulsado).</li>
+<li>Las ventanas son elementos <code>&lt;dialog&gt;</code> nativos con cabecera etiquetada y botón de cierre alcanzable por teclado, y al cerrarlas el foco vuelve al botón que las abrió.</li>
 <li>La agregación de la barra de total es un <code>&lt;select&gt;</code> etiquetado.</li>
 <li>La documentación que estás leyendo es HTML estático con enlace para saltar al contenido, elementos de referencia y una barra lateral alcanzable por teclado.</li>
 </ul>

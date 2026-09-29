@@ -1,4 +1,5 @@
 import storage from '../util/storage.js';
+import { FONT_SIZE_CHANGED } from '../util/events.js';
 
 // Applies a saved font scale at startup and handles the +/-/reset buttons.
 // The scale is a percentage of the browser's default font size (the user's
@@ -30,7 +31,7 @@ function initFontControls(onChange = () => {}) {
     onChange();
     // Floating controls that anchor themselves to the editor metrics (the
     // starter prompt) must reposition after a font change.
-    window.dispatchEvent(new Event('math:font-size-changed'));
+    window.dispatchEvent(new Event(FONT_SIZE_CHANGED));
   }
 
   function setScale(value) {
