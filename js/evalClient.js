@@ -1,4 +1,4 @@
-import { fetchRates, loadCached } from './eval/currency.js';
+import { fetchRates, loadCached, startRateRefresh } from './eval/currency.js';
 import { readMeasurementSystem } from './core/measurementSystem.js';
 import { DEFAULT_MEASUREMENT_SYSTEM } from './core/measures.js';
 import { DEFAULT_PRECISION, readDecimalPrecision } from './core/decimalPrecision.js';
@@ -221,7 +221,9 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     // change" (startLine -1). Snapshot the dirty flags for THIS request and clear
     // them immediately: a stale in-flight reply must not consume a force that
     // belongs to the request issued after the change.
-    const forceRender = precisionDirty || clockFormatDirty;
+    const forcePrecision = precisionDirty;
+    const forceClock = clockFormatDirty;
+    const forceRender = forcePrecision || forceClock;
     precisionDirty = false;
     clockFormatDirty = false;
     try {
@@ -229,7 +231,14 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
       // the results fill in when the reply lands (or not at all if stale).
       if (onTextRender) onTextRender(lines);
       const { data } = await requestEvaluate(lines);
-      if (editableNode.value !== text) return;
+      if (editableNode.value !== text) {
+        // The forced redraw was superseded by a newer edit; re-arm it so the
+        // next request still repaints with the new setting (a later edit is not
+        // guaranteed to change enough for the engine to report a full render).
+        if (forcePrecision) precisionDirty = true;
+        if (forceClock) clockFormatDirty = true;
+        return;
+      }
       if (forceRender) data.startLine = 0;
       onRender(lines, data);
     } catch (error) {
@@ -265,6 +274,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
   }
 
   fetchRates();
+  startRateRefresh();
 
   return {
     update,

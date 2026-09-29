@@ -167,6 +167,34 @@ test('a crashed worker falls back to the main thread for the in-flight request',
   assert.equal(busy[busy.length - 1], false, 'busy flag cleared after the crash');
 });
 
+test('a dropped forced redraw is re-armed for the next request', async () => {
+  const { client, node, renders } = setup();
+  await client.update(); // creates the worker
+  const worker = WorkerStub.latest;
+  worker.autoReply = false;
+  renders.length = 0;
+  const evaluateIds = () => worker.sent.filter((m) => m.type === 'evaluate').map((m) => m.id);
+  const reply = (id) =>
+    worker.emit('message', {
+      data: { id, type: 'result', results: [], total: 4, startLine: -1 },
+    });
+
+  client.syncPrecision(5);
+  const r1 = client.update();
+  const id1 = evaluateIds().at(-1);
+  node.value = '1 + 2'; // supersede the forced request
+  reply(id1);
+  await r1;
+  assert.equal(renders.length, 0, 'the superseded forced reply is dropped');
+
+  const r2 = client.update();
+  const id2 = evaluateIds().at(-1);
+  reply(id2);
+  await r2;
+  assert.equal(renders.length, 1);
+  assert.equal(renders[0].data.startLine, 0, 'the re-armed force repaints fully');
+});
+
 test('a stale reply does not consume a pending precision force', async () => {
   const { client, renders } = setup();
   await client.update(); // creates the worker
