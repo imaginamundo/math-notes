@@ -96,11 +96,8 @@ function exampleBlock(expr, hint, ui) {
   const hintHtml = hint
     ? `<figcaption class="doc-example-result">${escapeHtml(hint)}</figcaption>`
     : '';
-  // A one-line example lays its actions beside the code on wide screens, so a
-  // long list of them does not become a column of tall cards.
-  const modifier = expr.includes('\n') ? '' : ' doc-example-inline';
   return (
-    `<figure class="doc-example${modifier}" data-expr="${escapeAttr(expr)}">` +
+    `<figure class="doc-example" data-expr="${escapeAttr(expr)}">` +
     `<pre class="doc-code"><code data-calc>${escapeHtml(expr)}</code></pre>${hintHtml}` +
     `<div class="doc-example-actions">` +
     `<button type="button" class="doc-action" data-action="copy" data-copied="${escapeAttr(ui.copied)}">${escapeHtml(ui.copy)}</button>` +
