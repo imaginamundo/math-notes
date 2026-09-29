@@ -1,6 +1,7 @@
 import format from './format.js';
 import formatResult from './formatResult.js';
 import { getDecimalPrecision } from '../core/decimalPrecision.js';
+import { getClockFormat } from '../core/clockFormat.js';
 import { firstDifference, arraysEqual } from '../util/sequence.js';
 import { collectVariableNames, isMultiWordDefinition } from '../core/multiWordVariables.js';
 
@@ -206,7 +207,7 @@ function createRowRenderer(view) {
       const valid =
         ref && ref.type === 'value' && ref.value !== undefined && typeof ref.value !== 'function';
       if (valid) {
-        const text = formatResult(ref.value, getDecimalPrecision());
+        const text = formatResult(ref.value, getDecimalPrecision(), getClockFormat());
         span.dataset.value = text;
         span.title = text;
         span.classList.add('resolved');
@@ -344,7 +345,7 @@ function createRowRenderer(view) {
     const error = result.type === 'error';
     if (!error) {
       return {
-        value: `→ ${truncate(formatResult(result.value, getDecimalPrecision()), 80)}`,
+        value: `→ ${truncate(formatResult(result.value, getDecimalPrecision(), getClockFormat()), 80)}`,
         error: false,
       };
     }

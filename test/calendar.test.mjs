@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import { evaluateLines } from '../js/core/calculate.js';
 import formatResult from '../js/render/formatResult.js';
 import { preprocessCalendar } from '../js/eval/calendar.js';
-import { DEFAULT_CLOCK_FORMAT, setClockFormat } from '../js/core/clockFormat.js';
 
 function valueOf(line) {
   return formatResult(evaluateLines([line]).results[0].value);
@@ -147,14 +146,10 @@ test('clock times parse and render (24-hour by default)', () => {
   assert.equal(valueOf('12am'), '00:00');
 });
 
-test('the Clock setting switches to 12-hour', () => {
-  setClockFormat('12');
-  try {
-    assert.equal(valueOf('9:45 am'), '9:45 am');
-    assert.equal(valueOf('16:00 + 3 hours 12 minutes'), '7:12 pm');
-  } finally {
-    setClockFormat(DEFAULT_CLOCK_FORMAT);
-  }
+test('the Clock format renders 12-hour when asked', () => {
+  const at = (line) => formatResult(evaluateLines([line]).results[0].value, undefined, '12');
+  assert.equal(at('9:45 am'), '9:45 am');
+  assert.equal(at('16:00 + 3 hours 12 minutes'), '7:12 pm');
 });
 
 test('adding and subtracting a duration from a clock time', () => {

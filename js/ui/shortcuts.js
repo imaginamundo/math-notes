@@ -1,4 +1,6 @@
 import formatResult from '../render/formatResult.js';
+import { getDecimalPrecision } from '../core/decimalPrecision.js';
+import { getClockFormat } from '../core/clockFormat.js';
 import { indexOfLineAt } from '../util/text.js';
 import { copyText } from '../util/clipboard.js';
 import { setEditorValue } from './editorInput.js';
@@ -49,7 +51,7 @@ async function copyCurrentLineResult(editableNode, requestResults) {
     const { results } = await requestResults(value.split('\n'));
     const result = results[lineIndex];
     if (result && result.type !== 'error' && result.value !== undefined) {
-      copyText(formatResult(result.value));
+      copyText(formatResult(result.value, getDecimalPrecision(), getClockFormat()));
     }
   } catch {
     // evaluation failed; nothing to copy

@@ -2,6 +2,7 @@ import { formatTimespan } from '../eval/timespan.js';
 import { formatDate, formatInterval } from '../eval/calendar.js';
 import { isCurrencyCode, CURRENCY_DISPLAY } from '../core/currencySymbols.js';
 import { DEFAULT_PRECISION } from '../core/decimalPrecision.js';
+import { DEFAULT_CLOCK_FORMAT } from '../core/clockFormat.js';
 import { readableUnit } from '../core/unitNames.js';
 import { decodeUserUnits } from '../core/userUnits.js';
 
@@ -19,16 +20,16 @@ function formatterFor(precision) {
   return formatter;
 }
 
-function formatResult(value, precision = DEFAULT_PRECISION) {
-  return formatValue(value, 0, precision);
+function formatResult(value, precision = DEFAULT_PRECISION, clockFormat = DEFAULT_CLOCK_FORMAT) {
+  return formatValue(value, 0, precision, clockFormat);
 }
 
-function formatValue(value, depth, precision) {
+function formatValue(value, depth, precision, clockFormat) {
   if (value instanceof Error) return value.message;
   if (typeof value === 'number') return formatNumber(value, precision);
   // BigNumber is formatted through the same precision as a plain number.
   if (value && value.isBigNumber === true) return formatNumber(Number(value), precision);
-  if (value instanceof Date) return formatDate(value);
+  if (value instanceof Date) return formatDate(value, clockFormat);
   if (value && value.type === 'calendarInterval') return formatInterval(value.parts);
   if (value && value.isUnit === true) return decodeUserUnits(formatUnit(value, precision));
   // mathjs Fraction stringifies to its decimal; show the fraction instead.
@@ -38,10 +39,10 @@ function formatValue(value, depth, precision) {
   if (Array.isArray(value) || (value && value.isMatrix)) {
     if (depth >= MAX_DEPTH) return '[…]';
     const items = value.isMatrix && value.toArray ? value.toArray() : value;
-    return formatList(items, depth, precision);
+    return formatList(items, depth, precision, clockFormat);
   }
   if (isPlainObject(value)) {
-    return depth >= MAX_DEPTH ? '{…}' : formatObject(value, depth, precision);
+    return depth >= MAX_DEPTH ? '{…}' : formatObject(value, depth, precision, clockFormat);
   }
   return String(value);
 }
@@ -54,14 +55,15 @@ function isPlainObject(value) {
   return proto === Object.prototype || proto === null;
 }
 
-function formatObject(object, depth, precision) {
+function formatObject(object, depth, precision, clockFormat) {
   const keys = Object.keys(object);
   if (!keys.length) return '{}';
   const entry = (key) =>
     `${IDENTIFIER_KEY.test(key) ? key : JSON.stringify(key)}: ${formatValue(
       object[key],
       depth + 1,
-      precision
+      precision,
+      clockFormat
     )}`;
   if (keys.length <= LIST_SHOW) return `{ ${keys.map(entry).join(', ')} }`;
   const head = keys
@@ -73,9 +75,9 @@ function formatObject(object, depth, precision) {
 
 // Keep sequences readable: show the full list when short, otherwise the first
 // items and the last with an ellipsis in the middle.
-function formatList(items, depth, precision) {
+function formatList(items, depth, precision, clockFormat) {
   if (!items.length) return '[]';
-  const item = (value) => formatValue(value, depth + 1, precision);
+  const item = (value) => formatValue(value, depth + 1, precision, clockFormat);
   if (items.length <= LIST_SHOW) return `[${items.map(item).join(', ')}]`;
   const head = items
     .slice(0, LIST_SHOW - 1)
