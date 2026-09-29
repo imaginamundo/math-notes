@@ -160,6 +160,9 @@ function initTabs(editableNode, onUpdate) {
     scheduleSnapshot();
     dispatchInput();
     captureCaret();
+    // The input event deliberately skips the debounced evaluate for programmatic
+    // writes, so evaluate now.
+    onUpdate();
   }
 
   function undo() {
