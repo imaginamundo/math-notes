@@ -42,6 +42,9 @@ function initFind(editableNode, viewNode) {
   let caseSensitive = false;
   let matches = [];
   let activeIndex = -1;
+  // Where a replace just ended, so the re-mark picks the next match after it
+  // instead of wrapping back onto a match inside the inserted text.
+  let replaceAnchor = null;
 
   function open() {
     const selected = editableNode.value.slice(
@@ -70,10 +73,13 @@ function initFind(editableNode, viewNode) {
   // worker round-trip. The view is rebuilt on the editor's input event, which
   // is why this also runs (without scrolling) when the sheet changes.
   function refresh(scrollTo) {
-    const prevAnchor =
-      activeIndex !== -1 && matches[activeIndex]
+    const replacing = replaceAnchor !== null;
+    const prevAnchor = replacing
+      ? replaceAnchor
+      : activeIndex !== -1 && matches[activeIndex]
         ? matches[activeIndex].start
         : editableNode.selectionStart;
+    replaceAnchor = null;
     query = findInput.value;
     if (!query) {
       matches = [];
@@ -89,7 +95,11 @@ function initFind(editableNode, viewNode) {
       updateCounter();
       return;
     }
-    activeIndex = nearestIndex(matches, prevAnchor);
+    // A replace continues from the inserted text: wrapping back would keep
+    // matching a replacement that contains the query and grow it forever.
+    activeIndex = replacing
+      ? matches.findIndex((match) => match.start >= prevAnchor)
+      : nearestIndex(matches, prevAnchor);
     applyMarks(viewNode, matches, activeIndex);
     updateCounter();
     if (scrollTo) scrollToActive();
@@ -122,6 +132,7 @@ function initFind(editableNode, viewNode) {
     const value =
       editableNode.value.slice(0, match.start) + replacement + editableNode.value.slice(match.end);
     const caret = match.start + replacement.length;
+    replaceAnchor = caret;
     setEditorValue(editableNode, value, { start: caret, end: caret });
     scrollToActive();
     replaceInput.focus();

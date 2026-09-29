@@ -152,6 +152,33 @@ test('find highlights every match and replace-all rewrites the sheet', async () 
   assert.deepEqual(errors, []);
 });
 
+test('replace does not grow when the replacement contains the query', async () => {
+  await newPage();
+  await setContent('a');
+  await wait(300);
+  await page.evaluate(() =>
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'f', metaKey: true, bubbles: true, cancelable: true })
+    )
+  );
+  await wait(100);
+  await page.evaluate(() => {
+    const find = document.querySelector('.find-input');
+    find.value = 'a';
+    find.dispatchEvent(new Event('input', { bubbles: true }));
+    const replace = document.querySelector('.replace-input');
+    replace.value = 'ab';
+    replace.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await page.evaluate(() => document.querySelector('.replace-one').click());
+  await wait(200);
+  // The match inside the inserted `ab` must not be replaced again.
+  await page.evaluate(() => document.querySelector('.replace-one').click());
+  await wait(200);
+  assert.equal(await value(), 'ab');
+  assert.deepEqual(errors, []);
+});
+
 test('undo restores the sheet and redo brings the change back', async () => {
   await newPage();
   await setContent('1 + 1');
@@ -781,6 +808,35 @@ test('autocomplete offers variables and functions and inserts the choice', async
   await type('3.5');
   await wait(100);
   assert.deepEqual(await suggestions(), []);
+  assert.deepEqual(errors, []);
+});
+
+test('moving the caret off the autocomplete word closes it', async () => {
+  await newPage();
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.focus();
+    ed.value = 'alpha = 5\nal';
+    ed.setSelectionRange(ed.value.length, ed.value.length);
+    ed.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await waitFor(() => page.evaluate(() => !document.getElementById('autocomplete-list').hidden));
+
+  // Move the caret to the previous line: the popup must not stay armed.
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await wait(100);
+  assert.equal(
+    await page.evaluate(() => !document.getElementById('autocomplete-list').hidden),
+    false,
+    'the popup closes when the caret leaves the word'
+  );
+
+  // Enter now inserts a newline rather than replacing the old word.
+  await page.keyboard.press('Enter');
+  const value = await page.evaluate(() => document.getElementById('content-editable').value);
+  assert.ok(!value.includes('alphaalpha'), 'the old word was not rewritten');
   assert.deepEqual(errors, []);
 });
 
