@@ -83,182 +83,96 @@ function applyTheme(id) {
   storage.set(STORAGE_KEY, id);
 }
 
-function initSettings(contentEditableNode, tabsApi) {
-  const button = document.getElementById('settings-button');
-  const modal = document.getElementById('settings-modal');
-  const listNode = modal.querySelector('.settings-themes');
-
-  initModal(modal, button, { onOpen: renderSnapshots, onClose: () => contentEditableNode.focus() });
-
-  THEMES.forEach((theme) => {
+// The theme grid (swatches instead of labels). Kept apart from the plain choice
+// groups below because each card draws three colours.
+function initThemePicker(node) {
+  const cards = [];
+  for (const theme of THEMES) {
     const card = document.createElement('button');
     card.type = 'button';
     card.className = 'theme-card';
     card.dataset.theme = theme.id;
-    card.title = `Apply ${theme.name}`;
 
     const swatch = document.createElement('span');
     swatch.className = 'theme-swatch';
-    theme.swatch.forEach((color) => {
+    for (const color of theme.swatch) {
       const chip = document.createElement('span');
       chip.style.background = color;
       swatch.appendChild(chip);
-    });
+    }
 
     const name = document.createElement('span');
     name.textContent = theme.name;
 
-    card.appendChild(swatch);
-    card.appendChild(name);
+    card.append(swatch, name);
     card.addEventListener('click', () => {
       applyTheme(theme.id);
-      renderActive();
+      render();
       // The inline startup script restores only data-theme; keep the browser
       // chrome (theme-color meta) in step with the theme that was just applied.
       syncThemeColor(currentTheme());
     });
-    listNode.appendChild(card);
-  });
+    node.appendChild(card);
+    cards.push(card);
+  }
 
-  function renderActive() {
+  function render() {
     const current = currentTheme();
-    listNode.querySelectorAll('.theme-card').forEach((card) => {
-      card.classList.toggle('active', card.dataset.theme === current);
-    });
+    for (const card of cards) card.classList.toggle('active', card.dataset.theme === current);
   }
-  renderActive();
 
-  const measurementNode = modal.querySelector('.settings-measurement');
-  MEASUREMENT_SYSTEMS.forEach((system) => {
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = 'measurement-card';
-    card.dataset.system = system;
-    card.addEventListener('click', () => {
-      writeMeasurementSystem(system);
-      renderMeasurement();
-      window.dispatchEvent(new CustomEvent('measurement:updated', { detail: system }));
-    });
-    measurementNode.appendChild(card);
-  });
-
-  function renderMeasurement() {
-    const current = readMeasurementSystem();
-    measurementNode.querySelectorAll('.measurement-card').forEach((card) => {
-      card.classList.toggle('active', card.dataset.system === current);
-    });
-  }
-  renderMeasurement();
-
-  const precisionInput = document.getElementById('decimal-precision');
-  precisionInput.min = String(MIN_PRECISION);
-  precisionInput.max = String(MAX_PRECISION);
-  precisionInput.value = String(readDecimalPrecision());
-  precisionInput.addEventListener('change', () => {
-    const value = normalizeDecimalPrecision(precisionInput.value);
-    writeDecimalPrecision(value);
-    precisionInput.value = String(value);
-    window.dispatchEvent(new CustomEvent('precision:updated', { detail: value }));
-  });
-
-  const clockNode = modal.querySelector('.settings-clock');
-  CLOCK_FORMATS.forEach((format) => {
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = 'measurement-card';
-    card.dataset.format = format;
-    card.addEventListener('click', () => {
-      writeClockFormat(format);
-      renderClock();
-      window.dispatchEvent(new CustomEvent('clock-format:updated', { detail: format }));
-    });
-    clockNode.appendChild(card);
-  });
-
-  function renderClock() {
-    const current = readClockFormat();
-    clockNode.querySelectorAll('.measurement-card').forEach((card) => {
-      card.classList.toggle('active', card.dataset.format === current);
-    });
-  }
-  renderClock();
-
-  const languageNode = modal.querySelector('.settings-language');
-  SUPPORTED_LANGUAGES.forEach((code) => {
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = 'measurement-card';
-    card.dataset.lang = code;
-    card.addEventListener('click', () => {
-      setLocale(code);
-      renderLanguage();
-    });
-    languageNode.appendChild(card);
-  });
-
-  function renderLanguage() {
-    const current = getLocale();
-    languageNode.querySelectorAll('.measurement-card').forEach((card) => {
-      card.classList.toggle('active', card.dataset.lang === current);
-    });
-  }
-  renderLanguage();
-
-  // Text (and titles) that depend on the active language. Re-run on change.
   function renderLabels() {
-    THEMES.forEach((theme) => {
-      const card = listNode.querySelector(`.theme-card[data-theme="${theme.id}"]`);
-      if (card) card.title = t('apply.theme', { name: theme.name });
-    });
-    MEASUREMENT_SYSTEMS.forEach((system) => {
-      const card = measurementNode.querySelector(`.measurement-card[data-system="${system}"]`);
-      if (card) {
-        card.textContent = t(MEASUREMENT_KEYS[system]);
-        card.title = t('apply.measurement', { name: t(MEASUREMENT_KEYS[system]) });
-      }
-    });
-    CLOCK_FORMATS.forEach((format) => {
-      const card = clockNode.querySelector(`.measurement-card[data-format="${format}"]`);
-      if (card) {
-        card.textContent = t(CLOCK_KEYS[format]);
-        card.title = t('apply.clock', { name: t(CLOCK_KEYS[format]) });
-      }
-    });
-    SUPPORTED_LANGUAGES.forEach((code) => {
-      const card = languageNode.querySelector(`.measurement-card[data-lang="${code}"]`);
-      if (card) {
-        card.textContent = t(LANGUAGE_KEYS[code]);
-        card.title = t('apply.language', { name: t(LANGUAGE_KEYS[code]) });
-      }
-    });
-  }
-  renderLabels();
-
-  window.addEventListener('language:updated', () => {
-    renderLabels();
-    renderSnapshots();
-  });
-
-  const resetButton = document.getElementById('reset-data-button');
-  resetButton.addEventListener('click', async () => {
-    if (!window.confirm(t('settings.resetConfirm'))) return;
-    RESET_KEYS.forEach((key) => storage.remove(key));
-    // Drop the in-memory tabs and their pending writes before clearing
-    // snapshots, so the reload below is a genuine first run and the Welcome
-    // sheet is seeded again.
-    tabsApi.reset();
-    try {
-      const { clearSnapshots } = await import('../storage/snapshots.js');
-      await clearSnapshots();
-    } catch {
-      // storage unavailable
+    for (const card of cards) {
+      const theme = THEMES.find((entry) => entry.id === card.dataset.theme);
+      card.title = t('apply.theme', { name: theme.name });
     }
-    window.location.reload();
-  });
+  }
 
-  async function renderSnapshots() {
-    const container = document.getElementById('snapshot-history');
-    const restoreAllButton = document.getElementById('restore-all-button');
+  render();
+  renderLabels();
+  return { render, renderLabels };
+}
+
+// A radio-style row of buttons (measurement system, clock format, language).
+// `read` returns the active value, `select` persists it, and `labelKey` maps a
+// value to its i18n key.
+function createChoiceGroup(node, { options, dataKey, read, select, labelKey, applyKey }) {
+  const cards = new Map();
+  for (const value of options) {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'measurement-card';
+    card.dataset[dataKey] = value;
+    card.addEventListener('click', () => {
+      select(value);
+      render();
+    });
+    node.appendChild(card);
+    cards.set(value, card);
+  }
+
+  function render() {
+    const current = read();
+    for (const [value, card] of cards) card.classList.toggle('active', value === current);
+  }
+
+  function renderLabels() {
+    for (const [value, card] of cards) {
+      const text = t(labelKey(value));
+      card.textContent = text;
+      card.title = t(applyKey, { name: text });
+    }
+  }
+
+  render();
+  renderLabels();
+  return { render, renderLabels };
+}
+
+// The snapshot history and its "Restore all" action. Rebuilt on open and on a
+// language change.
+function initSnapshotHistory(container, restoreAllButton, tabsApi) {
+  async function render() {
     let snapshots = [];
     let latest = [];
     try {
@@ -304,8 +218,7 @@ function initSettings(contentEditableNode, tabsApi) {
           if (confirm) tabsApi.restoreTab(snapshot);
         });
 
-        row.appendChild(label);
-        row.appendChild(restore);
+        row.append(label, restore);
         container.appendChild(row);
       }
     }
@@ -315,6 +228,100 @@ function initSettings(contentEditableNode, tabsApi) {
       if (window.confirm(t('settings.restoreAllConfirm'))) tabsApi.restoreAll(latest);
     };
   }
+
+  return { render };
+}
+
+function initSettings(contentEditableNode, tabsApi) {
+  const button = document.getElementById('settings-button');
+  const modal = document.getElementById('settings-modal');
+
+  const themePicker = initThemePicker(modal.querySelector('.settings-themes'));
+
+  const measurement = createChoiceGroup(modal.querySelector('.settings-measurement'), {
+    options: MEASUREMENT_SYSTEMS,
+    dataKey: 'system',
+    read: readMeasurementSystem,
+    select: (system) => {
+      writeMeasurementSystem(system);
+      window.dispatchEvent(new CustomEvent('measurement:updated', { detail: system }));
+    },
+    labelKey: (system) => MEASUREMENT_KEYS[system],
+    applyKey: 'apply.measurement',
+  });
+
+  const precisionInput = document.getElementById('decimal-precision');
+  precisionInput.min = String(MIN_PRECISION);
+  precisionInput.max = String(MAX_PRECISION);
+  precisionInput.value = String(readDecimalPrecision());
+  precisionInput.addEventListener('change', () => {
+    const value = normalizeDecimalPrecision(precisionInput.value);
+    writeDecimalPrecision(value);
+    precisionInput.value = String(value);
+    window.dispatchEvent(new CustomEvent('precision:updated', { detail: value }));
+  });
+
+  const clock = createChoiceGroup(modal.querySelector('.settings-clock'), {
+    options: CLOCK_FORMATS,
+    dataKey: 'format',
+    read: readClockFormat,
+    select: (format) => {
+      writeClockFormat(format);
+      window.dispatchEvent(new CustomEvent('clock-format:updated', { detail: format }));
+    },
+    labelKey: (format) => CLOCK_KEYS[format],
+    applyKey: 'apply.clock',
+  });
+
+  const language = createChoiceGroup(modal.querySelector('.settings-language'), {
+    options: SUPPORTED_LANGUAGES,
+    dataKey: 'lang',
+    read: getLocale,
+    select: (code) => setLocale(code),
+    labelKey: (code) => LANGUAGE_KEYS[code],
+    applyKey: 'apply.language',
+  });
+
+  const snapshots = initSnapshotHistory(
+    document.getElementById('snapshot-history'),
+    document.getElementById('restore-all-button'),
+    tabsApi
+  );
+
+  initModal(modal, button, {
+    onOpen: snapshots.render,
+    onClose: () => contentEditableNode.focus(),
+  });
+
+  // Text (and titles) that depend on the active language. Re-run on change.
+  function renderLabels() {
+    themePicker.renderLabels();
+    measurement.renderLabels();
+    clock.renderLabels();
+    language.renderLabels();
+  }
+
+  window.addEventListener('language:updated', () => {
+    renderLabels();
+    snapshots.render();
+  });
+
+  const resetButton = document.getElementById('reset-data-button');
+  resetButton.addEventListener('click', async () => {
+    if (!window.confirm(t('settings.resetConfirm'))) return;
+    RESET_KEYS.forEach((key) => storage.remove(key));
+    // Drop the in-memory tabs and their pending writes before clearing
+    // snapshots, so the reload below is a genuine first run and the Welcome
+    // sheet is seeded again.
+    tabsApi.reset();
+    try {
+      const { clearSnapshots } = await import('../storage/snapshots.js');
+      await clearSnapshots();
+    } catch {
+      // storage unavailable
+    }
+    window.location.reload();
+  });
 }
 
 function timeAgo(timestamp) {
