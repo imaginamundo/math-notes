@@ -1,4 +1,4 @@
-import { fetchRates, loadCached, startRateRefresh } from './eval/currency.js';
+import { fetchRates, loadCached, startRateRefresh } from './storage/currencyRates.js';
 import { readMeasurementSystem } from './core/measurementSystem.js';
 import { DEFAULT_MEASUREMENT_SYSTEM } from './core/measures.js';
 import { DEFAULT_PRECISION, readDecimalPrecision } from './core/decimalPrecision.js';
@@ -67,24 +67,17 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     created.addEventListener('error', dropWorker);
     // Seed the worker with the stored settings; the worker defaults to the same
     // values, so only a non-default choice needs sending.
+    const seed = (name, value) => created.postMessage({ type: 'setting', name, value });
     const measurementSystem = readMeasurementSystem();
-    if (measurementSystem !== DEFAULT_MEASUREMENT_SYSTEM) {
-      created.postMessage({ type: 'measurement', data: measurementSystem });
-    }
+    if (measurementSystem !== DEFAULT_MEASUREMENT_SYSTEM) seed('measurement', measurementSystem);
     const precision = readDecimalPrecision();
-    if (precision !== DEFAULT_PRECISION) {
-      created.postMessage({ type: 'precision', data: precision });
-    }
+    if (precision !== DEFAULT_PRECISION) seed('precision', precision);
     const totalMode = readTotalMode();
-    if (totalMode !== DEFAULT_TOTAL_MODE) {
-      created.postMessage({ type: 'total-mode', data: totalMode });
-    }
+    if (totalMode !== DEFAULT_TOTAL_MODE) seed('total-mode', totalMode);
     const clockFormat = readClockFormat();
-    if (clockFormat !== DEFAULT_CLOCK_FORMAT) {
-      created.postMessage({ type: 'clock-format', data: clockFormat });
-    }
+    if (clockFormat !== DEFAULT_CLOCK_FORMAT) seed('clock-format', clockFormat);
     const cachedRates = loadCached();
-    if (cachedRates) created.postMessage({ type: 'rates', data: cachedRates });
+    if (cachedRates) seed('rates', cachedRates);
     // A fresh worker holds no sheet, so the next request must be a full one.
     lastSentLines = null;
     return created;
@@ -251,25 +244,53 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
 
   const debounced = debounce(update, UPDATE_DELAY);
 
+  // The main-thread engine is created lazily by the fallback path, so apply a
+  // setting to it directly when it exists. A freshly created engine reads the
+  // stored settings and the cached rates itself, so anything changed before it
+  // loads is already picked up.
+  function applyToFallback(apply) {
+    if (!fallbackModule) return;
+    try {
+      apply(fallbackModule);
+    } catch {
+      // a setting that cannot be applied must not break evaluation
+    }
+  }
+
+  // Settings the main-thread engine also owns; precision and clock format are
+  // module-level state the UI sets directly, so only the worker needs them.
+  const FALLBACK_SETTINGS = {
+    rates: (mod, value) => mod.registerCurrencyRates(value),
+    measurement: (mod, value) => mod.registerMeasurementSystem(value),
+    'total-mode': (mod, value) => mod.registerTotalMode(value),
+  };
+
+  // Every setting is sent as one message shape; the worker routes by name.
+  function postSetting(name, value) {
+    if (worker && value !== undefined) worker.postMessage({ type: 'setting', name, value });
+    const apply = FALLBACK_SETTINGS[name];
+    if (apply) applyToFallback((mod) => apply(mod, value));
+  }
+
   function syncRates(data) {
-    if (worker && data) worker.postMessage({ type: 'rates', data });
+    if (data) postSetting('rates', data);
   }
 
   function syncMeasurement(system) {
-    if (worker && system) worker.postMessage({ type: 'measurement', data: system });
+    if (system) postSetting('measurement', system);
   }
 
   function syncPrecision(value) {
-    if (worker && value !== undefined) worker.postMessage({ type: 'precision', data: value });
+    if (value !== undefined) postSetting('precision', value);
     precisionDirty = true;
   }
 
   function syncTotalMode(mode) {
-    if (worker && mode) worker.postMessage({ type: 'total-mode', data: mode });
+    if (mode) postSetting('total-mode', mode);
   }
 
   function syncClockFormat(format) {
-    if (worker && format) worker.postMessage({ type: 'clock-format', data: format });
+    if (format) postSetting('clock-format', format);
     clockFormatDirty = true;
   }
 

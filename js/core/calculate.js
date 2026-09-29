@@ -804,20 +804,6 @@ function createEngine() {
     totalMode = mode;
   }
 
-  if (typeof window !== 'undefined') {
-    // The main-thread fallback registers rates through its own currency:updated
-    // listener, so invalidate there too or cached conversions would go stale.
-    window.addEventListener('currency:updated', () => {
-      environmentRevision++;
-    });
-    window.addEventListener('measurement:updated', (event) => {
-      if (event.detail) registerMeasurementSystem(event.detail);
-    });
-    window.addEventListener('total-mode:updated', (event) => {
-      if (event.detail) registerTotalMode(event.detail);
-    });
-  }
-
   return {
     evaluateLine,
     evaluateLines,
