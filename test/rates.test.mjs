@@ -27,6 +27,14 @@ test('preprocessRates leaves ordinary expressions alone', () => {
   assert.equal(preprocessRates('2 + 2'), '2 + 2');
 });
 
+test('preprocessRates keeps a/an between variables from reading as per', () => {
+  const context = { names: new Set(['y']) };
+  assert.equal(preprocessRates('x a y', context), 'x a y');
+  assert.equal(preprocessRates('x an y', context), 'x an y');
+  assert.equal(preprocessRates('x per y', context), 'x / y');
+  assert.equal(preprocessRates('24 km a day', context), '24 km / day');
+});
+
 test('evaluateLines simplifies rates', () => {
   assert.equal(formatResult(valueOf('90 km / 3 day')), '30 km/day');
   assert.equal(formatResult(valueOf('10 km per day')), '10 km/day');

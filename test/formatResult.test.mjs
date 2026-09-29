@@ -23,6 +23,12 @@ test('formatResult trims long decimals to the precision with an ellipsis', () =>
   assert.equal(formatResult(1234.5678, 2), '1,234.57…');
 });
 
+test('formatResult formats a BigNumber with the chosen precision', () => {
+  const value = math.bignumber('1.23456789');
+  assert.equal(formatResult(value, 3), '1.235…');
+  assert.equal(formatResult(value, 6), '1.234568…');
+});
+
 test('formatResult keeps integers simple', () => {
   assert.equal(formatResult(2), '2');
   assert.equal(formatResult(0), '0');

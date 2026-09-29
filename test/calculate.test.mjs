@@ -26,6 +26,13 @@ test('parseLine splits a plain expression', () => {
   });
 });
 
+test('parseLine keeps a # inside a quoted string', () => {
+  const parsed = parseLine('"item # 3" + 5');
+  assert.equal(parsed.comment, '');
+  assert.deepEqual(parsed.tags, []);
+  assert.equal(parsed.code, '"item # 3" + 5');
+});
+
 test('parseLine separates tags from comments', () => {
   const tagged = parseLine('20 #food #urgent');
   assert.equal(tagged.code, '20 ');

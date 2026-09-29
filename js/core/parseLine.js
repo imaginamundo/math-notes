@@ -10,8 +10,24 @@ function parseLine(line) {
   let firstSpecial = -1;
 
   let i = 0;
+  // A `#` inside a quoted string is part of the string, not a tag or comment.
+  let quote = '';
   while (i < line.length) {
     const ch = line[i];
+    if (quote) {
+      if (ch === '\\') {
+        i += 2;
+        continue;
+      }
+      if (ch === quote) quote = '';
+      i++;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      quote = ch;
+      i++;
+      continue;
+    }
     if (ch !== '#') {
       i++;
       continue;
