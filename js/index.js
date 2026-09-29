@@ -135,6 +135,16 @@ window.addEventListener('currency:error', () => {
   showCurrencyStatus(t('status.ratesUnavailable'));
 });
 
+// A failed localStorage write (usually the quota is full) must not be silent.
+window.addEventListener('storage:error', () => {
+  showCurrencyStatus(t('status.storageFull'));
+});
+
+// A generic status line, so features without their own indicator can report one.
+window.addEventListener('status:message', (event) => {
+  if (event.detail) showCurrencyStatus(event.detail);
+});
+
 // A setting change forwards the new value to the engine, then recomputes. The
 // per-call comments below explain any extra sequencing.
 function onSettingUpdated(name, apply) {

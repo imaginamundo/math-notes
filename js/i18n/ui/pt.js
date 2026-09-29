@@ -32,6 +32,7 @@ export default {
   'status.ratesCached': 'cotações: em cache',
   'status.ratesLive': 'cotações: ao vivo',
   'status.ratesUnavailable': 'cotações indisponíveis',
+  'status.storageFull': 'armazenamento cheio — as alterações recentes podem não ser guardadas',
 
   'share.buildFailed': 'Não foi possível criar um link para esta planilha',
   'share.copiedLong': 'Link copiado — é longo, alguns apps podem cortá-lo',
@@ -43,6 +44,7 @@ export default {
   'share.defaultName': 'Planilha compartilhada',
 
   'io.importConfirm': 'A importação substituirá o conteúdo da aba atual. Continuar?',
+  'io.importTooLarge': 'Esse ficheiro é demasiado grande para importar',
 
   'tabs.list': 'Planilhas',
   'tabs.rename': 'Clique duas vezes para renomear',

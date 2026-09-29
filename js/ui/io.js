@@ -2,6 +2,10 @@ import { scrollEditorToEnd } from '../util/scroll.js';
 import { setEditorValue } from './editorInput.js';
 import { t } from '../i18n/index.js';
 
+// A sheet far larger than this is almost certainly a mistake (or a wrong file)
+// and would make the editor unresponsive, so refuse it with a message.
+const MAX_IMPORT_BYTES = 1_000_000;
+
 function initIo(editableNode) {
   const exportButton = document.getElementById('export-button');
   const importButton = document.getElementById('import-button');
@@ -22,6 +26,10 @@ function initIo(editableNode) {
     const file = fileInput.files[0];
     fileInput.value = '';
     if (!file) return;
+    if (file.size > MAX_IMPORT_BYTES) {
+      window.dispatchEvent(new CustomEvent('status:message', { detail: t('io.importTooLarge') }));
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
       const imported = String(reader.result).replace(/\r\n/g, '\n').replace(/\r/g, '\n');

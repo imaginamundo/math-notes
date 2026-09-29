@@ -400,6 +400,27 @@ test('the starter-sheet menu opens a new tab with the template', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('another window adopts tabs saved elsewhere', async () => {
+  await newPage();
+  const other = await context.newPage();
+  const otherErrors = [];
+  other.on('pageerror', (err) => otherErrors.push(err.message));
+  await other.goto(`http://localhost:${server.address().port}/`, { waitUntil: 'load' });
+  await wait(400);
+
+  await setContent('x = 1\n2 x');
+  await wait(700); // let the debounced tab write land
+
+  await waitFor(
+    async () =>
+      (await other.evaluate(() => document.getElementById('content-editable').value)) ===
+      'x = 1\n2 x'
+  );
+  await other.close();
+  assert.deepEqual(errors, []);
+  assert.deepEqual(otherErrors, []);
+});
+
 test('find marks wrap typed text and ignore ghost results', async () => {
   await newPage();
   await setContent('1 + 1\nhello world\n20');

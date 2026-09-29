@@ -33,6 +33,7 @@ export default {
   'status.ratesCached': 'rates: cached',
   'status.ratesLive': 'rates: live',
   'status.ratesUnavailable': 'exchange rates unavailable',
+  'status.storageFull': 'storage is full — recent changes may not be saved',
 
   'share.buildFailed': "Couldn't build a link for this sheet",
   'share.copiedLong': "Link copied — it's long, some apps may cut it",
@@ -44,6 +45,7 @@ export default {
   'share.defaultName': 'Shared sheet',
 
   'io.importConfirm': "Importing will replace the current tab's content. Continue?",
+  'io.importTooLarge': 'That file is too large to import',
 
   'tabs.list': 'Worksheets',
   'tabs.rename': 'Double-click to rename',

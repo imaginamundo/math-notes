@@ -4,6 +4,7 @@ import { ONBOARDED_KEY } from './onboarding.js';
 import { DISMISSED_KEY } from './starterPrompt.js';
 import { FONT_KEY } from './cosmetic.js';
 import { STORAGE_KEY as TABS_KEY, LEGACY_KEY as LEGACY_TABS_KEY } from './tabs.js';
+import { BACKUP_KEY as TABS_BACKUP_KEY } from '../storage/tabsStore.js';
 import { STORAGE_KEY as CURRENCY_KEY } from '../eval/currency.js';
 import { MEASUREMENT_SYSTEMS } from '../core/measures.js';
 import { SUPPORTED_LANGUAGES, STORAGE_KEY as LANGUAGE_KEY } from '../core/language.js';
@@ -36,6 +37,7 @@ const RESET_KEYS = [
   STORAGE_KEY,
   TABS_KEY,
   LEGACY_TABS_KEY,
+  TABS_BACKUP_KEY,
   CURRENCY_KEY,
   FONT_KEY,
   MEASUREMENT_KEY,
