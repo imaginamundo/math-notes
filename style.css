@@ -229,7 +229,8 @@ html.i18n-pending .layout {
   border-top: 1px solid transparent;
   border-right: 1px solid var(--border-faint);
   white-space: nowrap;
-  touch-action: none;
+  /* Let a finger swipe scroll the bar instead of starting a drag-reorder. */
+  touch-action: pan-x;
 }
 .tab.dragging {
   opacity: 0.5;

@@ -377,6 +377,19 @@ test('tabs can be reordered by dragging', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('a focused tab closes with Delete', async () => {
+  await newPage();
+  await page.evaluate(() => document.querySelector('.tab-new').click());
+  await wait(150);
+  assert.equal(await page.evaluate(() => document.querySelectorAll('.tab').length), 2);
+  page.on('dialog', (dialog) => dialog.accept());
+  await page.evaluate(() => document.querySelectorAll('.tab')[1].focus());
+  await page.keyboard.press('Delete');
+  await wait(200);
+  assert.equal(await page.evaluate(() => document.querySelectorAll('.tab').length), 1);
+  assert.deepEqual(errors, []);
+});
+
 test('the new-tab button stays reachable when tabs overflow', async () => {
   await newPage();
   await page.evaluate(() => {
