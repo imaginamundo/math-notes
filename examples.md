@@ -13,6 +13,7 @@
 
 2 + 2 # a note
 Price: 10 + 5
+"an item # 3"
 
 ### Running total
 
@@ -290,6 +291,7 @@ matrix[2, 1]
 
 1:5
 1:2:10
+range(1, 10)
 n = 1:5
 n[3]
 
@@ -479,6 +481,9 @@ BRL hour
 USD EUR
 100 USD to kg
 100 USD to XYZ
+10 USD
+5 EUR
+sum
 
 ### Measures & rates
 
@@ -501,6 +506,8 @@ days in banana
 [1, 2][9]
 n = [1, 2]
 n[0]
+range(1, 1000)
+ones(20, 20)
 
 ### Rounding
 
