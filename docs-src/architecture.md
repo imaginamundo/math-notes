@@ -193,10 +193,12 @@ incremental cache. A lazy shared instance is exported as the module's
 tests or embedders can build isolated engines.
 
 Despite the `core/` name this file is not strictly pure: it is the composition
-root for the engine, reads stored settings (total mode, measurement system) and,
-on the main thread, subscribes to settings events. The rules it wires —
-parsing, preprocessing, aggregation, unit checks — are pure and live in the
-sibling modules; the assembly is kept here rather than in a separate layer.
+root for the engine and reads stored settings (total mode, measurement system) at
+build time. Settings changed later are pushed in — to the worker as a message, to
+the main-thread engine by `js/evalClient.js` — so the engine never subscribes to
+browser events. The rules it wires — parsing, preprocessing, aggregation, unit
+checks — are pure and live in the sibling modules; the assembly is kept here
+rather than in a separate layer.
 
 `evaluateLines(lines)` parses each line, evaluates it against a `variables`
 scope (with `prev` and aggregate blocks), and returns
@@ -274,12 +276,13 @@ structured clone. The worker therefore pre-formats every result value into a
 string before posting. `patchResults` must accept both numbers (main-thread
 fallback path) and strings (worker path).
 
-Currency rates are fetched on the main thread (`fetchRates` in
-`js/eval/currency.js`), cached in localStorage, and forwarded to the worker as
-`{ type: 'rates', data }`; the worker registers them on its own engine. A lazy
-main-thread `calculate.js` import is the fallback when `Worker` is unavailable
-or dies; its engine receives live rate updates through the same
-`currency:updated` event.
+Currency rates are fetched on the main thread and cached in localStorage by
+`js/storage/currencyRates.js`, which has no mathjs dependency. `evalClient`
+forwards them to the worker as a `{ type: 'setting', name: 'rates', value }`
+message and, when the main-thread fallback is in use, calls
+`registerCurrencyRates` on its engine directly. A lazy `calculate.js` import is
+the fallback when `Worker` is unavailable or dies; a freshly created fallback
+engine seeds its rates from the cache.
 
 ## Tabs and persistence
 
@@ -299,9 +302,11 @@ are auto-saved to IndexedDB (`js/storage/snapshots.js`) on a pause in typing and
 on blur/tab-switch/close/pagehide; the content is stored deflated through
 `js/util/compress.js` when the platform supports it, and inflated on read.
 
-If localStorage is unavailable or corrupt on load, the tab collection is
-rebuilt automatically from the latest snapshot of each tab. Settings offers
-manual per-tab restore and a "restore all" action.
+If localStorage is unavailable or corrupt on load, the collection is rebuilt
+from the latest snapshot of each tab; a corrupt value is first copied to
+`math-notes-tabs-backup` so it is never silently lost. Settings shows every
+snapshot grouped by tab (not just the latest) plus a "restore all" action, and
+closing a tab deletes its snapshots.
 
 Undo/redo is per tab, kept in memory only: edits are grouped into bursts
 (a 700ms idle timer commits the draft), each burst becoming one undo step —
@@ -422,10 +427,12 @@ creates a row renderer once with `createRowRenderer(viewNode)`
 - `renderTotal` shows the running total. It groups unit values by dimension,
   merges compatible units into the largest present for display (currencies and
   affine temperatures never merge), folds bare numbers in using the first unit
-  seen for the group, and ignores mixed kinds; `aria-live` announces the settled
-  value after a pause. The bottom bar's dropdown chooses sum, average or median
-  (`computeTotal(results, mode)`). The engine holds the mode, and since it only
-  affects the total, the per-line cache stays valid.
+  seen for the group, and ignores mixed kinds — except two currencies, which is
+  an error. An `aria-live` region announces the settled total after a pause; the
+  view adds a second one for the active line's result. The bottom bar's dropdown
+  chooses sum, average or median (`computeTotal(results, mode)`). The engine
+  holds the mode, and since it only affects the total, the per-line cache stays
+  valid.
 
 ### The typing hot path
 

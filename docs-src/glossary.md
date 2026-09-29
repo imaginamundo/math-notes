@@ -14,8 +14,9 @@ Terms used throughout the codebase and this documentation.
 - **Total** — the running sum of numeric results shown at the bottom
   (`renderTotal`). Plain numbers fold into a single unit; compatible units
   (e.g. `cm` + `m`) merge into the largest one present; currencies and affine
-  units (temperatures) never merge across kinds; several different kinds are
-  ignored and only plain numbers are summed.
+  units (temperatures) never merge across kinds; mixing **two currencies** is an
+  error (convert to one first), while other mixed kinds are ignored and only the
+  plain numbers are summed.
 - **Total mode** — the bottom bar's dropdown: `sum` (default), `average` or
   `median`, stored by `js/core/totalMode.js` and applied by
   `computeTotal(results, mode)`. Only the total changes, so the line cache is
@@ -33,7 +34,8 @@ Terms used throughout the codebase and this documentation.
 - **Aggregate** — `sum`/`total`/`average`/`avg` keywords that combine the lines
   above (stopping at a blank line). They follow the total's unit rule
   (compatible units merge into the largest present, currencies/temperatures
-  stay separate, mixed kinds are ignored).
+  stay separate, mixing two currencies is an error, other mixed kinds are
+  ignored).
 - **`prev`** — a scope variable holding the most recent result above the
   current line (comments and blank lines are skipped).
 - **Object** — a mathjs object literal (`{key: value}`), rendered inline as
@@ -41,6 +43,11 @@ Terms used throughout the codebase and this documentation.
 - **Multi-word variable** — a variable whose name contains spaces
   (`monthly rent = 1500`); the engine rewrites the name to a single safe
   identifier so assignments and references resolve consistently.
+- **Custom unit** — a user-defined unit from `unit <name> = <quantity>`
+  (`unit widget = 3.5 kg`, then `2 widgets`). The name is registered with mathjs
+  for the sheet; a name with spaces or accents is encoded to a safe unit name and
+  decoded for display. The definition line shows the value and is excluded from
+  totals and `prev`; removing the line removes the unit.
 - **Line reference** — `line(n)` uses the result of line `n` (1-based, above
   the current line). The view shows the referenced value in place of the token;
   on the line being edited the raw token is revealed with the value dimmed over
@@ -63,7 +70,9 @@ Terms used throughout the codebase and this documentation.
   total. Groups are flat, and an unterminated header is just a label.
 - **Preprocessors** — the regex transforms run before mathjs, in order:
   measures, scales, symbols (currency), percentages, word operators, rates,
-  rounding.
+  calendar, timespans, rounding. `js/core/preprocess.js` holds the ordered list;
+  the currency step receives the known variable names so a code that is a
+  variable keeps its case.
 - **Subject label** — the free-form word(s) after a value and before a
   conversion (`butter` in `300g butter in cups`). No dataset is required; it is
   informational and selects a factor when one is known.
@@ -141,6 +150,10 @@ Terms used throughout the codebase and this documentation.
 - **Starter prompt** — the floating **Keep content** / **Clear content** control
   (`js/ui/starterPrompt.js`) shown while the active tab still holds exactly the
   starter sheet; either button (or editing away) dismisses it for good.
+- **Starter-sheet menu** — the `⌄` button beside `+` on the tab bar; choosing an
+  entry opens a new tab pre-filled with that template
+  (`js/ui/tabTemplates.js`: budget, trip cost, invoice, savings goal, split a
+  bill).
 - **List/range limit** — `MAX_LIST_LENGTH` (100). List literals and statically
   resolvable ranges longer than this are rejected before evaluation, so a range
   like `1:1e9` cannot allocate an unbounded array and lock up the worker.
