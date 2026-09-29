@@ -1684,6 +1684,29 @@ test('the desktop sidebar stays put while the content scrolls', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('the documentation follows the reader and app text size', async () => {
+  await newPage();
+  await page.setViewport({ width: 1024, height: 800 });
+  await page.goto(`http://localhost:${server.address().port}/docs/units/`, { waitUntil: 'load' });
+  await waitFor(() => page.$('.doc-content'));
+  const base = await page.$eval('.doc-content', (node) =>
+    parseFloat(getComputedStyle(node).fontSize)
+  );
+
+  await page.evaluate(() => localStorage.setItem('math-notes-font-scale', '200'));
+  await page.reload({ waitUntil: 'load' });
+  await waitFor(() => page.$('.doc-content'));
+  const scaled = await page.$eval('.doc-content', (node) =>
+    parseFloat(getComputedStyle(node).fontSize)
+  );
+
+  assert.ok(
+    Math.abs(scaled / base - 2) < 0.01,
+    `the docs scale with the app text size (${base}px → ${scaled}px)`
+  );
+  assert.deepEqual(errors, []);
+});
+
 test('the mobile header stays compact and the drawer closes after navigating', async () => {
   await newPage();
   await page.setViewport({ width: 360, height: 844, isMobile: true });

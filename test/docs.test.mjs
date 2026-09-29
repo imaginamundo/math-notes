@@ -92,6 +92,15 @@ test('the docs stylesheet respects motion and nested-scroll preferences', () => 
   assert.match(css, /\.doc-sidebar\s*\{[^}]*overscroll-behavior: contain/);
 });
 
+test('the docs stylesheet scales with the reader font size and the app preference', () => {
+  const css = readFileSync(join(docs, 'docs.css'), 'utf8');
+  assert.match(
+    css,
+    /html\s*\{[^}]*font-size:\s*calc\(1rem \* var\(--app-font-scale,\s*1\)\)/,
+    'the root font size follows the browser default and the app text-size'
+  );
+});
+
 test('every internal /docs anchor in the generated pages resolves', () => {
   for (const lang of availableLangs()) {
     const prefix = prefixFor(lang);
