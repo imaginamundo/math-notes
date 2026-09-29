@@ -27,7 +27,6 @@ function initRecipes(contentEditableNode) {
 
   const { close } = initModal(recipesModalNode, recipesButtonNode, {
     onOpen: ensureRendered,
-    onClose: () => contentEditableNode.focus(),
   });
 
   function sectionNode(section) {

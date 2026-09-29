@@ -105,7 +105,7 @@ function boot() {
   initShare(tabsApi);
   initDocsLink();
   initRecipes(contentEditableNode);
-  initSettings(contentEditableNode, tabsApi);
+  initSettings(tabsApi);
   initFontControls(editorScroll.refreshMetrics);
   window.addEventListener(FONT_SIZE_CHANGED, () => rowRenderer.relayout());
   initIo(contentEditableNode);

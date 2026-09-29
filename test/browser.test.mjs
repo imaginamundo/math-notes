@@ -899,6 +899,59 @@ test('moving the caret off the autocomplete word closes it', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('a focused tab renames with F2', async () => {
+  await newPage();
+  await page.evaluate(() => document.querySelector('.tab').focus());
+  await page.keyboard.press('F2');
+  await waitFor(() => page.$('.tab-rename'));
+  await page.keyboard.type('Budget');
+  await page.keyboard.press('Enter');
+  await wait(150);
+  assert.equal(
+    await page.evaluate(() => document.querySelector('.tab-name').textContent),
+    'Budget'
+  );
+  assert.deepEqual(errors, []);
+});
+
+test('the editor exposes combobox state for the autocomplete', async () => {
+  await newPage();
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.focus();
+    ed.value = 'sqr';
+    ed.setSelectionRange(3, 3);
+    ed.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await waitFor(() =>
+    page.evaluate(
+      () => document.getElementById('content-editable').getAttribute('aria-expanded') === 'true'
+    )
+  );
+  const state = await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    return {
+      role: ed.getAttribute('role'),
+      controls: ed.getAttribute('aria-controls'),
+      autocomplete: ed.getAttribute('aria-autocomplete'),
+    };
+  });
+  assert.deepEqual(state, {
+    role: 'combobox',
+    controls: 'autocomplete-list',
+    autocomplete: 'list',
+  });
+  await page.keyboard.press('Escape');
+  await wait(100);
+  assert.equal(
+    await page.evaluate(() =>
+      document.getElementById('content-editable').getAttribute('aria-expanded')
+    ),
+    'false'
+  );
+  assert.deepEqual(errors, []);
+});
+
 test('autocomplete offers sheet tags after a #', async () => {
   await newPage();
 

@@ -238,7 +238,7 @@ function initSnapshotHistory(container, restoreAllButton, tabsApi) {
   return { render };
 }
 
-function initSettings(contentEditableNode, tabsApi) {
+function initSettings(tabsApi) {
   const button = document.getElementById('settings-button');
   const modal = document.getElementById('settings-modal');
 
@@ -296,7 +296,6 @@ function initSettings(contentEditableNode, tabsApi) {
 
   initModal(modal, button, {
     onOpen: snapshots.render,
-    onClose: () => contentEditableNode.focus(),
   });
 
   // Text (and titles) that depend on the active language. Re-run on change.

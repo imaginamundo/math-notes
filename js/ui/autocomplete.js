@@ -35,6 +35,13 @@ function initAutocomplete(editableNode, editorScroll) {
   popup.setAttribute('aria-label', t('autocomplete.label'));
   popup.hidden = true;
   scroller.appendChild(popup);
+  // The editor is a combobox whose listbox is the popup. It is a multiline
+  // input, so this is the closest ARIA pattern; `aria-expanded` tracks the popup.
+  editableNode.setAttribute('role', 'combobox');
+  editableNode.setAttribute('aria-controls', 'autocomplete-list');
+  editableNode.setAttribute('aria-autocomplete', 'list');
+  editableNode.setAttribute('aria-haspopup', 'listbox');
+  editableNode.setAttribute('aria-expanded', 'false');
   window.addEventListener(LANGUAGE_UPDATED, () =>
     popup.setAttribute('aria-label', t('autocomplete.label'))
   );
@@ -109,6 +116,7 @@ function initAutocomplete(editableNode, editorScroll) {
     activeIndex = 0;
     render();
     popup.hidden = false;
+    editableNode.setAttribute('aria-expanded', 'true');
     position();
   }
 
@@ -119,6 +127,7 @@ function initAutocomplete(editableNode, editorScroll) {
     items = [];
     range = null;
     editableNode.removeAttribute('aria-activedescendant');
+    editableNode.setAttribute('aria-expanded', 'false');
   }
 
   function render() {
