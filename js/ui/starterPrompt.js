@@ -2,6 +2,7 @@ import { isStarterSheet } from './onboarding.js';
 import storage from '../util/storage.js';
 import { setEditorValue } from './editorInput.js';
 import { t } from '../i18n/index.js';
+import { LANGUAGE_UPDATED, FONT_SIZE_CHANGED } from '../util/events.js';
 
 // A small floating "Keep content | Clear content" control shown right after the
 // seeded Welcome sheet, so the sample content can be dismissed or emptied with
@@ -52,7 +53,7 @@ function initStarterPrompt(editableNode) {
     clearButton.title = t('starter.clearTitle');
   }
   refreshLabels();
-  window.addEventListener('language:updated', refreshLabels);
+  window.addEventListener(LANGUAGE_UPDATED, refreshLabels);
 
   control.append(keepButton, clearButton);
   scroller.appendChild(control);
@@ -100,7 +101,7 @@ function initStarterPrompt(editableNode) {
     if (wasVisible) writeDismissed();
   });
   window.addEventListener('resize', refresh);
-  window.addEventListener('math:font-size-changed', refresh);
+  window.addEventListener(FONT_SIZE_CHANGED, refresh);
 
   refresh();
 }

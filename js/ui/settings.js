@@ -29,6 +29,12 @@ import {
   writeClockFormat,
 } from '../core/clockFormat.js';
 import { t, getLocale, setLocale } from '../i18n/index.js';
+import {
+  MEASUREMENT_UPDATED,
+  PRECISION_UPDATED,
+  CLOCK_FORMAT_UPDATED,
+  LANGUAGE_UPDATED,
+} from '../util/events.js';
 
 const STORAGE_KEY = 'math-notes-theme';
 // "Reset data" must clear exactly the keys the app's modules own, imported
@@ -244,7 +250,7 @@ function initSettings(contentEditableNode, tabsApi) {
     read: readMeasurementSystem,
     select: (system) => {
       writeMeasurementSystem(system);
-      window.dispatchEvent(new CustomEvent('measurement:updated', { detail: system }));
+      window.dispatchEvent(new CustomEvent(MEASUREMENT_UPDATED, { detail: system }));
     },
     labelKey: (system) => MEASUREMENT_KEYS[system],
     applyKey: 'apply.measurement',
@@ -258,7 +264,7 @@ function initSettings(contentEditableNode, tabsApi) {
     const value = normalizeDecimalPrecision(precisionInput.value);
     writeDecimalPrecision(value);
     precisionInput.value = String(value);
-    window.dispatchEvent(new CustomEvent('precision:updated', { detail: value }));
+    window.dispatchEvent(new CustomEvent(PRECISION_UPDATED, { detail: value }));
   });
 
   const clock = createChoiceGroup(modal.querySelector('.settings-clock'), {
@@ -267,7 +273,7 @@ function initSettings(contentEditableNode, tabsApi) {
     read: readClockFormat,
     select: (format) => {
       writeClockFormat(format);
-      window.dispatchEvent(new CustomEvent('clock-format:updated', { detail: format }));
+      window.dispatchEvent(new CustomEvent(CLOCK_FORMAT_UPDATED, { detail: format }));
     },
     labelKey: (format) => CLOCK_KEYS[format],
     applyKey: 'apply.clock',
@@ -301,7 +307,7 @@ function initSettings(contentEditableNode, tabsApi) {
     language.renderLabels();
   }
 
-  window.addEventListener('language:updated', () => {
+  window.addEventListener(LANGUAGE_UPDATED, () => {
     renderLabels();
     snapshots.render();
   });

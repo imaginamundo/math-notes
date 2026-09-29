@@ -1,4 +1,5 @@
 import { getLocale } from '../i18n/index.js';
+import { LANGUAGE_UPDATED } from '../util/events.js';
 
 // The documentation is published per language at /docs (en), /docs/pt and
 // /docs/es. A locale without a translated build falls back to English rather
@@ -13,7 +14,7 @@ function initDocsLink() {
     }
   };
   update();
-  window.addEventListener('language:updated', update);
+  window.addEventListener(LANGUAGE_UPDATED, update);
 }
 
 export default initDocsLink;

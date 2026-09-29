@@ -1,6 +1,8 @@
 // Uniform, guarded access to localStorage. Every module reads and writes
 // storage through this wrapper so "storage is unavailable" behaves the same
 // everywhere: reads return null, writes are no-ops, nothing throws.
+import { STORAGE_ERROR } from './events.js';
+
 function available() {
   try {
     return globalThis.localStorage !== undefined;
@@ -22,7 +24,7 @@ function get(key) {
 function notifyFailure(key) {
   try {
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('storage:error', { detail: { key } }));
+      window.dispatchEvent(new CustomEvent(STORAGE_ERROR, { detail: { key } }));
     }
   } catch {
     // no window, or events unavailable

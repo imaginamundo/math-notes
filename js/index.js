@@ -24,6 +24,17 @@ import initEditorScroll from './ui/editor.js';
 import { readClockFormat, setClockFormat } from './core/clockFormat.js';
 import { readDecimalPrecision, setDecimalPrecision } from './core/decimalPrecision.js';
 import { initI18n, t } from './i18n/index.js';
+import {
+  CURRENCY_UPDATED,
+  CURRENCY_ERROR,
+  MEASUREMENT_UPDATED,
+  PRECISION_UPDATED,
+  TOTAL_MODE_UPDATED,
+  CLOCK_FORMAT_UPDATED,
+  STORAGE_ERROR,
+  STATUS_MESSAGE,
+  FONT_SIZE_CHANGED,
+} from './util/events.js';
 
 const contentEditableNode = document.getElementById('content-editable');
 const viewNode = document.getElementById('view');
@@ -96,7 +107,7 @@ function boot() {
   initRecipes(contentEditableNode);
   initSettings(contentEditableNode, tabsApi);
   initFontControls(editorScroll.refreshMetrics);
-  window.addEventListener('math:font-size-changed', () => rowRenderer.relayout());
+  window.addEventListener(FONT_SIZE_CHANGED, () => rowRenderer.relayout());
   initIo(contentEditableNode);
   initShortcuts(contentEditableNode, evalClient.requestLines, tabsApi.switchTab);
   initFind(contentEditableNode, viewNode);
@@ -122,7 +133,7 @@ boot();
 // placeholder before a saved sheet is restored.
 contentEditableNode.classList.add('ready');
 
-window.addEventListener('currency:updated', (event) => {
+window.addEventListener(CURRENCY_UPDATED, (event) => {
   evalClient.syncRates(event.detail && event.detail.data);
   evalClient.update();
   const source = event.detail && event.detail.source;
@@ -135,18 +146,18 @@ window.addEventListener('currency:updated', (event) => {
   showCurrencyStatus(t(key));
 });
 
-window.addEventListener('currency:error', () => {
+window.addEventListener(CURRENCY_ERROR, () => {
   evalClient.update();
   showCurrencyStatus(t('status.ratesUnavailable'));
 });
 
 // A failed localStorage write (usually the quota is full) must not be silent.
-window.addEventListener('storage:error', () => {
+window.addEventListener(STORAGE_ERROR, () => {
   showCurrencyStatus(t('status.storageFull'));
 });
 
 // A generic status line, so features without their own indicator can report one.
-window.addEventListener('status:message', (event) => {
+window.addEventListener(STATUS_MESSAGE, (event) => {
   if (event.detail) showCurrencyStatus(event.detail);
 });
 
@@ -161,21 +172,21 @@ function onSettingUpdated(name, apply) {
 
 // Switching measurement system re-registers the volume units in the worker and
 // the main-thread fallback, then recomputes every line.
-onSettingUpdated('measurement:updated', (value) => evalClient.syncMeasurement(value));
+onSettingUpdated(MEASUREMENT_UPDATED, (value) => evalClient.syncMeasurement(value));
 
 // Changing the display precision only reformats results, but the worker does
 // the formatting, so it needs the new value before the recompute.
-onSettingUpdated('precision:updated', (value) => {
+onSettingUpdated(PRECISION_UPDATED, (value) => {
   setDecimalPrecision(value);
   evalClient.syncPrecision(value);
 });
 
 // Switching the total aggregate recomputes the total (the lines are unchanged,
 // but the worker recomputes the total on every evaluation).
-onSettingUpdated('total-mode:updated', (value) => evalClient.syncTotalMode(value));
+onSettingUpdated(TOTAL_MODE_UPDATED, (value) => evalClient.syncTotalMode(value));
 
 // Changing the clock format only reformats clock-time results.
-onSettingUpdated('clock-format:updated', (value) => {
+onSettingUpdated(CLOCK_FORMAT_UPDATED, (value) => {
   setClockFormat(value);
   evalClient.syncClockFormat(value);
 });

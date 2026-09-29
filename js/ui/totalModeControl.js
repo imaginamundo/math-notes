@@ -1,4 +1,5 @@
 import { normalizeTotalMode, readTotalMode, writeTotalMode } from '../core/totalMode.js';
+import { TOTAL_MODE_UPDATED } from '../util/events.js';
 
 // The bottom bar's aggregate picker (total / average / median).
 function initTotalMode() {
@@ -10,7 +11,7 @@ function initTotalMode() {
     const mode = normalizeTotalMode(select.value);
     writeTotalMode(mode);
     select.value = mode;
-    window.dispatchEvent(new CustomEvent('total-mode:updated', { detail: mode }));
+    window.dispatchEvent(new CustomEvent(TOTAL_MODE_UPDATED, { detail: mode }));
   });
 }
 

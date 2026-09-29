@@ -3,6 +3,7 @@
 // forward them to the worker without loading the engine. Registering them as
 // units lives in js/eval/currency.js.
 import storage from '../util/storage.js';
+import { CURRENCY_UPDATED, CURRENCY_ERROR } from '../util/events.js';
 
 const BASE = 'EUR';
 const API_URL = 'https://api.frankfurter.dev/v1/latest?from=' + BASE;
@@ -41,7 +42,7 @@ function notify(name, detail) {
 function fetchRates() {
   const cached = loadCached();
   if (isFresh(cached)) {
-    notify('currency:updated', { source: 'cached', data: cached });
+    notify(CURRENCY_UPDATED, { source: 'cached', data: cached });
     return;
   }
   const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
@@ -53,12 +54,12 @@ function fetchRates() {
     })
     .then((data) => {
       save(data);
-      notify('currency:updated', { source: 'live', data });
+      notify(CURRENCY_UPDATED, { source: 'live', data });
     })
     .catch(() => {
       // Keep working with yesterday's rates, but say they are stale.
-      if (cached) notify('currency:updated', { source: 'stale', data: cached });
-      else notify('currency:error');
+      if (cached) notify(CURRENCY_UPDATED, { source: 'stale', data: cached });
+      else notify(CURRENCY_ERROR);
     })
     .finally(() => {
       if (timer) clearTimeout(timer);

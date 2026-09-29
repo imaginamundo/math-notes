@@ -4,6 +4,7 @@ import { getClockFormat } from '../core/clockFormat.js';
 import { indexOfLineAt } from '../util/text.js';
 import { copyText } from '../util/clipboard.js';
 import { setEditorValue } from './editorInput.js';
+import { SHARE_COPY } from '../util/events.js';
 
 function initShortcuts(editableNode, requestResults, switchTab) {
   document.addEventListener('keydown', (event) => {
@@ -28,7 +29,7 @@ function initShortcuts(editableNode, requestResults, switchTab) {
       // Both, because Firefox reserves Ctrl+Shift+S for its own devtools and
       // a page cannot intercept it there. L is for "link".
       event.preventDefault();
-      document.dispatchEvent(new CustomEvent('share:copy'));
+      document.dispatchEvent(new CustomEvent(SHARE_COPY));
     } else if (shift && key === 'e') {
       event.preventDefault();
       document.getElementById('export-button').click();
