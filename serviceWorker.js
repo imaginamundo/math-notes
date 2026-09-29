@@ -1,7 +1,9 @@
 // Served from the site root so its scope is `/` and it can cache the app shell
 // and the documentation (a worker under /js/ could only control /js/).
-const cacheName = 'math-notes-v41';
+const cacheName = 'math-notes-v42';
+const APP_SHELL = './index.html';
 const urlsToCache = [
+  './',
   './index.html',
   './style.css',
   './js/core/aggregate.js',
@@ -22,6 +24,7 @@ const urlsToCache = [
   './js/core/totalMode.js',
   './js/core/unitMix.js',
   './js/core/unitNames.js',
+  './js/core/userUnits.js',
   './js/core/vocabulary.js',
   './js/eval/aliases.js',
   './js/eval/calendar.js',
@@ -40,6 +43,7 @@ const urlsToCache = [
   './js/eval/symbols.js',
   './js/eval/timespan.js',
   './js/eval/units.js',
+  './js/eval/userUnits.js',
   './js/eval/wordOperators.js',
   './js/evalClient.js',
   './js/i18n/examples/en.js',
@@ -80,6 +84,7 @@ const urlsToCache = [
   './js/ui/share.js',
   './js/ui/shortcuts.js',
   './js/ui/starterPrompt.js',
+  './js/ui/tabTemplates.js',
   './js/ui/tabs.js',
   './js/ui/tabsHistory.js',
   './js/ui/tabsView.js',
@@ -123,6 +128,19 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET' || !request.url.startsWith(self.location.origin)) return;
+
+  // A navigation (the app at `/`, a deep link) must never fall through to the
+  // browser's offline error: when the network is unavailable, serve the cached
+  // page, or the app shell as a last resort.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(() =>
+        caches.match(request).then((cached) => cached || caches.match(APP_SHELL))
+      )
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(request).then((cached) => {
       const network = fetch(request).then((response) => {
