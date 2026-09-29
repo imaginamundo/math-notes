@@ -96,8 +96,11 @@ function exampleBlock(expr, hint, ui) {
   const hintHtml = hint
     ? `<figcaption class="doc-example-result">${escapeHtml(hint)}</figcaption>`
     : '';
+  // A one-line example lays its actions beside the code on wide screens, so a
+  // long list of them does not become a column of tall cards.
+  const modifier = expr.includes('\n') ? '' : ' doc-example-inline';
   return (
-    `<figure class="doc-example" data-expr="${escapeAttr(expr)}">` +
+    `<figure class="doc-example${modifier}" data-expr="${escapeAttr(expr)}">` +
     `<pre class="doc-code"><code data-calc>${escapeHtml(expr)}</code></pre>${hintHtml}` +
     `<div class="doc-example-actions">` +
     `<button type="button" class="doc-action" data-action="copy" data-copied="${escapeAttr(ui.copied)}">${escapeHtml(ui.copy)}</button>` +
@@ -118,6 +121,19 @@ marked.use({
   },
 });
 
+// marked escapes heading text, so `Cooking & measures` arrives as
+// `Cooking &amp; measures`; decode it before deriving the id or storing the
+// label, or the sidebar/search show `&amp;amp;` and the id picks up `amp`.
+function decodeEntities(text) {
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#0?39;/g, "'")
+    .replace(/&#x27;/gi, "'");
+}
+
 function headingId(text) {
   return (
     text
@@ -137,7 +153,7 @@ function addHeadingIds(html, ui) {
   const toc = [];
   const seen = new Map();
   const out = html.replace(/<h([23])>(.*?)<\/h\1>/g, (match, level, inner) => {
-    const text = inner.replace(/<[^>]+>/g, '');
+    const text = decodeEntities(inner.replace(/<[^>]+>/g, ''));
     const base = headingId(text);
     const count = seen.get(base) || 0;
     seen.set(base, count + 1);

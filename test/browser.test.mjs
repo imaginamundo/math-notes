@@ -1544,6 +1544,25 @@ test('the UI is hidden until a non-English language is applied', async () => {
   assert.equal(state.hidden, true, 'the English UI is hidden until the language applies');
 });
 
+test('the documentation renders in the light theme', async () => {
+  await newPage();
+  await page.evaluate(() => localStorage.setItem('math-notes-theme', 'light'));
+  await page.goto(`http://localhost:${server.address().port}/docs/getting-started/`, {
+    waitUntil: 'load',
+  });
+  await waitFor(() => page.$('.doc-content'));
+  const state = await page.evaluate(() => ({
+    theme: document.documentElement.dataset.theme,
+    // Parse the body background to a luminance so the assertion holds for any
+    // light palette.
+    background: getComputedStyle(document.body).backgroundColor,
+  }));
+  assert.equal(state.theme, 'light');
+  const [r, g, b] = state.background.match(/\d+/g).map(Number);
+  assert.ok(r + g + b > 3 * 128, `expected a light background, got ${state.background}`);
+  assert.deepEqual(errors, []);
+});
+
 test('the documentation page renders highlighted examples and wires its actions', async () => {
   if (context) await context.close();
   context = await browser.createBrowserContext();

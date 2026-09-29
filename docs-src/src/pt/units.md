@@ -8,11 +8,11 @@ Converta entre unidades com `to`, `in` ou `as`, nomeie o que você está medindo
 1cm to m
 ```
 
-```calc retorna 7200 s
+```calc retorna 7,200 s
 2h to s
 ```
 
-```calc retorna 5000 m
+```calc retorna 5,000 m
 5km to m
 ```
 
@@ -20,13 +20,13 @@ Converta entre unidades com `to`, `in` ou `as`, nomeie o que você está medindo
 30 degC to degF
 ```
 
-```calc retorna 45.36 kg
+```calc retorna 45.359… kg
 100 lb in kg
 ```
 
 Unidades CSS também são suportadas, para você conferir um layout:
 
-```calc retorna ≈ 37.8 px
+```calc retorna 37.795… px
 1 cm in px
 ```
 
@@ -42,7 +42,7 @@ As unidades de volume de cozinha seguem o sistema de medidas em **Configuraçõe
 
 Converta entre dimensões nomeando o que você está medindo. O sujeito é livre e opcional: um ingrediente conhecido usa sua densidade, um combustível sua densidade energética, mídias seu bitrate, e qualquer outra coisa usa um padrão (água). Escreva-o antes de `to`/`in`.
 
-```calc ≈ 1.32 cups
+```calc 1.317… cups
 300g butter in cups
 ```
 

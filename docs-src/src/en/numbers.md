@@ -55,11 +55,11 @@ Calculations can use words instead of symbols:
 
 `with` and `without` combine and subtract durations:
 
-```calc returns 150 minutes
+```calc returns 2 hours 30 minutes
 2 hours with 30 minutes
 ```
 
-```calc returns 90 minutes
+```calc returns 1 hour 30 minutes
 2 hours without 30 minutes
 ```
 
@@ -111,8 +111,8 @@ Round a result with a phrase at the end of the line, or call `round`, `ceil` or 
 1/3 to 2 dp
 ```
 
-```calc returns 3.14159
-π to 5 digits
+```calc returns 3.142
+π to 3 digits
 ```
 
 ```calc returns 6

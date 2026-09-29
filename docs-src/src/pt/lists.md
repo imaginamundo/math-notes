@@ -82,12 +82,12 @@ double(1:5)
 
 `sum`, `mean`, `min`, `max` e o resto das funções de agregação do mathjs aceitam uma lista ou um intervalo.
 
-```calc a última linha retorna 1325
+```calc a última linha retorna 1,325
 expenses = [1200, 80, 45]
 sum(expenses)
 ```
 
-```calc retorna 5050
+```calc retorna 5,050
 sum(1:100)
 ```
 

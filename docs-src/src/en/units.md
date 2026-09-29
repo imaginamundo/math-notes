@@ -8,11 +8,11 @@ Convert between units with `to`, `in` or `as`, name what you are measuring to co
 1cm to m
 ```
 
-```calc returns 7200 s
+```calc returns 7,200 s
 2h to s
 ```
 
-```calc returns 5000 m
+```calc returns 5,000 m
 5km to m
 ```
 
@@ -20,13 +20,13 @@ Convert between units with `to`, `in` or `as`, name what you are measuring to co
 30 degC to degF
 ```
 
-```calc returns 45.36 kg
+```calc returns 45.359… kg
 100 lb in kg
 ```
 
 CSS units are supported too, so you can check a layout:
 
-```calc returns ≈ 37.8 px
+```calc returns 37.795… px
 1 cm in px
 ```
 
@@ -42,7 +42,7 @@ Cooking volume units follow the measurement system in **Settings → Measurement
 
 Convert between dimensions by naming what you are measuring. The subject is free-form and optional: a known ingredient uses its density, a fuel its energy density, media their bitrate, and anything else a default (water). Write it before `to`/`in`.
 
-```calc ≈ 1.32 cups
+```calc 1.317… cups
 300g butter in cups
 ```
 

@@ -82,12 +82,12 @@ double(1:5)
 
 `sum`, `mean`, `min`, `max` y el resto de las funciones de agregación de mathjs aceptan una lista o un rango.
 
-```calc la última línea devuelve 1325
+```calc la última línea devuelve 1,325
 expenses = [1200, 80, 45]
 sum(expenses)
 ```
 
-```calc devuelve 5050
+```calc devuelve 5,050
 sum(1:100)
 ```
 

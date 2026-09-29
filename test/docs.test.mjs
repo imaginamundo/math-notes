@@ -68,7 +68,7 @@ test('generated pages carry navigation, examples and language metadata', () => {
   assert.match(landing, /hreflang="x-default"/);
 
   const page = readFileSync(join(docs, 'getting-started', 'index.html'), 'utf8');
-  assert.match(page, /class="doc-example"/);
+  assert.match(page, /class="doc-example[ "]/);
   assert.match(page, /data-expr="/);
   assert.match(page, /data-action="open"/);
   assert.match(page, /<h2 id="/);
@@ -90,6 +90,39 @@ test('the docs stylesheet respects motion and nested-scroll preferences', () => 
   const css = readFileSync(join(docs, 'docs.css'), 'utf8');
   assert.match(css, /@media \(prefers-reduced-motion: no-preference\)/);
   assert.match(css, /\.doc-sidebar\s*\{[^}]*overscroll-behavior: contain/);
+});
+
+test('every internal /docs anchor in the generated pages resolves', () => {
+  for (const lang of availableLangs()) {
+    const prefix = prefixFor(lang);
+    const pages = [
+      join(docs, prefix, 'index.html'),
+      ...structure.pages.map((slug) => join(docs, prefix, slug, 'index.html')),
+    ];
+    const idsByFile = new Map();
+    const idsFor = (file) => {
+      if (!idsByFile.has(file)) {
+        const html = readFileSync(file, 'utf8');
+        idsByFile.set(file, new Set([...html.matchAll(/id="([^"]+)"/g)].map((m) => m[1])));
+      }
+      return idsByFile.get(file);
+    };
+    for (const file of pages) {
+      const html = readFileSync(file, 'utf8');
+      for (const match of html.matchAll(/href="#([^"]+)"/g)) {
+        const anchor = decodeURIComponent(match[1]);
+        assert.ok(idsFor(file).has(anchor), `${file} links to missing #${anchor}`);
+      }
+      for (const match of html.matchAll(/href="(\/docs\/[^"#]*)#([^"]+)"/g)) {
+        const target = match[1];
+        const anchor = decodeURIComponent(match[2]);
+        const rel = target.slice('/docs/'.length);
+        const candidate = target.endsWith('/') ? join(docs, rel, 'index.html') : join(docs, rel);
+        assert.ok(existsSync(candidate), `${file} links to missing ${target}`);
+        assert.ok(idsFor(candidate).has(anchor), `${file} links to missing ${target}#${anchor}`);
+      }
+    }
+  }
 });
 
 test('every internal /docs link in the generated pages resolves', () => {

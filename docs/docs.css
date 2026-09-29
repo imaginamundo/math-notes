@@ -459,6 +459,28 @@ body {
   border-top: 1px solid var(--border-soft);
   background: var(--surface-nav);
 }
+/* A one-line example keeps its actions beside the code on wide screens, so a
+   list of them stays compact instead of a column of tall cards. */
+@media (min-width: 40em) {
+  .doc-example-inline {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
+  }
+  .doc-example-inline .doc-code,
+  .doc-example-inline .doc-example-result {
+    grid-column: 1;
+    min-width: 0;
+  }
+  .doc-example-inline .doc-example-actions {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    flex-direction: column;
+    justify-content: center;
+    border-top: 0;
+    border-left: 1px solid var(--border-soft);
+  }
+}
 .doc-action {
   padding: 0.3em 0.7em;
   border: 1px solid var(--border-chip);
