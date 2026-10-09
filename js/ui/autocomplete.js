@@ -139,29 +139,43 @@ function initAutocomplete(editableNode, editorScroll) {
     editableNode.setAttribute('aria-expanded', 'false');
   }
 
+  // One option row per position, created once and then updated in place:
+  // rebuilding all eight on every keystroke was the largest remaining cost of
+  // typing inside a word once the parser stopped being the bottleneck.
+  function optionAt(index) {
+    const existing = popup.children[index];
+    if (existing) return existing;
+    const option = document.createElement('div');
+    option.className = 'autocomplete-option';
+    option.id = `autocomplete-option-${index}`;
+    option.setAttribute('role', 'option');
+    const text = document.createElement('span');
+    text.className = 'autocomplete-text';
+    option.appendChild(text);
+    option.addEventListener('mousedown', (event) => {
+      event.preventDefault();
+      accept(index);
+    });
+    popup.appendChild(option);
+    return option;
+  }
+
   function render() {
-    popup.textContent = '';
+    while (popup.children.length > items.length) popup.lastChild.remove();
     items.forEach((entry, index) => {
-      const option = document.createElement('div');
-      option.className = 'autocomplete-option' + (index === activeIndex ? ' active' : '');
-      option.id = `autocomplete-option-${index}`;
-      option.setAttribute('role', 'option');
-      option.setAttribute('aria-selected', String(index === activeIndex));
-      const text = document.createElement('span');
-      text.className = 'autocomplete-text';
-      text.textContent = entry.text;
-      option.appendChild(text);
+      const option = optionAt(index);
+      const text = option.firstChild;
+      if (text.textContent !== entry.text) text.textContent = entry.text;
+      const detail = option.children[1];
       if (entry.detail) {
-        const detail = document.createElement('span');
-        detail.className = 'autocomplete-detail';
-        detail.textContent = entry.detail;
-        option.appendChild(detail);
+        const span = detail || option.appendChild(document.createElement('span'));
+        span.className = 'autocomplete-detail';
+        if (span.textContent !== entry.detail) span.textContent = entry.detail;
+      } else if (detail) {
+        detail.remove();
       }
-      option.addEventListener('mousedown', (event) => {
-        event.preventDefault();
-        accept(index);
-      });
-      popup.appendChild(option);
+      option.classList.toggle('active', index === activeIndex);
+      option.setAttribute('aria-selected', String(index === activeIndex));
     });
     popup.scrollTop = 0;
     setActiveDescendant();
