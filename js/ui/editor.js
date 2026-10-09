@@ -11,6 +11,12 @@ function initEditorScroll(editableNode) {
   let cachedGutterInset = null;
   let metricsCache = null;
   let extentCache = null;
+  // The scroller's scroll offset, tracked from its scroll event rather than
+  // read here: a read while the rows are still dirty forces a synchronous
+  // layout of the whole sheet, which at a few thousand lines costs more than
+  // the keystroke that triggered it.
+  let scrollerScrollLeft = 0;
+  let scrollerScrollTop = 0;
   // The scroller's client size, refreshed by a ResizeObserver, plus the last
   // values written, so a keystroke does not read or invalidate layout.
   let scrollerSize = null;
@@ -96,8 +102,6 @@ function initEditorScroll(editableNode) {
       lastHeight = heightValue;
       editableNode.style.height = heightValue;
     }
-    editableNode.scrollTop = 0;
-    editableNode.scrollLeft = 0;
   }
 
   function measureCharWidth() {
@@ -128,13 +132,21 @@ function initEditorScroll(editableNode) {
     const leftInset = gutterInset() + margin;
     const viewWidth = scrollerSize ? scrollerSize.width : scroller.clientWidth;
     const viewHeight = scrollerSize ? scrollerSize.height : scroller.clientHeight;
-    if (x < scroller.scrollLeft + leftInset) scroller.scrollLeft = Math.max(0, x - leftInset);
-    else if (x > scroller.scrollLeft + viewWidth - margin) {
-      scroller.scrollLeft = x - viewWidth + margin;
+    let nextLeft = scrollerScrollLeft;
+    let nextTop = scrollerScrollTop;
+    if (x < nextLeft + leftInset) nextLeft = Math.max(0, x - leftInset);
+    else if (x > nextLeft + viewWidth - margin) nextLeft = x - viewWidth + margin;
+    if (y < nextTop + margin) nextTop = Math.max(0, y - margin);
+    else if (y > nextTop + viewHeight - margin) nextTop = y - viewHeight + margin;
+    // Writing the offset back when it already holds that value is free, so the
+    // common case (the caret is already in view) touches no layout at all.
+    if (nextLeft !== scrollerScrollLeft) {
+      scrollerScrollLeft = nextLeft;
+      scroller.scrollLeft = nextLeft;
     }
-    if (y < scroller.scrollTop + margin) scroller.scrollTop = Math.max(0, y - margin);
-    else if (y > scroller.scrollTop + viewHeight - margin) {
-      scroller.scrollTop = y - viewHeight + margin;
+    if (nextTop !== scrollerScrollTop) {
+      scrollerScrollTop = nextTop;
+      scroller.scrollTop = nextTop;
     }
   }
 
@@ -152,12 +164,31 @@ function initEditorScroll(editableNode) {
     return cachedGutterInset;
   }
 
+  // Keep the scroll cache in step with scrolling the app does not drive (wheel,
+  // trackpad, scrollbar drag, keyboard), and leave caret tracking free of any
+  // read that could force layout.
+  scroller.addEventListener(
+    'scroll',
+    () => {
+      scrollerScrollLeft = scroller.scrollLeft;
+      scrollerScrollTop = scroller.scrollTop;
+    },
+    { passive: true }
+  );
+  // The textarea is sized to its own content, so it has no scrollable range to
+  // speak of — but if the browser ever does move it while the caret travels
+  // (the ghost layer does not scroll with it), the layers would slide apart.
+  // Correct it when it happens instead of clearing it on every keystroke: this
+  // listener only runs when something actually scrolled, and scroll events land
+  // after layout, so the hot path pays nothing for the guarantee.
+  editableNode.addEventListener('scroll', () => {
+    if (editableNode.scrollTop !== 0) editableNode.scrollTop = 0;
+    if (editableNode.scrollLeft !== 0) editableNode.scrollLeft = 0;
+  });
+
   editableNode.addEventListener('input', () => {
     // Sizing is handled once by the composition root after it redraws the
-    // rows (js/index.js); this listener only keeps the caret visible and
-    // clears the browser's internal scroll position so the layers stay glued.
-    editableNode.scrollTop = 0;
-    editableNode.scrollLeft = 0;
+    // rows (js/index.js); this listener only keeps the caret visible.
     scrollCaretIntoView();
   });
   editableNode.addEventListener('keyup', scrollCaretIntoView);
