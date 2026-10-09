@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 import { MESSAGES } from '../js/i18n/index.js';
 
 // Enforce the project's storage convention: localStorage is only ever touched
@@ -66,6 +67,33 @@ test('every data-i18n key in index.html exists in every locale', () => {
     const missing = [...keys].filter((key) => !(key in dict));
     assert.deepEqual(missing, [], `${name} is missing: ${missing.join(', ')}`);
   }
+});
+
+// GitHub Pages cannot send response headers, so the app's only CSP is the meta
+// tag in index.html. Its script hash is the part that silently rots: editing the
+// bootstrap script without recomputing the digest blocks the script in a real
+// browser while every other test still passes, so it is derived here rather
+// than trusted.
+test('the CSP in index.html pins every inline script', () => {
+  const html = readFileSync(join(root, 'index.html'), 'utf8');
+  const meta = /<meta http-equiv="Content-Security-Policy" content="([^"]*)"/.exec(html);
+  assert.ok(meta, 'index.html should declare a Content-Security-Policy');
+  const policy = meta[1];
+  const scripts = [...html.matchAll(/<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/g)].map(
+    (match) => match[1]
+  );
+  assert.ok(scripts.length > 0, 'index.html should keep its inline bootstrap');
+  for (const body of scripts) {
+    const digest = createHash('sha256').update(body, 'utf8').digest('base64');
+    assert.ok(policy.includes(`'sha256-${digest}'`), `CSP is missing sha256-${digest}`);
+  }
+  assert.ok(!/script-src[^;]*unsafe-inline/.test(policy), 'scripts must not allow unsafe-inline');
+  assert.ok(policy.includes("script-src 'self'"), 'scripts must be limited to this origin');
+  assert.ok(policy.includes("default-src 'self'"), 'everything else defaults to this origin');
+  assert.ok(
+    policy.includes("connect-src 'self' https://api.frankfurter.dev"),
+    'the exchange-rate API must stay reachable'
+  );
 });
 
 // The evaluator stays English in v1, and importing the UI strings there would
