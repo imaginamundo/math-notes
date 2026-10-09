@@ -346,7 +346,22 @@ function createEngine() {
     });
   }
 
-  function evaluateLine(line, scope) {
+  // The default name set for a scope built by hand (unit definitions, the
+  // public `evaluateLine`): every own key of the object it was handed.
+  function ownNames(scope) {
+    return new Set(Object.keys(scope));
+  }
+
+  // What `preprocess` sees for one line: the sheet's running variables plus
+  // whatever only this line put in its own scope (`prev`, tag aggregates, line
+  // references). A view over both, so a sheet with thousands of variables never
+  // rebuilds the whole set per line — that, together with copying the scope
+  // per line, is what used to make a sheet of assignments cost O(lines²).
+  function namesIn(ctx, scope) {
+    return { has: (name) => ctx.names.has(name) || Object.hasOwn(scope, name) };
+  }
+
+  function evaluateLine(line, scope, names) {
     const parsed = typeof line === 'string' ? parseLine(line) : line;
     const { code, label, isAssignment } = parsed;
     let type = isAssignment ? 'assignment' : 'value';
@@ -354,7 +369,7 @@ function createEngine() {
     let result;
 
     try {
-      const expression = preprocess(code, scope && { names: new Set(Object.keys(scope)) });
+      const expression = preprocess(code, scope && { names: names || ownNames(scope) });
       assertBoundedExpression(expression, scope);
       result = math.evaluate(expression, scope);
       const mixError = unitMixError(result);
@@ -399,13 +414,14 @@ function createEngine() {
 
   // Evaluate a definition line's value and register the unit. Returns the value
   // to display, or an error message.
-  function defineUserUnit(name, definition, scope) {
+  function defineUserUnit(name, definition, scope, names) {
     if (isReservedLabel(name) || name.toLowerCase() === 'end') {
       return { error: `"${name}" is a reserved word` };
     }
     const evaluated = evaluateLine(
       { code: definition, label: '', isAssignment: false, rhs: '' },
-      scope
+      scope,
+      names
     );
     if (evaluated.type === 'error') return { error: evaluated.result };
     const value = evaluated.result;
@@ -599,7 +615,8 @@ function createEngine() {
   function handleUnitDefinition(ctx) {
     const unit = unitDefinition(ctx.inputLines[ctx.i]);
     if (!unit) return false;
-    const outcome = defineUserUnit(unit.name, parseLine(ctx.line).rhs, { ...ctx.variables });
+    const scope = Object.create(ctx.variables);
+    const outcome = defineUserUnit(unit.name, parseLine(ctx.line).rhs, scope, namesIn(ctx, scope));
     ctx.results[ctx.i] = outcome.error
       ? { type: 'error', value: outcome.error }
       : { type: 'value', value: outcome.value, aggregate: true, unitDef: true };
@@ -666,7 +683,12 @@ function createEngine() {
   function handleExpression(ctx) {
     const group = ctx.groups.groupOfLine.get(ctx.i);
     const blockStart = group ? group.start + 1 : ctx.lastBlankIndex + 1;
-    const scope = { ...ctx.variables };
+    // The sheet's variables are reached through the prototype rather than
+    // copied in: the copy alone was O(variables) for every line of the sheet.
+    // What only this line needs (`prev`, tag aggregates, line references) is
+    // assigned below as own properties of this fresh object, so nothing from a
+    // previous line survives into this one.
+    const scope = Object.create(ctx.variables);
     if (ctx.tagScope) Object.assign(scope, ctx.tagScope);
     if (ctx.previousResult !== undefined) scope.prev = ctx.previousResult;
 
@@ -703,8 +725,11 @@ function createEngine() {
     Object.assign(scope, resolved.values);
     if (aggregateValues) Object.assign(scope, aggregateValues);
 
-    const { type, result, variable } = evaluateLine(parsedLine, scope);
-    if (variable) ctx.variables[variable.label] = variable.value;
+    const { type, result, variable } = evaluateLine(parsedLine, scope, namesIn(ctx, scope));
+    if (variable) {
+      ctx.variables[variable.label] = variable.value;
+      ctx.names.add(variable.label);
+    }
     ctx.results[ctx.i] = {
       type,
       value: result,
@@ -773,6 +798,9 @@ function createEngine() {
       results,
       groups,
       variables: replayed.variables,
+      // The names the preprocessors may ask about, grown as the loop assigns.
+      // Built once per run rather than from the scope for every line.
+      names: new Set(Object.keys(replayed.variables)),
       previousResult: replayed.previousResult,
       lastBlankIndex: replayed.lastBlankIndex,
       i: 0,
