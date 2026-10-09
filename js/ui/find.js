@@ -121,8 +121,10 @@ function initFind(editableNode, viewNode) {
   }
 
   function renderActive() {
-    viewNode.querySelectorAll('.find-match').forEach((mark, index) => {
-      mark.classList.toggle('active', index === activeIndex);
+    // A match can be several marks (one per highlighted token it crosses), so
+    // the active hit is chosen by its match index, not by position in the list.
+    viewNode.querySelectorAll('.find-match').forEach((mark) => {
+      mark.classList.toggle('active', mark.dataset.match === String(activeIndex));
     });
     updateCounter();
     scrollToActive();

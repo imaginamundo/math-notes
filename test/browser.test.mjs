@@ -547,6 +547,44 @@ test('find marks wrap typed text and ignore ghost results', async () => {
   assert.deepEqual(errors, []);
 });
 
+// A match can cross several highlighted tokens (`x = 1` is a variable, an
+// operator and a number). Wrapping that range into a single mark used to drag
+// the text out of its token elements, so clearing the marks left "=" and "1"
+// painted in the variable colour until the line was edited.
+test('closing find restores the token styling the match covered', async () => {
+  await newPage();
+  await setContent('x = 1');
+  await wait(300);
+  const before = await page.evaluate(() => document.querySelector('#view .line').innerHTML);
+  assert.match(before, /class="variable"/);
+  assert.match(before, /class="operator"/);
+  assert.match(before, /class="number"/);
+
+  await page.evaluate(() =>
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'f', metaKey: true, bubbles: true, cancelable: true })
+    )
+  );
+  await page.evaluate(() => {
+    const input = document.querySelector('.find-input');
+    input.value = 'x = 1';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await waitFor(() =>
+    page.evaluate(() => document.querySelectorAll('#view .find-match').length === 5)
+  );
+
+  await page.evaluate(() =>
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })
+    )
+  );
+  const after = await page.evaluate(() => document.querySelector('#view .line').innerHTML);
+  assert.equal(after, before, 'clearing the marks must leave the highlighter markup intact');
+  assert.equal(await page.evaluate(() => document.querySelectorAll('#view .find-match').length), 0);
+  assert.deepEqual(errors, []);
+});
+
 test('clicking a line number comments and uncomments that line', async () => {
   await newPage();
   await setContent('1 + 1\n2 + 2\n# 3 + 3');

@@ -5,12 +5,20 @@
 // newlines, producing offsets in the same space as the raw sheet text.
 // Ghost results are skipped so matches never wrap rendered output.
 //
+// A match spanning several highlighted tokens is wrapped once PER TEXT NODE
+// rather than merged into a single mark: merging discarded the token elements
+// around it, so clearing the marks left those tokens as unstyled plain text
+// until the line was edited. Every mark carries `data-match`, so the caller can
+// still treat the segments of one match as a single hit.
+//
 // Kept separate from js/ui/find.js (which owns the bar, query and replace) so
 // the trickiest DOM logic can be reasoned about and tested on its own.
 
 function clearMarks(root) {
   root.querySelectorAll('.find-match').forEach((mark) => {
-    mark.replaceWith(document.createTextNode(mark.textContent));
+    // Unwrap rather than replace: what comes out is the original text node, so
+    // its token keeps the markup the highlighter gave it.
+    mark.replaceWith(...mark.childNodes);
   });
 }
 
@@ -21,6 +29,7 @@ function applyMarks(root, matches, activeIndex) {
   // Single pass: collect every text node with its start offset once, then wrap
   // matches from last to first so DOM mutations only touch text already passed.
   const entries = textNodesInOrder(root);
+  if (!entries.length) return;
   const starts = entries.map((entry) => entry.start);
 
   // Matches are ascending and wrapped from the end, so the containing entry only
@@ -37,8 +46,7 @@ function applyMarks(root, matches, activeIndex) {
 
     const localStart = match.start - starts[startIndex];
     const localEnd = match.end - starts[endIndex];
-    const mark = document.createElement('mark');
-    mark.className = 'find-match' + (matchIndex === activeIndex ? ' active' : '');
+    const active = matchIndex === activeIndex;
 
     if (startIndex === endIndex) {
       const node = entries[startIndex].node;
@@ -48,21 +56,28 @@ function applyMarks(root, matches, activeIndex) {
         target = node.nextSibling;
       }
       if (target.length > match.end - match.start) target.splitText(match.end - match.start);
-      mark.textContent = target.textContent;
-      target.replaceWith(mark);
+      wrap(target, matchIndex, active);
     } else {
       if (localStart > 0) entries[startIndex].node.splitText(localStart);
       const startNode =
         localStart > 0 ? entries[startIndex].node.nextSibling : entries[startIndex].node;
-      if (localEnd < entries[endIndex].node.length) entries[endIndex].node.splitText(localEnd);
-      const parts = [startNode];
-      for (let k = startIndex + 1; k < endIndex; k++) parts.push(entries[k].node);
-      parts.push(entries[endIndex].node);
-      mark.textContent = parts.map((node) => node.textContent).join('');
-      parts[0].replaceWith(mark);
-      for (let k = 1; k < parts.length; k++) parts[k].remove();
+      const endNode = entries[endIndex].node;
+      if (localEnd < endNode.length) endNode.splitText(localEnd);
+      wrap(startNode, matchIndex, active);
+      for (let k = startIndex + 1; k < endIndex; k++) wrap(entries[k].node, matchIndex, active);
+      wrap(endNode, matchIndex, active);
     }
   }
+}
+
+// Wrap one text node in a mark, leaving it inside its original parent so the
+// token that owns the text is still the element that styles it.
+function wrap(node, matchIndex, active) {
+  const mark = document.createElement('mark');
+  mark.className = active ? 'find-match active' : 'find-match';
+  mark.dataset.match = String(matchIndex);
+  node.replaceWith(mark);
+  mark.appendChild(node);
 }
 
 function textNodesInOrder(root) {
