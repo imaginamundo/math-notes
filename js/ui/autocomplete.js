@@ -2,11 +2,10 @@ import {
   wordRangeAt,
   suggestionsFor,
   applyCompletion,
-  collectAssignments,
-  collectTags,
+  suggestionFacts,
+  suggestionsFrom,
 } from '../core/autocomplete.js';
 import { VOCABULARY } from '../core/vocabulary.js';
-import { collectUnitDefinitions } from '../core/userUnits.js';
 import { setEditorValue } from './editorInput.js';
 import { sheetLines } from '../util/text.js';
 import { t } from '../i18n/index.js';
@@ -62,11 +61,15 @@ function initAutocomplete(editableNode, editorScroll) {
   }
 
   // Suggestions come from every assignment and tag in the sheet, so building
-  // them means parsing every line. Cache the result and, when the text changes,
-  // rebuild only if a changed line could have added or removed one (`=` or `#`).
+  // them means parsing every line. The parsed facts are kept line by line, so
+  // an edit re-parses only the lines it touched: a keystroke in a
+  // thousand-line sheet costs one line instead of four parses of each. On top
+  // of that, a change that cannot add or remove a name (`=` or `#` is what
+  // can) reuses the whole list.
   let cachedValue = null;
   let cachedLines = null;
   let cachedEntries = null;
+  let facts = [];
 
   function couldAffectEntries(line) {
     return line.includes('=') || line.includes('#');
@@ -93,24 +96,30 @@ function initAutocomplete(editableNode, editorScroll) {
       }
     }
 
-    const variables = collectAssignments(lines).map((text) => ({ text, kind: 'variable' }));
-    const customUnits = collectUnitDefinitions(lines).flatMap(({ name, aliases }) =>
-      [name, ...aliases].map((text) => ({ text, kind: 'unit', detail: 'custom unit' }))
-    );
-    const tags = collectTags(lines).map((text) => ({ text: `#${text}`, kind: 'tag' }));
+    const next = new Array(lines.length);
+    for (let i = 0; i < lines.length; i++) {
+      next[i] =
+        facts[i] && cachedLines && cachedLines[i] === lines[i]
+          ? facts[i]
+          : suggestionFacts(lines[i]);
+    }
+    facts = next;
     cachedValue = value;
     cachedLines = lines;
-    cachedEntries = [...variables, ...customUnits, ...tags, ...VOCABULARY];
+    cachedEntries = [...suggestionsFrom(next), ...VOCABULARY];
     return cachedEntries;
   }
 
   function refresh(force) {
-    if (suppress || blocked()) return close();
+    if (suppress) return close();
     if (editableNode.selectionStart !== editableNode.selectionEnd) return close();
     range = wordRangeAt(editableNode.value, editableNode.selectionStart);
     if (!range) return close();
     // A `#tag` opens after the single `#`; a plain word needs MIN_PREFIX.
     if (!force && !range.tag && range.prefix.length < MIN_PREFIX) return close();
+    // A dialog in front means no popup at all; asked for last, so the document
+    // search it costs only happens for a word that would otherwise open one.
+    if (blocked()) return close();
     items = suggestionsFor(range.prefix, entries(), MAX_ITEMS);
     if (!items.length) return close();
     activeIndex = 0;

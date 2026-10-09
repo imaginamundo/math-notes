@@ -1,6 +1,6 @@
 import parseLine from './parseLine.js';
 import { LETTER, WORD } from './identifiers.js';
-import { isUnitDefinition } from './userUnits.js';
+import { unitDefinition, unitAliases } from './userUnits.js';
 
 // Pure completion logic: find the word under the caret, rank vocabulary
 // matches, and apply a chosen completion. No DOM, so it is unit-tested
@@ -110,14 +110,52 @@ function applyCompletion(value, range, text, options = {}) {
   return { value: next, caret: range.start + insert.length };
 }
 
+// One line's contribution to the suggestion list: the name it assigns (a unit
+// definition names a unit, so it is not offered as a variable), its unit
+// definition, and its tags. Parsed once, so a caller that keeps these per line
+// re-parses only the lines an edit actually touched.
+function suggestionFacts(line) {
+  const parsed = typeof line === 'string' ? parseLine(line) : line;
+  const unit = unitDefinition(parsed);
+  return {
+    variable: !unit && parsed.isAssignment && parsed.label ? parsed.label : null,
+    unit: unit ? { name: unit.name, aliases: unitAliases(unit.name) } : null,
+    tags: parsed.tags,
+  };
+}
+
+// The popup's own list from those facts, in the order it shows them:
+// variables, custom units (first definition of a name wins, as in
+// `collectUnitDefinitions`), tags. The curated vocabulary is the caller's to
+// append.
+function suggestionsFrom(facts) {
+  const variables = new Set();
+  const units = new Map();
+  const tags = new Set();
+  for (const fact of facts) {
+    if (fact.variable) variables.add(fact.variable);
+    if (fact.unit) {
+      const key = fact.unit.name.toLowerCase();
+      if (!units.has(key)) units.set(key, fact.unit);
+    }
+    for (const tag of fact.tags) tags.add(tag);
+  }
+  return [
+    ...[...variables].map((text) => ({ text, kind: 'variable' })),
+    ...[...units.values()].flatMap(({ name, aliases }) =>
+      [name, ...aliases].map((text) => ({ text, kind: 'unit', detail: 'custom unit' }))
+    ),
+    ...[...tags].map((text) => ({ text: `#${text}`, kind: 'tag' })),
+  ];
+}
+
 // Every assigned name in the sheet (`x = 1`, `monthly rent = 1500`). A `unit`
 // definition names a unit, not a variable, so it is offered separately.
 function collectAssignments(lines) {
   const names = new Set();
   for (const line of lines) {
-    if (isUnitDefinition(line)) continue;
-    const { isAssignment, label } = parseLine(line);
-    if (isAssignment && label) names.add(label);
+    const { variable } = suggestionFacts(line);
+    if (variable) names.add(variable);
   }
   return [...names];
 }
@@ -126,9 +164,17 @@ function collectAssignments(lines) {
 function collectTags(lines) {
   const tags = new Set();
   for (const line of lines) {
-    for (const tag of parseLine(line).tags) tags.add(tag);
+    for (const tag of suggestionFacts(line).tags) tags.add(tag);
   }
   return [...tags];
 }
 
-export { wordRangeAt, suggestionsFor, applyCompletion, collectAssignments, collectTags };
+export {
+  wordRangeAt,
+  suggestionsFor,
+  applyCompletion,
+  collectAssignments,
+  collectTags,
+  suggestionFacts,
+  suggestionsFrom,
+};
