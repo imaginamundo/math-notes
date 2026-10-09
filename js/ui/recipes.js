@@ -1,6 +1,6 @@
 import initModal from './modal.js';
 import initExamples from './examples.js';
-import { getLocale } from '../i18n/index.js';
+import { getLocale, t } from '../i18n/index.js';
 import { LANGUAGE_UPDATED } from '../util/events.js';
 
 // The Examples modal. Its sections are rendered from the lazy-loaded, generated
@@ -10,10 +10,11 @@ const cache = new Map();
 
 function loadContent(lang) {
   if (!cache.has(lang)) {
-    cache.set(
-      lang,
-      import(`../i18n/examples/${lang}.js`).then((module) => module.default)
-    );
+    const pending = import(`../i18n/examples/${lang}.js`).then((module) => module.default);
+    cache.set(lang, pending);
+    // A rejected import must not be cached, or the modal would keep failing
+    // every time it opens instead of trying again.
+    pending.catch(() => cache.delete(lang));
   }
   return cache.get(lang);
 }
@@ -43,8 +44,19 @@ function initRecipes(contentEditableNode) {
   async function ensureRendered() {
     const lang = getLocale();
     if (renderedLang === lang) return;
-    const content = await loadContent(lang);
+    let content = null;
+    try {
+      content = await loadContent(lang);
+    } catch {
+      // fall through to the message below; the next open retries
+    }
     bodyNode.textContent = '';
+    if (!content) {
+      const message = document.createElement('p');
+      message.textContent = t('examples.loadFailed');
+      bodyNode.appendChild(message);
+      return;
+    }
     if (content.intro) {
       const intro = document.createElement('p');
       intro.innerHTML = content.intro;

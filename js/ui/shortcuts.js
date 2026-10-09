@@ -52,7 +52,7 @@ async function copyCurrentLineResult(editableNode, requestResults) {
     const { results } = await requestResults(value.split('\n'));
     const result = results[lineIndex];
     if (result && result.type !== 'error' && result.value !== undefined) {
-      copyText(formatResult(result.value, getDecimalPrecision(), getClockFormat()));
+      await copyText(formatResult(result.value, getDecimalPrecision(), getClockFormat()));
     }
   } catch {
     // evaluation failed; nothing to copy

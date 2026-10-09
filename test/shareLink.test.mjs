@@ -32,6 +32,12 @@ test('encodeSheet/decodeSheet round-trip a 100 KB sheet', async () => {
   assert.equal(decoded.content, content);
 });
 
+test('decodeSheet normalises Windows line endings', async () => {
+  const sheet = { name: 'Notes', content: 'rent = 1200\r\nfood = 380\rlast' };
+  const decoded = await roundTrip(sheet);
+  assert.equal(decoded.content, 'rent = 1200\nfood = 380\nlast');
+});
+
 test('the token is a base64url payload behind a version tag', async () => {
   const token = await encodeSheet({ name: 'a', content: 'b' });
   assert.match(token, /^[01]\.[A-Za-z0-9\-_]+$/);

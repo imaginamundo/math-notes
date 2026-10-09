@@ -49,12 +49,23 @@ function initShare(tabsApi) {
     // Exposed so the browser test can read the built URL without needing
     // clipboard permissions in headless Chrome.
     buttonNode.dataset.url = built.url;
-    try {
-      copyText(built.url);
+    if (await copyText(built.url)) {
       showStatus(built.long ? t('share.copiedLong') : t('share.copied'));
+      return;
+    }
+    // Nothing reached the clipboard, so leave the link where it can be copied
+    // by hand. replaceState puts it there without firing a hashchange —
+    // importing our own token would prompt to open the sheet already on screen.
+    showStatus(t('share.copyFailed'));
+    try {
+      window.history.replaceState(
+        null,
+        '',
+        window.location.pathname + window.location.search + built.url.slice(built.url.indexOf('#'))
+      );
     } catch {
-      showStatus(t('share.copyFailed'));
-      window.location.hash = built.url.slice(built.url.indexOf('#') + 1);
+      // history unavailable (sandboxed frame); the status above still tells
+      // the copy failed
     }
   }
 
