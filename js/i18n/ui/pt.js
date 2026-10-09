@@ -34,6 +34,9 @@ export default {
   'status.ratesLive': 'cotações: ao vivo',
   'status.ratesUnavailable': 'cotações indisponíveis',
   'status.storageFull': 'armazenamento cheio — as alterações recentes podem não ser guardadas',
+  'status.bootFailed':
+    'O Math Notes não conseguiu iniciar — as suas planilhas guardadas ficaram intactas',
+  'status.evaluationFailed': 'falha na avaliação — não foi possível atualizar os resultados',
 
   'share.buildFailed': 'Não foi possível criar um link para esta planilha',
   'share.copiedLong': 'Link copiado — é longo, alguns apps podem cortá-lo',
@@ -86,6 +89,7 @@ export default {
 
   'autocomplete.label': 'Sugestões',
   'example.addTitle': 'Clique para adicionar ao editor',
+  'examples.loadFailed': 'Não foi possível carregar os exemplos',
 
   'settings.files': 'Arquivos',
   'settings.filesBody': 'Exporte a planilha ativa como texto ou importe uma de um arquivo.',
