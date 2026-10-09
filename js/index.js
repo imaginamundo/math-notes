@@ -126,7 +126,19 @@ function boot() {
   // 5. Onboarding seeds the starter sheet last, once everything else is wired.
   initOnboarding(contentEditableNode, tabsApi, onboardingState);
 }
-boot();
+// A failed boot must not die silently on a blank page: report it, and leave the
+// saved collection untouched (tabs persistence starts inside initTabs, so
+// whatever failed before it is never written over).
+try {
+  boot();
+} catch (error) {
+  console.error('Math Notes failed to start:', error);
+  try {
+    showCurrencyStatus(t('status.bootFailed'), true);
+  } catch {
+    // the translator itself is unavailable
+  }
+}
 
 // The active sheet is now in the textarea, so the placeholder may show (only
 // when the sheet is empty). Keeping it hidden until here avoids a flash of the
@@ -192,10 +204,13 @@ onSettingUpdated(CLOCK_FORMAT_UPDATED, (value) => {
 });
 
 let statusTimer = null;
-function showCurrencyStatus(text) {
+// `sticky` keeps the notice up until the next one: a boot failure is not
+// something the reader should have to catch within five seconds.
+function showCurrencyStatus(text, sticky = false) {
   currencyStatusNode.textContent = text;
   currencyStatusNode.classList.add('visible');
   clearTimeout(statusTimer);
+  if (sticky) return;
   statusTimer = setTimeout(() => currencyStatusNode.classList.remove('visible'), 5000);
 }
 
