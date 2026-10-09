@@ -12,6 +12,29 @@ const EVALUATE_TIMEOUT = 10000;
 const UPDATE_DELAY = 250;
 
 /**
+ * How to recover from a failed evaluation request. A pure function because the
+ * alternative — waiting out the real timeout twice — is not a test anyone can
+ * run.
+ *
+ *   'fallback'  The worker could not load or crashed, which is permanent for the
+ *               session: the main thread owns evaluation from here on.
+ *   'restart'   A timeout only means this worker is stuck. Terminate it and send
+ *               the same request to a fresh one.
+ *   'fail'      A second timeout for the same request. Give up on this reply
+ *               instead of falling back: running the sheet on the main thread
+ *               would block typing for at least as long as the worker already
+ *               needed — exactly what the worker exists to avoid.
+ *
+ * @param {{ workerUnavailable: boolean, retried: boolean }} failure
+ * @returns {'fallback'|'restart'|'fail'}
+ */
+export function recoveryFor({ workerUnavailable, retried }) {
+  if (workerUnavailable) return 'fallback';
+  if (retried) return 'fail';
+  return 'restart';
+}
+
+/**
  * Client for the evaluation worker. Owns the worker connection, the
  * request/reply protocol (with timeout and render gating), the debounced
  * update scheduling, and forwarding currency rates to the worker.
@@ -20,8 +43,9 @@ const UPDATE_DELAY = 250;
  * @param {(lines: string[]) => void} onTextRender  Draws the typed input synchronously.
  * @param {(lines: string[], data: SheetResult) => void} onRender  Renders the results.
  * @param {(busy: boolean) => void} [onBusy]  Notified while an evaluation is in flight.
+ * @param {(error: Error) => void} [onError]  Notified when a reply could not be produced.
  */
-export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
+export function createEvalClient(editableNode, onTextRender, onRender, onBusy, onError) {
   let worker = null;
   let workerUnavailable = false;
   let latestId = 0;
@@ -127,21 +151,20 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
   function requestEvaluate(lines, retried = false) {
     const active = ensureWorker();
     if (!active) return fallbackEvaluate(lines);
-    // If the worker cannot load (common offline, when its module graph was
-    // never fetched) or crashes, evaluate this request on the main thread
-    // instead of leaving the sheet blank, and fall back for later requests.
     return workerEvaluate(active, lines).catch(() => {
-      // A failed load/crash is permanent; a timeout just needs a fresh worker.
-      if (workerUnavailable) return fallbackEvaluate(lines);
+      const action = recoveryFor({ workerUnavailable, retried });
+      if (action === 'fallback') return fallbackEvaluate(lines);
       if (worker === active) restartWorker();
-      if (retried) return fallbackEvaluate(lines);
+      if (action === 'fail') return Promise.reject(new Error('Evaluation timed out twice'));
       return requestEvaluate(lines, true);
     });
   }
 
   // Evaluate on the main thread when there is no worker or it failed. The raw
   // values this resolves with are formatted by `patchResults`, which accepts
-  // both the worker's pre-formatted strings and these numbers/units.
+  // both the worker's pre-formatted strings and these numbers/units. This path
+  // is synchronous, so the timeout here only bounds the module import; it can
+  // never interrupt the evaluation itself.
   function fallbackEvaluate(lines) {
     const load = fallbackModule
       ? Promise.resolve(fallbackModule)
@@ -236,6 +259,8 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
       onRender(lines, data);
     } catch (error) {
       console.error('Failed to update the sheet:', error);
+      // The results are now stale and nothing on screen says so; tell the UI.
+      if (onError) onError(error);
     } finally {
       pendingUpdates--;
       if (pendingUpdates === 0) setBusy(false);

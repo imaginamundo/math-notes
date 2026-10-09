@@ -52,7 +52,7 @@ globalThis.fetch = async () => ({
 
 const editableNode = () => ({ value: '1 + 1' });
 
-const { createEvalClient } = await import('../js/evalClient.js');
+const { createEvalClient, recoveryFor } = await import('../js/evalClient.js');
 
 function setup() {
   globalThis.Worker = WorkerStub;
@@ -147,6 +147,20 @@ test('a failed worker restart retries instead of falling back permanently', asyn
   // Later updates keep using the worker path.
   await client.update();
   assert.equal(renders.length, 2);
+});
+
+// The timeout path cannot be exercised without waiting out the real timeout
+// twice, so the policy itself is what gets tested: a timeout must never turn
+// into a synchronous main-thread evaluation, which would freeze typing for at
+// least as long as the worker already needed.
+test('a timeout restarts the worker instead of evaluating on the main thread', () => {
+  assert.equal(recoveryFor({ workerUnavailable: false, retried: false }), 'restart');
+  assert.equal(recoveryFor({ workerUnavailable: false, retried: true }), 'fail');
+});
+
+test('a crashed or unloadable worker is the only main-thread fallback', () => {
+  assert.equal(recoveryFor({ workerUnavailable: true, retried: false }), 'fallback');
+  assert.equal(recoveryFor({ workerUnavailable: true, retried: true }), 'fallback');
 });
 
 test('a crashed worker falls back to the main thread for the in-flight request', async () => {

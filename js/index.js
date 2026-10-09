@@ -74,7 +74,10 @@ const evalClient = createEvalClient(
   contentEditableNode,
   renderTextLayer,
   renderResultLayer,
-  (busy) => (busy ? loadingIndicator.show() : loadingIndicator.hide())
+  (busy) => (busy ? loadingIndicator.show() : loadingIndicator.hide()),
+  // Nothing renders when a reply never arrives, so say so rather than leaving
+  // results that look current but are not.
+  () => showCurrencyStatus(t('status.evaluationFailed'))
 );
 
 // Trigger changes: redraw what you typed immediately, then evaluate in the
