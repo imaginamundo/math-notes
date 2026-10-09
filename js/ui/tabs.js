@@ -13,6 +13,7 @@ import {
   deriveNextTabNumber,
 } from '../core/tabsState.js';
 import { STORAGE_KEY, LEGACY_KEY, loadTabsState, createTabsWriter } from '../storage/tabsStore.js';
+import { isTypingTarget } from '../util/dom.js';
 import createHistoryStore from './tabsHistory.js';
 import createTabsView from './tabsView.js';
 import debounce from '../util/debounce.js';
@@ -235,7 +236,7 @@ function initTabs(editableNode, onUpdate) {
     const key = event.key.toLowerCase();
     if (key !== 'z' && key !== 'y') return;
     const active = document.activeElement;
-    if (active && active !== editableNode && active.tagName === 'INPUT') return;
+    if (active && active !== editableNode && isTypingTarget(active)) return;
     if (document.querySelector('dialog[open]')) return;
     event.preventDefault();
     if (event.shiftKey || key === 'y') redo();
