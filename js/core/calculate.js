@@ -248,9 +248,11 @@ function resolveLineRefs(parsed, results, index) {
 /**
  * Build an isolated evaluation engine: its own mathjs instance (aliases, css
  * and currency units configured), its own incremental result cache and its own
- * currency-rate revision. Nothing is constructed at import time.
+ * currency-rate revision. Nothing is constructed at import time, and rates are
+ * an argument — the engine never reads storage or subscribes to events.
+ * @param {{ rates?: { base: string, rates: Record<string, number> } }} [options]
  */
-function createEngine() {
+function createEngine({ rates } = {}) {
   const math = create(all);
   initAliases(math);
   initCssUnits(math);
@@ -261,7 +263,7 @@ function createEngine() {
   initRates(math);
   initTimespan(math);
   initCalendar(math);
-  initCurrency(math);
+  initCurrency(math, rates);
 
   const cache = {
     lines: [],

@@ -168,7 +168,14 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
   function fallbackEvaluate(lines) {
     const load = fallbackModule
       ? Promise.resolve(fallbackModule)
-      : import('./core/calculate.js').then((mod) => (fallbackModule = mod));
+      : import('./core/calculate.js').then((mod) => {
+          fallbackModule = mod;
+          // The engine takes rates as input; the composition root owns the
+          // cache, so seed the freshly loaded module with what is stored.
+          const cached = loadCached();
+          if (cached) mod.registerCurrencyRates(cached);
+          return mod;
+        });
     return withTimeout(
       load.then((mod) => ({ id: 0, data: mod.evaluateLines(lines) })),
       EVALUATE_TIMEOUT
@@ -271,8 +278,9 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
 
   // The main-thread engine is created lazily by the fallback path, so apply a
   // setting to it directly when it exists. A freshly created engine reads the
-  // stored settings and the cached rates itself, so anything changed before it
-  // loads is already picked up.
+  // stored measurement system itself and is seeded with the cached rates when
+  // the fallback first loads it, so anything changed before then is already
+  // picked up.
   function applyToFallback(apply) {
     if (!fallbackModule) return;
     try {

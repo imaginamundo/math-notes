@@ -1,5 +1,4 @@
 import { BASE } from '../core/currencySymbols.js';
-import { loadCached } from '../storage/currencyRates.js';
 
 function ensureBaseUnit(math) {
   try {
@@ -24,13 +23,13 @@ function registerRates(math, data) {
   }
 }
 
-// Seed the engine with the cached rates. Later updates are pushed in explicitly
-// — the worker by a message, the main-thread fallback by evalClient — so the
-// engine itself never subscribes to browser events.
-function initCurrency(math) {
+// Seed the engine with whatever rates the composition root hands it. Later
+// updates are pushed in explicitly — the worker by a message, the main-thread
+// fallback by evalClient — so the engine itself never subscribes to browser
+// events or reads storage.
+function initCurrency(math, rates) {
   ensureBaseUnit(math);
-  const cached = loadCached();
-  if (cached) registerRates(math, cached);
+  if (rates) registerRates(math, rates);
 }
 
 export { registerRates };

@@ -61,6 +61,19 @@ test('core and eval do not depend on the UI layer', () => {
   assert.deepEqual(offenders, []);
 });
 
+// Rate storage (fetch, cache, events) belongs to the composition root, which
+// pushes rates into the engine as an argument; the evaluator must not pull them
+// from storage, or the worker graph drags the browser in with it.
+test('eval does not depend on the storage layer', () => {
+  const offenders = [];
+  for (const path of listJs(join(root, 'js/eval'))) {
+    const rel = path.slice(root.length).replace(/^[\\/]/, '');
+    const source = readFileSync(path, 'utf8');
+    if (/from\s+['"][^'"]*\/storage\//.test(source)) offenders.push(rel);
+  }
+  assert.deepEqual(offenders, []);
+});
+
 // Every `data-i18n*` marker in the static markup must resolve in every locale,
 // so a new label cannot ship untranslated.
 test('every data-i18n key in index.html exists in every locale', () => {
