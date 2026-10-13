@@ -1,11 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  evaluateLines,
-  evaluateLine,
-  createEngine,
-  registerCurrencyRates,
-} from '../js/core/calculate.js';
+import { evaluateLines, evaluateLine, createEngine } from '../js/core/calculate.js';
 import parseLine from '../js/core/parseLine.js';
 
 test('parseLine splits a plain expression', () => {
@@ -371,15 +366,20 @@ test('evaluateLines evaluates comparisons as values', () => {
 });
 
 test('evaluateLines recomputes conversions when rates change', () => {
-  const setRates = (usd) => registerCurrencyRates({ base: 'EUR', rates: { USD: usd } });
+  const engine = createEngine();
+  const setRates = (usd) => engine.registerCurrencyRates({ base: 'EUR', rates: { USD: usd } });
   setRates(1.1);
-  const before = evaluateLines(['1 USD to EUR']);
+  const before = engine.evaluateLines(['1 USD to EUR']);
   assert.equal(before.startLine, 0);
   assert.ok(Math.abs(before.results[0].value.toNumber('EUR') - 1 / 1.1) < 1e-9);
-  assert.equal(evaluateLines(['1 USD to EUR']).startLine, -1, 'cached while rates are stable');
+  assert.equal(
+    engine.evaluateLines(['1 USD to EUR']).startLine,
+    -1,
+    'cached while rates are stable'
+  );
 
   setRates(2.2);
-  const after = evaluateLines(['1 USD to EUR']);
+  const after = engine.evaluateLines(['1 USD to EUR']);
   assert.equal(after.startLine, 0, 'a rate change must not be served from cache');
   assert.ok(Math.abs(after.results[0].value.toNumber('EUR') - 1 / 2.2) < 1e-9);
 });
@@ -558,12 +558,16 @@ test('editing or removing a group refreshes the header subtotal', () => {
 });
 
 test('evaluateLines rejects mixed currencies instead of summing to zero', () => {
-  registerCurrencyRates({ base: 'EUR', rates: { BRL: 5.5, USD: 1.1 } });
-  assert.match(evaluateLines(['500 BRL', '10 USD']).total, /combine .*BRL.*USD/);
-  assert.match(evaluateLines(['500 BRL', '10 USD', '10', '10']).total, /combine .*BRL.*USD/);
-  assert.match(evaluateLines(['500 BRL', '10 USD', 'sum']).results[2].value, /combine .*BRL.*USD/);
+  const engine = createEngine();
+  engine.registerCurrencyRates({ base: 'EUR', rates: { BRL: 5.5, USD: 1.1 } });
+  assert.match(engine.evaluateLines(['500 BRL', '10 USD']).total, /combine .*BRL.*USD/);
+  assert.match(engine.evaluateLines(['500 BRL', '10 USD', '10', '10']).total, /combine .*BRL.*USD/);
+  assert.match(
+    engine.evaluateLines(['500 BRL', '10 USD', 'sum']).results[2].value,
+    /combine .*BRL.*USD/
+  );
 
-  const single = evaluateLines(['500 BRL', '10']).total;
+  const single = engine.evaluateLines(['500 BRL', '10']).total;
   assert.equal(single.formatUnits(), 'BRL');
   assert.ok(Math.abs(single.toNumber() - 510) < 1e-9);
 });
@@ -576,8 +580,13 @@ test('evaluateLines keeps same affine units apart from other temperatures', () =
 });
 
 test('evaluateLines totals values that share a currency', () => {
-  registerCurrencyRates({ base: 'EUR', rates: { BRL: 5.5 } });
-  const { total } = evaluateLines(['daily = 24.8 BRL', 'fixed = 750 BRL', '22 * daily + fixed']);
+  const engine = createEngine();
+  engine.registerCurrencyRates({ base: 'EUR', rates: { BRL: 5.5 } });
+  const { total } = engine.evaluateLines([
+    'daily = 24.8 BRL',
+    'fixed = 750 BRL',
+    '22 * daily + fixed',
+  ]);
   assert.equal(total.isUnit, true);
   assert.equal(total.formatUnits(), 'BRL');
   assert.ok(Math.abs(total.toNumber() - (22 * 24.8 + 750)) < 1e-9);

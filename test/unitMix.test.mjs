@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { create, all } from '../js/lib/math.bundle.min.js';
 import { registerRates } from '../js/eval/currency.js';
 import { unitMixError } from '../js/core/unitMix.js';
-import { evaluateLines, registerCurrencyRates } from '../js/core/calculate.js';
+import { createEngine } from '../js/core/calculate.js';
 
 const math = create(all);
 registerRates(math, { base: 'EUR', rates: { USD: 1.16, BRL: 5.9 } });
@@ -62,8 +62,9 @@ test('unitMixError ignores values without units', () => {
 });
 
 test('evaluateLines reports a unit mix as an error', () => {
-  registerCurrencyRates({ base: 'EUR', rates: { USD: 1.16, BRL: 5.9 } });
-  const { results } = evaluateLines(['5 kg * 3 m', '350brl', '2h * prev']);
+  const engine = createEngine();
+  engine.registerCurrencyRates({ base: 'EUR', rates: { USD: 1.16, BRL: 5.9 } });
+  const { results } = engine.evaluateLines(['5 kg * 3 m', '350brl', '2h * prev']);
   assert.equal(results[0].type, 'error');
   assert.match(results[0].value, /Cannot combine "kg" and "m"/);
   assert.equal(results[1].type, 'value');
