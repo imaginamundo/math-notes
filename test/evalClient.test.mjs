@@ -29,7 +29,7 @@ class WorkerStub {
         id: message.id,
         type: 'result',
         results: [{ type: 'value', value: '4' }],
-        total: 4,
+        total: '4',
         startLine: 0,
       },
     });
@@ -86,7 +86,7 @@ test('update renders text, evaluates and clears the busy flag', async () => {
   assert.equal(WorkerStub.latest.sent.length, 1);
   assert.equal(WorkerStub.latest.sent[0].type, 'evaluate');
   assert.equal(renders.length, 1);
-  assert.equal(renders[0].data.total, 4);
+  assert.equal(renders[0].data.total, '4');
   assert.deepEqual(busy, [true, false]);
 });
 
@@ -151,7 +151,7 @@ test('a failed worker restart retries instead of falling back permanently', asyn
   await client.update();
   assert.notEqual(WorkerStub.latest, first, 'a fresh worker replaces the failed one');
   assert.equal(renders.length, 1, 'the retried request still renders on the worker');
-  assert.equal(renders[0].data.total, 4);
+  assert.equal(renders[0].data.total, '4');
 
   // Later updates keep using the worker path.
   await client.update();
@@ -199,7 +199,7 @@ test('a dropped forced redraw is re-armed for the next request', async () => {
   const evaluateIds = () => worker.sent.filter((m) => m.type === 'evaluate').map((m) => m.id);
   const reply = (id) =>
     worker.emit('message', {
-      data: { id, type: 'result', results: [], total: 4, startLine: -1 },
+      data: { id, type: 'result', results: [], total: '4', startLine: -1 },
     });
 
   client.syncPrecision(5);
@@ -236,7 +236,7 @@ test('a stale reply does not consume a pending precision force', async () => {
 
   const reply = (id) =>
     worker.emit('message', {
-      data: { id, type: 'result', results: [], total: 4, startLine: -1 },
+      data: { id, type: 'result', results: [], total: '4', startLine: -1 },
     });
   reply(id1);
   await r1;

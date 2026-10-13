@@ -1,4 +1,5 @@
 import { loadCached } from './storage/currencyRates.js';
+import { MSG } from './protocol.js';
 import { readMeasurementSystem } from './core/measurementSystem.js';
 import { DEFAULT_MEASUREMENT_SYSTEM } from './core/measures.js';
 import { DEFAULT_PRECISION, readDecimalPrecision } from './core/decimalPrecision.js';
@@ -91,7 +92,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
     created.addEventListener('error', dropWorker);
     // Seed the worker with the stored settings; the worker defaults to the same
     // values, so only a non-default choice needs sending.
-    const seed = (name, value) => created.postMessage({ type: 'setting', name, value });
+    const seed = (name, value) => created.postMessage({ type: MSG.setting, name, value });
     const measurementSystem = readMeasurementSystem();
     if (measurementSystem !== DEFAULT_MEASUREMENT_SYSTEM) seed('measurement', measurementSystem);
     const precision = readDecimalPrecision();
@@ -121,7 +122,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
     worker = null;
     for (const [id, callback] of pending) {
       pending.delete(id);
-      callback({ type: 'error', message: 'The evaluation worker failed' });
+      callback({ type: MSG.error, message: 'The evaluation worker failed' });
     }
   }
 
@@ -136,7 +137,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
     failed.terminate();
     for (const [id, callback] of pending) {
       pending.delete(id);
-      callback({ type: 'error', message: 'The evaluation worker timed out' });
+      callback({ type: MSG.error, message: 'The evaluation worker timed out' });
     }
     lastSentLines = null;
   }
@@ -191,7 +192,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
       }, EVALUATE_TIMEOUT);
       pending.set(id, (data) => {
         clearTimeout(timer);
-        if (data.type === 'error') reject(new Error(data.message));
+        if (data.type === MSG.error) reject(new Error(data.message));
         else resolve({ id, data });
       });
       // Send only the suffix from the first changed line. `from` is -1 when
@@ -200,7 +201,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
       const suffix = from > 0 ? lines.slice(from) : from === 0 ? lines : [];
       worker.postMessage({
         id,
-        type: 'evaluate',
+        type: MSG.evaluate,
         lines: suffix,
         from: from === -1 ? lines.length : from,
       });
@@ -300,7 +301,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
 
   // Every setting is sent as one message shape; the worker routes by name.
   function postSetting(name, value) {
-    if (worker && value !== undefined) worker.postMessage({ type: 'setting', name, value });
+    if (worker && value !== undefined) worker.postMessage({ type: MSG.setting, name, value });
     const apply = FALLBACK_SETTINGS[name];
     if (apply) applyToFallback((mod) => apply(mod, value));
   }

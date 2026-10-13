@@ -6,6 +6,7 @@ import {
 } from './core/calculate.js';
 import { DEFAULT_PRECISION, normalizeDecimalPrecision } from './core/decimalPrecision.js';
 import { DEFAULT_CLOCK_FORMAT } from './core/clockFormat.js';
+import { MSG } from './protocol.js';
 import formatResult from './render/formatResult.js';
 import { applyLinePatch } from './util/sequence.js';
 
@@ -32,7 +33,7 @@ const SETTINGS = {
 self.addEventListener('message', (event) => {
   const { id, type, lines, from, name, value } = event.data || {};
   try {
-    if (type === 'evaluate') {
+    if (type === MSG.evaluate) {
       sheetLines = applyLinePatch(sheetLines, from, lines);
       const { results, total, startLine } = evaluateLines(sheetLines);
       // Values are pre-formatted to strings so no mathjs class instances
@@ -52,20 +53,20 @@ self.addEventListener('message', (event) => {
         total === null || total === undefined ? total : formatResult(total, precision, clockFormat);
       self.postMessage({
         id,
-        type: 'result',
+        type: MSG.result,
         results: serialized,
         total: serializedTotal,
         startLine,
       });
-    } else if (type === 'setting') {
+    } else if (type === MSG.setting) {
       const apply = SETTINGS[name];
       if (apply) apply(value);
     }
   } catch (error) {
     // Only an evaluate request carries an id to report against. A malformed
     // settings payload must not take the worker down for the whole session.
-    if (type === 'evaluate') {
-      self.postMessage({ id, type: 'error', message: error.message });
+    if (type === MSG.evaluate) {
+      self.postMessage({ id, type: MSG.error, message: error.message });
     } else {
       console.error('worker message failed:', error, event.data);
     }

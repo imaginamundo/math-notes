@@ -1,5 +1,5 @@
 {
-  "version": 50,
+  "version": 51,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "3158ce141fee274b7f17e7fc54d9c0c477fa8567f219ebcda0ab577c095187ee",
@@ -42,7 +42,7 @@
     "js/eval/units.js": "9d6375d090a78ecf70fe37919d8674d857ea450e37817a11948fc240e486526f",
     "js/eval/userUnits.js": "089e0e8965a0484c5213c8d241990d22ca567fd4d6eb64820366d22c35f291b6",
     "js/eval/wordOperators.js": "d7b4640a40e62af4970d937abbdcaf18eb47c40db172febadccfe5dea6e08d6c",
-    "js/evalClient.js": "ea228849cc9d9595911360f71b8412808997156ce8ce556e1b2a7003b0f20348",
+    "js/evalClient.js": "170b72f552f2a8186d7a4a0457828b52995a0c74ce565454452f600bc5f1abb9",
     "js/i18n/examples/en.js": "1174e51c49a04cd63cb4c16ac2efc31bc5dc58163dd83f9b3b382f2009e3cec9",
     "js/i18n/examples/es.js": "36d181952836fe1cd44884cfd3888b82cd1d891797c427df8dc651bb15c9bc05",
     "js/i18n/examples/pt.js": "f9c0acfb8228252b6296d1936b10cf092cf5f7a177d67ee510517d33468aa8b1",
@@ -52,6 +52,7 @@
     "js/i18n/ui/pt.js": "8fa942127f81f4b3ac2bd171f8d5e569be96167af94c32d5491d9a5f9e8898ec",
     "js/index.js": "ec6068dbd5498c7e7d86f2a6da01ce4262b5afefe474d3155f730903f9286bc7",
     "js/lib/math.bundle.min.js": "a4d194cbcf01ffe384efd1f64757ea14c9e584d7ec294cb2916abf622fab93c9",
+    "js/protocol.js": "6b2ef4bcc2f65ed172f684dfee193ea43f43b370417437fa9960f86aceda97e1",
     "js/registerServiceWorker.js": "eb484b46ff06e0a3317b35ab6d9141991ddff6ac5c44d7f36e1f04fb953ddb8f",
     "js/render/exampleText.js": "bfa054aa3a65162e8af4187e9a8b6509c1e7c3adb31c75f9eaa28ff7526a86b3",
     "js/render/format.js": "e1924113a687e02ef6abc3cf551d3dabf3f8b56746fd2d1a79fa23a07a05569a",
@@ -96,7 +97,7 @@
     "js/util/sequence.js": "599d9e79ff4d2cf3887614e78cd89da673f610d165a4ea1196ebabd38f33e6c3",
     "js/util/storage.js": "38b4c3255a93602347dd155e21ae8791676fc31a8b73775f69ec20f2ac8f9ab8",
     "js/util/text.js": "b5a945f08ce595855b42b2da43292dec11c2cfc194a2ba6a47ecb8d9330af4e8",
-    "js/worker.js": "6f4b487330556bd0a831790b2efe43569663466bd6b028dddcb3184d04697156",
+    "js/worker.js": "b80a0eea42df4c8a1206cfbc0dceba0779eb6d9fd9713d232f32a82411e9085e",
     "style.css": "846359c5f99284a44df5bd87f3b2d9033a4413a5b16c779d9355bdd448a077b0"
   }
 }
