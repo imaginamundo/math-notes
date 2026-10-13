@@ -1,4 +1,5 @@
-import { BASE, loadCached } from '../storage/currencyRates.js';
+import { BASE } from '../core/currencySymbols.js';
+import { loadCached } from '../storage/currencyRates.js';
 
 function ensureBaseUnit(math) {
   try {

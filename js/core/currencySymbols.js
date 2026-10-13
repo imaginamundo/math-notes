@@ -5,6 +5,11 @@
 // evaluator both read the vocabulary from here rather than the domain reaching
 // into `eval/`.
 
+// Every rate is quoted against this one currency, and the vocabulary module is
+// where both the evaluator and the rate storage agree on it — neither layer
+// should define it for the other.
+const BASE = 'EUR';
+
 // How each currency is written back: a symbol in front of the amount
 // (`350usd` -> `US$350`). Currencies with no distinct symbol (CHF, ZAR, the
 // Nordic krona) are absent and keep their ISO code instead, so the result can
@@ -112,4 +117,4 @@ function isCurrencyCode(code) {
   return CURRENCY_CODES.has(String(code).toUpperCase());
 }
 
-export { CURRENCY_SYMBOLS, CURRENCY_DISPLAY, SYMBOL_SOURCE, isCurrencyCode };
+export { BASE, CURRENCY_SYMBOLS, CURRENCY_DISPLAY, SYMBOL_SOURCE, isCurrencyCode };
