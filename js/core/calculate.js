@@ -54,11 +54,17 @@ import { createUserUnit, removeUserUnit } from '../eval/userUnits.js';
  * present only on the rows of a closed group (`'header'`, `'body'`, `'end'`),
  * so the renderer can shade the block.
  *
+ * The worker path (see `worker.js`) matches this shape except where the
+ * structured clone cannot: `value` is pre-formatted to a string, and
+ * `assigned` is dropped (functions cannot clone). Every other field is
+ * clone-safe and rides along, so the two paths agree on shape.
+ *
  * @typedef {Object} LineResult
  * @property {('value'|'assignment'|'error')} type
  * @property {*} value
- * @property {*} [assigned]
+ * @property {*} [assigned]  Engine path only; stripped by the worker.
  * @property {boolean} [aggregate]
+ * @property {boolean} [unitDef]
  * @property {string[]} [tags]
  * @property {('header'|'body'|'end')} [group]
  */
@@ -66,7 +72,9 @@ import { createUserUnit, removeUserUnit } from '../eval/userUnits.js';
 /**
  * @typedef {Object} SheetResult
  * @property {LineResult[]} results
- * @property {*} total  The running total (number, Unit, or formatted string).
+ * @property {*} total  The running total: a number/Unit (engine path) or a
+ *   pre-formatted string (worker path); an error message string when the
+ *   aggregate fails (e.g. mixed currencies).
  * @property {number} startLine  First line that changed (-1 when input is unchanged).
  */
 

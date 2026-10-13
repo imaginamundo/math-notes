@@ -7,7 +7,7 @@ import {
 import { DEFAULT_PRECISION, normalizeDecimalPrecision } from './core/decimalPrecision.js';
 import { DEFAULT_CLOCK_FORMAT } from './core/clockFormat.js';
 import { MSG } from './protocol.js';
-import formatResult from './render/formatResult.js';
+import formatResult, { serializeResults } from './render/formatResult.js';
 import { applyLinePatch } from './util/sequence.js';
 
 let precision = DEFAULT_PRECISION;
@@ -38,16 +38,7 @@ self.addEventListener('message', (event) => {
       const { results, total, startLine } = evaluateLines(sheetLines);
       // Values are pre-formatted to strings so no mathjs class instances
       // (units, big numbers) cross the structured-clone boundary.
-      const serialized = results.map((result) => ({
-        type: result.type,
-        value:
-          result.value === undefined
-            ? undefined
-            : result.type === 'error'
-              ? result.value
-              : formatResult(result.value, precision, clockFormat),
-        group: result.group,
-      }));
+      const serialized = serializeResults(results, precision, clockFormat);
       // The total may be a Unit (same-unit sheet) and must be serialized too.
       const serializedTotal =
         total === null || total === undefined ? total : formatResult(total, precision, clockFormat);

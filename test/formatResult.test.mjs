@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import formatResult from '../js/render/formatResult.js';
+import formatResult, { serializeResults } from '../js/render/formatResult.js';
 import { registerRates } from '../js/eval/currency.js';
 import { create, all } from '../js/lib/math.bundle.min.js';
 
@@ -150,4 +150,34 @@ test('formatUnit applies its rules in order', () => {
   assert.equal(formatResult(math.evaluate('2 m * 3 m * 4 m')), '24 m^3');
   // A plain ratio stays as written rather than simplifying to an area.
   assert.equal(formatResult(math.evaluate('7 l / 100 km')), '0.07 l/km');
+});
+
+test('serializeResults formats values and keeps clone-safe flags, dropping assigned', () => {
+  const results = [
+    { type: 'value', value: 1000000, aggregate: true, tags: ['food'], group: 'header' },
+    { type: 'assignment', value: 5, assigned: () => {}, unitDef: true },
+    { type: 'error', value: 'boom' },
+    { type: 'value', value: undefined },
+  ];
+  const out = serializeResults(results, 2, '24h');
+  assert.deepEqual(out[0], {
+    type: 'value',
+    value: '1,000,000',
+    aggregate: true,
+    unitDef: undefined,
+    tags: ['food'],
+    group: 'header',
+  });
+  assert.equal(out[1].value, '5');
+  assert.equal(out[1].assigned, undefined, 'assigned cannot cross structured clone');
+  assert.equal(out[1].unitDef, true);
+  assert.deepEqual(out[2], {
+    type: 'error',
+    value: 'boom',
+    aggregate: undefined,
+    unitDef: undefined,
+    tags: undefined,
+    group: undefined,
+  });
+  assert.equal(out[3].value, undefined);
 });
