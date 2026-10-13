@@ -43,8 +43,13 @@ function createTabsView(tabBarNode, handlers) {
     nameNode.textContent = tab.name;
     nameNode.title = t('tabs.rename');
 
+    // The tab itself is the tab stop (roving tabindex); the × stays out of the
+    // tab order so a bar of tabs is one stop, not one per close button. Delete
+    // or Backspace closes the focused tab instead.
     const closeNode = document.createElement('button');
+    closeNode.type = 'button';
     closeNode.className = 'tab-close';
+    closeNode.tabIndex = -1;
     closeNode.textContent = '×';
     closeNode.title = t('tabs.close');
     closeNode.setAttribute('aria-label', t('tabs.close'));

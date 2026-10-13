@@ -9,7 +9,7 @@ Usa las pestañas de arriba para mantener hojas separadas. Cada pestaña se guar
 - **Cambiar** — haz clic en una pestaña (o usa `←`/`→` con ella enfocada, o `Ctrl+Tab`).
 - **Reordenar** — haz clic y arrastra una pestaña a otra posición.
 - **Renombrar** — haz doble clic en el nombre de la pestaña (o pulsa `F2` con la pestaña enfocada; en una pantalla táctil, mantén pulsado).
-- **Cerrar** — haz clic en la `×` (se te pedirá confirmación).
+- **Cerrar** — haz clic en la `×`, o pulsa `Delete` / `Backspace` con la pestaña enfocada (se te pedirá confirmación).
 - **Añadir** — haz clic en la pestaña `+`, o en el `⌄` de al lado para empezar desde una plantilla (presupuesto, coste del viaje, factura, meta de ahorro, dividir la cuenta).
 
 ## Exportar e importar

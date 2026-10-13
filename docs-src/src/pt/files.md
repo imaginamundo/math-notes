@@ -9,7 +9,7 @@ Use as abas no topo para manter planilhas separadas. Cada aba é salva automatic
 - **Trocar** — clique em uma aba (ou use `←`/`→` com ela focada, ou `Ctrl+Tab`).
 - **Reordenar** — clique e arraste uma aba para uma nova posição.
 - **Renomear** — clique duas vezes no nome da aba (ou pressione `F2` com a aba focada; em uma tela de toque, pressione e segure).
-- **Fechar** — clique no `×` (você deverá confirmar).
+- **Fechar** — clique no `×`, ou pressione `Delete` / `Backspace` com a aba em foco (você deverá confirmar).
 - **Adicionar** — clique na aba `+`, ou no `⌄` ao lado para começar a partir de um modelo (orçamento, custo da viagem, fatura, meta de poupança, dividir a conta).
 
 ## Exportar e importar

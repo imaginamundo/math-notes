@@ -9,7 +9,7 @@ Use the tabs at the top to keep separate worksheets. Every tab is saved automati
 - **Switch** — click a tab (or use `←`/`→` once focused, or `Ctrl+Tab`).
 - **Reorder** — click and drag a tab to a new position.
 - **Rename** — double-click the tab name (or press `F2` on a focused tab; on a touchscreen, press and hold).
-- **Close** — click the `×` (you are asked to confirm).
+- **Close** — click the `×`, or press `Delete` / `Backspace` on a focused tab (you are asked to confirm).
 - **Add** — click the `+` tab, or the `⌄` beside it to start from a template (budget, trip cost, invoice, savings goal, split a bill).
 
 ## Export and import

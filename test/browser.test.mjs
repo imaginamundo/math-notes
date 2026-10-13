@@ -419,6 +419,23 @@ test('a focused tab closes with Delete', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('the tab bar is one tab stop: close buttons stay out of the order', async () => {
+  await newPage();
+  await page.evaluate(() => document.querySelector('.tab').focus());
+  const stops = [];
+  for (let i = 0; i < 2; i++) {
+    await page.keyboard.press('Tab');
+    stops.push(await page.evaluate(() => document.activeElement.className));
+  }
+  assert.deepEqual(stops, ['tab-template', 'tab-new']);
+  assert.equal(
+    await page.evaluate(() => document.querySelector('.tab-close').tabIndex),
+    -1,
+    'the × is for pointers; Delete closes the focused tab'
+  );
+  assert.deepEqual(errors, []);
+});
+
 test('the new-tab button stays reachable when tabs overflow', async () => {
   await newPage();
   await page.evaluate(() => {
