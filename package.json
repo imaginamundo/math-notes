@@ -8,6 +8,7 @@
     "build:mathjs": "make -C js/lib",
     "build:i18n": "make -C js/i18n",
     "build:docs": "make -C docs-src",
+    "build:sw-manifest": "node scripts/sw-manifest.mjs",
     "dev": "node scripts/dev.mjs",
     "test": "node --test --test-concurrency=1",
     "lint": "eslint .",

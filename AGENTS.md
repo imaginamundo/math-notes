@@ -22,6 +22,9 @@ no build step and is installable as a PWA.
   Examples content modules from the Markdown in `js/i18n/src/`.
 - `make -C docs-src` (or `npm run build:docs`) — regenerate the committed
   documentation site in `docs/` from the Markdown in `docs-src/src/`.
+- `npm run build:sw-manifest` — recompute `cache-manifest.json` and bump the
+  service-worker cache version. Run it after changing any precached file
+  (`js/`, `index.html`, `style.css`); `npm test` fails if you forget.
 
 Always run `npm run lint`, `npm run format:check`, and `npm test` before
 committing. Make one focused change per commit.
@@ -78,6 +81,12 @@ for the project's terminology.
    (an environment revision forces a full recompute).
 6. Aggregate blocks (`sum`/`average`/`total`) and `prev` depend on the per-line
    cache; incremental edits recompute from the first changed line.
+7. An installed PWA serves the precached shell cache-first with no
+   revalidation, and a new service worker installs only when `serviceWorker.js`
+   changes bytes — so every change to a precached file must bump `cacheName`.
+   Run `npm run build:sw-manifest` (it hashes the precached files into
+   `cache-manifest.json` and bumps the version); the service-worker tests
+   compare the manifest against the files on disk.
 
 ## Conventions
 

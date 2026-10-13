@@ -3,6 +3,12 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  cachedFiles as precachedUrls,
+  hashCachedFiles,
+  readManifest,
+  readWorkerVersion,
+} from '../scripts/sw-manifest.mjs';
 
 // The offline shell can only work if every module the app imports at runtime is
 // precached. A new module that is left out would make the app open blank
@@ -10,12 +16,7 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('..', import.meta.url));
 
 function cachedFiles() {
-  const source = readFileSync(join(root, 'serviceWorker.js'), 'utf8');
-  const start = source.indexOf('urlsToCache');
-  const block = source.slice(start, source.indexOf('];', start));
-  return new Set(
-    [...block.matchAll(/'(\.\/[^']+)'/g)].map((match) => normalize(match[1]).replace(/^\.\//, ''))
-  );
+  return new Set(precachedUrls());
 }
 
 function importsOf(rel) {
@@ -62,4 +63,27 @@ test('every runtime module is in the service worker cache list', () => {
 test('the service worker cache list points at files that exist', () => {
   const missing = [...cachedFiles()].filter((rel) => !existsSync(join(root, rel))).sort();
   assert.deepEqual(missing, [], `urlsToCache entries that do not exist: ${missing.join(', ')}`);
+});
+
+// An installed PWA serves these files cache-first and never revalidates them,
+// so a version only reaches clients when serviceWorker.js changes bytes. The
+// manifest pins what is precached; the version pins when clients get it again.
+test('the committed cache manifest matches the precached files', () => {
+  const manifest = readManifest();
+  assert.ok(manifest, 'cache-manifest.json is missing — run `npm run build:sw-manifest`');
+  assert.deepEqual(
+    hashCachedFiles(),
+    manifest.files,
+    'precached files changed without regenerating — run `npm run build:sw-manifest`'
+  );
+});
+
+test('the service worker cache version matches the manifest', () => {
+  const manifest = readManifest();
+  assert.ok(manifest, 'cache-manifest.json is missing — run `npm run build:sw-manifest`');
+  assert.equal(
+    readWorkerVersion().version,
+    manifest.version,
+    'cacheName in serviceWorker.js was not bumped — run `npm run build:sw-manifest`'
+  );
 });
