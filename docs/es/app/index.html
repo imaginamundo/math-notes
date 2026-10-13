@@ -97,7 +97,11 @@
 </tr>
 <tr>
 <td><code>Tab</code> <code>Shift+Tab</code></td>
-<td>Indentar / desindentar</td>
+<td>Indentar / desindentar al inicio de una línea</td>
+</tr>
+<tr>
+<td><code>Esc</code></td>
+<td>Salir del editor a la barra de pestañas</td>
 </tr>
 <tr>
 <td><code>⇧⌘C</code> <code>Ctrl+Shift+C</code></td>
@@ -114,6 +118,8 @@
 <li>El control de tamaño del texto escala desde el tamaño predeterminado del navegador, así que honra tu preferencia del sistema.</li>
 <li>El editor tiene una etiqueta accesible, la barra de estado anuncia el estado con <code>aria-live</code>, y el resultado de la línea activa se anuncia mediante una región viva aparte.</li>
 <li>El autocompletado se expone como combobox (<code>aria-expanded</code>, <code>aria-controls</code>, <code>aria-activedescendant</code>), y las pestañas pueden renombrarse con el teclado (<code>F2</code>) o por toque (mantén pulsado).</li>
+<li>La barra de pestañas es un tablist con tabindex móvil: <code>Tab</code> la alcanza en una sola parada, <code>←</code>/<code>→</code> cambian de pestaña, y <code>Delete</code> / <code>Backspace</code> cierra la pestaña enfocada.</li>
+<li>El editor nunca atrapa el teclado: <code>Tab</code> indenta al inicio de una línea y en cualquier otra posición mueve el foco, y <code>Esc</code> siempre sale del editor a la barra de pestañas.</li>
 <li>Las ventanas son elementos <code>&lt;dialog&gt;</code> nativos con cabecera etiquetada y botón de cierre alcanzable por teclado, y al cerrarlas el foco vuelve al botón que las abrió.</li>
 <li>La agregación de la barra de total es un <code>&lt;select&gt;</code> etiquetado.</li>
 <li>La documentación que estás leyendo es HTML estático con enlace para saltar al contenido, elementos de referencia y una barra lateral alcanzable por teclado.</li>

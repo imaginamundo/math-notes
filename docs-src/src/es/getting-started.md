@@ -37,7 +37,7 @@ Cuando una línea no se puede evaluar, el error aparece en la propia línea, en 
 
 ## Edición
 
-- **Sangría** — `Tab` indenta la línea actual o una selección de varias líneas, `Shift+Tab` desindenta. La sangría es de dos espacios y no cambia cómo se evalúa la línea.
+- **Sangría** — `Tab` indenta y `Shift+Tab` desindenta la línea actual (cuando el cursor está al inicio o dentro de su sangría inicial) o una selección de varias líneas. La sangría es de dos espacios y no cambia cómo se evalúa la línea. En cualquier otra posición `Tab` mueve el foco al siguiente control, y `Esc` sale siempre del editor a la barra de pestañas: el teclado nunca queda atrapado.
 - **Comentar una línea** — haz clic en el número de la línea en el margen izquierdo para comentarla o descomentarla. Una línea que ya empieza por `##` solo pierde un `#`.
 - **Números de línea** — el margen izquierdo numera la hoja y resalta la línea donde está el cursor.
 - **Deshacer / rehacer** — `⌘Z` / `Ctrl+Z` y `⇧⌘Z` / `Ctrl+Shift+Z`, con un historial separado para cada pestaña.

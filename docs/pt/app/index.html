@@ -97,7 +97,11 @@
 </tr>
 <tr>
 <td><code>Tab</code> <code>Shift+Tab</code></td>
-<td>Indentar / desindentar</td>
+<td>Indentar / desindentar no início de uma linha</td>
+</tr>
+<tr>
+<td><code>Esc</code></td>
+<td>Sair do editor para a barra de abas</td>
 </tr>
 <tr>
 <td><code>⇧⌘C</code> <code>Ctrl+Shift+C</code></td>
@@ -114,6 +118,8 @@
 <li>O controle de tamanho do texto parte do tamanho padrão do navegador, então honra sua preferência de sistema.</li>
 <li>O editor tem um rótulo acessível, a barra de status anuncia o estado com <code>aria-live</code>, e o resultado da linha ativa é anunciado por uma região viva separada.</li>
 <li>O autocompletar é exposto como combobox (<code>aria-expanded</code>, <code>aria-controls</code>, <code>aria-activedescendant</code>), e as abas podem ser renomeadas pelo teclado (<code>F2</code>) ou por toque (pressione e segure).</li>
+<li>A barra de abas é um tablist com tabindex móvel: <code>Tab</code> a alcança em uma única parada, <code>←</code>/<code>→</code> trocam de aba, e <code>Delete</code> / <code>Backspace</code> fecha a aba em foco.</li>
+<li>O editor nunca prende o teclado: <code>Tab</code> indenta no início de uma linha e em qualquer outra posição move o foco, e <code>Esc</code> sempre sai do editor para a barra de abas.</li>
 <li>As janelas são elementos <code>&lt;dialog&gt;</code> nativos com cabeçalho rotulado e botão de fechar alcançável pelo teclado, e fechá-las devolve o foco ao botão que as abriu.</li>
 <li>A agregação da barra de total é um <code>&lt;select&gt;</code> rotulado.</li>
 <li>A documentação que você está lendo é HTML estático com link de pular para o conteúdo, marcos e uma barra lateral alcançável pelo teclado.</li>

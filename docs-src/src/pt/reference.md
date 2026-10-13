@@ -73,7 +73,8 @@ Palavras de data `today`, `now`, `yesterday`, `tomorrow`, `christmas`, `hallowee
 | `⌘F` / `Ctrl+F` | Localizar e substituir na planilha ativa |
 | `⌘G` / `Ctrl+G` | Ir para um número de linha |
 | `Ctrl+Space` | Mostrar sugestões de autocompletar |
-| `Tab` / `Shift+Tab` | Indentar / desindentar a(s) linha(s) |
+| `Tab` / `Shift+Tab` | Indentar / desindentar no início de uma linha (em outra posição Tab move o foco) |
+| `Esc` | Sair do editor para a barra de abas |
 | `⇧⌘C` / `Ctrl+Shift+C` | Copiar o resultado da linha atual |
 | `⇧⌘S` `⇧⌘L` / `Ctrl+Shift+S` | Copiar um link de compartilhamento |
 | `⇧⌘E` / `Ctrl+Shift+E` | Exportar a planilha ativa |

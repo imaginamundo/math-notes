@@ -436,6 +436,50 @@ test('the tab bar is one tab stop: close buttons stay out of the order', async (
   assert.deepEqual(errors, []);
 });
 
+test('Tab indents at a line start and leaves the editor after content', async () => {
+  await newPage();
+  await page.click('#content-editable');
+  await page.evaluate(() => {
+    const node = document.getElementById('content-editable');
+    node.value = 'a = 1';
+    node.setSelectionRange(0, 0);
+  });
+  await page.keyboard.press('Tab');
+  assert.equal(
+    await page.evaluate(() => document.getElementById('content-editable').value),
+    '  a = 1'
+  );
+  assert.equal(
+    await page.evaluate(() => document.activeElement.id),
+    'content-editable',
+    'indenting keeps focus in the editor'
+  );
+
+  await page.evaluate(() => {
+    const node = document.getElementById('content-editable');
+    node.setSelectionRange(node.value.length, node.value.length);
+  });
+  await page.keyboard.press('Tab');
+  assert.equal(
+    await page.evaluate(() => document.activeElement.id),
+    'total-mode',
+    'after content on the line Tab moves focus on'
+  );
+  assert.deepEqual(errors, []);
+});
+
+test('Escape leaves the editor for the active tab', async () => {
+  await newPage();
+  await page.click('#content-editable');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.evaluate(() => document.activeElement.classList.contains('tab')), true);
+  assert.equal(
+    await page.evaluate(() => document.activeElement.getAttribute('aria-selected')),
+    'true'
+  );
+  assert.deepEqual(errors, []);
+});
+
 test('the new-tab button stays reachable when tabs overflow', async () => {
   await newPage();
   await page.evaluate(() => {
@@ -835,13 +879,14 @@ test('Tab indents and Shift+Tab outdents', async () => {
   await setContent('a\nb');
   await page.focus('#content-editable');
 
-  // No selection: insert two spaces at the caret.
+  // At a line start Tab indents and keeps focus in the editor.
+  await page.evaluate(() => document.getElementById('content-editable').setSelectionRange(0, 0));
   await page.keyboard.press('Tab');
-  assert.equal(await value(), 'a\nb  ');
+  assert.equal(await value(), '  a\nb');
   assert.equal(
     await page.evaluate(() => document.activeElement.id),
     'content-editable',
-    'Tab stays trapped in the editor'
+    'indenting keeps focus in the editor'
   );
 
   // Multi-line selection: indent every line, then outdent them again.
@@ -850,11 +895,11 @@ test('Tab indents and Shift+Tab outdents', async () => {
     ed.setSelectionRange(0, ed.value.length);
   });
   await page.keyboard.press('Tab');
-  assert.equal(await value(), '  a\n  b  ');
+  assert.equal(await value(), '    a\n  b');
   await page.keyboard.down('Shift');
   await page.keyboard.press('Tab');
   await page.keyboard.up('Shift');
-  assert.equal(await value(), 'a\nb  ');
+  assert.equal(await value(), '  a\nb');
   assert.deepEqual(errors, []);
 });
 

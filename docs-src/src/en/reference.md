@@ -73,7 +73,8 @@ Date words `today`, `now`, `yesterday`, `tomorrow`, `christmas`, `halloween`; ph
 | `⌘F` / `Ctrl+F` | Find & replace in the active sheet |
 | `⌘G` / `Ctrl+G` | Jump to a line number |
 | `Ctrl+Space` | Show autocomplete suggestions |
-| `Tab` / `Shift+Tab` | Indent / outdent the line(s) |
+| `Tab` / `Shift+Tab` | Indent / outdent at a line start (elsewhere Tab moves focus) |
+| `Esc` | Leave the editor for the tab bar |
 | `⇧⌘C` / `Ctrl+Shift+C` | Copy the current line's result |
 | `⇧⌘S` `⇧⌘L` / `Ctrl+Shift+S` | Copy a share link |
 | `⇧⌘E` / `Ctrl+Shift+E` | Export the active sheet |

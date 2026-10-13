@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { INDENT, indentSelection, outdentSelection } from '../js/ui/indent.js';
+import { INDENT, indentSelection, outdentSelection, takesIndent } from '../js/ui/indent.js';
 
 test('Tab with no selection inserts the indent unit', () => {
   assert.deepEqual(indentSelection('a = 1', 0, 0), {
@@ -61,4 +61,24 @@ test('outdent leaves an unindented line alone', () => {
   const value = 'a\nb';
   const result = outdentSelection(value, 2, 2);
   assert.deepEqual(result, { value, start: 2, end: 2 });
+});
+
+test('Tab claims the key at a line start and inside its leading whitespace', () => {
+  assert.equal(takesIndent('a = 1', 0, 0), true);
+  assert.equal(takesIndent('  a = 1', 2, 2), true);
+  assert.equal(takesIndent('  a = 1', 4, 4), false, 'after content Tab moves focus');
+  assert.equal(takesIndent('  \nx', 2, 2), true, 'a whitespace-only line is still indentation');
+});
+
+test('Tab claims a multi-line selection but not a single-line one', () => {
+  const value = 'a\nb\nc';
+  assert.equal(takesIndent(value, 0, value.length), true);
+  assert.equal(takesIndent(value, 0, 2), true, 'even a selection of just "a\\n" touches a line');
+  assert.equal(takesIndent(value, 0, 1), false);
+  assert.equal(takesIndent(value, 1, 1), false);
+});
+
+test('Tab claims the key on the first line and right after a newline', () => {
+  assert.equal(takesIndent('a\nb', 0, 0), true);
+  assert.equal(takesIndent('a\nb', 2, 2), true);
 });

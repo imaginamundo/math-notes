@@ -23,7 +23,8 @@ Toda ação tem um atalho; a lista completa está na [Referência](/docs/referen
 | `⌘F` `Ctrl+F` | Localizar e substituir |
 | `⌘G` `Ctrl+G` | Ir para uma linha |
 | `Ctrl+Space` | Autocompletar |
-| `Tab` `Shift+Tab` | Indentar / desindentar |
+| `Tab` `Shift+Tab` | Indentar / desindentar no início de uma linha |
+| `Esc` | Sair do editor para a barra de abas |
 | `⇧⌘C` `Ctrl+Shift+C` | Copiar o resultado da linha atual |
 | `⇧⌘S` `Ctrl+Shift+S` | Copiar um link de compartilhamento |
 
@@ -32,6 +33,8 @@ Toda ação tem um atalho; a lista completa está na [Referência](/docs/referen
 - O controle de tamanho do texto parte do tamanho padrão do navegador, então honra sua preferência de sistema.
 - O editor tem um rótulo acessível, a barra de status anuncia o estado com `aria-live`, e o resultado da linha ativa é anunciado por uma região viva separada.
 - O autocompletar é exposto como combobox (`aria-expanded`, `aria-controls`, `aria-activedescendant`), e as abas podem ser renomeadas pelo teclado (`F2`) ou por toque (pressione e segure).
+- A barra de abas é um tablist com tabindex móvel: `Tab` a alcança em uma única parada, `←`/`→` trocam de aba, e `Delete` / `Backspace` fecha a aba em foco.
+- O editor nunca prende o teclado: `Tab` indenta no início de uma linha e em qualquer outra posição move o foco, e `Esc` sempre sai do editor para a barra de abas.
 - As janelas são elementos `<dialog>` nativos com cabeçalho rotulado e botão de fechar alcançável pelo teclado, e fechá-las devolve o foco ao botão que as abriu.
 - A agregação da barra de total é um `<select>` rotulado.
 - A documentação que você está lendo é HTML estático com link de pular para o conteúdo, marcos e uma barra lateral alcançável pelo teclado.

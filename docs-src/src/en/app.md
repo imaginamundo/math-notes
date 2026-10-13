@@ -23,7 +23,8 @@ Every action has a shortcut; the full list is in [Reference](/docs/reference/). 
 | `⌘F` `Ctrl+F` | Find & replace |
 | `⌘G` `Ctrl+G` | Jump to a line |
 | `Ctrl+Space` | Autocomplete |
-| `Tab` `Shift+Tab` | Indent / outdent |
+| `Tab` `Shift+Tab` | Indent / outdent at a line start |
+| `Esc` | Leave the editor for the tab bar |
 | `⇧⌘C` `Ctrl+Shift+C` | Copy the current line's result |
 | `⇧⌘S` `Ctrl+Shift+S` | Copy a share link |
 
@@ -32,6 +33,8 @@ Every action has a shortcut; the full list is in [Reference](/docs/reference/). 
 - The text size control scales from your browser's default size, so it honours your system preference.
 - The editor has an accessible label, the status bar announces state with `aria-live`, and the active line's result is announced through a separate polite live region.
 - The autocomplete is exposed as a combobox (`aria-expanded`, `aria-controls`, `aria-activedescendant`), and tabs can be renamed from the keyboard (`F2`) or by touch (press and hold).
+- The tab bar is a roving-tabindex tablist: `Tab` reaches it in one stop, `←`/`→` switch tabs, and `Delete` / `Backspace` closes the focused tab.
+- The editor never traps the keyboard: `Tab` indents at a line start and moves focus on anywhere else, and `Esc` always leaves the editor for the tab bar.
 - The modals are native `<dialog>` elements with a labelled header and a close button that is reachable by keyboard, and closing one returns focus to the button that opened it.
 - The total bar's aggregate is a labelled `<select>`.
 - The documentation you are reading is static HTML with a skip link, landmarks and a keyboard-reachable sidebar.

@@ -37,7 +37,7 @@ Quando uma linha não pode ser calculada, o erro aparece na própria linha, em v
 
 ## Edição
 
-- **Indentação** — `Tab` indenta a linha atual ou uma seleção de várias linhas, `Shift+Tab` desindenta. A indentação é de dois espaços e não muda como a linha é calculada.
+- **Indentação** — `Tab` indenta e `Shift+Tab` desindenta a linha atual (quando o cursor está no início ou dentro do recuo inicial) ou uma seleção de várias linhas. A indentação é de dois espaços e não muda como a linha é calculada. Em qualquer outra posição `Tab` move o foco para o próximo controle, e `Esc` sempre sai do editor para a barra de abas: o teclado nunca fica preso.
 - **Comentar uma linha** — clique no número da linha na calha à esquerda para comentá-la ou descomentá-la. Uma linha que já começa com `##` apenas perde um `#`.
 - **Números de linha** — a calha à esquerda numera a planilha e destaca a linha em que o cursor está.
 - **Desfazer / refazer** — `⌘Z` / `Ctrl+Z` e `⇧⌘Z` / `Ctrl+Shift+Z`, com um histórico separado para cada aba.

@@ -73,7 +73,8 @@ Palabras de fecha `today`, `now`, `yesterday`, `tomorrow`, `christmas`, `hallowe
 | `⌘F` / `Ctrl+F` | Buscar y reemplazar en la hoja activa |
 | `⌘G` / `Ctrl+G` | Ir a un número de línea |
 | `Ctrl+Space` | Mostrar sugerencias de autocompletado |
-| `Tab` / `Shift+Tab` | Indentar / desindentar la(s) línea(s) |
+| `Tab` / `Shift+Tab` | Indentar / desindentar al inicio de una línea (en otro caso Tab mueve el foco) |
+| `Esc` | Salir del editor a la barra de pestañas |
 | `⇧⌘C` / `Ctrl+Shift+C` | Copiar el resultado de la línea actual |
 | `⇧⌘S` `⇧⌘L` / `Ctrl+Shift+S` | Copiar un enlace para compartir |
 | `⇧⌘E` / `Ctrl+Shift+E` | Exportar la hoja activa |
