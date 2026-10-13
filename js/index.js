@@ -93,6 +93,81 @@ contentEditableNode.addEventListener('input', (event) => {
 contentEditableNode.addEventListener('click', () => rowRenderer.updateActiveLine(activeLine()));
 contentEditableNode.addEventListener('keyup', () => rowRenderer.updateActiveLine(activeLine()));
 
+// Status and reactivity are wired before boot(): the inits inside it notify
+// synchronously (a quota hit while the collection persists, a font size
+// restored at startup), and a listener registered afterwards would drop that
+// first message.
+let statusTimer = null;
+// `sticky` keeps the notice up until the next one: a boot failure is not
+// something the reader should have to catch within five seconds.
+function showCurrencyStatus(text, sticky = false) {
+  currencyStatusNode.textContent = text;
+  currencyStatusNode.classList.add('visible');
+  clearTimeout(statusTimer);
+  if (sticky) return;
+  statusTimer = setTimeout(() => currencyStatusNode.classList.remove('visible'), 5000);
+}
+
+window.addEventListener(CURRENCY_UPDATED, (event) => {
+  evalClient.syncRates(event.detail && event.detail.data);
+  evalClient.update();
+  const source = event.detail && event.detail.source;
+  const key =
+    source === 'cached'
+      ? 'status.ratesCached'
+      : source === 'stale'
+        ? 'status.ratesStale'
+        : 'status.ratesLive';
+  showCurrencyStatus(t(key));
+});
+
+window.addEventListener(CURRENCY_ERROR, () => {
+  evalClient.update();
+  showCurrencyStatus(t('status.ratesUnavailable'));
+});
+
+// A failed localStorage write (usually the quota is full) must not be silent.
+window.addEventListener(STORAGE_ERROR, () => {
+  showCurrencyStatus(t('status.storageFull'));
+});
+
+// A generic status line, so features without their own indicator can report one.
+window.addEventListener(STATUS_MESSAGE, (event) => {
+  if (event.detail) showCurrencyStatus(event.detail);
+});
+
+window.addEventListener(FONT_SIZE_CHANGED, () => rowRenderer.relayout());
+
+// A setting change forwards the new value to the engine, then recomputes. The
+// per-call comments below explain any extra sequencing.
+function onSettingUpdated(name, apply) {
+  window.addEventListener(name, (event) => {
+    apply(event.detail, event);
+    evalClient.update();
+  });
+}
+
+// Switching measurement system re-registers the volume units in the worker and
+// the main-thread fallback, then recomputes every line.
+onSettingUpdated(MEASUREMENT_UPDATED, (value) => evalClient.syncMeasurement(value));
+
+// Changing the display precision only reformats results, but the worker does
+// the formatting, so it needs the new value before the recompute.
+onSettingUpdated(PRECISION_UPDATED, (value) => {
+  setDecimalPrecision(value);
+  evalClient.syncPrecision(value);
+});
+
+// Switching the total aggregate recomputes the total (the lines are unchanged,
+// but the worker recomputes the total on every evaluation).
+onSettingUpdated(TOTAL_MODE_UPDATED, (value) => evalClient.syncTotalMode(value));
+
+// Changing the clock format only reformats clock-time results.
+onSettingUpdated(CLOCK_FORMAT_UPDATED, (value) => {
+  setClockFormat(value);
+  evalClient.syncClockFormat(value);
+});
+
 // The composition root runs in a fixed order — that ordering is a contract, so
 // boot() states it explicitly rather than leaving it to line position.
 function boot() {
@@ -111,7 +186,6 @@ function boot() {
   initRecipes(contentEditableNode);
   initSettings(tabsApi);
   initFontControls(editorScroll.refreshMetrics);
-  window.addEventListener(FONT_SIZE_CHANGED, () => rowRenderer.relayout());
   initIo(contentEditableNode);
   initShortcuts(contentEditableNode, evalClient.requestLines, tabsApi.switchTab);
   initFind(contentEditableNode, viewNode);
@@ -148,75 +222,6 @@ try {
 // when the sheet is empty). Keeping it hidden until here avoids a flash of the
 // placeholder before a saved sheet is restored.
 contentEditableNode.classList.add('ready');
-
-window.addEventListener(CURRENCY_UPDATED, (event) => {
-  evalClient.syncRates(event.detail && event.detail.data);
-  evalClient.update();
-  const source = event.detail && event.detail.source;
-  const key =
-    source === 'cached'
-      ? 'status.ratesCached'
-      : source === 'stale'
-        ? 'status.ratesStale'
-        : 'status.ratesLive';
-  showCurrencyStatus(t(key));
-});
-
-window.addEventListener(CURRENCY_ERROR, () => {
-  evalClient.update();
-  showCurrencyStatus(t('status.ratesUnavailable'));
-});
-
-// A failed localStorage write (usually the quota is full) must not be silent.
-window.addEventListener(STORAGE_ERROR, () => {
-  showCurrencyStatus(t('status.storageFull'));
-});
-
-// A generic status line, so features without their own indicator can report one.
-window.addEventListener(STATUS_MESSAGE, (event) => {
-  if (event.detail) showCurrencyStatus(event.detail);
-});
-
-// A setting change forwards the new value to the engine, then recomputes. The
-// per-call comments below explain any extra sequencing.
-function onSettingUpdated(name, apply) {
-  window.addEventListener(name, (event) => {
-    apply(event.detail, event);
-    evalClient.update();
-  });
-}
-
-// Switching measurement system re-registers the volume units in the worker and
-// the main-thread fallback, then recomputes every line.
-onSettingUpdated(MEASUREMENT_UPDATED, (value) => evalClient.syncMeasurement(value));
-
-// Changing the display precision only reformats results, but the worker does
-// the formatting, so it needs the new value before the recompute.
-onSettingUpdated(PRECISION_UPDATED, (value) => {
-  setDecimalPrecision(value);
-  evalClient.syncPrecision(value);
-});
-
-// Switching the total aggregate recomputes the total (the lines are unchanged,
-// but the worker recomputes the total on every evaluation).
-onSettingUpdated(TOTAL_MODE_UPDATED, (value) => evalClient.syncTotalMode(value));
-
-// Changing the clock format only reformats clock-time results.
-onSettingUpdated(CLOCK_FORMAT_UPDATED, (value) => {
-  setClockFormat(value);
-  evalClient.syncClockFormat(value);
-});
-
-let statusTimer = null;
-// `sticky` keeps the notice up until the next one: a boot failure is not
-// something the reader should have to catch within five seconds.
-function showCurrencyStatus(text, sticky = false) {
-  currencyStatusNode.textContent = text;
-  currencyStatusNode.classList.add('visible');
-  clearTimeout(statusTimer);
-  if (sticky) return;
-  statusTimer = setTimeout(() => currencyStatusNode.classList.remove('visible'), 5000);
-}
 
 registerServiceWorker();
 

@@ -1137,6 +1137,20 @@ test('the placeholder stays hidden until the app is ready', async () => {
   assert.deepEqual(errors, []);
 });
 
+// Rates are fetched after every listener is registered, so even the first
+// update — which can be dispatched synchronously from the cache — reaches the
+// status line. Success and failure both report: live/cached rates or the
+// unavailable notice.
+test('the first currency status reaches the status line', async () => {
+  await newPage();
+  await waitFor(() =>
+    page.evaluate(() => document.getElementById('currency-status').classList.contains('visible'))
+  );
+  const status = await page.evaluate(() => document.getElementById('currency-status').textContent);
+  assert.ok(status.length > 0, 'the status line carries a message');
+  assert.deepEqual(errors, []);
+});
+
 test('a result on an overflowing line is reachable by horizontal scroll', async () => {
   await newPage();
   const longLine =

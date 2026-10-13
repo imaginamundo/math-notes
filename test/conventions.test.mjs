@@ -34,6 +34,19 @@ test('localStorage is only accessed inside util/storage.js', () => {
   assert.deepEqual(offenders, []);
 });
 
+// The feature inits inside boot() notify synchronously — a quota hit while the
+// collection persists, a font scale restored at startup, the first currency
+// rate — so every listener the composition root owns must be registered before
+// boot() runs, or that first message is dropped.
+test('js/index.js registers its listeners before it calls boot', () => {
+  const source = readFileSync(join(root, 'js/index.js'), 'utf8');
+  const lastListener = source.lastIndexOf('addEventListener(');
+  const bootCall = source.indexOf('  boot();');
+  assert.notEqual(lastListener, -1, 'no addEventListener call found in js/index.js');
+  assert.notEqual(bootCall, -1, 'js/index.js no longer calls boot() the expected way');
+  assert.ok(lastListener < bootCall, 'a listener is registered after boot() runs');
+});
+
 // The domain (core/eval) must not reach up into the UI: a pure module that
 // imports `ui/` can no longer be imported without a document.
 test('core and eval do not depend on the UI layer', () => {

@@ -1,5 +1,5 @@
 {
-  "version": 47,
+  "version": 48,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "3158ce141fee274b7f17e7fc54d9c0c477fa8567f219ebcda0ab577c095187ee",
@@ -50,7 +50,7 @@
     "js/i18n/ui/en.js": "fb8f4be2caa01cd50f74e8c03f61121790d4bc5bb8da69d52952c542080fb17b",
     "js/i18n/ui/es.js": "cf66083fb79cf83212c5ace1d70cf9d6574cfadfaadc95be8a8ddfa08f182c06",
     "js/i18n/ui/pt.js": "8fa942127f81f4b3ac2bd171f8d5e569be96167af94c32d5491d9a5f9e8898ec",
-    "js/index.js": "475db65e971b5a9fa83d805173338ac390549250249c3fef53644f37268e4178",
+    "js/index.js": "ec6068dbd5498c7e7d86f2a6da01ce4262b5afefe474d3155f730903f9286bc7",
     "js/lib/math.bundle.min.js": "a4d194cbcf01ffe384efd1f64757ea14c9e584d7ec294cb2916abf622fab93c9",
     "js/registerServiceWorker.js": "eb484b46ff06e0a3317b35ab6d9141991ddff6ac5c44d7f36e1f04fb953ddb8f",
     "js/render/exampleText.js": "bfa054aa3a65162e8af4187e9a8b6509c1e7c3adb31c75f9eaa28ff7526a86b3",
