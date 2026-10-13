@@ -45,11 +45,6 @@ class WorkerStub {
   }
 }
 
-globalThis.fetch = async () => ({
-  ok: true,
-  json: async () => ({ base: 'EUR', rates: {} }),
-});
-
 const editableNode = () => ({ value: '1 + 1' });
 
 const { createEvalClient, recoveryFor } = await import('../js/evalClient.js');
@@ -69,6 +64,20 @@ function setup() {
   );
   return { client, node, textRender, renders, busy };
 }
+
+test('creating a client does not touch the network', () => {
+  let fetched = 0;
+  globalThis.fetch = async () => {
+    fetched += 1;
+    return { ok: true, json: async () => ({ base: 'EUR', rates: {} }) };
+  };
+  try {
+    setup();
+    assert.equal(fetched, 0, 'rate fetching belongs to the composition root');
+  } finally {
+    delete globalThis.fetch;
+  }
+});
 
 test('update renders text, evaluates and clears the busy flag', async () => {
   const { client, textRender, renders, busy } = setup();

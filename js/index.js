@@ -3,6 +3,7 @@ import renderTotal from './render/renderTotal.js';
 import { indexOfLineAt, sheetLines } from './util/text.js';
 import registerServiceWorker from './registerServiceWorker.js';
 import { createEvalClient } from './evalClient.js';
+import { fetchRates, startRateRefresh } from './storage/currencyRates.js';
 import initRecipes from './ui/recipes.js';
 import initDocsLink from './ui/docsLink.js';
 import initSettings from './ui/settings.js';
@@ -218,3 +219,10 @@ function showCurrencyStatus(text, sticky = false) {
 }
 
 registerServiceWorker();
+
+// Rates are fetched here rather than inside the eval client, and only after
+// every CURRENCY listener above exists: the first update can be dispatched
+// synchronously from the cache, and the client itself should never have to
+// touch the network to be constructed.
+fetchRates();
+startRateRefresh();

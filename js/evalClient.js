@@ -1,4 +1,4 @@
-import { fetchRates, loadCached, startRateRefresh } from './storage/currencyRates.js';
+import { loadCached } from './storage/currencyRates.js';
 import { readMeasurementSystem } from './core/measurementSystem.js';
 import { DEFAULT_MEASUREMENT_SYSTEM } from './core/measures.js';
 import { DEFAULT_PRECISION, readDecimalPrecision } from './core/decimalPrecision.js';
@@ -318,9 +318,6 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
     if (format) postSetting('clock-format', format);
     clockFormatDirty = true;
   }
-
-  fetchRates();
-  startRateRefresh();
 
   return {
     update,

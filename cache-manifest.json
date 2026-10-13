@@ -1,5 +1,5 @@
 {
-  "version": 46,
+  "version": 47,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "3158ce141fee274b7f17e7fc54d9c0c477fa8567f219ebcda0ab577c095187ee",
@@ -42,7 +42,7 @@
     "js/eval/units.js": "9d6375d090a78ecf70fe37919d8674d857ea450e37817a11948fc240e486526f",
     "js/eval/userUnits.js": "089e0e8965a0484c5213c8d241990d22ca567fd4d6eb64820366d22c35f291b6",
     "js/eval/wordOperators.js": "d7b4640a40e62af4970d937abbdcaf18eb47c40db172febadccfe5dea6e08d6c",
-    "js/evalClient.js": "5676ee6519b3a09548a9745b118b2948d1b3b2af02b1042088006751eea0ef5c",
+    "js/evalClient.js": "337878a7a50ddab8c6987bb88a3e40f12aa05a600732b8451e027b87cd63550b",
     "js/i18n/examples/en.js": "1174e51c49a04cd63cb4c16ac2efc31bc5dc58163dd83f9b3b382f2009e3cec9",
     "js/i18n/examples/es.js": "36d181952836fe1cd44884cfd3888b82cd1d891797c427df8dc651bb15c9bc05",
     "js/i18n/examples/pt.js": "f9c0acfb8228252b6296d1936b10cf092cf5f7a177d67ee510517d33468aa8b1",
@@ -50,7 +50,7 @@
     "js/i18n/ui/en.js": "fb8f4be2caa01cd50f74e8c03f61121790d4bc5bb8da69d52952c542080fb17b",
     "js/i18n/ui/es.js": "cf66083fb79cf83212c5ace1d70cf9d6574cfadfaadc95be8a8ddfa08f182c06",
     "js/i18n/ui/pt.js": "8fa942127f81f4b3ac2bd171f8d5e569be96167af94c32d5491d9a5f9e8898ec",
-    "js/index.js": "3018416324fd12befa174cfd83200fd6a75fe0281b6375a0008347474c704d88",
+    "js/index.js": "475db65e971b5a9fa83d805173338ac390549250249c3fef53644f37268e4178",
     "js/lib/math.bundle.min.js": "a4d194cbcf01ffe384efd1f64757ea14c9e584d7ec294cb2916abf622fab93c9",
     "js/registerServiceWorker.js": "eb484b46ff06e0a3317b35ab6d9141991ddff6ac5c44d7f36e1f04fb953ddb8f",
     "js/render/exampleText.js": "bfa054aa3a65162e8af4187e9a8b6509c1e7c3adb31c75f9eaa28ff7526a86b3",
