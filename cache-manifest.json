@@ -1,10 +1,11 @@
 {
-  "version": 54,
+  "version": 55,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "3158ce141fee274b7f17e7fc54d9c0c477fa8567f219ebcda0ab577c095187ee",
     "js/core/autocomplete.js": "793eb5040045e1da758835ced2942a00a31d7427531ce1e6e7a889002f7ef4fe",
-    "js/core/calculate.js": "4b28a1c4383eea1ca8f859505b650c40922f235331abf37d3768dc527a9282cd",
+    "js/core/boundedExpression.js": "525b71ccadca491a7fc0d89d938ec02f445510f525faaaa1e707a862733e1685",
+    "js/core/calculate.js": "c0c6d4575a6cec75a6ea32357f2b6c20e4ddc969f0f0c7256a52912b96c820f0",
     "js/core/clockFormat.js": "f0a6e7670e4e6231cdf1a8676601b3bae22d8df02f25ede666155632ad518ddb",
     "js/core/currencySymbols.js": "9ccd8acf86ef1ef95143985b58b68a34e005fb45d78641c9d8f3d7956cab1326",
     "js/core/decimalPrecision.js": "1395bb81ccc7b8f7df3b586ddc77d4cbfd56702529e3ceb680936f396e87e235",
