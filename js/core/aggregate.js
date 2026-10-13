@@ -183,12 +183,15 @@ function groupCount(group) {
 // Combining different currencies used to fall through to the plain-number sum
 // (usually 0), which hides the mistake. Report it instead: the values must be
 // converted to one currency first.
+// Aggregates return either the combined value or this plain error string —
+// never an Error instance — so callers discriminate with a string check and
+// the worker's structured clone never has to carry an Error.
 function currencyConflict(groups) {
   const currencies = groups.filter((group) => group.kind === 'currency');
   if (currencies.length < 2) return null;
   const names = currencies.map((group) => group.name);
   const last = names.pop();
-  return new Error(`Cannot combine ${names.join(', ')} and ${last} — convert them first`);
+  return `Cannot combine ${names.join(', ')} and ${last} — convert them first`;
 }
 
 // Apply the shared total/aggregate rules to a scan. `empty` is what an empty

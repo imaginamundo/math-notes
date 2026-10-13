@@ -69,6 +69,10 @@ function substituteTags(parsed, results, index, math) {
       error = tagError([tag]);
       return match;
     }
+    if (typeof value === 'string') {
+      error = value;
+      return match;
+    }
     values[name] = value;
     return name;
   });

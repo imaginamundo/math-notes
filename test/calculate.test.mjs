@@ -559,11 +559,8 @@ test('editing or removing a group refreshes the header subtotal', () => {
 
 test('evaluateLines rejects mixed currencies instead of summing to zero', () => {
   registerCurrencyRates({ base: 'EUR', rates: { BRL: 5.5, USD: 1.1 } });
-  assert.match(evaluateLines(['500 BRL', '10 USD']).total.message, /combine .*BRL.*USD/);
-  assert.match(
-    evaluateLines(['500 BRL', '10 USD', '10', '10']).total.message,
-    /combine .*BRL.*USD/
-  );
+  assert.match(evaluateLines(['500 BRL', '10 USD']).total, /combine .*BRL.*USD/);
+  assert.match(evaluateLines(['500 BRL', '10 USD', '10', '10']).total, /combine .*BRL.*USD/);
   assert.match(evaluateLines(['500 BRL', '10 USD', 'sum']).results[2].value, /combine .*BRL.*USD/);
 
   const single = evaluateLines(['500 BRL', '10']).total;

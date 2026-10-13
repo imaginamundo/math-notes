@@ -322,8 +322,8 @@ function createEngine({ rates } = {}) {
     const endGroup = ctx.groups.byEnd.get(ctx.i);
     if (!endGroup) return false;
     const value = aggregateAbove(ctx.results, endGroup.start + 1, ctx.i, 'sum');
-    if (value instanceof Error) {
-      ctx.results[endGroup.start] = { type: 'error', value: value.message };
+    if (typeof value === 'string') {
+      ctx.results[endGroup.start] = { type: 'error', value };
       ctx.results[ctx.i] = { type: 'value', value: undefined };
       return true;
     }
@@ -370,8 +370,8 @@ function createEngine({ rates } = {}) {
     const mode = tagAggregateMode(ctx.parsed.code);
     if (!mode) return false;
     const value = tagAggregate(ctx.results, ctx.tags, ctx.i, mode, math);
-    if (value instanceof Error) {
-      ctx.results[ctx.i] = { type: 'error', value: value.message };
+    if (typeof value === 'string') {
+      ctx.results[ctx.i] = { type: 'error', value };
       return true;
     }
     if (value === null) {
@@ -398,8 +398,8 @@ function createEngine({ rates } = {}) {
       ctx.variables[bare] === undefined ? AGGREGATE_KEYWORDS[bare.toLowerCase()] : undefined;
     if (!keyword) return false;
     const value = aggregateAbove(ctx.results, blockStart, ctx.i, keyword);
-    if (value instanceof Error) {
-      ctx.results[ctx.i] = { type: 'error', value: value.message };
+    if (typeof value === 'string') {
+      ctx.results[ctx.i] = { type: 'error', value };
       return true;
     }
     ctx.results[ctx.i] = { type: 'value', value, aggregate: true };
@@ -425,11 +425,11 @@ function createEngine({ rates } = {}) {
       const blockSum = aggregateAbove(ctx.results, blockStart, ctx.i, 'sum');
       const blockAvg = aggregateAbove(ctx.results, blockStart, ctx.i, 'average');
       const conflict =
-        blockSum instanceof Error ? blockSum : blockAvg instanceof Error ? blockAvg : null;
+        typeof blockSum === 'string' ? blockSum : typeof blockAvg === 'string' ? blockAvg : null;
       if (conflict) {
         ctx.results[ctx.i] = {
           type: 'error',
-          value: conflict.message,
+          value: conflict,
           tags: ctx.tags.length ? ctx.tags : undefined,
         };
         return true;
