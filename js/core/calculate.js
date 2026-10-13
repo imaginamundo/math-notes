@@ -24,6 +24,7 @@ import { tagAggregate, tagAggregateMode, tagError, substituteTags } from './tags
 import { resolveLineRefs } from './lineRefs.js';
 import { assertBoundedExpression } from './boundedExpression.js';
 import { friendlyError } from './friendlyErrors.js';
+import { substituteAggregates } from './aggregateSubstitution.js';
 import { firstDifference } from '../util/sequence.js';
 import { mangleLines } from './multiWordVariables.js';
 import { unitDefinition } from './userUnits.js';
@@ -72,7 +73,6 @@ import { createUserUnit, removeUserUnit } from '../eval/userUnits.js';
 // Matches a standalone aggregate keyword, i.e. not a mathjs function call
 // like `sum([1, 2, 3])`. The words come from AGGREGATE_KEYWORDS.
 const AGGREGATE_WORD = new RegExp(`\\b(?:${AGGREGATE_WORD_SOURCE})\\b(?!\\s*\\()`, 'i');
-const AGGREGATE_WORD_ALL = new RegExp(`\\b(${AGGREGATE_WORD_SOURCE})\\b(?!\\s*\\()`, 'gi');
 
 // Labels a line may not assign to: `prev` and the unconditional date keywords
 // (rewritten before mathjs, so a variable of that name could never be read
@@ -250,37 +250,6 @@ function createEngine({ rates } = {}) {
       return { error: error.message };
     }
     return { value };
-  }
-
-  // Replace aggregate keywords in an expression with scope variables holding the
-  // block's values, rather than pasting the value into the text. Pasting broke
-  // precedence (`-5` then `sum^2` read as `-5^2`) and units (`sum * 2 kg`); a
-  // scope variable is a real value, exactly like `line(n)`. A keyword the user
-  // has redefined as a variable is left alone, so the variable shadows it.
-  function substituteAggregates(parsed, sum, average, variables) {
-    const values = {};
-    let count = 0;
-    const replace = (expression) =>
-      expression.replace(AGGREGATE_WORD_ALL, (word) => {
-        if (variables[word] !== undefined) return word;
-        const value = AGGREGATE_KEYWORDS[word.toLowerCase()] === 'average' ? average : sum;
-        const token = `__agg_${count++}`;
-        values[token] = value;
-        return token;
-      });
-
-    if (parsed.isAssignment) {
-      const rhs = replace(parsed.rhs);
-      return { parsed: { ...parsed, code: `${parsed.label} = ${rhs}`, rhs }, values };
-    }
-    return {
-      parsed: {
-        ...parsed,
-        code: replace(parsed.code),
-        rhs: parsed.rhs ? replace(parsed.rhs) : parsed.rhs,
-      },
-      values,
-    };
   }
 
   // Whether a result row becomes the `prev` for later lines. A group header's
