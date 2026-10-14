@@ -29,7 +29,10 @@ const NEAREST =
   /^(.*?\S)\s+(?:rounded\s+(up|down)\s+to|rounded\s+to|to)\s+(?:the\s+)?nearest\s+([A-Za-z]+|\d[\d,]*(?:\.\d+)?)(?:\s+([A-Za-z$€£]+))?$/i;
 const WHOLE = /^(.*\S)\s+rounded(?:\s+(up|down))?$/i;
 
-function preprocessRounding(expression) {
+function preprocessRounding(expression, context) {
+  // A variable named `rounded` is the user's, not a phrase.
+  const names = context && context.names;
+  if (names && names.has('rounded') && /\brounded\b/i.test(expression)) return expression;
   // An assignment rounds its right-hand side: `x = 5.5 rounded` must not wrap
   // the `x =` part in the call.
   const parsed = parseLine(expression);
@@ -50,7 +53,7 @@ function rewrite(expression) {
   match = DECIMALS.exec(expression);
   if (match) {
     const [, value, places] = match;
-    return `round(${value}, ${places})`;
+    return `__round(${value}, ${places})`;
   }
 
   match = NEAREST.exec(expression);
@@ -106,10 +109,12 @@ function inSmallestTimeUnit(value) {
   return `(${value}) to ${TIME_UNITS[smallest][0]}`;
 }
 
+// The rewrites call these, not `round`/`ceil`/`floor`, which a variable of that name
+// would capture (`round = 45`, then `5.5 rounded`).
 function directionFn(direction) {
-  if (direction === 'up') return 'ceil';
-  if (direction === 'down') return 'floor';
-  return 'round';
+  if (direction === 'up') return '__ceil';
+  if (direction === 'down') return '__floor';
+  return '__round';
 }
 
 function magnitude(token) {
@@ -182,6 +187,9 @@ function initRounding(math) {
   math.import(
     {
       __fractionRound: fractionRound,
+      __round: unitAware(round),
+      __ceil: unitAware(ceil),
+      __floor: unitAware(floor),
       round: unitAware(round),
       ceil: unitAware(ceil),
       floor: unitAware(floor),

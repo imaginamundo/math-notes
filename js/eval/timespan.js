@@ -106,27 +106,34 @@ const SECOND = new RegExp(`${BEFORE_WORD}(\\d+(?:\\.\\d+)?)\\s*secs?(?![${WORD}_
 const TARGET_UNIT = new RegExp(`\\b(to|in|as)\\s+(min|secs?)(?![${WORD}_.(])`, 'giu');
 const COMPOUND_UNIT = new RegExp(`([/*^]\\s*)(min|secs?)(?![${WORD}_.(])`, 'giu');
 
+// `5 minutes`, or `__unit(5, "minutes")` when the sheet has a variable of that name,
+// which would otherwise capture the unit the app wrote for the user (`minutes = 10`,
+// then `5.5 min`). `__unit` builds the unit directly and no variable can shadow it.
+function timeTerm(amount, unit, names) {
+  return names && names.has(unit) ? `__unit(${amount}, "${unit}")` : `${amount} ${unit}`;
+}
+
 function timeSymbolName(symbol) {
   return symbol.toLowerCase() === 'min' ? 'minutes' : 'seconds';
 }
 
-function normalizeTimeSymbols(expression) {
+function normalizeTimeSymbols(expression, names) {
   return expression
-    .replace(MINUTE, '$1 minutes')
-    .replace(SECOND, '$1 seconds')
+    .replace(MINUTE, (match, amount) => timeTerm(amount, 'minutes', names))
+    .replace(SECOND, (match, amount) => timeTerm(amount, 'seconds', names))
     .replace(TARGET_UNIT, (match, word, symbol) => `${word} ${timeSymbolName(symbol)}`)
     .replace(COMPOUND_UNIT, (match, operator, symbol) => `${operator}${timeSymbolName(symbol)}`);
 }
 
 // `3h 5m 10s` -> `3 hours + 5 minutes + 10 seconds`.
-function joinTimeComponents(expression) {
+function joinTimeComponents(expression, names) {
   const run = new RegExp(RUN_SOURCE, 'gi');
   return expression.replace(run, (match) => {
     const component = new RegExp(`(\\d+(?:\\.\\d+)?)\\s*(${UNIT_ALT})(?![A-Za-z])`, 'gi');
     const parts = [];
     let m;
     while ((m = component.exec(match)) !== null) {
-      parts.push(`${m[1]} ${COMPONENT_UNIT[m[2].toLowerCase()]}`);
+      parts.push(timeTerm(m[1], COMPONENT_UNIT[m[2].toLowerCase()], names));
     }
     // Parenthesised so the whole run is one operand: without this
     // `3h 5m 10s * 2` multiplies only the last component.
@@ -134,19 +141,20 @@ function joinTimeComponents(expression) {
   });
 }
 
-function preprocessTimespan(expression) {
+function preprocessTimespan(expression, context) {
+  const names = context && context.names;
   // `as` converts like `to`/`in` (`... as minutes`), except `as timespan`
   // (handled below) and `as a %` (percentage, already consumed).
   const converted = expression.replace(/\s+as\s+(?!timespan\b|a\s+%)/gi, ' to ');
   // mathjs reads `min` as the min() function; a number before it is a minute.
-  const normalized = normalizeTimeSymbols(converted);
+  const normalized = normalizeTimeSymbols(converted, names);
 
   // A line that is nothing but time components displays as a timespan.
   if (WHOLE_RUN.test(normalized)) {
-    return `__timespan(${joinTimeComponents(normalized)})`;
+    return `__timespan(${joinTimeComponents(normalized, names)})`;
   }
 
-  const joined = joinTimeComponents(normalized);
+  const joined = joinTimeComponents(normalized, names);
 
   const asTimespan = /^(.*\S)\s+as\s+timespan$/i.exec(joined);
   if (asTimespan) return `__timespan(${asTimespan[1]})`;
@@ -248,6 +256,8 @@ function initTimespan(math) {
       __timespanParts: (value, unitA, unitB) => timespanParts(value, second, unitA, unitB),
       // Marks an explicit conversion so formatResult keeps the requested unit
       // instead of drawing the duration as a timespan.
+      // A unit by name; the rewrites use it where a variable could shadow the name.
+      __unit: (amount, name) => math.unit(Number(amount), name),
       __keepUnit: (value) => {
         if (value && value.isUnit === true) value.keepUnit = true;
         return value;

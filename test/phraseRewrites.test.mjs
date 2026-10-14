@@ -121,3 +121,34 @@ test('a name that holds a date still takes a duration', () => {
   assert.match(show(['start = 2030-01-01', 'start + 2 weeks']), /Jan|2030/);
   assert.match(one('2030-01-01 + 4h 3m'), /2030|Jan/);
 });
+
+// A rewrite must not introduce a name the user did not type: a variable called `k`,
+// `minutes` or `round` captured the app's own `k` scale, `minutes` unit and `round`
+// call. (A variable the user does type still wins, as the docs say: after `m = 5`,
+// `2 m` is `2 × m`.)
+test('a variable named like a scale wins over the scale', () => {
+  assert.equal(one('3 k'), '3,000');
+  assert.equal(one('3k'), '3,000');
+  assert.equal(show(['k = 2', '3 k']), '6');
+  assert.equal(show(['k = 2', '3k']), '6');
+  assert.equal(show(['k = 2', '3 * k']), '6');
+  assert.equal(show(['kk = 2', '3 kk']), '6');
+  assert.equal(show(['k = 2', '3 kk']), '3,000,000', 'only the exact name is a variable');
+});
+
+test('a variable named like a unit does not capture the minute and second symbols', () => {
+  assert.equal(show(['minutes = 10', '5.5 min']), '5 min 30 s');
+  assert.equal(show(['hours = 8', '2h 30m']), '2 hours 30 minutes');
+  assert.equal(show(['seconds = 4', '3h 5m 10s']), '3 hours 5 minutes 10 seconds');
+  assert.match(show(['seconds = 4', '30 sec']), /^30 s/);
+});
+
+test('a variable named like a rounding function does not break the phrases', () => {
+  assert.equal(show(['round = 45', '5.5 rounded']), '6');
+  assert.equal(show(['round = 45', '37 to nearest 10']), '40');
+  assert.equal(show(['round = 45', 'pi to 2 dp']), '3.14');
+  assert.equal(show(['ceil = 1', '5.2 rounded up']), '6');
+  assert.equal(show(['floor = 2', '5.5 rounded down']), '5');
+  assert.equal(show(['fraction = 3', '0.534 to nearest 16th']), '9/16');
+  assert.equal(show(['rounded = 7', '3 rounded']), '21');
+});

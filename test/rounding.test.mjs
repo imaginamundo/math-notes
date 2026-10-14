@@ -8,22 +8,25 @@ function valueOf(line) {
 }
 
 test('preprocessRounding rewrites decimal-place phrases', () => {
-  assert.equal(preprocessRounding('1/3 to 2 dp'), 'round(1/3, 2)');
-  assert.equal(preprocessRounding('pi to 5 digits'), 'round(pi, 5)');
-  assert.equal(preprocessRounding('1/3 to 2 decimal places'), 'round(1/3, 2)');
+  assert.equal(preprocessRounding('1/3 to 2 dp'), '__round(1/3, 2)');
+  assert.equal(preprocessRounding('pi to 5 digits'), '__round(pi, 5)');
+  assert.equal(preprocessRounding('1/3 to 2 decimal places'), '__round(1/3, 2)');
 });
 
 test('preprocessRounding rewrites whole-number rounding', () => {
-  assert.equal(preprocessRounding('5.5 rounded'), 'round(5.5)');
-  assert.equal(preprocessRounding('5.5 rounded up'), 'ceil(5.5)');
-  assert.equal(preprocessRounding('5.5 rounded down'), 'floor(5.5)');
+  assert.equal(preprocessRounding('5.5 rounded'), '__round(5.5)');
+  assert.equal(preprocessRounding('5.5 rounded up'), '__ceil(5.5)');
+  assert.equal(preprocessRounding('5.5 rounded down'), '__floor(5.5)');
 });
 
 test('preprocessRounding rewrites nearest-magnitude phrases', () => {
-  assert.equal(preprocessRounding('37 to nearest 10'), 'round((37) / 10) * 10');
-  assert.equal(preprocessRounding('$490 rounded to nearest hundred'), 'round(($490) / 100) * 100');
-  assert.equal(preprocessRounding('21 rounded up to nearest 5'), 'ceil((21) / 5) * 5');
-  assert.equal(preprocessRounding('17 rounded down to nearest 3'), 'floor((17) / 3) * 3');
+  assert.equal(preprocessRounding('37 to nearest 10'), '__round((37) / 10) * 10');
+  assert.equal(
+    preprocessRounding('$490 rounded to nearest hundred'),
+    '__round(($490) / 100) * 100'
+  );
+  assert.equal(preprocessRounding('21 rounded up to nearest 5'), '__ceil((21) / 5) * 5');
+  assert.equal(preprocessRounding('17 rounded down to nearest 3'), '__floor((17) / 3) * 3');
 });
 
 test('preprocessRounding rewrites fraction rounding', () => {
@@ -31,7 +34,7 @@ test('preprocessRounding rewrites fraction rounding', () => {
 });
 
 test('preprocessRounding rounds an assignment right-hand side', () => {
-  assert.equal(preprocessRounding('x = 5.5 rounded'), 'x = round(5.5)');
+  assert.equal(preprocessRounding('x = 5.5 rounded'), 'x = __round(5.5)');
 });
 
 test('preprocessRounding leaves other expressions alone', () => {

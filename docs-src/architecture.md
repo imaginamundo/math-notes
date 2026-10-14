@@ -149,6 +149,13 @@ smallest one it names. `to nearest 16th` on a unit or currency rounds the unit's
 number and keeps the exact numerator and denominator (`fractionParts`), which
 `formatResult`draws as`37/16 in`.
 
+A rewrite must not introduce a name the user did not type. The rounding phrases call the
+private `__round`/`__ceil`/`__floor`/`__fractionRound`, and the time rewrites emit
+`__unit(5, "minutes")` when the sheet has a variable called `minutes`, so neither a variable
+named `round` nor one named `hours` captures the app's own call or unit; a variable named
+`k` or `rounded` is the user's, and wins over the scale and the phrase (`k = 2`, then `3 k`
+is 6).
+
 Numbers grouped in threes: results print `1,500` and Copy result copies that text, but
 pasting it back was a syntax error, and inside a call or list the comma silently split the
 number in two. `stripGrouping` (`js/core/numberGrouping.js`, the first preprocessing step)
