@@ -121,3 +121,10 @@ for the project's terminology.
   have the same sections.
 - Every module imports cleanly in Node, and every imported module is precached.
 - Editor text meets WCAG AA contrast (4.5:1) in every theme.
+
+Some sweeps cover many inputs and are not clean yet. They are **ratchets**: the
+failures they know about are listed in `test/ratchets/*.json` (see
+`test/helpers/ratchet.mjs`). A new failure fails the build, and so does a listed
+one that now passes. Fix the finding, then run `UPDATE_RATCHET=1 npm test` to
+shrink the baseline and review the diff. Tests marked `todo` are single known
+problems, named by their `REVIEW.md` finding ID.
