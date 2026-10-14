@@ -131,7 +131,31 @@ function mergeSnapshots(state, snapshots, { dropPristine = false } = {}) {
   return { ...state, tabs, activeId, nextTabNumber: deriveNextTabNumber(tabs) };
 }
 
+// The snapshots that hold work the saved collection does not: saved after the
+// collection was, and either for a tab it never recorded or with different text.
+// This is what is left after a localStorage write fails (quota, blocked storage):
+// the collection stays at its last successful write while snapshots, which live
+// in IndexedDB, keep up. Compared by content as well as time because a snapshot is
+// normally saved a moment after the collection and is newer without being different.
+// `savedAt` is when the collection was saved, or null when it never said, in which
+// case nothing can be concluded and nothing is returned.
+function newerSnapshots(state, snapshots, savedAt) {
+  if (!Number.isFinite(savedAt)) return [];
+  const newest = new Map();
+  for (const snapshot of snapshots) {
+    const known = newest.get(snapshot.tabId);
+    if (!known || snapshot.timestamp > known.timestamp) newest.set(snapshot.tabId, snapshot);
+  }
+  const contents = new Map(state.tabs.map((tab) => [tab.id, tab.content]));
+  return [...newest.values()].filter(
+    (snapshot) =>
+      snapshot.timestamp > savedAt &&
+      (!contents.has(snapshot.tabId) || contents.get(snapshot.tabId) !== snapshot.content)
+  );
+}
+
 export {
+  newerSnapshots,
   mergeSnapshots,
   generateId,
   createTab,

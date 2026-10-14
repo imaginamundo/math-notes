@@ -34,6 +34,9 @@ export default {
   'status.ratesLive': 'tasas: en vivo',
   'status.ratesUnavailable': 'tasas de cambio no disponibles',
   'status.storageFull': 'almacenamiento lleno — puede que los cambios recientes no se guarden',
+  'status.storageBlocked':
+    'el navegador bloquea el almacenamiento — tus hojas no se guardarán; exporta lo que quieras conservar en Ajustes → Archivos',
+  'status.recoveredNewer': 'se recuperaron cambios más recientes de la copia automática',
   'status.bootFailed': 'Math Notes no pudo iniciarse — tus hojas guardadas se han conservado',
   'status.evaluationFailed': 'error de evaluación — no se pudieron actualizar los resultados',
   'status.evaluationPaused':

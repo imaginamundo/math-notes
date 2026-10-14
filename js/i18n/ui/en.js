@@ -35,6 +35,9 @@ export default {
   'status.ratesLive': 'rates: live',
   'status.ratesUnavailable': 'exchange rates unavailable',
   'status.storageFull': 'storage is full — recent changes may not be saved',
+  'status.storageBlocked':
+    'browser storage is blocked — your sheets will not be saved; export what you want to keep from Settings → Files',
+  'status.recoveredNewer': 'recovered newer changes from the automatic backup',
   'status.bootFailed': 'Math Notes could not start — your saved sheets were left untouched',
   'status.evaluationFailed': 'evaluation failed — results could not be updated',
   'status.evaluationPaused':

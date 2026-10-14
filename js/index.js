@@ -33,6 +33,7 @@ import {
   TOTAL_MODE_UPDATED,
   CLOCK_FORMAT_UPDATED,
   STORAGE_ERROR,
+  STORAGE_OK,
   STATUS_MESSAGE,
   FONT_SIZE_CHANGED,
 } from './util/events.js';
@@ -64,16 +65,14 @@ function activeLine() {
   return indexOfLineAt(contentEditableNode.value, contentEditableNode.selectionStart);
 }
 
-// Set while the active sheet's results are paused (it stopped the app last time).
-// The notice must outlive the rate messages that arrive after boot, and goes away
-// once real results are drawn again.
-let evaluationPaused = false;
+// A held notice is one that must stay up until its cause is gone, and that rate
+// messages arriving later must not replace: 'paused' (the active sheet stopped the
+// app last time), 'storage' (saving is failing) and 'recovered' (work was restored
+// from the backup). Each has its own way to end; see `release`.
+let held = null;
 
 function renderResultLayer(lines, data) {
-  if (evaluationPaused && data.results.length > 0) {
-    evaluationPaused = false;
-    currencyStatusNode.classList.remove('visible');
-  }
+  if (held === 'paused' && data.results.length > 0) release('paused');
   rowRenderer.patchResults(lines, data.results, data.startLine);
   renderTotal(totalNode, data.total);
   rowRenderer.updateActiveLine(activeLine());
@@ -101,7 +100,10 @@ contentEditableNode.addEventListener('input', (event) => {
   rowRenderer.updateActiveLine(activeLine());
   // A programmatic write (tab switch, undo/redo, seed) is evaluated immediately
   // by the tab controller, so only a user edit needs the debounced schedule.
-  if (!event.programmatic) evalClient.schedule();
+  if (!event.programmatic) {
+    evalClient.schedule();
+    release('recovered');
+  }
 });
 contentEditableNode.addEventListener('click', () => rowRenderer.updateActiveLine(activeLine()));
 contentEditableNode.addEventListener('keyup', () => rowRenderer.updateActiveLine(activeLine()));
@@ -121,14 +123,24 @@ function showCurrencyStatus(text, sticky = false) {
   statusTimer = setTimeout(() => currencyStatusNode.classList.remove('visible'), 5000);
 }
 
-function showPausedStatus() {
-  evaluationPaused = true;
-  showCurrencyStatus(t('status.evaluationPaused'), true);
+function hold(kind, text) {
+  held = kind;
+  showCurrencyStatus(text, true);
 }
 
-// Rate notices are background news; they wait while a paused notice is up.
+function release(kind) {
+  if (held !== kind) return;
+  held = null;
+  currencyStatusNode.classList.remove('visible');
+}
+
+function showPausedStatus() {
+  hold('paused', t('status.evaluationPaused'));
+}
+
+// Rate notices are background news; they wait while a held notice is up.
 function showRateStatus(key) {
-  if (!evaluationPaused) showCurrencyStatus(t(key));
+  if (!held) showCurrencyStatus(t(key));
 }
 
 window.addEventListener(CURRENCY_UPDATED, (event) => {
@@ -150,13 +162,23 @@ window.addEventListener(CURRENCY_ERROR, () => {
 });
 
 // A failed localStorage write (usually the quota is full) must not be silent.
-window.addEventListener(STORAGE_ERROR, () => {
-  showCurrencyStatus(t('status.storageFull'));
+// It stays up while saving keeps failing, and says which problem it is: a full
+// store can be freed, a blocked one cannot, and the advice differs (UID-02).
+window.addEventListener(STORAGE_ERROR, (event) => {
+  const blocked = event.detail && event.detail.reason === 'blocked';
+  hold('storage', t(blocked ? 'status.storageBlocked' : 'status.storageFull'));
 });
+window.addEventListener(STORAGE_OK, () => release('storage'));
 
 // A generic status line, so features without their own indicator can report one.
+// `detail` is the text, or `{ text, hold: true }` for a notice that stays until the
+// user edits.
 window.addEventListener(STATUS_MESSAGE, (event) => {
-  if (event.detail) showCurrencyStatus(event.detail);
+  const { detail } = event;
+  if (!detail) return;
+  if (typeof detail === 'string') showCurrencyStatus(detail);
+  else if (detail.hold) hold('recovered', detail.text);
+  else showCurrencyStatus(detail.text);
 });
 
 window.addEventListener(FONT_SIZE_CHANGED, () => rowRenderer.relayout());

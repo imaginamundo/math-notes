@@ -399,6 +399,19 @@ bar, capped at 10 per tab) are auto-saved to IndexedDB (`js/storage/snapshots.js
 on blur/tab-switch/close/pagehide; the content is stored deflated through
 `js/util/compress.js` when the platform supports it, and inflated on read.
 
+Each write of the collection carries a `savedAt` timestamp. If a write fails
+(the quota is full, or storage is blocked), the saved collection stays at its last
+good write while snapshots, which live in IndexedDB, keep up. On load,
+`newerSnapshots` (in `js/core/tabsState.js`) picks the snapshots saved after
+`savedAt` that hold work the collection lacks (a tab it never saved, or different
+text) and `recoverNewerSnapshots` merges them in, unless that tab was edited since
+the page opened; a notice says so. Comparing content as well as time matters: a
+snapshot is normally saved a moment after the collection and is newer without being
+different. `js/util/storage.js` reports why a write failed (`reason: 'full'` or
+`'blocked'`) and announces the first write that works again (`STORAGE_OK`), and the
+status line holds the storage notice until then instead of letting it time out; a
+held notice is one rate messages do not replace.
+
 A tab the app fills in itself (a template or share import through `openSheet`,
 the Welcome sheet through `seedSheet`) is never typed in, so no edit would ever
 snapshot it; both snapshot it as soon as it is filled in, or a restore would not

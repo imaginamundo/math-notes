@@ -28,7 +28,7 @@ Las ediciones de cada pestaña se copian a IndexedDB como snapshots versionados.
 
 Si la aplicación se detiene mientras calcula una hoja, los resultados de esa hoja quedan en pausa al recargar la página (un aviso lo indica), así que una sola línea problemática no te deja fuera. Edita la hoja para calcularla de nuevo, o cierra la pestaña.
 
-Si localStorage no está disponible o está corrupto, las hojas se reconstruyen automáticamente desde las copias de seguridad, y un valor corrupto se copia aparte en vez de perderse.
+Si el guardado falla (el almacenamiento del navegador está lleno o bloqueado) un aviso permanece hasta que vuelva a funcionar. Tras recargar, la aplicación restaura lo más reciente de las copias automáticas y lo indica. Si localStorage no está disponible o está corrupto, las hojas se reconstruyen automáticamente desde las copias de seguridad, y un valor corrupto se copia aparte en vez de perderse.
 
 ## Restablecer
 

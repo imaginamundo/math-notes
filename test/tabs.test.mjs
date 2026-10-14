@@ -244,3 +244,50 @@ test('mergeSnapshots never loses a tab that has content', () => {
     );
   assert.ok(merged.tabs.some((t) => t.id === 'q'));
 });
+
+// REVIEW.md UID-02: after a localStorage write failed, the saved collection is
+// older than the snapshots, and a reload used to load it as if it were current.
+import { newerSnapshots } from '../js/core/tabsState.js';
+
+test('newerSnapshots finds snapshots saved after the collection, with different content', () => {
+  const state = {
+    tabs: [
+      { id: 'a', name: 'A', content: 'old = 1' },
+      { id: 'b', name: 'B', content: 'same' },
+    ],
+    activeId: 'a',
+    nextTabNumber: 3,
+  };
+  const found = newerSnapshots(
+    state,
+    [
+      snap('a', 'A', 'old = 1\nnew = 2', 200, 0), // newer and different: the lost edit
+      snap('b', 'B', 'same', 300, 1), // newer but identical: nothing was lost
+      snap('c', 'C', 'whole new tab', 250, 2), // a tab the collection never saved
+    ],
+    100
+  );
+  assert.deepEqual(found.map((s) => s.tabId).sort(), ['a', 'c']);
+});
+
+test('newerSnapshots ignores snapshots that are not newer than the saved collection', () => {
+  const state = { tabs: [{ id: 'a', name: 'A', content: 'x' }], activeId: 'a', nextTabNumber: 2 };
+  assert.deepEqual(newerSnapshots(state, [snap('a', 'A', 'y', 100, 0)], 100), []);
+  assert.deepEqual(newerSnapshots(state, [snap('a', 'A', 'y', 99, 0)], 100), []);
+});
+
+test('newerSnapshots does nothing when the collection never recorded when it was saved', () => {
+  const state = { tabs: [{ id: 'a', name: 'A', content: 'x' }], activeId: 'a', nextTabNumber: 2 };
+  assert.deepEqual(newerSnapshots(state, [snap('a', 'A', 'y', 999, 0)], null), []);
+});
+
+test('newerSnapshots takes a tab’s newest snapshot only', () => {
+  const state = { tabs: [{ id: 'a', name: 'A', content: 'x' }], activeId: 'a', nextTabNumber: 2 };
+  const found = newerSnapshots(
+    state,
+    [snap('a', 'A', 'older', 150, 0), snap('a', 'A', 'newest', 180, 0)],
+    100
+  );
+  assert.equal(found.length, 1);
+  assert.equal(found[0].content, 'newest');
+});

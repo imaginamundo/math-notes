@@ -80,6 +80,9 @@ function loadTabsState() {
             Number.isInteger(storedNext) && storedNext > 0 ? storedNext : deriveNextTabNumber(tabs),
         },
         failed,
+        // When this collection was last written, so a load can tell it is older
+        // than snapshots saved after a write that failed. Null if it never said.
+        savedAt: Number.isFinite(saved.savedAt) ? saved.savedAt : null,
       };
     }
     unreadable = true;
@@ -93,12 +96,12 @@ function loadTabsState() {
   const content = storage.get(LEGACY_KEY) || '';
   storage.remove(LEGACY_KEY);
   const tab = { id: generateId(), name: 'Tab 1', content, caret: null };
-  return { state: { tabs: [tab], activeId: tab.id, nextTabNumber: 2 }, failed };
+  return { state: { tabs: [tab], activeId: tab.id, nextTabNumber: 2 }, failed, savedAt: null };
 }
 
 function createTabsWriter(getState, onWrite) {
   const write = () => {
-    storage.set(STORAGE_KEY, JSON.stringify(getState()));
+    storage.set(STORAGE_KEY, JSON.stringify({ ...getState(), savedAt: Date.now() }));
     if (onWrite) onWrite();
   };
   const debounced = debounce(write, 400);

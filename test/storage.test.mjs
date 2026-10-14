@@ -125,3 +125,109 @@ test('an empty storage slot reports no failure and leaves no backup', () => {
   assert.equal(state.tabs.length, 1);
   assert.equal(state.tabs[0].content, '');
 });
+
+// REVIEW.md UID-02 ------------------------------------------------------------
+
+import { createTabsWriter } from '../js/storage/tabsStore.js';
+
+test('UID-02: the writer stamps each saved collection with the time it was saved', () => {
+  const fake = fakeStorage();
+  const state = { tabs: [{ id: 'a', name: 'A', content: '1' }], activeId: 'a', nextTabNumber: 2 };
+  const before = Date.now();
+  withGlobals({ localStorage: fake }, () => createTabsWriter(() => state).persist());
+  const saved = JSON.parse(fake.store.get(STORAGE_KEY));
+  assert.ok(saved.savedAt >= before && saved.savedAt <= Date.now());
+  assert.deepEqual(saved.tabs, state.tabs, 'the stamp is added to the collection, not to its tabs');
+});
+
+test('UID-02: loading reports when the collection was saved, or null if unknown', () => {
+  const read = (saved) =>
+    withGlobals(
+      { localStorage: fakeStorage({ store: new Map([[STORAGE_KEY, JSON.stringify(saved)]]) }) },
+      () => loadTabsState()
+    );
+  const tabs = [{ id: 'a', name: 'A', content: '1' }];
+  assert.equal(read({ tabs, activeId: 'a', savedAt: 1234 }).savedAt, 1234);
+  assert.equal(read({ tabs, activeId: 'a' }).savedAt, null, 'a collection from before the stamp');
+  assert.equal(read({ tabs, activeId: 'a', savedAt: 'soon' }).savedAt, null, 'a damaged stamp');
+});
+
+test('UID-02: the stamp does not leak into the tab state', () => {
+  const saved = { tabs: [{ id: 'a', name: 'A', content: '1' }], activeId: 'a', savedAt: 5 };
+  const { state } = withGlobals(
+    { localStorage: fakeStorage({ store: new Map([[STORAGE_KEY, JSON.stringify(saved)]]) }) },
+    () => loadTabsState()
+  );
+  assert.equal('savedAt' in state, false);
+});
+
+test('UID-02: a failed write says whether storage is full or blocked', () => {
+  const failure = (fake) => {
+    const events = [];
+    withGlobals(
+      { localStorage: fake, window: { dispatchEvent: (event) => events.push(event) } },
+      () => storage.set('k', 'v')
+    );
+    return events[0].detail;
+  };
+  const full = failure(
+    fakeStorage({
+      methods: {
+        setItem() {
+          throw new Error('QuotaExceededError');
+        },
+      },
+    })
+  );
+  assert.deepEqual(full, { key: 'k', reason: 'full' });
+
+  const events = [];
+  const blocked = {
+    get localStorage() {
+      throw new Error('SecurityError');
+    },
+  };
+  const previous = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+  Object.defineProperty(globalThis, 'localStorage', {
+    get: () => blocked.localStorage,
+    configurable: true,
+  });
+  Object.defineProperty(globalThis, 'window', {
+    value: { dispatchEvent: (event) => events.push(event) },
+    configurable: true,
+  });
+  try {
+    storage.set('k', 'v');
+  } finally {
+    if (previous) Object.defineProperty(globalThis, 'localStorage', previous);
+    else delete globalThis.localStorage;
+    delete globalThis.window;
+  }
+  assert.deepEqual(events[0].detail, { key: 'k', reason: 'blocked' });
+});
+
+test('UID-02: the first write that works after a failure announces the recovery', () => {
+  let failing = true;
+  const fake = fakeStorage({
+    methods: {
+      setItem(key, value) {
+        if (failing) throw new Error('QuotaExceededError');
+        fake.store.set(key, String(value));
+      },
+    },
+  });
+  const events = [];
+  const window = { dispatchEvent: (event) => events.push(event.type) };
+  withGlobals({ localStorage: fake, window }, () => {
+    storage.set('k', '1');
+    storage.set('k', '2');
+    failing = false;
+    storage.set('k', '3');
+    storage.set('k', '4');
+  });
+  assert.deepEqual(
+    events,
+    ['storage:error', 'storage:error', 'storage:ok'],
+    'once, not on every write'
+  );
+});

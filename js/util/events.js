@@ -9,6 +9,7 @@ export const TOTAL_MODE_UPDATED = 'total-mode:updated';
 export const CLOCK_FORMAT_UPDATED = 'clock-format:updated';
 export const LANGUAGE_UPDATED = 'language:updated';
 export const STORAGE_ERROR = 'storage:error';
+export const STORAGE_OK = 'storage:ok';
 export const STATUS_MESSAGE = 'status:message';
 export const FONT_SIZE_CHANGED = 'math:font-size-changed';
 export const SHARE_COPY = 'share:copy';

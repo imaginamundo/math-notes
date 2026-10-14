@@ -1,5 +1,5 @@
 import { saveSnapshot, latestPerTab, deleteSnapshots } from '../storage/snapshots.js';
-import { LANGUAGE_UPDATED } from '../util/events.js';
+import { LANGUAGE_UPDATED, STATUS_MESSAGE } from '../util/events.js';
 import {
   generateId,
   createTab,
@@ -12,6 +12,7 @@ import {
   moveTab,
   deriveNextTabNumber,
   mergeSnapshots,
+  newerSnapshots,
 } from '../core/tabsState.js';
 import { STORAGE_KEY, LEGACY_KEY, loadTabsState, createTabsWriter } from '../storage/tabsStore.js';
 import { isTypingTarget } from '../util/dom.js';
@@ -38,7 +39,7 @@ function initTabs(editableNode, onUpdate) {
   // save must not clobber it, so the cross-window sync waits until it is saved.
   let dirty = false;
   const tabBarNode = document.getElementById('tabs-bar');
-  const { state: loadedState, failed: storageFailed } = loadTabsState();
+  const { state: loadedState, failed: storageFailed, savedAt } = loadTabsState();
   state = loadedState;
 
   const writer = createTabsWriter(
@@ -386,6 +387,31 @@ function initTabs(editableNode, onUpdate) {
     }
   }
 
+  // A write to localStorage that failed (the quota was full, storage was blocked)
+  // leaves the saved collection behind the snapshots, which live in IndexedDB. On
+  // load, take the snapshots that hold work the collection lacks (UID-02), unless
+  // the user has already edited that tab since the page opened.
+  async function recoverNewerSnapshots(savedAt, loadedContent) {
+    if (!Number.isFinite(savedAt)) return;
+    try {
+      const newer = newerSnapshots(state, await latestPerTab(), savedAt).filter((snapshot) => {
+        const tab = state.tabs.find((entry) => entry.id === snapshot.tabId);
+        if (!tab) return true;
+        const current = tab.id === state.activeId ? editableNode.value : tab.content;
+        return current === loadedContent.get(tab.id);
+      });
+      if (!newer.length) return;
+      restoreAll(newer);
+      window.dispatchEvent(
+        new CustomEvent(STATUS_MESSAGE, {
+          detail: { text: t('status.recoveredNewer'), hold: true },
+        })
+      );
+    } catch {
+      // IndexedDB unavailable: the saved collection is all there is
+    }
+  }
+
   view.render();
   onUpdate();
   editableNode.focus();
@@ -411,6 +437,7 @@ function initTabs(editableNode, onUpdate) {
   });
 
   if (storageFailed) recoverFromSnapshots().finally(() => writer.persist());
+  else recoverNewerSnapshots(savedAt, new Map(state.tabs.map((tab) => [tab.id, tab.content])));
 
   return { switchTab, restoreTab, restoreAll, openSheet, getActiveSheet, seedSheet, reset };
 }

@@ -752,6 +752,64 @@ test('SEC-01: automatic recovery from corrupt storage rebuilds tabs in order', a
   assert.deepEqual(errors, []);
 });
 
+// REVIEW.md UID-02: when a localStorage write failed, a reload loaded the older
+// collection as if it were current, and the notice vanished after five seconds.
+test('UID-02: work lost to a failed write is recovered from the snapshots on reload', async () => {
+  await newPage();
+  const status = () =>
+    page.evaluate(() => {
+      const node = document.getElementById('currency-status');
+      return { text: node.textContent, visible: node.classList.contains('visible') };
+    });
+  await setContent('old = 1');
+  await wait(900);
+
+  // From here the browser refuses to save the tab collection (the quota is full).
+  await page.evaluate(() => {
+    const real = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (key === 'math-notes-tabs') {
+        throw new DOMException('quota', 'QuotaExceededError');
+      }
+      return real.call(this, key, value);
+    };
+  });
+  const lost = 'old = 1\nsmall = 2\nbig = 3';
+  await setContent(lost);
+  await wait(3500); // the snapshot is debounced, and goes to IndexedDB, not localStorage
+  const first = await status();
+  assert.match(first.text, /storage|saved/i);
+  await wait(6000);
+  const later = await status();
+  assert.equal(later.visible, true, 'the warning stays up while saving keeps failing');
+  assert.match(later.text, /storage|saved/i);
+
+  await page.reload({ waitUntil: 'load' });
+  await wait(1200);
+  assert.equal(await value(), lost, 'the newer text is back');
+  assert.match((await status()).text, /recovered/i);
+  assert.deepEqual(errors, []);
+});
+
+test('UID-02: blocked storage is reported as blocked, not as full', async () => {
+  await newPage();
+  await page.evaluateOnNewDocument(() => {
+    Object.defineProperty(window, 'localStorage', {
+      get() {
+        throw new DOMException('denied', 'SecurityError');
+      },
+    });
+  });
+  await page.reload({ waitUntil: 'load' });
+  await wait(800);
+  await setContent('1 + 1');
+  await wait(900);
+  const text = await page.evaluate(() => document.getElementById('currency-status').textContent);
+  assert.match(text, /blocked/i);
+  assert.doesNotMatch(text, /full/i);
+  assert.deepEqual(errors, []);
+});
+
 test('the starter-sheet menu opens a new tab with the template', async () => {
   await newPage();
   await page.click('.tab-template');

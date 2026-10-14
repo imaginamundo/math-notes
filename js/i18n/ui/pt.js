@@ -34,6 +34,9 @@ export default {
   'status.ratesLive': 'cotações: ao vivo',
   'status.ratesUnavailable': 'cotações indisponíveis',
   'status.storageFull': 'armazenamento cheio — as alterações recentes podem não ser guardadas',
+  'status.storageBlocked':
+    'o navegador bloqueou o armazenamento — suas planilhas não serão salvas; exporte o que quiser manter em Configurações → Arquivos',
+  'status.recoveredNewer': 'alterações mais recentes recuperadas do backup automático',
   'status.bootFailed':
     'O Math Notes não conseguiu iniciar — as suas planilhas guardadas ficaram intactas',
   'status.evaluationFailed': 'falha na avaliação — não foi possível atualizar os resultados',

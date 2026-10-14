@@ -28,7 +28,7 @@ As edições de cada aba são copiadas para o IndexedDB como snapshots versionad
 
 Se o app parar enquanto calcula uma planilha, os resultados dela ficam em pausa quando a página recarrega (um aviso informa isso), então uma única linha problemática não deixa você de fora. Edite a planilha para calculá-la de novo, ou feche a aba.
 
-Se o localStorage estiver indisponível ou corrompido, as planilhas são reconstruídas automaticamente a partir dos backups, e um valor corrompido é copiado à parte em vez de ser perdido.
+Se o salvamento falhar (o armazenamento do navegador está cheio ou bloqueado) um aviso permanece até voltar a funcionar. Depois de recarregar, o app restaura o que for mais recente dos backups automáticos e avisa. Se o localStorage estiver indisponível ou corrompido, as planilhas são reconstruídas automaticamente a partir dos backups, e um valor corrompido é copiado à parte em vez de ser perdido.
 
 ## Redefinir
 
