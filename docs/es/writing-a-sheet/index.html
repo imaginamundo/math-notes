@@ -70,8 +70,13 @@
 30 #food
 #food"><pre class="doc-code"><code data-calc>20 #food
 30 #food
-#food</code></pre><figcaption class="doc-example-result">la última línea devuelve 50</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><p>Una línea que solo tiene tags muestra su total, y <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> (opcionalmente <code>of</code>) hace lo mismo. Las líneas marcadas se suman donde estén, arriba o abajo del pedido.</p>
-<figure class="doc-example" data-expr="20 #food
+#food</code></pre><figcaption class="doc-example-result">la última línea devuelve 50</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><p>Una línea que solo tiene tags muestra su total, y <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> (opcionalmente <code>of</code>) hace lo mismo. Se suman las líneas de valor marcadas <strong>por encima</strong> del pedido (las asignaciones marcadas como <code>lunch = 12 #food</code> no cuentan; escribe <code>lunch: 12 #food</code>).</p>
+<p>Un operador después de un pedido se aplica a su total.</p>
+<figure class="doc-example" data-expr="10 #food
+20 #food
+sum #food * 2"><pre class="doc-code"><code data-calc>10 #food
+20 #food
+sum #food * 2</code></pre><figcaption class="doc-example-result">devuelve 60</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="20 #food
 30 #food
 #food * 2"><pre class="doc-code"><code data-calc>20 #food
 30 #food

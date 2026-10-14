@@ -70,8 +70,13 @@
 30 #food
 #food"><pre class="doc-code"><code data-calc>20 #food
 30 #food
-#food</code></pre><figcaption class="doc-example-result">last line returns 50</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>A line that is only tags shows their total, and <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> (optionally followed by <code>of</code>) does the same. Tagged lines are summed wherever they appear, above or below the request.</p>
-<figure class="doc-example" data-expr="20 #food
+#food</code></pre><figcaption class="doc-example-result">last line returns 50</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>A line that is only tags shows their total, and <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> (optionally followed by <code>of</code>) does the same. Tagged value lines <strong>above</strong> the request are summed (tagged assignments such as <code>lunch = 12 #food</code> are not counted; write <code>lunch: 12 #food</code>).</p>
+<p>An operator after a request applies to its total.</p>
+<figure class="doc-example" data-expr="10 #food
+20 #food
+sum #food * 2"><pre class="doc-code"><code data-calc>10 #food
+20 #food
+sum #food * 2</code></pre><figcaption class="doc-example-result">returns 60</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><figure class="doc-example" data-expr="20 #food
 30 #food
 #food * 2"><pre class="doc-code"><code data-calc>20 #food
 30 #food

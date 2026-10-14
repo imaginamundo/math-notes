@@ -28,7 +28,15 @@ With no space after the `#`, a word is a **tag** rather than a comment. Tags lab
 #food
 ```
 
-A line that is only tags shows their total, and `sum`/`total`/`average`/`avg` (optionally followed by `of`) does the same. Tagged lines are summed wherever they appear, above or below the request.
+A line that is only tags shows their total, and `sum`/`total`/`average`/`avg` (optionally followed by `of`) does the same. Tagged value lines **above** the request are summed (tagged assignments such as `lunch = 12 #food` are not counted; write `lunch: 12 #food`).
+
+An operator after a request applies to its total.
+
+```calc returns 60
+10 #food
+20 #food
+sum #food * 2
+```
 
 ```calc last line returns 100
 20 #food

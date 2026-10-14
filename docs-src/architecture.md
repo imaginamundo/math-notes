@@ -149,6 +149,14 @@ smallest one it names. `to nearest 16th` on a unit or currency rounds the unit's
 number and keeps the exact numerator and denominator (`fractionParts`), which
 `formatResult`draws as`37/16 in`.
 
+Tags in calculations: trailing `#tags` label a line only when the code before them is a
+finished expression (`isCompleteCode` in `parseLine.js`); after an operator, `=`, `(` or a
+word operator (`5 + #food`, `x = #food`) the tag is an operand and the line is not
+tagged. `substituteTags` replaces an optional `sum|total|average|avg [of]` and a run of
+adjacent tags with one value, computed as the same request on its own line is, so
+`sum #food * 2` and `#food #drink * 2` apply the operator to the request. A tag request
+counts the tagged value lines above it.
+
 Other phrases fixed at the text level: `time to` takes an optional verb (a number is never
 one, or the amount's own number was dropped); `days until|since|between … in|to|as <unit>`
 is a calendar phrase with a conversion on the end, so the measures step skips it and the

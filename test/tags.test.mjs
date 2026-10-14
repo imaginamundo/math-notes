@@ -76,16 +76,16 @@ test('substituteTags replaces a tag with a scope variable holding its sum', () =
   const results = [row(10, 'food'), row(5, 'food')];
   const out = substituteTags(parseLine('#food * 2'), results, 2, math);
   assert.equal(out.error, null);
-  assert.equal(out.text.trim(), '__tag_food * 2');
-  assert.deepEqual(out.values, { __tag_food: 15 });
+  assert.equal(out.text.trim(), '__tag_sum_food * 2');
+  assert.deepEqual(out.values, { __tag_sum_food: 15 });
 });
 
 test('substituteTags reuses one variable for a repeated tag', () => {
   const results = [row(4, 'a')];
   const out = substituteTags(parseLine('#a + #a'), results, 1, math);
   assert.equal(out.error, null);
-  assert.equal(out.text.trim(), '__tag_a + __tag_a');
-  assert.deepEqual(out.values, { __tag_a: 4 });
+  assert.equal(out.text.trim(), '__tag_sum_a + __tag_sum_a');
+  assert.deepEqual(out.values, { __tag_sum_a: 4 });
 });
 
 test('substituteTags reports the first tag with no rows and stops substituting', () => {

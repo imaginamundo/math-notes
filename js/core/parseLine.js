@@ -52,7 +52,7 @@ function parseLine(line) {
 
   const rawCode = firstSpecial === -1 ? line : line.slice(0, firstSpecial);
   const tail = firstSpecial === -1 ? '' : line.slice(firstSpecial);
-  const valid = tail === '' || tagsAtEnd(tail);
+  const valid = tail === '' || (tagsAtEnd(tail) && isCompleteCode(rawCode));
 
   let code = rawCode;
   let title = '';
@@ -96,6 +96,21 @@ function parseLine(line) {
     tail,
     titleIndex,
   };
+}
+
+// Trailing tags label a line only when what is before them is a finished
+// expression. After an operator, `=`, `(` or a word operator (`5 + #food`, `x = #food`,
+// `5 to #food`) the tag is an operand of the calculation, and the line is not tagged.
+// A line that is only tags, or `sum`/`average` (optionally `of`) and tags, is a request.
+const TRAILING_OPERATOR = /(?:[-+*/^=(,<>!&|~:]|(?<=\s)%)$/;
+const TRAILING_WORD_OPERATOR =
+  /\b(?:of|to|in|as|on|off|plus|minus|times|mod|and|or|with|without|per|at|for)$/i;
+const REQUEST_KEYWORD = /^(?:sum|total|average|avg)(?:\s+of)?$/i;
+
+function isCompleteCode(rawCode) {
+  const code = rawCode.trim();
+  if (code === '' || REQUEST_KEYWORD.test(code)) return true;
+  return !TRAILING_OPERATOR.test(code) && !TRAILING_WORD_OPERATOR.test(code);
 }
 
 // After the first tag, only whitespace, further tags and a trailing comment may

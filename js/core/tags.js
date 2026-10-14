@@ -60,13 +60,25 @@ function substituteTags(parsed, results, index, math) {
   const values = {};
   let error = null;
 
-  const substituted = text.replace(new RegExp(`#(${TAG_NAME_SRC})`, 'gu'), (match, tag) => {
-    const name = `__tag_${tag.replace(/[^\p{L}\p{N}\p{M}_]/gu, '_')}`;
+  // A request is an optional `sum|total|average|avg [of]` and a run of adjacent tags;
+  // the whole run is one value, computed the way the same request on its own line is,
+  // so an operator after it (`sum #food * 2`, `#food #drink * 2`) applies to that value.
+  const tagSource = `#${TAG_NAME_SRC}`;
+  const request = new RegExp(
+    `(?:\\b(sum|total|average|avg)\\b[ \\t]+(?:of[ \\t]+)?)?(${tagSource}(?:[ \\t]+${tagSource})*)`,
+    'giu'
+  );
+  const tagName = new RegExp(`#(${TAG_NAME_SRC})`, 'gu');
+
+  const substituted = text.replace(request, (match, keyword, run) => {
+    const mode = keyword ? AGGREGATE_KEYWORDS[keyword.toLowerCase()] : 'sum';
+    const tags = [...new Set([...run.matchAll(tagName)].map((found) => found[1]))];
+    const name = `__tag_${mode}_${tags.map((tag) => tag.replace(/[^\p{L}\p{N}\p{M}_]/gu, '_')).join('__')}`;
     if (name in values) return name;
     if (error) return match;
-    const value = tagAggregate(results, [tag], index, 'sum', math);
+    const value = tagAggregate(results, tags, index, mode, math);
     if (value === null) {
-      error = tagError([tag]);
+      error = tagError(tags);
       return match;
     }
     if (typeof value === 'string') {

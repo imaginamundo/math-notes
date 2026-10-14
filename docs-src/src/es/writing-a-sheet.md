@@ -28,7 +28,15 @@ Sin espacio después del `#`, una palabra es una **tag**, no un comentario. Las 
 #food
 ```
 
-Una línea que solo tiene tags muestra su total, y `sum`/`total`/`average`/`avg` (opcionalmente `of`) hace lo mismo. Las líneas marcadas se suman donde estén, arriba o abajo del pedido.
+Una línea que solo tiene tags muestra su total, y `sum`/`total`/`average`/`avg` (opcionalmente `of`) hace lo mismo. Se suman las líneas de valor marcadas **por encima** del pedido (las asignaciones marcadas como `lunch = 12 #food` no cuentan; escribe `lunch: 12 #food`).
+
+Un operador después de un pedido se aplica a su total.
+
+```calc devuelve 60
+10 #food
+20 #food
+sum #food * 2
+```
 
 ```calc la última línea devuelve 100
 20 #food
