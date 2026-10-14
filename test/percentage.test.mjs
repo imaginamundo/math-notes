@@ -8,11 +8,11 @@ function valueOf(line) {
 }
 
 test('preprocessPercent rewrites percentage value phrases', () => {
-  assert.equal(preprocessPercent('20% of 10'), '(10) * 20%');
-  assert.equal(preprocessPercent('5% on 30'), '(30) + 5%');
-  assert.equal(preprocessPercent('6% off 40'), '(40) - 6%');
+  assert.equal(preprocessPercent('20% of 10'), '((10) * 20%)');
+  assert.equal(preprocessPercent('5% on 30'), '((30) + 5%)');
+  assert.equal(preprocessPercent('6% off 40'), '((40) - 6%)');
   // A leading-dot percentage is still a percentage phrase.
-  assert.equal(preprocessPercent('.5% of 10'), '(10) * .5%');
+  assert.equal(preprocessPercent('.5% of 10'), '((10) * .5%)');
 });
 
 test('preprocessPercent rewrites relative percentage phrases', () => {
@@ -22,9 +22,9 @@ test('preprocessPercent rewrites relative percentage phrases', () => {
 });
 
 test('preprocessPercent rewrites value by percent part phrases', () => {
-  assert.equal(preprocessPercent('5% of what is 6'), '(6) / 5%');
-  assert.equal(preprocessPercent('5% on what is 6'), '(6) / (1 + 5%)');
-  assert.equal(preprocessPercent('5% off what is 6'), '(6) / (1 - 5%)');
+  assert.equal(preprocessPercent('5% of what is 6'), '((6) / 5%)');
+  assert.equal(preprocessPercent('5% on what is 6'), '((6) / (1 + 5%))');
+  assert.equal(preprocessPercent('5% off what is 6'), '((6) / (1 - 5%))');
 });
 
 test('preprocessPercent leaves modulo and plain percent alone', () => {

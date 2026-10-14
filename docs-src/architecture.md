@@ -149,6 +149,15 @@ smallest one it names. `to nearest 16th` on a unit or currency rounds the unit's
 number and keeps the exact numerator and denominator (`fractionParts`), which
 `formatResult`draws as`37/16 in`.
 
+mathjs reads `%` followed by `+` or `-` as the remainder operator, so `50 + 10% + 1` was
+`50 + (10 % (+1))` and gave 50. `preprocessPercent` (`js/eval/percentage.js`) sets such a
+percentage apart: as the right operand of an additive chain it closes the chain
+(`(50 + 10%) + 1`, which is what `50 + 10%` already means), and elsewhere it stands
+alone (`(10%) + 5`, and the `5%` in `(10%) + 5%`); `10 % 3` is still the remainder.
+The `of`/`on`/`off` phrases take a sign that belongs to the percentage (`-20% on 50`,
+but not the binary minus in `10 - 20% on 50`), and each replacement is parenthesised so
+it stays one operand of whatever surrounds it.
+
 A bare unit (`USD`, `km`, `hour`) has no amount, so it showed as 0 and counted as 0 in
 totals while `USD * 5` and `USD to EUR` read it as 1; `evaluateLine` stores it as one
 of that unit, and a valueless operand elsewhere (`USD + 1 USD`) gets a plain hint

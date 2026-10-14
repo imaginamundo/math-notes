@@ -103,6 +103,16 @@ Usa `of`, `on` y `off` con `%`.
 5% of what is 6
 ```
 
+Un porcentaje se puede sumar a un valor o restarle, encadenarse con más términos, y puede ser negativo.
+
+```calc devuelve 56
+50 + 10% + 1
+```
+
+```calc devuelve 40
+-20% on 50
+```
+
 ## Redondeo
 
 Redondea un resultado con una frase al final de la línea, o llama directamente a `round`, `ceil` o `floor`. El redondeo también funciona con unidades y monedas.

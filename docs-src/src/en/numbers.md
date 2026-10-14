@@ -103,6 +103,16 @@ Use `of`, `on` and `off` with `%`.
 5% of what is 6
 ```
 
+A percentage can be added to or taken from a value and chained with more terms, and it can be negative.
+
+```calc returns 56
+50 + 10% + 1
+```
+
+```calc returns 40
+-20% on 50
+```
+
 ## Rounding
 
 Round a result with a phrase at the end of the line, or call `round`, `ceil` or `floor` directly. Rounding works with units and currencies too.

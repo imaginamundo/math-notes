@@ -103,6 +103,16 @@ Use `of`, `on` e `off` com `%`.
 5% of what is 6
 ```
 
+Uma porcentagem pode ser somada a um valor ou subtraída dele, encadeada com mais termos, e pode ser negativa.
+
+```calc retorna 56
+50 + 10% + 1
+```
+
+```calc retorna 40
+-20% on 50
+```
+
 ## Arredondamento
 
 Arredonde um resultado com uma frase no fim da linha, ou chame `round`, `ceil` ou `floor` diretamente. O arredondamento funciona com unidades e moedas também.
