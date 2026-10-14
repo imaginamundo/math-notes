@@ -219,7 +219,12 @@ scope (with `prev` and aggregate blocks), and returns
 `{ results, total, startLine }`. Each engine keeps a per-input cache of the
 last lines and their per-line results. When called with new input, it diffs to
 the first changed line, rebuilds the variable/aggregate context up to that line
-from cached values, and only re-evaluates from there. Each line goes through
+from cached values, and only re-evaluates from there. The variables are one object
+for the engine's life, cleared and refilled by that rebuild, and a variable is
+restored only from a cached row that assigned it (each row records its `label` and
+what it `assigned`): a user function keeps the scope it was defined in, so a new
+object per run would leave functions above the first changed line reading
+variables from a run that no longer exists. Each line goes through
 an ordered list of handlers (`LINE_HANDLERS`: group end, stray `end`, unit
 definition, tag substitution, tag request, reserved label, bare aggregate,
 expression), and the first that claims the line produces its result.

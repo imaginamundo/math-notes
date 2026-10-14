@@ -219,6 +219,21 @@ const KNOWN = [
     after: ['conv = c(x) = x * fx', 'fx = 2 USD', 'conv(10)'],
   },
   {
+    id: 'AGG-01-typed-top-down',
+    before: ['rate = 25', 'pay = p(h) = h * rate', 'pay(10)', 'rate = 30', 'pay(10)', 'sum'],
+    after: ['rate = 25', 'pay = p(h) = h * rate', 'pay(10)', 'rate = 40', 'pay(10)', 'sum'],
+  },
+  {
+    id: 'AGG-01-deleted-assignment',
+    before: ['net = n(x) = x - fee', 'fee = 1.5', 'net(10)'],
+    after: ['net = n(x) = x - fee', 'net(10)'],
+  },
+  {
+    id: 'SHEET-01-redefined-after-error',
+    before: ['x = 5', 'x = foo + 1', 'x * 2', '1'],
+    after: ['x = 5', 'x = foo + 1', 'x * 2', '2'],
+  },
+  {
     id: 'AGG-01-other-tab',
     // A tab switch hands the engine a different sheet with the same opening lines.
     before: ['rate = 3', 'pay = p(h) = h * rate', 'pay(10)'],

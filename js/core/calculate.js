@@ -173,6 +173,13 @@ function createEngine({ rates } = {}) {
   // per-line cache, so it is read fresh on each evaluation.
   let totalMode = readTotalMode();
 
+  // The sheet's variables. There is one object for the engine's whole life and it
+  // is cleared and refilled whenever the context is rebuilt: a user function keeps
+  // the scope it was defined in, so a fresh object per run would leave every
+  // function defined above the first changed line reading variables from a run
+  // that no longer exists (stale, deleted or later-assigned values; AGG-01).
+  const engineVariables = {};
+
   // The user-defined units of the current sheet, in definition order, so they
   // can be deleted and rebuilt when the definitions change.
   let userUnits = [];
@@ -285,7 +292,8 @@ function createEngine({ rates } = {}) {
   // results (no mathjs evaluation): the variables in scope, the running `prev`,
   // and the last blank line that starts an aggregate block.
   function replayContext(lines, inputLines, results, groups, startLine) {
-    const variables = {};
+    const variables = engineVariables;
+    for (const key of Object.keys(variables)) delete variables[key];
     let previousResult;
     let lastBlankIndex = -1;
     // A group header's cached value is the group subtotal, but the main loop
@@ -305,15 +313,18 @@ function createEngine({ rates } = {}) {
         continue;
       }
 
-      const parsed = parseLine(line);
-      if (parsed.isAssignment) {
-        const stored = results[i];
-        const assigned = stored
-          ? stored.assigned !== undefined
-            ? stored.assigned
-            : stored.value
-          : undefined;
-        if (assigned !== undefined) variables[parsed.label] = assigned;
+      // A variable comes back only from a row that really assigned it, under the
+      // label that row recorded. Reading the line text instead restored the error
+      // text of a failed assignment as the variable's value, and lost assignments
+      // whose line was rewritten before evaluation (`x = #a + #b`; SHEET-01).
+      const assignment = results[i];
+      if (
+        assignment &&
+        assignment.type === 'assignment' &&
+        assignment.label &&
+        assignment.assigned !== undefined
+      ) {
+        variables[assignment.label] = assignment.assigned;
       }
       const endGroup = groups.byEnd.get(i);
       const result = results[i];
@@ -476,6 +487,7 @@ function createEngine({ rates } = {}) {
       type,
       value: result,
       assigned: variable ? variable.value : undefined,
+      label: variable ? variable.label : undefined,
       tags: ctx.tags.length ? ctx.tags : undefined,
     };
     if (feedsPrev(ctx.results[ctx.i])) ctx.previousResult = result;
