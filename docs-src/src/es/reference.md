@@ -67,16 +67,19 @@ Palabras de fecha `today`, `now`, `yesterday`, `tomorrow`, `christmas`, `hallowe
 | Atajo | Acción |
 | --- | --- |
 | `⌘Z` / `Ctrl+Z` | Deshacer el último cambio en la pestaña |
-| `⇧⌘Z` / `Ctrl+Shift+Z` | Rehacer |
+| `⇧⌘Z` `⌘Y` / `Ctrl+Shift+Z` `Ctrl+Y` | Rehacer |
 | `Ctrl+Tab` / `Ctrl+Shift+Tab` | Pestaña siguiente / anterior |
 | `⌘1…9` / `Ctrl+1…9` | Ir a la enésima pestaña |
-| `⌘F` / `Ctrl+F` | Buscar y reemplazar en la hoja activa |
+| `⌘F` / `Ctrl+F` | Buscar y reemplazar en la hoja activa (`Enter` / `Shift+Enter` para la coincidencia siguiente / anterior) |
 | `⌘G` / `Ctrl+G` | Ir a un número de línea |
 | `Ctrl+Space` | Mostrar sugerencias de autocompletado |
 | `Tab` / `Shift+Tab` | Indentar / desindentar al inicio de una línea (en otro caso Tab mueve el foco) |
-| `Esc` | Salir del editor a la barra de pestañas |
+| `Esc` | Salir del editor a la barra de pestañas (un cuadro de sugerencias o la barra de búsqueda abiertos reciben `Esc` primero) |
+| `←` `→` `Home` `End` | Moverse entre pestañas, con la barra de pestañas enfocada |
+| `F2` | Renombrar la pestaña enfocada |
+| `Delete` / `Backspace` | Cerrar la pestaña enfocada (con confirmación) |
 | `⇧⌘C` / `Ctrl+Shift+C` | Copiar el resultado de la línea actual |
-| `⇧⌘S` `⇧⌘L` / `Ctrl+Shift+S` | Copiar un enlace para compartir |
+| `⇧⌘S` `⇧⌘L` / `Ctrl+Shift+S` `Ctrl+Shift+L` | Copiar un enlace para compartir |
 | `⇧⌘E` / `Ctrl+Shift+E` | Exportar la hoja activa |
 | `⇧⌘I` / `Ctrl+Shift+I` | Importar una hoja |
 | `⇧⌘⌫` / `Ctrl+Shift+Backspace` | Limpiar la hoja activa |

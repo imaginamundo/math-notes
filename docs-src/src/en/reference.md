@@ -67,16 +67,19 @@ Date words `today`, `now`, `yesterday`, `tomorrow`, `christmas`, `halloween`; ph
 | Shortcut | Action |
 | --- | --- |
 | `⌘Z` / `Ctrl+Z` | Undo the last change in the tab |
-| `⇧⌘Z` / `Ctrl+Shift+Z` | Redo |
+| `⇧⌘Z` `⌘Y` / `Ctrl+Shift+Z` `Ctrl+Y` | Redo |
 | `Ctrl+Tab` / `Ctrl+Shift+Tab` | Next / previous tab |
 | `⌘1…9` / `Ctrl+1…9` | Jump to the nth tab |
-| `⌘F` / `Ctrl+F` | Find & replace in the active sheet |
+| `⌘F` / `Ctrl+F` | Find & replace in the active sheet (`Enter` / `Shift+Enter` for the next / previous match) |
 | `⌘G` / `Ctrl+G` | Jump to a line number |
 | `Ctrl+Space` | Show autocomplete suggestions |
 | `Tab` / `Shift+Tab` | Indent / outdent at a line start (elsewhere Tab moves focus) |
-| `Esc` | Leave the editor for the tab bar |
+| `Esc` | Leave the editor for the tab bar (an open suggestion popup or find bar takes `Esc` first) |
+| `←` `→` `Home` `End` | Move between tabs, with the tab bar focused |
+| `F2` | Rename the focused tab |
+| `Delete` / `Backspace` | Close the focused tab (after a confirm) |
 | `⇧⌘C` / `Ctrl+Shift+C` | Copy the current line's result |
-| `⇧⌘S` `⇧⌘L` / `Ctrl+Shift+S` | Copy a share link |
+| `⇧⌘S` `⇧⌘L` / `Ctrl+Shift+S` `Ctrl+Shift+L` | Copy a share link |
 | `⇧⌘E` / `Ctrl+Shift+E` | Export the active sheet |
 | `⇧⌘I` / `Ctrl+Shift+I` | Import a sheet |
 | `⇧⌘⌫` / `Ctrl+Shift+Backspace` | Clear the active sheet |

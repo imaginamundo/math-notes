@@ -16,7 +16,7 @@ A line can be a plain number, an expression, an assignment, a comment, or a labe
 
 - The **editor** is the large text area. Its ghost layer shows results, tags and errors in place.
 - The **total bar** sits under the editor and aggregates the sheet. Use its dropdown to switch between **total**, **average** and **median**.
-- The **footer** holds text-size controls and the **Share**, **Settings**, **Examples** and **Documentation** buttons.
+- The **footer** holds text-size controls and the **Share**, **Settings**, **Examples** and **Docs** buttons.
 - The **tabs bar** at the top holds separate sheets (see [Files, sharing & data](/docs/files/)).
 
 ## Results
@@ -37,7 +37,7 @@ When a line cannot be evaluated, the error appears inline in red. Errors never s
 
 ## Editing
 
-- **Indentation** — `Tab` indents and `Shift+Tab` outdents the current line (when the caret sits at its start or inside its leading whitespace) or a multi-line selection. Indentation is two spaces and does not change how a line is evaluated. Anywhere else `Tab` moves focus to the next control, and `Esc` always leaves the editor for the tab bar, so the keyboard is never trapped.
+- **Indentation** — `Tab` indents and `Shift+Tab` outdents the current line (when the caret sits at its start or inside its leading whitespace) or a multi-line selection. Indentation is two spaces and does not change how a line is evaluated. Anywhere else `Tab` moves focus to the next control, and `Esc` leaves the editor for the tab bar (an open suggestion popup or find bar takes `Esc` first), so the keyboard is never trapped.
 - **Comment a line** — click a line's number in the left gutter to comment or uncomment it. A line that already starts with `##` just loses one `#`.
 - **Line numbers** — the left gutter numbers the sheet and highlights the line the caret is on.
 - **Undo / redo** — `⌘Z` / `Ctrl+Z` and `⇧⌘Z` / `Ctrl+Shift+Z`, with a separate history for every tab.

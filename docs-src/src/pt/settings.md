@@ -4,7 +4,7 @@ Abra **Configurações** no rodapé. As escolhas são lembradas no navegador e a
 
 ## Tema
 
-Escolha um tema claro ou escuro. A paleta é aplicada por variáveis CSS, então toda superfície do app muda junto. Os temas disponíveis incluem **Dracula**, **Solarized Dark**, **Monokai** e **Light**.
+Escolha um tema claro ou escuro. A paleta é aplicada por variáveis CSS, então toda superfície do app muda junto. Há cinco temas: **One Dark** (o padrão), **Dracula**, **Solarized Dark**, **Monokai** e **Light**.
 
 ## Tamanho do texto
 
@@ -27,3 +27,7 @@ As unidades de volume de cozinha seguem **Configurações → Sistema de medidas
 ## Idioma
 
 A interface, os Exemplos e estas páginas de documentação existem em **inglês**, **português** e **espanhol**. O Math Notes começa no idioma do sistema e pode ser trocado em **Configurações → Idioma**. A sintaxe da calculadora continua sendo em inglês, independentemente do idioma da interface.
+
+## Arquivos, recuperação e redefinição
+
+O diálogo de Configurações também tem **Arquivos** (exportar e importar), **Recuperar** (restaurar a partir dos snapshots automáticos) e **Redefinir**. Eles são descritos em [Arquivos, compartilhamento & dados](/docs/files/).

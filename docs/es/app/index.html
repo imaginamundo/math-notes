@@ -108,8 +108,8 @@
 <td>Copiar el resultado de la línea actual</td>
 </tr>
 <tr>
-<td><code>⇧⌘S</code> <code>Ctrl+Shift+S</code></td>
-<td>Copiar un enlace para compartir</td>
+<td><code>⇧⌘S</code> <code>⇧⌘L</code> <code>Ctrl+Shift+S</code> <code>Ctrl+Shift+L</code></td>
+<td>Copiar un enlace para compartir (<code>L</code> también funciona donde el navegador reserva <code>Ctrl+Shift+S</code>)</td>
 </tr>
 </tbody></table>
 </div>
@@ -117,9 +117,10 @@
 <ul>
 <li>El control de tamaño del texto escala desde el tamaño predeterminado del navegador, así que honra tu preferencia del sistema.</li>
 <li>El editor tiene una etiqueta accesible, la barra de estado anuncia el estado con <code>aria-live</code>, y el resultado de la línea activa se anuncia mediante una región viva aparte.</li>
-<li>El autocompletado se expone como combobox (<code>aria-expanded</code>, <code>aria-controls</code>, <code>aria-activedescendant</code>), y las pestañas pueden renombrarse con el teclado (<code>F2</code>) o por toque (mantén pulsado).</li>
+<li>El autocompletado mantiene el editor como un cuadro de texto normal (<code>aria-controls</code>, <code>aria-autocomplete</code>) y anuncia el número de sugerencias y la resaltada mediante un mensaje de estado.</li>
+<li>Las pestañas pueden renombrarse con el teclado (<code>F2</code>) o por toque (mantén pulsado).</li>
 <li>La barra de pestañas es un tablist con tabindex móvil: <code>Tab</code> la alcanza en una sola parada, <code>←</code>/<code>→</code> cambian de pestaña, y <code>Delete</code> / <code>Backspace</code> cierra la pestaña enfocada.</li>
-<li>El editor nunca atrapa el teclado: <code>Tab</code> indenta al inicio de una línea y en cualquier otra posición mueve el foco, y <code>Esc</code> siempre sale del editor a la barra de pestañas.</li>
+<li>El editor nunca atrapa el teclado: <code>Tab</code> indenta al inicio de una línea y en cualquier otra posición mueve el foco, y <code>Esc</code> sale del editor a la barra de pestañas (un cuadro de sugerencias o la barra de búsqueda abiertos reciben <code>Esc</code> primero).</li>
 <li>Las ventanas son elementos <code>&lt;dialog&gt;</code> nativos con cabecera etiquetada y botón de cierre alcanzable por teclado, y al cerrarlas el foco vuelve al botón que las abrió.</li>
 <li>La agregación de la barra de total es un <code>&lt;select&gt;</code> etiquetado.</li>
 <li>La documentación que estás leyendo es HTML estático con enlace para saltar al contenido, elementos de referencia y una barra lateral alcanzable por teclado.</li>

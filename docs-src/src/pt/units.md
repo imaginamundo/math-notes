@@ -138,7 +138,7 @@ Unidades só se combinam em formas que fazem sentido. `kg L`, `BRL hour`, `h^2` 
 | Comprimento | meter (m), inch (in), foot (ft), yard (yd), mile (mi), link (li), rod (rd), chain (ch), angstrom, mil |
 | Área de superfície | m2, sqin, sqft, sqyd, sqmi, sqrd, sqch, sqmil, acre, hectare |
 | Volume | m3, litre (l, L, lt, liter), cc, cuin, cuft, cuyd, teaspoon, tablespoon |
-| Volume líquido | minim (min), fluiddram (fldr), fluidounce (floz), gill (gi), cup (cp), pint (pt), quart (qt), gallon (gal), beerbarrel (bbl), oilbarrel (obl), hogshead, drop (gtt) |
+| Volume líquido | minim, fluiddram (fldr), fluidounce (floz), gill (gi), cup (cp), pint (pt), quart (qt), gallon (gal), beerbarrel (bbl), oilbarrel (obl), hogshead, drop (gtt) |
 | Ângulos | rad (radian), deg (degree), grad (gradian), cycle, arcsec (arcsecond), arcmin (arcminute) |
 | Tempo | second (s), minute (min), hour (h), day, week, month, year, decade, century, millennium |
 | Frequência | hertz (Hz) |

@@ -16,7 +16,7 @@ Una línea puede ser un número simple, una expresión, una asignación, un come
 
 - El **editor** es el área de texto grande. Su capa fantasma muestra resultados, tags y errores en su sitio.
 - La **barra de total** está debajo del editor y agrega la hoja. Usa su menú para cambiar entre **total**, **media** y **mediana**.
-- El **pie** contiene los controles de tamaño del texto y los botones **Compartir**, **Ajustes**, **Ejemplos** y **Documentación**.
+- El **pie** contiene los controles de tamaño del texto y los botones **Compartir**, **Ajustes**, **Ejemplos** y **Docs**.
 - La **barra de pestañas** de arriba guarda hojas separadas (consulta [Archivos, compartir & datos](/docs/files/)).
 
 ## Resultados
@@ -37,7 +37,7 @@ Cuando una línea no se puede evaluar, el error aparece en la propia línea, en 
 
 ## Edición
 
-- **Sangría** — `Tab` indenta y `Shift+Tab` desindenta la línea actual (cuando el cursor está al inicio o dentro de su sangría inicial) o una selección de varias líneas. La sangría es de dos espacios y no cambia cómo se evalúa la línea. En cualquier otra posición `Tab` mueve el foco al siguiente control, y `Esc` sale siempre del editor a la barra de pestañas: el teclado nunca queda atrapado.
+- **Sangría** — `Tab` indenta y `Shift+Tab` desindenta la línea actual (cuando el cursor está al inicio o dentro de su sangría inicial) o una selección de varias líneas. La sangría es de dos espacios y no cambia cómo se evalúa la línea. En cualquier otra posición `Tab` mueve el foco al siguiente control, y `Esc` sale del editor a la barra de pestañas (un cuadro de sugerencias o la barra de búsqueda abiertos reciben `Esc` primero): el teclado nunca queda atrapado.
 - **Comentar una línea** — haz clic en el número de la línea en el margen izquierdo para comentarla o descomentarla. Una línea que ya empieza por `##` solo pierde un `#`.
 - **Números de línea** — el margen izquierdo numera la hoja y resalta la línea donde está el cursor.
 - **Deshacer / rehacer** — `⌘Z` / `Ctrl+Z` y `⇧⌘Z` / `Ctrl+Shift+Z`, con un historial separado para cada pestaña.

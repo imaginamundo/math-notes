@@ -4,7 +4,7 @@ Open **Settings** from the footer. Choices are remembered in your browser and ap
 
 ## Theme
 
-Choose a light or dark theme. The palette is applied through CSS variables, so every surface of the app changes together. The available themes include **Dracula**, **Solarized Dark**, **Monokai** and **Light**.
+Choose a light or dark theme. The palette is applied through CSS variables, so every surface of the app changes together. There are five themes: **One Dark** (the default), **Dracula**, **Solarized Dark**, **Monokai** and **Light**.
 
 ## Text size
 
@@ -27,3 +27,7 @@ Cooking volume units follow **Settings → Measurement system** — **Metric** (
 ## Language
 
 The interface, the Examples and these documentation pages ship in **English**, **Portuguese** and **Spanish**. Math Notes starts in your system language and can be changed in **Settings → Language**. The calculator syntax itself stays English regardless of the interface language.
+
+## Files, recovery and reset
+
+The Settings dialog also holds **Files** (export and import), **Recover** (restore from automatic snapshots) and **Reset**. They are described in [Files, sharing & data](/docs/files/).

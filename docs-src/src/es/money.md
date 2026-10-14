@@ -1,6 +1,6 @@
 # Dinero & monedas
 
-Convierte entre monedas usando códigos ISO de 3 letras o símbolos. Las tasas vienen del [Banco Central Europeo](https://www.ecb.europa.eu) vía [Frankfurter](https://frankfurter.dev) y se guardan en caché local para que las conversiones sigan funcionando sin conexión.
+Convierte entre monedas usando códigos ISO de 3 letras o símbolos. Las tasas vienen del [Banco Central Europeo](https://www.ecb.europa.eu) vía [Frankfurter](https://frankfurter.dev) y se guardan en caché local para que las conversiones sigan funcionando sin conexión. Mientras una ventana sigue abierta, las tasas se vuelven a consultar cada hora; si una consulta falla o tarda más de 10 segundos, se usan las tasas en caché y un aviso breve lo indica.
 
 ## Convertir
 

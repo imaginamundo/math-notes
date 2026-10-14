@@ -67,16 +67,19 @@ Palavras de data `today`, `now`, `yesterday`, `tomorrow`, `christmas`, `hallowee
 | Atalho | Ação |
 | --- | --- |
 | `⌘Z` / `Ctrl+Z` | Desfazer a última alteração na aba |
-| `⇧⌘Z` / `Ctrl+Shift+Z` | Refazer |
+| `⇧⌘Z` `⌘Y` / `Ctrl+Shift+Z` `Ctrl+Y` | Refazer |
 | `Ctrl+Tab` / `Ctrl+Shift+Tab` | Próxima / aba anterior |
 | `⌘1…9` / `Ctrl+1…9` | Ir para a enésima aba |
-| `⌘F` / `Ctrl+F` | Localizar e substituir na planilha ativa |
+| `⌘F` / `Ctrl+F` | Localizar e substituir na planilha ativa (`Enter` / `Shift+Enter` para a ocorrência seguinte / anterior) |
 | `⌘G` / `Ctrl+G` | Ir para um número de linha |
 | `Ctrl+Space` | Mostrar sugestões de autocompletar |
 | `Tab` / `Shift+Tab` | Indentar / desindentar no início de uma linha (em outra posição Tab move o foco) |
-| `Esc` | Sair do editor para a barra de abas |
+| `Esc` | Sair do editor para a barra de abas (um pop-up de sugestões ou a barra de busca abertos recebem o `Esc` primeiro) |
+| `←` `→` `Home` `End` | Mover entre abas, com a barra de abas em foco |
+| `F2` | Renomear a aba em foco |
+| `Delete` / `Backspace` | Fechar a aba em foco (com confirmação) |
 | `⇧⌘C` / `Ctrl+Shift+C` | Copiar o resultado da linha atual |
-| `⇧⌘S` `⇧⌘L` / `Ctrl+Shift+S` | Copiar um link de compartilhamento |
+| `⇧⌘S` `⇧⌘L` / `Ctrl+Shift+S` `Ctrl+Shift+L` | Copiar um link de compartilhamento |
 | `⇧⌘E` / `Ctrl+Shift+E` | Exportar a planilha ativa |
 | `⇧⌘I` / `Ctrl+Shift+I` | Importar uma planilha |
 | `⇧⌘⌫` / `Ctrl+Shift+Backspace` | Limpar a planilha ativa |

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Money &amp; currencies · Documentation · Math Notes</title>
-  <meta name="description" content="Convert between currencies using 3-letter ISO codes or symbols. Rates come from the European Central Bank via Frankfurter and are cached locally so conversions keep working offline.">
+  <meta name="description" content="Convert between currencies using 3-letter ISO codes or symbols. Rates come from the European Central Bank via Frankfurter and are cached locally so conversions keep working offline. While a window stays open the rates are re-checked every hour; if a check fails or takes longer than 10 seconds, the cached rates are used and a short notice says so.">
   <link rel="canonical" href="https://math.dio.dev/docs/money/">
   <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/money/">
   <link rel="alternate" hreflang="pt" href="https://math.dio.dev/docs/pt/money/">
@@ -13,7 +13,7 @@
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Math Notes">
   <meta property="og:title" content="Money &amp; currencies">
-  <meta property="og:description" content="Convert between currencies using 3-letter ISO codes or symbols. Rates come from the European Central Bank via Frankfurter and are cached locally so conversions keep working offline.">
+  <meta property="og:description" content="Convert between currencies using 3-letter ISO codes or symbols. Rates come from the European Central Bank via Frankfurter and are cached locally so conversions keep working offline. While a window stays open the rates are re-checked every hour; if a check fails or takes longer than 10 seconds, the cached rates are used and a short notice says so.">
   <meta property="og:url" content="https://math.dio.dev/docs/money/">
   <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
   <link rel="stylesheet" href="/style.css">
@@ -59,7 +59,7 @@
     <main class="doc-main" id="content">
       <article class="doc-content">
 <h1>Money &amp; currencies</h1>
-<p>Convert between currencies using 3-letter ISO codes or symbols. Rates come from the <a href="https://www.ecb.europa.eu">European Central Bank</a> via <a href="https://frankfurter.dev">Frankfurter</a> and are cached locally so conversions keep working offline.</p>
+<p>Convert between currencies using 3-letter ISO codes or symbols. Rates come from the <a href="https://www.ecb.europa.eu">European Central Bank</a> via <a href="https://frankfurter.dev">Frankfurter</a> and are cached locally so conversions keep working offline. While a window stays open the rates are re-checked every hour; if a check fails or takes longer than 10 seconds, the cached rates are used and a short notice says so.</p>
 <h2 id="converting">Converting<a class="doc-anchor" href="#converting" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <figure class="doc-example" data-expr="100 USD to EUR"><pre class="doc-code"><code data-calc>100 USD to EUR</code></pre><figcaption class="doc-example-result">converts USD to EUR</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><figure class="doc-example" data-expr="$5 to GBP"><pre class="doc-code"><code data-calc>$5 to GBP</code></pre><figcaption class="doc-example-result">converts to GBP</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><figure class="doc-example" data-expr="R$5 to EUR"><pre class="doc-code"><code data-calc>R$5 to EUR</code></pre><figcaption class="doc-example-result">converts to EUR</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><figure class="doc-example" data-expr="50 EUR in BRL"><pre class="doc-code"><code data-calc>50 EUR in BRL</code></pre><figcaption class="doc-example-result">converts to BRL</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><h2 id="how-results-are-written">How results are written<a class="doc-anchor" href="#how-results-are-written" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p>Results use the currency&#39;s symbol where it has one (<code>350usd</code> becomes <code>US$ 350</code>); currencies without a symbol keep their ISO code. A rate reads as a phrase: <code>100 USD/hour</code> becomes <code>US$ 100 per hour</code>.</p>

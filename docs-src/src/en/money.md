@@ -1,6 +1,6 @@
 # Money & currencies
 
-Convert between currencies using 3-letter ISO codes or symbols. Rates come from the [European Central Bank](https://www.ecb.europa.eu) via [Frankfurter](https://frankfurter.dev) and are cached locally so conversions keep working offline.
+Convert between currencies using 3-letter ISO codes or symbols. Rates come from the [European Central Bank](https://www.ecb.europa.eu) via [Frankfurter](https://frankfurter.dev) and are cached locally so conversions keep working offline. While a window stays open the rates are re-checked every hour; if a check fails or takes longer than 10 seconds, the cached rates are used and a short notice says so.
 
 ## Converting
 
