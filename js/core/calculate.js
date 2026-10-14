@@ -24,6 +24,7 @@ import { tagAggregate, tagAggregateMode, tagError, substituteTags } from './tags
 import { resolveLineRefs } from './lineRefs.js';
 import { assertBoundedExpression } from './boundedExpression.js';
 import { lockDown } from './engineLock.js';
+import { normalizeUnit } from './unitForm.js';
 import { limitSizes } from './sizeLimits.js';
 import { friendlyError } from './friendlyErrors.js';
 import { substituteAggregates } from './aggregateSubstitution.js';
@@ -257,6 +258,8 @@ function createEngine({ rates } = {}) {
       result = trusted.evaluate(expression, scope);
       const mixError = unitMixError(result);
       if (mixError) throw new Error(mixError);
+      // Store a compound that cancels to one unit as that unit (MIX-01).
+      result = normalizeUnit(result);
       // The assignment statement already returns the rhs value; reuse it rather
       // than evaluating the rhs a second time, which could disagree for impure
       // expressions (e.g. `x = unix()`).

@@ -128,6 +128,22 @@ right after `math.evaluate`, so the message flows through the normal error path
 (`Cannot combine "kg" and "m" — that unit has no meaning`,
 `Cannot multiply a currency by "hour" — use a rate like "BRL per hour"`).
 
+A compound result that cancels down to one plain unit (`(USD year) / day` → `USD`,
+`(GB s) / MB` → `s`, `(km year) / day` → `km`) is stored as that unit: `evaluateLine`
+passes every result through `normalizeUnit` (`js/core/unitForm.js`) right after the
+mix check. The raw form used to be stored and only simplified when drawn, so
+rounding, `prev`, `sum` and the total bar worked on the raw number (24 for `$24 a
+day for a year`) instead of the value shown (US$ 8,766). The currency the user wrote
+is kept (`simplify()` folds a currency into the base one), and a computed duration is
+stored in seconds with its `timespan` marker so it is still drawn as `5 min`; the
+aggregate rebuild carries that marker, so a sum of durations is also drawn as one.
+Anything that does not reduce to one unit (a rate such as `USD/hour`, a power such
+as `m^3`) is left as it was. Rounding reduces its argument the same way, because
+`$24 a day for a year to nearest 100`rounds an intermediate value that never
+passed through`evaluateLine`, and it uses mathjs's own `round`, `ceil`and`floor`
+on the number, so halves, negatives and a value a hair off a whole number behave
+exactly as they do for a plain number.
+
 Which unit a compound result is shown in must depend only on that line. mathjs's
 `simplify()` follows its current unit system, and the default (`auto`) remembers the
 last unit of each dimension it parsed anywhere, so the same line once read `gallon`

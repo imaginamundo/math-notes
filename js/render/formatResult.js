@@ -1,10 +1,11 @@
 import { formatTimespan } from '../eval/timespan.js';
 import { formatDate, formatInterval } from '../eval/calendar.js';
-import { isCurrencyCode, CURRENCY_DISPLAY } from '../core/currencySymbols.js';
+import { CURRENCY_DISPLAY } from '../core/currencySymbols.js';
 import { DEFAULT_PRECISION } from '../core/decimalPrecision.js';
 import { DEFAULT_CLOCK_FORMAT } from '../core/clockFormat.js';
 import { readableUnit } from '../core/unitNames.js';
 import { simplifyLocal } from '../core/unitSimplify.js';
+import { numericValue, convertTo, leadingCurrency } from '../core/unitForm.js';
 import { decodeUserUnits } from '../core/userUnits.js';
 
 const formatters = new Map();
@@ -265,24 +266,6 @@ function formatCurrency(symbol, value, precision) {
   return formatted.startsWith('-') ? `-${symbol} ${formatted.slice(1)}` : `${symbol} ${formatted}`;
 }
 
-function numericValue(unit) {
-  try {
-    return unit.toNumber();
-  } catch {
-    return unit.value;
-  }
-}
-
-// Express a unit in a currency, so a reduced compound keeps the currency the
-// user wrote instead of mathjs's base currency.
-function convertTo(unit, code) {
-  try {
-    return unit.toNumber(code);
-  } catch {
-    return numericValue(unit);
-  }
-}
-
 // The display symbol when the value is a single currency unit (`350 USD` ->
 // `US$ 350`), or null.
 function currencyOf(unit) {
@@ -290,18 +273,6 @@ function currencyOf(unit) {
   const [entry] = unit.units;
   if (entry.power !== 1 || (entry.prefix && entry.prefix.name)) return null;
   return CURRENCY_DISPLAY[entry.unit.name] || null;
-}
-
-// The currency code when the unit has exactly one currency factor, on top
-// (`USD`, `USD/hour`, `(h USD)/hour`), else null.
-function leadingCurrency(unit) {
-  let code = null;
-  for (const entry of unit.units) {
-    if (!isCurrencyCode(entry.unit.name)) continue;
-    if (code || entry.power !== 1 || (entry.prefix && entry.prefix.name)) return null;
-    code = entry.unit.name;
-  }
-  return code;
 }
 
 // `<currency> / <unit>` (`USD/hour`, `BRL/day`): the symbol and the singular

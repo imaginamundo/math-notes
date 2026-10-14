@@ -1,4 +1,5 @@
 import parseLine from '../core/parseLine.js';
+import { normalizeUnit } from '../core/unitForm.js';
 
 // Soulver-style rounding phrases:
 //   `1/3 to 2 dp`, `pi to 5 digits`        -> round(x, n)
@@ -82,14 +83,21 @@ function magnitude(token) {
 
 // mathjs rounds numbers, but its Unit overload wants a valueless unit to round
 // in. Round the unit's own displayed value and rebuild it, so
-// `round(4.567 m, 2)` is `4.57 m`.
-function roundUnit(math, unit, decimals, mode) {
+// `round(4.567 m, 2)` is `4.57 m`. A compound that cancels to one unit is reduced
+// first (`$24 a day for a year` is US$ 8,766, not 24), and the rounding is mathjs's
+// own `round`/`ceil`/`floor` on the number, so halves, negatives and values a hair
+// off a whole number behave exactly as they do for a plain number (REVIEW.md
+// NUM-07, MIX-01). The timespan marker is carried over, or a rounded duration would
+// stop being drawn as one.
+function roundUnit(math, unit, decimals, round) {
+  const source = normalizeUnit(unit);
   const places = Number(decimals) || 0;
-  const unitName = unit.formatUnits();
-  const factor = 10 ** places;
-  const scaled = unit.toNumber() * factor;
-  const round = mode === 'ceil' ? Math.ceil : mode === 'floor' ? Math.floor : Math.round;
-  return math.unit(round(scaled) / factor, unitName);
+  const number = source.toNumber();
+  const rounded = places ? round(number, places) : round(number);
+  const result = math.unit(rounded, source.formatUnits());
+  if (source.timespan === true) result.timespan = true;
+  if (source.keepUnit === true) result.keepUnit = true;
+  return result;
 }
 
 // Extend mathjs's round/ceil/floor with the Unit overload the phrases need,
@@ -107,11 +115,11 @@ function initRounding(math) {
     return fn(value);
   };
 
-  const unitAware = (fn, mode) => (value, decimals, unit) => {
+  const unitAware = (fn) => (value, decimals, unit) => {
     if (value && value.isUnit === true && unit === undefined) {
       // A Unit second argument is mathjs's own `round(unit, valuelessUnit)`.
       if (!decimals || decimals.isUnit !== true) {
-        return roundUnit(math, value, decimals, mode);
+        return roundUnit(math, value, decimals, fn);
       }
     }
     return call(fn, value, decimals, unit);
@@ -119,9 +127,9 @@ function initRounding(math) {
 
   math.import(
     {
-      round: unitAware(round, 'round'),
-      ceil: unitAware(ceil, 'ceil'),
-      floor: unitAware(floor, 'floor'),
+      round: unitAware(round),
+      ceil: unitAware(ceil),
+      floor: unitAware(floor),
     },
     { override: true }
   );

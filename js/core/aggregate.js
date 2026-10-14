@@ -56,7 +56,11 @@ function buildUnit(group, target, amount) {
     // is worth, so express `amount` in the scale's own unit and scale its sample.
     const ratio = unitRatio(scale, target.unit);
     const unit = scale.sample.multiply(amount / ratio / sampleAmount);
-    return scale.unit === target.unit ? unit : unit.to(target.unit);
+    const built = scale.unit === target.unit ? unit : unit.to(target.unit);
+    // A sum of computed durations is still a duration, drawn as `5 min 10 s`, not
+    // `310 s`; the marker lives on the Unit object, so a rebuilt unit has to carry it.
+    if (scale.sample.timespan === true || target.sample.timespan === true) built.timespan = true;
+    return built;
   } catch {
     return null;
   }
