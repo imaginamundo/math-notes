@@ -217,6 +217,28 @@ function addMonths(date, delta) {
   return target;
 }
 
+// Calendar steps that keep the time of day (the plain `addDays`/`addMonths` land on
+// noon, which is right for a date and wrong for `now` or `16:00`).
+function shiftDays(date, days) {
+  const out = new Date(date);
+  out.setDate(out.getDate() + days);
+  return out;
+}
+
+function shiftMonths(date, delta) {
+  const out = new Date(date);
+  const day = out.getDate();
+  out.setDate(1);
+  out.setMonth(out.getMonth() + delta);
+  const lastDay = new Date(out.getFullYear(), out.getMonth() + 1, 0).getDate();
+  out.setDate(Math.min(day, lastDay));
+  return out;
+}
+
+function startOfDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
 function parseDuration(text) {
   const parts = {};
   const re = /(\d+(?:\.\d+)?)\s*([a-z]+)/gi;
@@ -277,6 +299,9 @@ export {
   requireDate,
   addDays,
   addMonths,
+  shiftDays,
+  shiftMonths,
+  startOfDay,
   parseDuration,
   parseDurationExact,
   toDate,

@@ -8,6 +8,9 @@ import {
   atNoon,
   addDays,
   addMonths,
+  shiftDays,
+  shiftMonths,
+  startOfDay,
   parseDuration,
   parseDurationExact,
   requireClock,
@@ -16,14 +19,33 @@ import {
   toDate,
 } from './calendarDate.js';
 
+// Month and year lengths used for the fractional part of a count (`1.5 months`),
+// matching the timespan display.
+const MONTH_DAYS = 30.4375;
+
+// Add a duration to a date. Whole months and days move the calendar and keep the
+// time of day; the fractions and the hours, minutes and seconds are elapsed time.
+// A plain date measures sub-day time from the start of its day and so becomes a
+// clock time (`today + 12 hours` is 12:00), instead of carrying a hidden noon.
 function applyDuration(date, parts, sign) {
-  let result = new Date(date);
   const months = (parts.year || 0) * 12 + (parts.month || 0);
-  if (months) result = addMonths(result, sign * months);
-  const days = (parts.week || 0) * 7 + (parts.day || 0);
-  if (days) result = addDays(result, sign * days);
-  const seconds = (parts.hour || 0) * 3600 + (parts.minute || 0) * 60 + (parts.second || 0);
-  if (seconds) result = new Date(result.getTime() + sign * seconds * 1000);
+  const wholeMonths = Math.trunc(months);
+  const days = (parts.week || 0) * 7 + (parts.day || 0) + (months - wholeMonths) * MONTH_DAYS;
+  const wholeDays = Math.trunc(days);
+  const elapsed =
+    (days - wholeDays) * 86400 +
+    (parts.hour || 0) * 3600 +
+    (parts.minute || 0) * 60 +
+    (parts.second || 0);
+  const subDay = elapsed !== 0;
+
+  let result = date.clock || !subDay ? new Date(date) : startOfDay(date);
+  if (wholeMonths) result = shiftMonths(result, sign * wholeMonths);
+  if (wholeDays) result = shiftDays(result, sign * wholeDays);
+  if (subDay) {
+    result = new Date(result.getTime() + sign * elapsed * 1000);
+    result.clock = true;
+  }
   return result;
 }
 

@@ -190,6 +190,14 @@ A custom unit cannot take a name the date grammar owns (`mo`, `mos`, `w`, `wk`, 
 is already something else (`ds` is deciseconds) is dropped rather than failing the
 definition, so `unit d = 8 hours` defines `d` and the built-in keeps `ds`.
 
+Date arithmetic (`applyDuration` in `calendarArithmetic.js`): whole months and days move
+the calendar and keep the time of day, so `16:00 + 1 day` is tomorrow at 16:00 and
+`now + 2 years` keeps the minute. Fractions (`1.5 days`, `1.5 months` at 30.4375 days) and
+hours, minutes and seconds are elapsed time. A plain date has no time of day, so sub-day
+time counts from the start of its day and the result becomes a clock time
+(`today + 12 hours` is 12:00, and equals `today + 0.5 days`); the date is never left
+carrying a hidden noon. A clock time not in the current year shows the year.
+
 Tags in calculations: trailing `#tags` label a line only when the code before them is a
 finished expression (`isCompleteCode` in `parseLine.js`); after an operator, `=`, `(` or a
 word operator (`5 + #food`, `x = #food`) the tag is an operand and the line is not

@@ -172,3 +172,41 @@ test('clock arithmetic with a duration and ranges are unchanged', () => {
   assert.equal(one('1:5'), '[1, 2, 3, 4, 5]'.replace('[1, 2, 3, 4, 5]', one('1:5')));
   assert.equal(one('2030-01-31 - 2030-01-01'), '4 weeks 2 days');
 });
+
+// Date arithmetic keeps the time of day and does not drop fractions.
+const clockOf = (line) => {
+  const row = run([line]).results[0];
+  return row.type === 'error' ? `ERR ${row.value}` : row.value;
+};
+const hm = (date) => `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+
+test('adding days to a clock time keeps the time of day', () => {
+  const start = clockOf('16:00');
+  const plus = clockOf('16:00 + 1 day 2 hours');
+  assert.equal(hm(plus), '18:00');
+  assert.equal(hm(clockOf('16:00 + 1 week')), '16:00');
+  assert.equal(hm(clockOf('16:00 + 0.5 days')), '4:00');
+  assert.equal(hm(clockOf('16:00 + 1 day')), '16:00');
+  assert.equal(hm(clockOf('16:00 + 24 hours')), '16:00');
+  assert.equal(clockOf('16:00 + 1 day').getDate(), new Date(start.getTime() + 864e5).getDate());
+  const now = clockOf('now + 3 days');
+  assert.equal(now.clock, true);
+  assert.ok(Math.abs(now - Date.now() - 3 * 864e5) < 4 * 3600e3, 'within a DST hour');
+});
+
+test('sub-day arithmetic on a plain date counts from the start of its day', () => {
+  assert.equal(hm(clockOf('June 10 2024 + 11 hours')), '11:00');
+  assert.equal(hm(clockOf('June 10 2024 + 12 hours')), '12:00');
+  assert.equal(clockOf('June 10 2024 + 13 hours').getDate(), 10);
+  assert.equal(clockOf('June 10 2024 - 12 hours').getDate(), 9);
+  assert.equal(hm(clockOf('June 10 2024 - 12 hours')), '12:00');
+  assert.equal(String(clockOf('today + 12 hours')), String(clockOf('today + 0.5 days')));
+  assert.equal(show(['x = June 10 2024 + 13 hours', 'x - 2 hours']), '10 June 2024 at 11:00');
+});
+
+test('fractional day, week, month and year counts are not rounded away', () => {
+  assert.equal(show(['June 10 2024 + 1.5 days']), '11 June 2024 at 12:00');
+  assert.equal(show(['June 10 2024 - 1.5 days']), '8 June 2024 at 12:00');
+  assert.equal(show(['June 10 2024 + 1 day']), '11 June 2024');
+  assert.equal(show(['March 1 2024 + 1.5 months']), '16 April 2024 at 05:15');
+});
