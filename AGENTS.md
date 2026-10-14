@@ -126,5 +126,5 @@ Some sweeps cover many inputs and are not clean yet. They are **ratchets**: the
 failures they know about are listed in `test/ratchets/*.json` (see
 `test/helpers/ratchet.mjs`). A new failure fails the build, and so does a listed
 one that now passes. Fix the finding, then run `UPDATE_RATCHET=1 npm test` to
-shrink the baseline and review the diff. Tests marked `todo` are single known
+shrink the baseline (then `npm run format`, since the files are Prettier-checked) and review the diff. Tests marked `todo` are single known
 problems, named by their `REVIEW.md` finding ID.

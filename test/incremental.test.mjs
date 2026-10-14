@@ -234,6 +234,26 @@ const KNOWN = [
     after: ['x = 5', 'x = foo + 1', 'x * 2', '2'],
   },
   {
+    id: 'SHEET-03-read-above-assignment',
+    before: ['n = [10, 20, 30]', 'n[2]', 'n[2] = 99'],
+    after: ['n = [10, 20, 30]', 'n[2] + 0', 'n[2] = 99'],
+  },
+  {
+    id: 'SHEET-03-self-updating-line',
+    before: ['n = [1, 2, 3]', 'n[1] = n[1] + 1', 'n[1]'],
+    after: ['n = [1, 2, 3]', 'n[1] = n[1] + 1 ', 'n[1]'],
+  },
+  {
+    id: 'SHEET-03-object-property',
+    before: ['p = {x: 1}', 'p.x = 5', 'p.x'],
+    after: ['p = {x: 1}', 'p.x = 5', 'p.x + 0'],
+  },
+  {
+    id: 'SHEET-03-later-edit-sees-assignment',
+    before: ['n = [1, 2, 3]', 'n[2] = 99', 'sum(n)'],
+    after: ['n = [1, 2, 3]', 'n[2] = 99', 'sum(n) * 1'],
+  },
+  {
     id: 'AGG-01-other-tab',
     // A tab switch hands the engine a different sheet with the same opening lines.
     before: ['rate = 3', 'pay = p(h) = h * rate', 'pay(10)'],
@@ -267,24 +287,37 @@ test('incremental evaluation matches a fresh one on the sequences from the revie
   ratchet('incremental-known', failing);
 });
 
-// SHEET-03 is invisible to the comparison above: a fresh evaluation is wrong in
-// the same way, because element assignment mutates the value an earlier row
-// holds. So it is asserted directly: a row keeps showing what it computed.
-test('element assignment does not rewrite the rows above it', () => {
+// SHEET-03 is invisible to the comparison above: a fresh evaluation used to be
+// wrong in the same way, because element assignment mutated the value an earlier
+// row (or an alias, or `prev`) held. So it is asserted directly: a row keeps
+// showing what it computed.
+test('SHEET-03: element assignment does not rewrite the rows above it', () => {
   const cases = [
-    { id: 'SHEET-03-list', lines: ['n = [1, 2, 3]', 'n[2] = 99'], row: 0, expected: '[1, 2, 3]' },
-    { id: 'SHEET-03-object', lines: ['p = {x: 1}', 'p.x = 5'], row: 0, expected: '{ x: 1 }' },
-    {
-      id: 'SHEET-03-alias',
-      lines: ['n = [1, 2, 3]', 'm = n', 'n[2] = 99', 'm'],
-      row: 3,
-      expected: '[1, 2, 3]',
-    },
+    { lines: ['n = [1, 2, 3]', 'n[2] = 99'], row: 0, expected: '[1, 2, 3]' },
+    { lines: ['n = [1, 2, 3]', 'n[2] = 99', 'n'], row: 2, expected: '[1, 99, 3]' },
+    { lines: ['p = {x: 1}', 'p.x = 5'], row: 0, expected: '{ x: 1 }' },
+    { lines: ['n = [1, 2, 3]', 'm = n', 'n[2] = 99', 'm'], row: 3, expected: '[1, 2, 3]' },
+    { lines: ['a = [1, 2, 3]', 'b = a', 'b[1] = 100', 'a'], row: 3, expected: '[1, 2, 3]' },
+    { lines: ['[1, 2, 3]', 'x = prev', 'x[1] = 5'], row: 0, expected: '[1, 2, 3]' },
+    { lines: ['M = [[1, 2], [3, 4]]', 'M[1, 1] = 0'], row: 0, expected: '[[1, 2], [3, 4]]' },
+    { lines: ['r = 1:3', 'r[1] = 9'], row: 0, expected: '[1, 2, 3]' },
+    { lines: ['n = [10, 20, 30]', 'n[2]', 'n[2] = 99'], row: 1, expected: '20' },
   ];
   const failing = [];
-  for (const { id, lines, row, expected } of cases) {
+  for (const { lines, row, expected } of cases) {
     const { results } = createEngine().evaluateLines(lines);
-    if (formatResult(results[row].value) !== expected) failing.push(id);
+    const actual = formatResult(results[row].value);
+    if (actual !== expected) failing.push(`${lines.join(' / ')} → row ${row}: ${actual}`);
   }
-  ratchet('element-assignment', failing);
+  assert.deepEqual(failing, []);
+});
+
+test('SHEET-03: a self-updating element assignment gives the same answer on every edit', () => {
+  const engine = createEngine();
+  const lastRow = (suffix) =>
+    shown(engine.evaluateLines(['n = [1, 2, 3]', 'n[1] = n[1] + 1', `n[1]${suffix}`])).rows[2];
+  // `n[1]` is 2 after the second line, however many times the sheet is edited.
+  for (const suffix of ['', ' ', '  ', ' + 0', ' * 1', '']) {
+    assert.equal(lastRow(suffix), 'value:2', JSON.stringify(suffix));
+  }
 });

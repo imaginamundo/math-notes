@@ -248,7 +248,11 @@ prototype instead of being copied for every line (which made a sheet of
 assignments cost O(lines²)), and what only that line needs — `prev`, tag
 aggregates, line references — is assigned as own properties of the fresh object,
 so nothing leaks into the next line. The preprocessors are given a `names` view
-over the same two sources.
+over the same two sources. mathjs changes a list or object in place when an element
+is assigned (`n[2] = 99`), and that object is also held by the rows above, by any
+variable set from it and by `prev`; so such a line works on a private copy of its
+base variable and records the base's new value as the variable (the row's `value`
+is still what was assigned), and a restored variable is therefore never mutated.
 
 A line `unit widget = 3.5 kg` defines a custom unit (`js/core/userUnits.js`
 parses it, `js/eval/userUnits.js` registers it with its plural and removes it

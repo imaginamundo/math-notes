@@ -433,6 +433,10 @@ function createEngine({ rates } = {}) {
     return true;
   }
 
+  // The variable an indexed or property assignment changes: `n` in `n[2] = 99`,
+  // `p` in `p.x = 5`. Not a function definition (`f(x) = …`).
+  const ELEMENT_TARGET = /^([A-Za-z_]\w*)\s*[[.]/;
+
   function handleExpression(ctx) {
     const group = ctx.groups.groupOfLine.get(ctx.i);
     const blockStart = group ? group.start + 1 : ctx.lastBlankIndex + 1;
@@ -478,7 +482,23 @@ function createEngine({ rates } = {}) {
     Object.assign(scope, resolved.values);
     if (aggregateValues) Object.assign(scope, aggregateValues);
 
-    const { type, result, variable } = evaluateLine(parsedLine, scope, namesIn(ctx, scope));
+    // mathjs changes a list or object in place when an element is assigned, and
+    // that object is also held by the rows above, by every variable that was set
+    // from it and by `prev`. So the assignment works on a private copy of its
+    // base, and the base's new value is recorded as the variable (SHEET-03).
+    const elementBase = parsedLine.isAssignment
+      ? (ELEMENT_TARGET.exec(parsedLine.label || '') || [])[1]
+      : undefined;
+    if (elementBase && Object.hasOwn(ctx.variables, elementBase)) {
+      scope[elementBase] = math.clone(ctx.variables[elementBase]);
+    }
+
+    const evaluated = evaluateLine(parsedLine, scope, namesIn(ctx, scope));
+    const { type, result } = evaluated;
+    let { variable } = evaluated;
+    if (elementBase && type === 'assignment' && Object.hasOwn(scope, elementBase)) {
+      variable = { label: elementBase, value: scope[elementBase] };
+    }
     if (variable) {
       ctx.variables[variable.label] = variable.value;
       ctx.names.add(variable.label);
