@@ -251,7 +251,12 @@ function combine(summary, mode, empty) {
         if (value !== null) return value;
       }
     } else {
-      const combined = groupAmount(group) + (numericSum ?? 0) * fold;
+      const terms = [...numbers.map((value) => value * fold)];
+      for (const entry of group.units.values()) {
+        const ratio = unitRatio(entry, target.unit);
+        for (const amount of entry.amounts) terms.push(amount * ratio);
+      }
+      const combined = snapToZero(groupAmount(group) + (numericSum ?? 0) * fold, terms);
       const count = groupCount(group) + numericCount;
       const amount = mode === 'average' ? (count ? combined / count : 0) : combined;
       const value = buildUnit(group, target, amount);
@@ -264,7 +269,16 @@ function combine(summary, mode, empty) {
     return median(numbers);
   }
   if (numericSum === null) return empty;
-  return mode === 'average' ? numericSum / numericCount : numericSum;
+  const sum = snapToZero(numericSum, numbers);
+  return mode === 'average' ? sum / numericCount : sum;
+}
+
+// A sum whose terms cancel is exactly 0, not the float residue left behind (0.1 +
+// 0.2 - 0.3 is 5.6e-17): anything below 1e-12 of the largest term is noise (NUM-03).
+function snapToZero(sum, terms) {
+  if (sum === 0 || !Number.isFinite(sum)) return sum;
+  const largest = terms.reduce((max, term) => Math.max(max, Math.abs(term)), 0);
+  return largest > 0 && Math.abs(sum) < 1e-12 * largest ? 0 : sum;
 }
 
 function median(values) {

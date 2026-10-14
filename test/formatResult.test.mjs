@@ -181,3 +181,20 @@ test('serializeResults formats values and keeps clone-safe flags, dropping assig
   });
   assert.equal(out[3].value, undefined);
 });
+
+// REVIEW.md NUM-03: float residue (about 1e-16) skipped the precision setting and
+// was drawn as ten digits of exponent. Nothing that small can be a real result of
+// the arithmetic here, so it reads as "0 with more behind it", like 0.0001 does.
+test('NUM-03: float residue reads 0… instead of an exponent', () => {
+  assert.equal(formatResult(5.5511151231e-17), '0…');
+  assert.equal(formatResult(-5.5511151231e-17), '0…');
+  assert.equal(formatResult(1e-13), '0…');
+  assert.equal(formatResult(2.7755575615628914e-17, 8), '0…');
+});
+
+test('NUM-03: genuinely small values and the large cutoff are unchanged', () => {
+  assert.equal(formatResult(1e-8), '1e-8');
+  assert.equal(formatResult(1.5e-9), '1.5e-9');
+  assert.equal(formatResult(1e16), '1e+16');
+  assert.equal(formatResult(0), '0');
+});

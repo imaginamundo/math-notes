@@ -171,6 +171,18 @@ function bindFailure(variables, label, line) {
 
 const PLAIN_LABEL = /^[A-Za-z_]\w*$/;
 
+// A number result that is vanishingly small next to the numbers written in the
+// expression is float residue (`0.1 + 0.2 - 0.3`), not an answer: it is 0. A value
+// that is small on its own (`1e-8`) is compared with itself, so it stays.
+function snapResidue(result, expression) {
+  if (typeof result !== 'number' || result === 0 || !Number.isFinite(result)) return result;
+  let largest = 0;
+  for (const literal of expression.match(/\d+\.?\d*(?:e[+-]?\d+)?|\.\d+/gi) || []) {
+    largest = Math.max(largest, Math.abs(Number(literal)));
+  }
+  return largest > 0 && Math.abs(result) < 1e-12 * largest ? 0 : result;
+}
+
 function createEngine({ rates } = {}) {
   const math = create(all);
   initAliases(math);
@@ -260,6 +272,7 @@ function createEngine({ rates } = {}) {
       if (mixError) throw new Error(mixError);
       // Store a compound that cancels to one unit as that unit (MIX-01).
       result = normalizeUnit(result);
+      result = snapResidue(result, expression);
       // The assignment statement already returns the rhs value; reuse it rather
       // than evaluating the rhs a second time, which could disagree for impure
       // expressions (e.g. `x = unix()`).

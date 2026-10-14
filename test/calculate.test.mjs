@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { evaluateLines, evaluateLine, createEngine } from '../js/core/calculate.js';
 import parseLine from '../js/core/parseLine.js';
+import formatResult from '../js/render/formatResult.js';
 
 test('parseLine splits a plain expression', () => {
   const parsed = parseLine('1 + 1');
@@ -900,4 +901,35 @@ test('AGG-03: the error is the same incrementally and from scratch', () => {
     fresh.map((r) => [r.type, String(r.value)])
   );
   assert.equal(after[2].type, 'error');
+});
+
+// REVIEW.md NUM-03: a result that should be exactly 0 showed float residue.
+const shownTotal = (lines) => {
+  const { results, total } = createEngine().evaluateLines(lines);
+  const show = (value) => (value === null || value === undefined ? null : formatResult(value));
+  return { rows: results.map((row) => show(row.value)), total: show(total) };
+};
+
+test('NUM-03: a result that cancels to nothing next to its operands is exactly 0', () => {
+  assert.equal(shownTotal(['0.1 + 0.2 - 0.3']).rows[0], '0');
+  assert.equal(shownTotal(['1000.1 - 1000.1 + 0.1 - 0.1']).rows[0], '0');
+  assert.equal(shownTotal(['0.3 - 0.1 - 0.2']).rows[0], '0');
+  assert.equal(shownTotal(['x = 0.1 + 0.2 - 0.3', 'x + 1']).rows[1], '1');
+});
+
+test('NUM-03: real small results are not snapped away', () => {
+  assert.equal(shownTotal(['1e-8']).rows[0], '1e-8');
+  assert.equal(shownTotal(['1e-8 * 1']).rows[0], '1e-8');
+  assert.equal(shownTotal(['0.1 - 0.0999']).rows[0], '0…');
+});
+
+test('NUM-03: a sum that balances reads 0 in the sum row and the total bar', () => {
+  const sheet = shownTotal(['0.1', '0.2', '-0.3', 'sum']);
+  assert.equal(sheet.rows[3], '0');
+  assert.equal(shownTotal(['0.1', '0.2', '-0.3']).total, '0');
+  assert.equal(shownTotal(['0.1 m', '0.2 m', '-0.3 m', 'sum']).rows[3], '0 m');
+});
+
+test('NUM-03: an average of values that cancel is 0', () => {
+  assert.equal(shownTotal(['0.1', '0.2', '-0.3', 'average']).rows[3], '0');
 });

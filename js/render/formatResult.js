@@ -94,6 +94,10 @@ function formatList(items, depth, precision, clockFormat) {
 function formatNumber(n, precision) {
   if (!isFinite(n)) return String(n);
   const abs = Math.abs(n);
+  // Below this nothing here can be a real result, only float residue (about 1e-16),
+  // so it reads like any value smaller than the precision step: 0 with more behind
+  // it, not ten digits of exponent that ignore the setting (NUM-03).
+  if (abs !== 0 && abs < 1e-12) return '0…';
   if (abs !== 0 && (abs >= 1e16 || abs < 1e-7)) {
     return n.toExponential(10).replace(/\.?0+e/, 'e');
   }
