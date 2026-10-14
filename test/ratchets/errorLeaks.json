@@ -1,6 +1,7 @@
 {
-  "total": 911,
+  "total": 929,
   "categories": [
+    "cannot calculate max, unexpected type",
     "function cot",
     "function for",
     "function in",

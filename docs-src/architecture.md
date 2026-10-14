@@ -174,6 +174,17 @@ Aggregate substitution also skips a keyword that is a field or a parameter: afte
 (`stats.total`), as a key before `:` inside `{ }`, or named in a function's parameter
 list (`tip = f(total) = total * 0.15`), where it is that name and not the sheet's total.
 
+Phrases work wherever an expression can stand. Most phrase patterns are anchored to the
+whole expression they rewrite, so `preprocess` (`js/core/preprocess.js`) hands them one
+expression at a time: the innermost body of `a = f(x) = body`, and every `( )` or `[ ]`
+group and call argument, innermost first. A group's rewritten inside is parked in a slot
+while the outside is rewritten, so each piece is rewritten once and an outer phrase sees
+the group as one operand. `(100 km at 10 km/hour) * 2`, `pay = f(h) = h at $20/hour` and
+`max(1, 3.456 to 2 dp)` all work. A bare `h:mm` inside a group stays the range `1:50`
+(`concat(1:50, 1:50)`); on its own line it is a time of day. `stripGrouping` still runs on
+the whole line first, because a comma means something different once a line is cut into
+arguments.
+
 Tags in calculations: trailing `#tags` label a line only when the code before them is a
 finished expression (`isCompleteCode` in `parseLine.js`); after an operator, `=`, `(` or a
 word operator (`5 + #food`, `x = #food`) the tag is an operand and the line is not
