@@ -26,10 +26,10 @@ export default [
     },
   },
   {
-    // The i18n and docs build scripts run under Deno.
+    // The i18n and docs build scripts run under Node.
     files: ['js/i18n/build.js', 'docs-src/build.js'],
     languageOptions: {
-      globals: { ...globals.node, Deno: 'readonly' },
+      globals: globals.node,
     },
   },
   {

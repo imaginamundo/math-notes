@@ -1,11 +1,13 @@
 // Build the documentation site from the Markdown sources in src/. Run with
-// `make -C docs-src` (or `npm run build:docs`). The generated files under the
+// `npm run build:docs`. The generated files under the
 // top-level docs/ are committed and published at /docs, like the mathjs bundle.
-import { marked } from 'npm:marked@15';
+import { copyFileSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { marked } from 'marked';
 
-const ROOT = new URL('.', import.meta.url).pathname;
+const ROOT = fileURLToPath(new URL('.', import.meta.url));
 const SRC = `${ROOT}src/`;
-const DIST = new URL('../docs/', import.meta.url).pathname;
+const DIST = fileURLToPath(new URL('../docs/', import.meta.url));
 
 // Every language that has an index.md is built; the rest are skipped, so a
 // language can be added one page at a time without breaking the build. The
@@ -72,7 +74,7 @@ const UI = {
   },
 };
 
-const structure = JSON.parse(Deno.readTextFileSync(`${SRC}structure.json`));
+const structure = JSON.parse(readFileSync(`${SRC}structure.json`, 'utf8'));
 const BASE_URL = String(structure.baseUrl || 'https://math.dio.dev').replace(/\/$/, '');
 const PAGES = structure.pages;
 
@@ -383,15 +385,15 @@ ${page.html}
 
 function write(path, data) {
   const dir = path.slice(0, path.lastIndexOf('/'));
-  Deno.mkdirSync(dir, { recursive: true });
-  Deno.writeTextFileSync(path, data);
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(path, data);
 }
 
 // Read every page for every available language before rendering any HTML, so
 // the sidebar knows all the localized titles.
 const LANGS_AVAILABLE = LANGS.filter((lang) => {
   try {
-    return Deno.statSync(`${SRC}${lang}/index.md`).isFile;
+    return statSync(`${SRC}${lang}/index.md`).isFile();
   } catch {
     return false;
   }
@@ -405,7 +407,7 @@ for (const lang of LANGS_AVAILABLE) {
   searchIndex[lang] = [];
   for (const slug of ['', ...PAGES]) {
     const file = slug ? `${SRC}${lang}/${slug}.md` : `${SRC}${lang}/index.md`;
-    const md = Deno.readTextFileSync(file);
+    const md = readFileSync(file, 'utf8');
     const title = titleOf(md, slug || UI[lang].docs);
     const { html, toc } = renderMarkdown(md, UI[lang]);
     content[lang][slug] = {
@@ -434,7 +436,7 @@ for (const lang of LANGS_AVAILABLE) {
 }
 
 try {
-  Deno.removeSync(DIST, { recursive: true });
+  rmSync(DIST, { recursive: true, force: true });
 } catch {
   // dist does not exist yet
 }
@@ -452,7 +454,7 @@ for (const lang of LANGS_AVAILABLE) {
   }
 }
 
-Deno.copyFileSync(`${SRC}docs.css`, `${DIST}docs.css`);
-Deno.copyFileSync(`${SRC}docs.js`, `${DIST}docs.js`);
+copyFileSync(`${SRC}docs.css`, `${DIST}docs.css`);
+copyFileSync(`${SRC}docs.js`, `${DIST}docs.js`);
 
 console.log(`docs: ${LANGS_AVAILABLE.join(', ')} → ${PAGES.length + 1} pages each`);

@@ -5,9 +5,9 @@
   "description": "Inline calculator for modern browsers.",
   "type": "module",
   "scripts": {
-    "build:mathjs": "make -C js/lib",
-    "build:i18n": "make -C js/i18n",
-    "build:docs": "make -C docs-src",
+    "build:mathjs": "node scripts/build-mathjs.mjs",
+    "build:i18n": "node js/i18n/build.js",
+    "build:docs": "node docs-src/build.js",
     "build:sw-manifest": "node scripts/sw-manifest.mjs",
     "dev": "node scripts/dev.mjs",
     "test": "node --test --test-concurrency=1",
@@ -18,9 +18,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "esbuild": "^0.28.2",
     "eslint": "^10.9.1",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.11.0",
+    "marked": "^15.0.12",
     "mathjs": "15.2.0",
     "prettier": "^3.9.6",
     "puppeteer": "^24.43.1"
