@@ -237,3 +237,16 @@ test('a non-ASCII date variable resolves', () => {
   const { results } = evaluateLines(['aniversário = March 4, 2025', 'aniversário + 2 weeks']);
   assert.equal(formatResult(results[1].value), '18 March 2025');
 });
+
+test('an interval is counted from its start, so start + interval is the end', () => {
+  assert.equal(valueOf('2024-01-31 to 2024-03-31'), '2 months');
+  assert.equal(valueOf('2023-01-31 to 2023-12-31'), '11 months');
+  assert.equal(valueOf('2024-02-29 to 2028-02-29'), '4 years');
+  assert.equal(valueOf('2023-05-31 to 2023-07-31'), '2 months');
+  assert.equal(valueOf('2024-08-31 to 2024-12-31'), '4 months');
+  assert.equal(valueOf('2024-01-31 to 2024-03-30'), '1 month 4 weeks 2 days');
+  assert.equal(valueOf('2024-01-31 to 2024-02-29'), '1 month');
+  assert.equal(valueOf('2023-12-31 to 2024-12-31'), '1 year');
+  assert.equal(valueOf('2024-01-29 to 2024-03-29'), '2 months');
+  assert.equal(valueOf('2024-03-31 to 2024-01-31'), '2 months');
+});

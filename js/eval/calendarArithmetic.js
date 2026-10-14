@@ -74,33 +74,23 @@ function durationUnit(math, text) {
   return total;
 }
 
-const DIFF_UNITS = [
-  ['year', (d) => addMonths(d, 12)],
-  ['month', (d) => addMonths(d, 1)],
-  ['week', (d) => addDays(d, 7)],
-  ['day', (d) => addDays(d, 1)],
-];
-
 // The calendar interval from the earlier to the later date, e.g.
-// `3 months 3 weeks 6 days`.
+// `3 months 3 weeks 6 days`. Whole months are counted from the original start, not
+// by stepping month to month, because a step from the 31st clamps to a shorter
+// month and the lost days would come back as extra days: `Jan 31 to Mar 31` is
+// 2 months, and start + interval is always the end.
 function dateDiff(a, b) {
-  let start = new Date(a);
-  let end = new Date(b);
+  let start = atNoon(a);
+  let end = atNoon(b);
   if (start > end) [start, end] = [end, start];
+  let months = (end.getFullYear() - start.getFullYear()) * 12 + end.getMonth() - start.getMonth();
+  while (months > 0 && addMonths(start, months) > end) months--;
   const parts = {};
-  for (const [unit, next] of DIFF_UNITS) {
-    let count = 0;
-    for (;;) {
-      const candidate = next(start);
-      if (candidate <= end) {
-        start = candidate;
-        count++;
-      } else {
-        break;
-      }
-    }
-    if (count) parts[unit] = count;
-  }
+  if (Math.floor(months / 12)) parts.year = Math.floor(months / 12);
+  if (months % 12) parts.month = months % 12;
+  const days = daysBetween(addMonths(start, months), end);
+  if (Math.floor(days / 7)) parts.week = Math.floor(days / 7);
+  if (days % 7) parts.day = days % 7;
   return parts;
 }
 
