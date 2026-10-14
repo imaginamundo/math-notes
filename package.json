@@ -24,7 +24,7 @@
     "globals": "^17.11.0",
     "marked": "^15.0.12",
     "mathjs": "15.2.0",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.10",
     "puppeteer": "^24.43.1"
   }
 }
