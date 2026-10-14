@@ -1,5 +1,5 @@
 {
-  "version": 75,
+  "version": 76,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "8ab30c03ce83a52ec3048a552d376b54d3b502247119c24db874b0251d059156",
@@ -65,7 +65,7 @@
     "js/registerServiceWorker.js": "eb484b46ff06e0a3317b35ab6d9141991ddff6ac5c44d7f36e1f04fb953ddb8f",
     "js/render/exampleText.js": "bfa054aa3a65162e8af4187e9a8b6509c1e7c3adb31c75f9eaa28ff7526a86b3",
     "js/render/format.js": "e1924113a687e02ef6abc3cf551d3dabf3f8b56746fd2d1a79fa23a07a05569a",
-    "js/render/formatResult.js": "73024833a98ba2d586de55d87375837a0d22bec73c9b5a75c87ffd29633474c0",
+    "js/render/formatResult.js": "3d8a03881663d45762ac4ac3c330c54fc2c5fca9f81cd1b235b6e4ae8f598691",
     "js/render/marks.js": "339def83f5e1158c2744190b6ea2d9d45571f4eb07ddf83780efa81fb463b6fe",
     "js/render/renderInput.js": "5f3718344bf8659fd6eefb97d91138efdb2f6985d2ed8f9afe7c95ebf33ef218",
     "js/render/renderTotal.js": "5d4c7594f65e95f6e4f0724b5e47f200ed032edd46346129042646006433b8a6",
