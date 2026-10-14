@@ -1,5 +1,5 @@
 import { loadCached } from './storage/currencyRates.js';
-import { MSG } from './protocol.js';
+import { MSG, SETTING } from './protocol.js';
 import { readMeasurementSystem } from './core/measurementSystem.js';
 import { DEFAULT_MEASUREMENT_SYSTEM } from './core/measures.js';
 import { DEFAULT_PRECISION, readDecimalPrecision } from './core/decimalPrecision.js';
@@ -94,15 +94,16 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
     // values, so only a non-default choice needs sending.
     const seed = (name, value) => created.postMessage({ type: MSG.setting, name, value });
     const measurementSystem = readMeasurementSystem();
-    if (measurementSystem !== DEFAULT_MEASUREMENT_SYSTEM) seed('measurement', measurementSystem);
+    if (measurementSystem !== DEFAULT_MEASUREMENT_SYSTEM)
+      seed(SETTING.measurement, measurementSystem);
     const precision = readDecimalPrecision();
-    if (precision !== DEFAULT_PRECISION) seed('precision', precision);
+    if (precision !== DEFAULT_PRECISION) seed(SETTING.precision, precision);
     const totalMode = readTotalMode();
-    if (totalMode !== DEFAULT_TOTAL_MODE) seed('total-mode', totalMode);
+    if (totalMode !== DEFAULT_TOTAL_MODE) seed(SETTING.totalMode, totalMode);
     const clockFormat = readClockFormat();
-    if (clockFormat !== DEFAULT_CLOCK_FORMAT) seed('clock-format', clockFormat);
+    if (clockFormat !== DEFAULT_CLOCK_FORMAT) seed(SETTING.clockFormat, clockFormat);
     const cachedRates = loadCached();
-    if (cachedRates) seed('rates', cachedRates);
+    if (cachedRates) seed(SETTING.rates, cachedRates);
     // A fresh worker holds no sheet, so the next request must be a full one.
     lastSentLines = null;
     return created;
@@ -294,9 +295,9 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
   // Settings the main-thread engine also owns; precision and clock format are
   // module-level state the UI sets directly, so only the worker needs them.
   const FALLBACK_SETTINGS = {
-    rates: (mod, value) => mod.registerCurrencyRates(value),
-    measurement: (mod, value) => mod.registerMeasurementSystem(value),
-    'total-mode': (mod, value) => mod.registerTotalMode(value),
+    [SETTING.rates]: (mod, value) => mod.registerCurrencyRates(value),
+    [SETTING.measurement]: (mod, value) => mod.registerMeasurementSystem(value),
+    [SETTING.totalMode]: (mod, value) => mod.registerTotalMode(value),
   };
 
   // Every setting is sent as one message shape; the worker routes by name.
@@ -307,24 +308,24 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
   }
 
   function syncRates(data) {
-    if (data) postSetting('rates', data);
+    if (data) postSetting(SETTING.rates, data);
   }
 
   function syncMeasurement(system) {
-    if (system) postSetting('measurement', system);
+    if (system) postSetting(SETTING.measurement, system);
   }
 
   function syncPrecision(value) {
-    if (value !== undefined) postSetting('precision', value);
+    if (value !== undefined) postSetting(SETTING.precision, value);
     precisionDirty = true;
   }
 
   function syncTotalMode(mode) {
-    if (mode) postSetting('total-mode', mode);
+    if (mode) postSetting(SETTING.totalMode, mode);
   }
 
   function syncClockFormat(format) {
-    if (format) postSetting('clock-format', format);
+    if (format) postSetting(SETTING.clockFormat, format);
     clockFormatDirty = true;
   }
 

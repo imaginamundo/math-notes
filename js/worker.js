@@ -6,7 +6,7 @@ import {
 } from './core/calculate.js';
 import { DEFAULT_PRECISION, normalizeDecimalPrecision } from './core/decimalPrecision.js';
 import { DEFAULT_CLOCK_FORMAT } from './core/clockFormat.js';
-import { MSG } from './protocol.js';
+import { MSG, SETTING } from './protocol.js';
 import formatResult, { serializeResults } from './render/formatResult.js';
 import { applyLinePatch } from './util/sequence.js';
 
@@ -19,13 +19,13 @@ let sheetLines = [];
 // message and is routed here, so adding one is a single entry rather than a new
 // message type on both sides.
 const SETTINGS = {
-  rates: (value) => registerCurrencyRates(value),
-  measurement: (value) => registerMeasurementSystem(value),
-  'total-mode': (value) => registerTotalMode(value),
-  precision: (value) => {
+  [SETTING.rates]: (value) => registerCurrencyRates(value),
+  [SETTING.measurement]: (value) => registerMeasurementSystem(value),
+  [SETTING.totalMode]: (value) => registerTotalMode(value),
+  [SETTING.precision]: (value) => {
     precision = normalizeDecimalPrecision(value);
   },
-  'clock-format': (value) => {
+  [SETTING.clockFormat]: (value) => {
     clockFormat = value;
   },
 };

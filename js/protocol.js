@@ -8,10 +8,21 @@ const MSG = {
   error: 'error',
 };
 
-// Every name that arrives as `{ type: 'setting', name, value }`. The worker
-// routes all of them; the client also applies the engine-owned subset to its
-// main-thread fallback, and seeds a fresh worker with the rest.
-const SETTING_NAMES = ['rates', 'measurement', 'total-mode', 'precision', 'clock-format'];
-const ENGINE_SETTING_NAMES = ['rates', 'measurement', 'total-mode'];
+// Every name that arrives as `{ type: 'setting', name, value }`, keyed by what
+// the code calls it. Use these rather than the strings: a misspelt key is
+// `undefined` and fails the protocol test, where a misspelt string would be a
+// silent no-op in the worker.
+const SETTING = {
+  rates: 'rates',
+  measurement: 'measurement',
+  totalMode: 'total-mode',
+  precision: 'precision',
+  clockFormat: 'clock-format',
+};
 
-export { MSG, SETTING_NAMES, ENGINE_SETTING_NAMES };
+// The worker routes all of them; the client also applies the engine-owned
+// subset to its main-thread fallback, and seeds a fresh worker with the rest.
+const SETTING_NAMES = Object.values(SETTING);
+const ENGINE_SETTING_NAMES = [SETTING.rates, SETTING.measurement, SETTING.totalMode];
+
+export { MSG, SETTING, SETTING_NAMES, ENGINE_SETTING_NAMES };
