@@ -816,3 +816,10 @@ test('evaluateLines keeps function variables when resuming from a change', () =>
   assert.equal(results[0].type, 'assignment');
   assert.equal(results[1].value, 10);
 });
+
+test('a tag request gives each tag its share of a row tagged for several', () => {
+  const { results } = evaluateLines(['burger: 2 * 50 #ana #bob', '#ana', '#bob']);
+  assert.equal(results[0].value, 100, 'the row keeps its full amount');
+  assert.equal(results[1].value, 50);
+  assert.equal(results[2].value, 50);
+});
