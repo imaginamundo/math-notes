@@ -1,4 +1,5 @@
 import { registeredName, unitAliases } from '../core/userUnits.js';
+import { moneyCurrency } from '../core/unitForm.js';
 
 // A name that must not already be taken: a mathjs symbol/function/constant or an
 // existing unit (built-in or another definition's alias).
@@ -17,6 +18,14 @@ function createUserUnit(math, name, value, { valueIsUnit = false } = {}) {
     throw new Error(`"${name}" is already a unit`);
   }
   math.createUnit(registered, { definition: valueIsUnit ? value : String(value), aliases });
+  // A unit defined from money is money. Note which currency on the unit's own
+  // definition (so it goes when the unit does), for the aggregates to read.
+  const currency = valueIsUnit ? moneyCurrency(value) : null;
+  if (currency) {
+    for (const name of [registered, ...aliases]) {
+      if (math.Unit.UNITS[name]) math.Unit.UNITS[name].currency = currency;
+    }
+  }
   return { name: registered, aliases, readable: name };
 }
 

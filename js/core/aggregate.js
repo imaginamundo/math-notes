@@ -1,4 +1,5 @@
 import { isCurrencyCode } from './currencySymbols.js';
+import { moneyCurrency } from './unitForm.js';
 
 const AGGREGATE_KEYWORDS = {
   sum: 'sum',
@@ -102,6 +103,16 @@ function scan(results) {
       amount = value.value;
     }
     if (typeof amount !== 'number' || !Number.isFinite(amount)) continue;
+
+    // Money counts as its currency, whatever it is called: `3 coffees` defined from
+    // US dollars is US dollars, and joins the other US dollar amounts (UNIT-06).
+    const currency = moneyCurrency(value);
+    if (currency) {
+      const inCurrency = value.to(currency);
+      const group = findGroup(groups, 'currency', currency, inCurrency);
+      addUnit(group, currency, inCurrency, inCurrency.toNumber());
+      continue;
+    }
 
     const name = unitName(value);
     const kind = unitKind(name);

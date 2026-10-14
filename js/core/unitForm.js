@@ -43,6 +43,21 @@ export function leadingCurrency(unit) {
 const isSingleUnit = (unit) => unit.units.length === 1 && unit.units[0].power === 1;
 
 /**
+ * The currency a plain amount of money is in: `USD` for `5 USD`, and for a custom
+ * unit defined from money (`unit coffee = $4.5`, then `3 coffees`) the currency it
+ * was defined in, which `createUserUnit` records on the unit definition. Null for
+ * anything that is not an amount of money. A value is classified by what it is,
+ * not by its name, or `3 coffees` and `$10` are two unrelated groups (UNIT-06).
+ */
+export function moneyCurrency(unit) {
+  if (!unit || unit.isUnit !== true || !isSingleUnit(unit)) return null;
+  const [entry] = unit.units;
+  if (entry.prefix && entry.prefix.name) return null;
+  if (isCurrencyCode(entry.unit.name)) return entry.unit.name;
+  return typeof entry.unit.currency === 'string' ? entry.unit.currency : null;
+}
+
+/**
  * A compound result that cancels down to one plain unit (`(USD year) / day` →
  * `USD`, `(GB s) / MB` → `s`, `(km year) / day` → `km`) is stored as that unit,
  * not as the raw compound. The raw form is only simplified when it is drawn, so

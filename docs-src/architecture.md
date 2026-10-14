@@ -300,7 +300,11 @@ A line `unit widget = 3.5 kg` defines a custom unit (`js/core/userUnits.js`
 parses it, `js/eval/userUnits.js` registers it with its plural and removes it
 when the line goes). A definition is excluded from the total and from `prev`,
 and a name already taken by a built-in unit, a symbol or a reserved word is an
-error. mathjs decides when a function body is compiled whether a free symbol names a
+error. A unit defined from money (`unit coffee = $4.5`) records its currency on its
+own mathjs definition (`createUserUnit`), and the aggregates classify a value by
+`moneyCurrency` (`js/core/unitForm.js`), not by its name, so `3 coffees` totals with
+`$10`, and two such units on different currencies raise the same conflict as two
+currencies do. mathjs decides when a function body is compiled whether a free symbol names a
 unit, so a function defined above a `unit` line would never see it; the engine
 re-checks in `SymbolNode.onUndefinedSymbol`, which is reached when the function is
 called.

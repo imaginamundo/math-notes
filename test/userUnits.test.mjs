@@ -147,3 +147,56 @@ test('AGG-04: deleting the unit definition makes the unit undefined again', () =
   assert.equal(gone.type, 'error');
   assert.match(String(gone.value), /widget/);
 });
+
+// REVIEW.md UNIT-06: a custom unit defined from a currency (`unit coffee = $4.5`)
+// was classified by its name, so totals, `sum` and group headers split it from its
+// own currency and dropped both, yet merged two such units from different
+// currencies through exchange rates.
+import { FIXTURE_RATES } from './helpers/rates.mjs';
+
+const money = (lines) => {
+  const { results, total } = createEngine({ rates: FIXTURE_RATES }).evaluateLines(lines);
+  const shown = (value) => (value === null || value === undefined ? null : formatResult(value));
+  return {
+    rows: results.map((row) => (row.type === 'error' ? `ERR ${row.value}` : shown(row.value))),
+    total: shown(total),
+  };
+};
+
+test('UNIT-06: a unit defined from a currency totals with that currency', () => {
+  const lines = ['unit coffee = $4.5', '3 coffees', '$10'];
+  assert.equal(money(lines).total, 'US$ 23.5');
+  assert.equal(money([...lines, 'sum']).rows[3], 'US$ 23.5');
+  assert.equal(money(['Group:', ...lines.slice(1), 'end'].slice(0, 4)).rows.length, 4);
+});
+
+test('UNIT-06: it still totals when a plain number is in the block', () => {
+  // The plain 5 folds into the dollar group: 13.5 + 10 + 5.
+  assert.equal(money(['unit coffee = $4.5', '3 coffees', '$10', '5']).total, 'US$ 28.5');
+});
+
+test('UNIT-06: custom units on two different currencies are a conflict', () => {
+  const sheet = ['unit coffee = 4.5 USD', 'unit latte = 5 EUR', '2 coffees', '2 lattes', 'sum'];
+  assert.match(money(sheet).rows[4], /ERR Cannot combine/);
+});
+
+test('UNIT-06: a custom unit on one currency does not merge with another currency', () => {
+  const sheet = ['unit coffee = 4.5 USD', '2 coffees', '€10', 'sum'];
+  assert.match(money(sheet).rows[3], /ERR Cannot combine/);
+});
+
+test('UNIT-06: a unit defined from another money unit is money too', () => {
+  const lines = ['unit coffee = $4.5', 'unit big coffee = 2 coffees', '1 big coffee', '$1'];
+  assert.equal(money(lines).total, 'US$ 10');
+});
+
+test('UNIT-06: units that are not money are unaffected', () => {
+  assert.equal(money(['unit widget = 3.5 kg', '2 widgets', '1 kg']).total, '2.286… widgets');
+});
+
+test('UNIT-06: deleting the definition removes the money kind with it', () => {
+  const engine = createEngine({ rates: FIXTURE_RATES });
+  engine.evaluateLines(['unit coffee = $4.5', '3 coffees']);
+  const after = engine.evaluateLines(['3 coffees', '$10']).results[0];
+  assert.equal(after.type, 'error');
+});
