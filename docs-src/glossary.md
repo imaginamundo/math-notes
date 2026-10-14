@@ -22,7 +22,7 @@ Terms used throughout the codebase and this documentation.
   `computeTotal(results, mode)`. Only the total changes, so the line cache is
   unaffected.
 - **Tab** — a worksheet. `TabState` is `{ tabs, activeId, nextTabNumber }`;
-  each `Tab` is `{ id, name, content }`.
+  each `Tab` is `{ id, name, content, caret }`.
 - **Snapshot** — a versioned backup of a tab (id, name, content, timestamp)
   stored in IndexedDB and capped at 10 per tab.
 - **Worker** — the Web Worker (`js/worker.js`) that evaluates sheets off the
@@ -142,10 +142,12 @@ Terms used throughout the codebase and this documentation.
 - **Share token** — the `<version>.<base64url>` part of a share link: a version
   tag, then base64url of the (usually `deflate`-compressed) sheet JSON.
 - **Import** — opening a share link. Always additive: it prompts, then adds a
-  new tab; it never overwrites the active sheet.
+  new tab; it never overwrites the active sheet. (Importing a file from
+  **Settings → Files** is different: it replaces the active sheet's content,
+  after a confirm when the sheet is not empty.)
 - **Onboarding** — the first-run experience: the seeded starter sheet
   (`js/ui/onboarding.js`). Gated on `math-notes-onboarded`.
-- **Starter sheet** — the `Welcome` sheet seeded on a first run. Every line
+- **Starter sheet** — the localized sheet (`Welcome` in English) seeded on a first run. Every line
   evaluates, so the first screen already demonstrates the app.
 - **Starter prompt** — the floating **Keep content** / **Clear content** control
   (`js/ui/starterPrompt.js`) shown while the active tab still holds exactly the

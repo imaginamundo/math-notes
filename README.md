@@ -129,7 +129,7 @@ Based on [Numi](https://numi.app/) and [Soulver](https://soulver.app/).
   a fragment the sheet is never sent to the origin, never lands in an access
   log, and is not forwarded in a `Referer` header. Opening one asks first, then
   adds a new tab — it never overwrites the sheet you already have.
-- **Onboarding** — a first visit opens with a working `Welcome` sheet instead
+- **Onboarding** — a first visit opens with a working starter sheet (named `Welcome` in English) instead
   of an empty page: variables, labels and `sum`, tags, unit durations,
   percentages and dates. The sheet offers **Keep content** / **Clear content**
   to dismiss or empty it.
@@ -198,7 +198,7 @@ Run the app locally with:
 npm run dev
 ```
 
-### Tests
+### Tests and checks
 
 The calculation pipeline is pure and covered by the Node test runner, and the
 DOM-heavy behavior (find & replace, undo, snapshots, tab reordering) is covered
@@ -208,6 +208,21 @@ by browser tests driven through puppeteer:
 npm test
 ```
 
+The same tests also enforce structural rules (layering, the CSP digest, the
+service-worker manifest); see `docs-src/architecture.md`. Before committing, run
+the three checks CI runs:
+
+```sh
+npm run lint
+npm run format:check
+npm test
+```
+
+`npm run lint:fix` and `npm run format` fix what they can. If you changed any
+precached file (`js/`, `index.html`, `style.css`), also run
+`npm run build:sw-manifest`: an installed PWA never revalidates its cache, so
+the cache version has to be bumped, and `npm test` fails when it was not.
+
 `test/perf.test.mjs` seeds a ~1000-line sheet and prints the first-paint and
 per-keystroke timings. Run it alone to compare a change against a baseline:
 
@@ -215,18 +230,22 @@ per-keystroke timings. Run it alone to compare a change against a baseline:
 node --test test/perf.test.mjs
 ```
 
-### Updating math.js
+### Updating mathjs
 
-The pinned version lives in two places, keep them in sync:
-
-- the import in `js/lib/math.js`
-- the `mathjs` devDependency in `package.json`
-
-Regenerate the bundle, then minify it into the file the app loads:
+The pinned version is the `mathjs` devDependency in `package.json`; there is no
+second pin and no wrapper file. After changing it and running `npm install`,
+regenerate the bundle (esbuild bundles `mathjs` from `node_modules` into the
+minified `js/lib/math.bundle.min.js` the app loads) and refresh the
+service-worker manifest, since the bundle is precached:
 
 ```sh
-make -C js/lib
+npm run build:mathjs
+npm run build:sw-manifest
 ```
+
+The three generated outputs (the bundle, the Examples modules and the docs site)
+are committed and built with Node, using the `esbuild` and `marked` devDependencies,
+so there is nothing else to install.
 
 ### Updating Examples
 
@@ -235,7 +254,8 @@ The Examples prose is authored in Markdown under
 example chip). Regenerate the committed modules after editing:
 
 ```sh
-make -C js/i18n
+npm run build:i18n
+npm run build:sw-manifest
 ```
 
 ### Updating the documentation site
@@ -246,7 +266,7 @@ one file per category, with the page order in `docs-src/src/structure.json`. A
 Math Notes** buttons. Regenerate the committed static site after editing:
 
 ```sh
-make -C docs-src
+npm run build:docs
 ```
 
 The built pages live in `docs/` and are published at `/docs`, so any static
@@ -254,13 +274,18 @@ server rooted at the repository serves them directly.
 
 ### Architecture
 
-- `js/core/` — parsing and evaluation (`calculate.js`, `parseLine.js`,
-  `preprocess.js`, `aggregate.js`, `multiWordVariables.js`, `currencySymbols.js`,
-  `tabsState.js`, `history.js`, `language.js`).
+- `js/core/` — parsing and evaluation (`calculate.js` and the rules split out of
+  it — `tags.js`, `lineRefs.js`, `boundedExpression.js`,
+  `aggregateSubstitution.js`, `friendlyErrors.js` — plus `parseLine.js`,
+  `preprocess.js`, `aggregate.js`, `unitMix.js`, `userUnits.js`,
+  `autocomplete.js`, `tabsState.js`, `history.js`, `language.js`, and more).
 - `js/eval/` — mathjs extensions and preprocessors (`aliases.js`, `cssUnits.js`,
-  `currency.js`, `datetime.js`, `measures.js`, `rates.js`, `rounding.js`,
-  `scales.js`, `symbols.js`, `timespan.js`, `units.js`, `wordOperators.js`,
-  `percentage.js`).
+  `currency.js`, `calendar*.js`, `measures.js`, `rates.js`, `rounding.js`,
+  `scales.js`, `symbols.js`, `timespan.js`, `units.js`, `userUnits.js`,
+  `wordOperators.js`, `percentage.js`, and more).
+- `js/index.js`, `js/evalClient.js`, `js/worker.js` and `js/protocol.js` — the
+  composition root, the worker client, the Web Worker and the message protocol
+  they share.
 - `js/i18n/` — interface translations: the runtime, per-language `ui/` chrome
   dictionaries, and the `src/` Markdown with its generated `examples/` content
   modules.
@@ -271,8 +296,9 @@ server rooted at the repository serves them directly.
 - `js/storage/` — persistence (`tabsStore.js` for the tab collection,
   `snapshots.js` for the versioned IndexedDB backups).
 - `js/share/` — share-link encoding (`shareLink.js`).
-- `js/util/` — shared pure helpers (debounce, storage, clipboard, text, scroll,
-  sequence, compress).
+- `js/util/` — shared helpers (debounce, storage, clipboard, text, scroll,
+  sequence, compress, dom, events).
 - `docs/` — the generated documentation site (published at `/docs`).
 - `docs-src/` — its Markdown sources (`src/`), build (`build.js`) and the
-  developer notes (`architecture.md`, `glossary.md`).
+  developer notes (`architecture.md`, `glossary.md`). Read `architecture.md` for
+  the full, current module map.

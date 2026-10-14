@@ -16,12 +16,12 @@ no build step and is installable as a PWA.
   tests (find & replace, undo, snapshots, tab reordering).
 - `npm run lint` / `npm run lint:fix` — ESLint.
 - `npm run format` / `npm run format:check` — Prettier.
-- `make -C js/lib` — rebuild the committed mathjs bundle (after bumping the
-  version in `js/lib/math.js` and `package.json`).
-- `make -C js/i18n` (or `npm run build:i18n`) — regenerate the committed
-  Examples content modules from the Markdown in `js/i18n/src/`.
-- `make -C docs-src` (or `npm run build:docs`) — regenerate the committed
-  documentation site in `docs/` from the Markdown in `docs-src/src/`.
+- `npm run build:mathjs` — rebuild the committed mathjs bundle with esbuild
+  (after bumping the `mathjs` version in `package.json`).
+- `npm run build:i18n` — regenerate the committed Examples content modules from
+  the Markdown in `js/i18n/src/`.
+- `npm run build:docs` — regenerate the committed documentation site in `docs/`
+  from the Markdown in `docs-src/src/`.
 - `npm run build:sw-manifest` — recompute `cache-manifest.json` and bump the
   service-worker cache version. Run it after changing any precached file
   (`js/`, `index.html`, `style.css`); `npm test` fails if you forget.
@@ -48,7 +48,7 @@ committing. Make one focused change per commit.
   localStorage, and versioned snapshots are auto-saved to IndexedDB
   (`js/storage/snapshots.js`) and recoverable from Settings.
 - A separate documentation site is generated from Markdown in `docs-src/src/`
-  into committed static HTML in `docs/` (Deno + marked, like the Examples
+  into committed static HTML in `docs/` (Node + marked, like the Examples
   content)
   and published at `/docs`. It is a multi-page, per-language site; the footer
   Documentation link (`js/ui/docsLink.js`) points at the active language, and
@@ -95,10 +95,29 @@ for the project's terminology.
 - `js/core/` evaluation (including the pure undo history in `history.js`),
   `js/eval/` mathjs extensions/preprocessors,
   `js/render/` highlighting/formatting, `js/ui/` DOM behavior,
-  `js/storage/` persistence, `js/util/` shared pure helpers (debounce,
-  storage, clipboard, text, scroll, sequence).
+  `js/storage/` persistence, `js/util/` shared helpers (debounce, storage,
+  clipboard, text, scroll, sequence, compress, dom, events; the pure ones are
+  unit-tested, the rest touch the browser).
 - Guard every storage/worker call (localStorage, IndexedDB, clipboard may be
   unavailable); wrap in try/catch or `.catch(() => {})`.
 - Worker updates are async: use the debounced `schedule`/`update` client in
   `js/evalClient.js`; `find` re-marks the view synchronously on input and never
   forces an evaluation itself.
+- Worker message types and setting names come from `js/protocol.js` (`MSG`,
+  `SETTING`), never string literals.
+
+## Rules the tests enforce
+
+`npm test` fails if you break any of these (details in
+`docs-src/architecture.md`, "Rules the tests enforce"):
+
+- `localStorage` is only used inside `js/util/storage.js`.
+- `js/core/` and `js/eval/` do not import `js/ui/` or `js/i18n/`, and `js/eval/`
+  does not import `js/storage/`.
+- `js/index.js` registers every listener before it calls `boot()`.
+- The CSP `<meta>` in `index.html` carries the SHA-256 digest of each inline
+  script: if you edit the inline bootstrap script, recompute the digest.
+- Every `data-i18n` key exists in every locale, and every language's Examples
+  have the same sections.
+- Every module imports cleanly in Node, and every imported module is precached.
+- Editor text meets WCAG AA contrast (4.5:1) in every theme.

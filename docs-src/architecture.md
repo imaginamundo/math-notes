@@ -31,7 +31,12 @@ and the ghost results stay scrollable.
 
 The textarea no longer scrolls natively, so the caret is kept in view by
 `js/ui/editor.js`, which computes the caret position from monospace column/line
-math and scrolls `.editor-scroll` on input, clicks and selection changes.
+math and scrolls `.editor-scroll` on input, `keyup`, clicks and selection
+changes. It tracks the scroller's offsets from its `scroll` event rather than
+reading them (a read while the rows are dirty forces a layout of the whole
+sheet), and writes `scrollLeft`/`scrollTop` only when they change. A `scroll`
+listener on the textarea resets any native scroll it is given, so the layers
+cannot slide apart.
 
 Both layers must share **identical metrics** — font, font-size, line-height,
 padding, and `white-space: pre` — or the ghost text drifts from the caret.
@@ -42,7 +47,8 @@ The view is a sequence of `.line-row` block wrappers (one per line), each
 containing the highlighted `.line` span and an optional `.ghost-result`. Rows
 are `width: max-content` so the view (and therefore the scrollable extent)
 spans the line plus its result. There are no `<br>` separators; each row is
-exactly one `1.65em` line.
+exactly one line high: `js/ui/editor.js` sets `--editor-line-height` to the
+font size × 1.65, rounded to whole pixels, on both layers.
 
 ### End-of-line padding
 
@@ -56,10 +62,12 @@ toward the scrollable extent and gives breathing room after long lines.
 
 Each line goes through `preprocess` (`js/core/preprocess.js`) before mathjs:
 `measures` → `scales` → `symbols` → `percentage` → `wordOperators` → `rates` →
-`rounding`, in that order (measures first so a scale-like subject such as
-`4k video` is recognised before `scales` rewrites it; scales before currency so
-`$2k` becomes `2000 USD`; percentage before word operators so its `of|on|off`
-phrases are consumed first; rounding last, so it wraps the normalised value).
+`calendar` → `timespan` → `rounding`, in that order (measures first so a
+scale-like subject such as `4k video` is recognised before `scales` rewrites it;
+scales before currency so `$2k` becomes `2000 USD`; percentage before word
+operators so its `of|on|off` phrases are consumed first; calendar before
+timespan so a date's `as <pattern>` is not read as a conversion; rounding last,
+so it wraps the normalised value).
 `js/eval/symbols.js` only treats 3-letter currency codes as units in currency
 contexts (amounts and `to`/`in` conversions), so `usd = 5` stays a variable. A
 currency code written before its amount is flipped so the amount leads
@@ -193,22 +201,46 @@ incremental cache. A lazy shared instance is exported as the module's
 tests or embedders can build isolated engines.
 
 Despite the `core/` name this file is not strictly pure: it is the composition
-root for the engine and reads stored settings (total mode, measurement system) at
-build time. Settings changed later are pushed in — to the worker as a message, to
-the main-thread engine by `js/evalClient.js` — so the engine never subscribes to
-browser events. The rules it wires — parsing, preprocessing, aggregation, unit
-checks — are pure and live in the sibling modules; the assembly is kept here
-rather than in a separate layer.
+root for the engine and reads two stored settings (total mode, measurement
+system) at build time. Currency rates are not among them: they are an argument
+(`createEngine({ rates })`), so the engine never reads rate storage. Settings
+changed later are pushed in — to the worker as a message, to the main-thread
+engine by `js/evalClient.js` — so the engine never subscribes to browser
+events. The rules it wires are pure and live in sibling modules:
+`parseLine.js`, `preprocess.js`, `aggregate.js`, `unitMix.js`, and the pieces
+split out of the engine — `tags.js` (tag aggregation and substitution),
+`lineRefs.js` (`line(n)`), `boundedExpression.js` (the size guard),
+`aggregateSubstitution.js` (`sum`/`average` as scope values) and
+`friendlyErrors.js` (readable messages). The assembly stays here rather than in
+a separate layer.
 
 `evaluateLines(lines)` parses each line, evaluates it against a `variables`
 scope (with `prev` and aggregate blocks), and returns
 `{ results, total, startLine }`. Each engine keeps a per-input cache of the
 last lines and their per-line results. When called with new input, it diffs to
 the first changed line, rebuilds the variable/aggregate context up to that line
-from cached values, and only re-evaluates from there. **Invariant:** results
+from cached values, and only re-evaluates from there. Each line goes through
+an ordered list of handlers (`LINE_HANDLERS`: group end, stray `end`, unit
+definition, tag substitution, tag request, reserved label, bare aggregate,
+expression), and the first that claims the line produces its result.
+**Invariant:** results
 must stay correct across any sequence of interleaved calls (the cache is not
 per caller). Registering new currency rates bumps an _environment revision_
 that forces a full recompute, so cached conversions never go stale.
+
+An expression line is evaluated against a scope created with
+`Object.create(ctx.variables)`: the sheet's variables are reached through the
+prototype instead of being copied for every line (which made a sheet of
+assignments cost O(lines²)), and what only that line needs — `prev`, tag
+aggregates, line references — is assigned as own properties of the fresh object,
+so nothing leaks into the next line. The preprocessors are given a `names` view
+over the same two sources.
+
+A line `unit widget = 3.5 kg` defines a custom unit (`js/core/userUnits.js`
+parses it, `js/eval/userUnits.js` registers it with its plural and removes it
+when the line goes). A definition is excluded from the total and from `prev`,
+and a name already taken by a built-in unit, a symbol or a reserved word is an
+error.
 
 A small structural pass (`findGroups`) pairs header lines (`Name:` with no
 expression) with `end` rows. A closed group's **header** row becomes an
@@ -245,9 +277,10 @@ their own:
 
 `assertBoundedExpression` rejects list literals and statically resolvable ranges
 longer than `MAX_LIST_LENGTH` (100) before evaluation, so `1:1e9` cannot
-allocate an unbounded array in the worker. It parses only when the expression
-contains `[` or `:`, the only bounded constructs, so ordinary lines skip the
-extra parse.
+allocate an unbounded array in the worker. It also bounds `range(...)` and
+the `ones`/`zeros` constructors, whose size sits inside a call rather than a
+literal. It parses only when the expression contains `[`, `:` or one of those
+calls, so ordinary lines skip the extra parse.
 
 ### The worker
 
@@ -260,16 +293,29 @@ protocol, and the debounced `schedule`/`flush` update scheduling.
 
 Each request posts `{ id, type: 'evaluate', lines, from }`, where `lines` is only
 the suffix from the first changed line and `from` its start index (0 for the
-first request, `-1` when nothing changed). The worker keeps the full sheet and
+first request, or the line count with an empty suffix when nothing changed;
+`-1` is the reply's `startLine`, meaning no line changed). The worker keeps the full sheet and
 rebuilds it with `applyLinePatch`, so an edit near the end of a long sheet ships
 a few lines instead of the whole document. `update()` draws the typed input
 first (phase one) and then, on reply, applies the results — but only if the
 sheet text is still unchanged, so a stale reply is never rendered and two
 back-to-back requests for the same text cannot both be dropped. Every request
-also has a timeout so a hung worker can't freeze the sheet. If the worker fails
-to load (its module graph was never cached, which is common offline) or crashes,
-the failing request is re-run on the main-thread engine and every later
-evaluation uses it, so the sheet still evaluates instead of staying blank.
+has a 10 s timeout, and `recoveryFor` decides what a failure means. If the
+worker fails to load (its module graph was never cached, which is common
+offline) or crashes, the failing request is re-run on the main-thread engine and
+every later evaluation uses it, so the sheet still evaluates instead of staying
+blank. A timeout only means this worker is stuck: it is terminated and the same
+request goes to a fresh one. A second timeout for that request is reported as a
+status message and not retried on the main thread, which would block typing for
+at least as long as the worker already needed.
+
+The messages and setting names both ends speak live in `js/protocol.js` (`MSG`,
+`SETTING`): `evaluate`, `setting`, `result` and `error`, and the settings `rates`,
+`measurement`, `total-mode`, `precision` and `clock-format`. The worker routes all
+of them; the main-thread fallback applies only the engine-owned ones (rates,
+measurement system, total mode), since precision and clock format only affect
+how results are formatted. `test/protocol.test.mjs` pins both tables to the
+protocol.
 
 **Serialization:** mathjs `Unit`, `BigNumber`, etc. lose their prototypes in
 structured clone. The worker therefore pre-formats every result value into a
@@ -277,12 +323,30 @@ string before posting. `patchResults` must accept both numbers (main-thread
 fallback path) and strings (worker path).
 
 Currency rates are fetched on the main thread and cached in localStorage by
-`js/storage/currencyRates.js`, which has no mathjs dependency. `evalClient`
-forwards them to the worker as a `{ type: 'setting', name: 'rates', value }`
+`js/storage/currencyRates.js`, which has no mathjs dependency. The composition
+root (`js/index.js`) starts the fetch (`fetchRates`, then `startRateRefresh`,
+which re-checks hourly; a fetch times out after 10 s and falls back to the cached
+rates, reported as `source: 'stale'`) and, on each `CURRENCY_UPDATED`, calls
+`evalClient.syncRates`. That posts a `{ type: 'setting', name: 'rates', value }`
 message and, when the main-thread fallback is in use, calls
 `registerCurrencyRates` on its engine directly. A lazy `calculate.js` import is
-the fallback when `Worker` is unavailable or dies; a freshly created fallback
-engine seeds its rates from the cache.
+the fallback when `Worker` is unavailable or dies; `evalClient` seeds a fresh
+worker, and a freshly loaded fallback engine, from the cached rates. The base
+currency (`BASE`) is defined once in `js/core/currencySymbols.js`.
+
+### The composition root
+
+`js/index.js` runs `boot()` in a fixed order, which is a contract: resolve the
+language, capture the onboarding keys _before_ `initTabs` persists a fresh
+collection, initialise tabs (which evaluate whatever was restored), then the
+features that read the active sheet, then the starter prompt, then onboarding
+last. `initAutocomplete` must run before `initIndent`, because an open popup
+swallows Tab. Every listener `js/index.js` owns is registered _before_ `boot()`
+runs, since the inits inside it notify synchronously (a quota hit while the
+collection persists, a font size restored at startup, the first cached rate) and
+a later listener would miss that message; a conventions test checks it. A failed
+boot reports a sticky status message and leaves the saved collection untouched.
+The rate fetch starts last, after every `CURRENCY_*` listener exists.
 
 ## Tabs and persistence
 
@@ -381,7 +445,12 @@ scrolling to a match anchors on the row.
 ## Autocomplete
 
 `js/ui/autocomplete.js` draws a caret-anchored `role="listbox"` popup inside
-`.editor-scroll`. It opens while a word of at least two letters is being typed
+`.editor-scroll`. The editor stays a plain textbox: ARIA does not allow
+`combobox` on a `<textarea>`, so it carries only `aria-controls` and
+`aria-autocomplete="list"`, and a polite `role="status"` region outside the
+popup announces the count ("5 suggestions") and, as the arrow keys move, the
+highlighted suggestion and its position. It opens while a word of at least two
+letters (`MIN_PREFIX`) is being typed
 (or right after a single `#`) and on `Ctrl`/`Cmd`+`Space`, offering the sheet's
 own assignments and tags plus the curated vocabulary in
 `js/core/vocabulary.js` (keywords, functions, constants and the units from
@@ -392,8 +461,11 @@ finds the word around the caret (leading digits stay outside it, so `300g`
 completes `g`; a `#tag` comes back with `tag: true` and `-` allowed inside),
 `suggestionsFor` ranks matches (variables and prefix matches first, exact
 matches dropped; a leading `#` restricts matches to tags), and `applyCompletion`
-rewrites the range (functions get an opening bracket). `collectAssignments` and
-`collectTags` collect variable names and tags with `parseLine`.
+rewrites the range (functions get an opening bracket); at most eight (`MAX_ITEMS`)
+entries show. `suggestionFacts` reads
+one line (its variable, unit definition and tags, via `parseLine`) and
+`suggestionsFrom` turns the per-line facts into the popup's list, so the UI keeps
+facts per line text and re-parses only the lines an edit touched.
 
 The popup is positioned from `editorScroll.caretPosition()` — the glyph and line
 metrics `js/ui/editor.js` already measures — and flips above the caret when
@@ -443,9 +515,13 @@ so its cost tracks the edit, not the sheet:
 - `renderText` rescans the multi-word names only when a changed line is a
   definition (`isMultiWordDefinition`), and re-highlights just the changed rows.
 - `js/ui/editor.js` caches the font-derived metrics, the content extent (longest
-  line and count) and the line-gutter inset, so sizing and caret tracking do not
-  read `getComputedStyle`/`getBoundingClientRect` per keystroke; a resize or font
-  change invalidates them.
+  line and count), the line-gutter inset, the scroller's client size (a
+  `ResizeObserver`) and its scroll offsets (its `scroll` event), so sizing and
+  caret tracking do not read `getComputedStyle`/`getBoundingClientRect` or force
+  a layout per keystroke; a resize or font change invalidates them.
+- The autocomplete keeps each line's parsed facts by line text, so an edit
+  re-parses only the lines it touched, an inserted line costs one parse, and the
+  option rows are updated in place instead of rebuilt.
 - `updateActiveLine` touches only the outgoing and incoming rows, and the
   line-number gutter (`js/ui/lineNumbers.js`) likewise moves only its highlight.
 - `patchResults` refreshes group shading and `line(n)` references from the first
@@ -467,14 +543,16 @@ container's vertical offset so the numbers stay glued to the text. It is
 Two independent parts, both dismissible.
 
 **The starter sheet.** On a first run the first tab is renamed `Welcome` and
-filled with a short working sheet (`STARTER_SHEET` in `js/ui/onboarding.js`) —
+filled with a short working sheet (`starterSheet()` in `js/ui/onboarding.js`, built
+from the translated `starter.*` strings, so it is localized) —
 every line evaluates, so the opening screen demonstrates the app rather than
 describing it. It is seeded through `tabsApi.seedSheet`, which fills the
-_active_ tab; that is deliberately different from an import, which adds one.
+_active_ tab, like an import (which replaces the active sheet's content after a
+confirm) and unlike a share link, which opens in a new tab.
 
 **The starter prompt.** `js/ui/starterPrompt.js` adds a small floating **Keep
 content** / **Clear content** control just below the seeded sheet. It is visible
-only while the active tab still holds exactly `STARTER_SHEET` and the visitor
+only while the active tab still holds exactly `starterSheet()` and the visitor
 has not dismissed it; either button (or editing away from the sheet) sets
 `math-notes-starter-dismissed`, so it never returns.
 
@@ -517,7 +595,7 @@ applies the language, so the English source never flashes.
 Strings are split by area. `js/i18n/ui/<lang>.js` is the app chrome, eager and
 marked with `data-i18n` in `index.html`. The Examples prose is authored in
 Markdown at `js/i18n/src/examples.<lang>.md` and rendered at **build time**
-(`make -C js/i18n`, deno + marked, like the mathjs bundle) into the committed
+(`npm run build:i18n`, Node + marked) into the committed
 modules `js/i18n/examples/<lang>.js`; a ` ```calc ` fence becomes a clickable
 example chip. `js/ui/recipes.js` lazy-imports the active language only when the
 Examples modal opens, so the prose never touches the boot path or the worker. The
@@ -547,13 +625,22 @@ under `js/`, so its default scope is `/` and it can cache the app shell as well
 as the documentation. A worker under `/js/` could only ever control `/js/`
 (the browser's max-scope rule), which would leave the app and `/docs` online
 only. It precaches the shell and every module (except the build-only
-`js/i18n/build.js` and `js/lib/math.js` / `math.bundle.js`) into a versioned
-cache and serves same-origin GETs stale-while-revalidate; the Examples content
-is cached too, so the modal works on a first offline visit. Each asset is added
+`js/i18n/build.js`) into a versioned
+cache and serves same-origin GETs cache-first, with no revalidation: a version's
+modules are immutable until the next install, so a session never mixes versions.
+There is no `skipWaiting`, so a new version waits until every tab is closed. The
+Examples content is cached too, so the modal works on a first offline visit. Each asset is added
 to the cache independently, so one transient failure cannot abort the whole
 install. Both the app
 (`js/registerServiceWorker.js`) and the docs (`docs-src/src/docs.js`) register
 it; `test/browser.test.mjs` asserts the registration scope is the whole origin.
+
+Because nothing is revalidated, a change to any precached file only reaches an
+installed PWA if `serviceWorker.js` changes bytes. `scripts/sw-manifest.mjs`
+(`npm run build:sw-manifest`) hashes every precached file into
+`cache-manifest.json` and bumps the version in `cacheName` whenever a hash
+changed; `test/serviceWorker.test.mjs` fails if the committed manifest or version
+is stale.
 
 ## Accessibility notes
 
@@ -561,16 +648,51 @@ it; `test/browser.test.mjs` asserts the registration scope is the whole origin.
   input.
 - The tabs implement the ARIA tabs pattern (`role="tab"` /
   `role="tabpanel"` with `aria-controls` and `aria-labelledby`).
+- A tab contains no other interactive control: its `×` is a pointer-only,
+  `aria-hidden` span, and Delete/Backspace closes the focused tab (after a
+  confirm), advertised with `aria-keyshortcuts`. The tab bar is one tab stop
+  (roving `tabindex`).
+- The editor never traps the keyboard (WCAG 2.1.2). Tab indents only for a
+  multi-line selection or a caret at a line start or in its leading whitespace,
+  and moves focus on anywhere else; Escape moves focus to the active tab, unless
+  the suggestion popup or the find bar is open, which take Escape first
+  (`js/ui/indent.js`).
+- The active line's result and the total are announced through separate polite
+  live regions, and the autocomplete count through its own (see Autocomplete).
 - Icon-only buttons carry `aria-label`s (a `title` is not reliably read).
+- Text on the editor background meets WCAG AA contrast (4.5:1) in every theme;
+  `test/contrast.test.mjs` checks it.
 - The documentation site is static HTML with a skip link, landmark elements and
   a keyboard-reachable sidebar.
+
+## Rules the tests enforce
+
+Several structural rules are checked by `npm test`, so a violation fails the
+build instead of surfacing in a browser:
+
+- `localStorage` is only touched inside `js/util/storage.js`
+  (`test/conventions.test.mjs`).
+- `core/` and `eval/` do not import `ui/`, `i18n/`, and (for `eval/`) `storage/`,
+  so the engine and the worker graph stay free of the DOM, the dictionary and
+  persistence.
+- `js/index.js` registers its listeners before it calls `boot()`.
+- The CSP `<meta>` in `index.html` carries the SHA-256 digest of every inline
+  script. Editing the inline bootstrap script means recomputing that digest, or
+  a real browser blocks it while every other test still passes.
+- Every `data-i18n` key exists in every locale, and every language has the same
+  Examples and section count.
+- Every module imports cleanly in Node (`test/modules.test.mjs`; the browser-only
+  entry points are excluded), and every module the app imports is precached.
+- The precache manifest and the service-worker version are current (see
+  Offline).
+- Editor text meets WCAG AA contrast in every theme (`test/contrast.test.mjs`).
 
 ## Documentation site
 
 The long-form user guide lives at `/docs`. It is authored in Markdown under
 `docs-src/src/<lang>/` — one file per category, ordered by
 `docs-src/src/structure.json` — and rendered at **build time** by
-`docs-src/build.js` (Deno + marked, the same toolchain as the Examples content)
+`docs-src/build.js` (Node + marked, the same toolchain as the Examples content)
 into committed static HTML in `docs/`. No runtime Markdown and no backend are
 involved, and because the built site sits directly under `docs/`, any static
 server rooted at the repository serves it.
@@ -602,4 +724,4 @@ footer Documentation link is pointed at the active language by
 `js/ui/docsLink.js`. `test/docs.test.mjs` checks source/output parity and that
 every internal `/docs` link resolves; `test/browser.test.mjs` loads a page and
 asserts the examples are highlighted. The site is committed output: run
-`make -C docs-src` after editing the Markdown.
+`npm run build:docs` after editing the Markdown.
