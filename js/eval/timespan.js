@@ -10,9 +10,11 @@
 
 import { BEFORE_WORD, AFTER_WORD, WORD } from '../core/identifiers.js';
 
+// The year and month are mathjs's (365.25 and 30.4375 days), because those built the
+// value being taken apart: `1 year` has to come out as exactly 1 year.
 const UNIT_SECONDS = {
-  year: 365.2425 * 86400,
-  month: 30.436875 * 86400,
+  year: 365.25 * 86400,
+  month: 30.4375 * 86400,
   week: 7 * 86400,
   day: 86400,
   hour: 3600,

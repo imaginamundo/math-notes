@@ -216,6 +216,13 @@ than the first volatile line, even when no text changed, so `now`, `today`, `uni
 `days until X` are not frozen while lines below them are edited. A date literal does not
 read the clock. The page re-evaluates when it becomes visible or regains focus.
 
+Clock arithmetic is in wall-clock time: an interval between two clock times counts minutes
+of the day (so `1:00 - 4:00` is 3 hours on the day the clocks change), and hours added to
+a clock time or to a plain date move the wall clock. A midpoint is whole days at noon, the
+later day for an odd span, so it is the same date in every time zone. A timespan takes
+years and months apart with mathjs's own sizes (365.25 and 30.4375 days), so `1 year`
+comes out as exactly 1 year.
+
 Tags in calculations: trailing `#tags` label a line only when the code before them is a
 finished expression (`isCompleteCode` in `parseLine.js`); after an operator, `=`, `(` or a
 word operator (`5 + #food`, `x = #food`) the tag is an operand and the line is not

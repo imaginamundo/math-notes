@@ -45,7 +45,8 @@ function applyDuration(date, parts, sign) {
   if (wholeMonths) result = shiftMonths(result, sign * wholeMonths);
   if (wholeDays) result = shiftDays(result, sign * wholeDays);
   if (subDay) {
-    result = new Date(result.getTime() + sign * elapsed * 1000);
+    // Wall-clock time, so `1:00 + 3 hours` is 4:00 even on the day the clocks change.
+    result.setMilliseconds(result.getMilliseconds() + sign * elapsed * 1000);
     result.clock = true;
   }
   return result;
@@ -225,12 +226,18 @@ function clockAdd(text, duration, sign) {
 function clockInterval(aText, bText, forward, math) {
   const a = requireClock(aText);
   const b = requireClock(bText);
-  if (forward && b <= a) {
-    b.setDate(b.getDate() + 1);
+  // Wall-clock minutes, not elapsed time: `1:00 - 4:00` is 3 hours on every day, even
+  // the one the clocks change.
+  const minutesOf = (date) => date.getHours() * 60 + date.getMinutes();
+  let span = minutesOf(b) - minutesOf(a);
+  if (forward) {
+    if (span <= 0) span += 24 * 60;
+  } else {
+    span = Math.abs(span);
   }
   // Minutes (not seconds) so that arithmetic keeps a unit formatResult draws as
   // a timespan, rather than falling back to raw seconds.
-  const unit = math.unit(Math.round(Math.abs(b - a) / 60000), 'minutes');
+  const unit = math.unit(span, 'minutes');
   unit.timespan = true;
   return unit;
 }

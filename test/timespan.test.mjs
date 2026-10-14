@@ -114,3 +114,12 @@ test('a negative duration keeps its sign', () => {
   assert.equal(valueOf('-1.5 hours in hours and minutes'), '-1 hour 30 min');
   assert.equal(valueOf('1.5 hours in hours and minutes'), '1 hour 30 min');
 });
+
+test('a year or month typed in comes apart into exactly that unit', () => {
+  assert.equal(valueOf('1 year as timespan'), '1 year');
+  assert.equal(valueOf('1 year 2 days'), '1 year 2 days');
+  assert.equal(valueOf('10 years as timespan'), '10 years');
+  assert.equal(valueOf('1 year in years and days'), '1 year 0 days');
+  assert.equal(valueOf('18 months in years and months'), '1 year 6 months');
+  assert.equal(valueOf('2 years 3 months in years and months'), '2 years 3 months');
+});

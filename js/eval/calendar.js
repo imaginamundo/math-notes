@@ -16,7 +16,7 @@
 // concerns live apart: parsing and primitives in calendarDate.js, formatting in
 // calendarFormat.js, arithmetic in calendarArithmetic.js, and the phrase grammar
 // in calendarGrammar.js.
-import { parseDate, requireDate, requireClock, atNoon, WEEKDAYS } from './calendarDate.js';
+import { parseDate, requireDate, requireClock, atNoon, addDays, WEEKDAYS } from './calendarDate.js';
 import { formatDate, formatInterval, formatDatePattern } from './calendarFormat.js';
 import {
   WORKDAY_HOURS,
@@ -70,7 +70,10 @@ function initCalendar(math) {
       __weekNumber: (date) => isoWeek(date),
       __midpointText: (a, b) => {
         const { a: from, b: to } = resolveInterval(a, b, 'span');
-        return new Date((atNoon(from).getTime() + atNoon(to).getTime()) / 2);
+        // Whole days at noon, the later one for an odd span, so the date is the same in
+        // every time zone (a DST change inside the span cannot move it).
+        const [early, late] = from <= to ? [from, to] : [to, from];
+        return addDays(atNoon(early), Math.ceil(daysBetween(early, late) / 2));
       },
       __workdaysInDuration: (text) => workdaysInDuration(text),
       __workdaysBetween: (a, b) => {

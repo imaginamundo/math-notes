@@ -1,5 +1,5 @@
 {
-  "version": 95,
+  "version": 96,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "8ab30c03ce83a52ec3048a552d376b54d3b502247119c24db874b0251d059156",
@@ -35,8 +35,8 @@
     "js/core/userUnits.js": "42d38f541d531a9e86fb5adf176991f7b6a79b04d00bef5940ebc7026c95ff52",
     "js/core/vocabulary.js": "92c3aa0873f5a3e808f4a28ce619d6d40599176ea140eeaa88aab89089a26569",
     "js/eval/aliases.js": "8446e43855628b6e8a6f0cce2b4b621c4a95b1c797e4968416e0e6156065af6d",
-    "js/eval/calendar.js": "eaede740d25123bed2fd3620dfcade976ac26210002b5b74470a448e73bed49e",
-    "js/eval/calendarArithmetic.js": "54bcc2e6680bef9deba479f0f0989ba975b798e1efc6402d11995528963d5154",
+    "js/eval/calendar.js": "d2bdd2a326e6d23d63057e949f380f5dea0a642615dfa0a07710037f2843aa22",
+    "js/eval/calendarArithmetic.js": "1caf79654faadd36ba9ce596680301105d19cda403278b965b1a089078cfe4dd",
     "js/eval/calendarDate.js": "5729f6992eaafbb0a21d3cff4e723c72c4adf63eba286cd4f2b5b5c938a78356",
     "js/eval/calendarFormat.js": "bb26aa59db629c21c61bb5e601cdada33d209d22d26320132a04d6de08bc408f",
     "js/eval/calendarGrammar.js": "04b4b72efa4059a4f2f220768947f92e85c4b0da68cc6b03b98a3c62549921fe",
@@ -50,7 +50,7 @@
     "js/eval/rounding.js": "63df0aa2ff315762c9794c30914bc3419a7baa78d4a11af767479ea17d4b1b09",
     "js/eval/scales.js": "6c82daf165a7ca07314372da2ec6e42ebe10f89be12e19d64275473f3aebca7d",
     "js/eval/symbols.js": "e6b5592fda6e5102330b9c5f2d714731f8ad118c01b5491b9c21e6bc92158924",
-    "js/eval/timespan.js": "9e918766b233fa8725c7310c04c0a4742c26b15de1e22298e567953eaf148921",
+    "js/eval/timespan.js": "07bacb5669d01024ccfa3d8e45280fbe41edd21566c5aa145e6438c7eee22417",
     "js/eval/unitRuns.js": "270cd389d4e32f9bd35709692dc5ab02c084117a8f88d4ad87acb2883b123e7f",
     "js/eval/units.js": "9d6375d090a78ecf70fe37919d8674d857ea450e37817a11948fc240e486526f",
     "js/eval/userUnits.js": "0f9a6980d3a01eee868c904db7e47ac25c133dfba1aa3520a595369a80cf5ca7",

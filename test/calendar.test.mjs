@@ -274,3 +274,17 @@ test('lines that read the clock are evaluated again when the sheet is unchanged'
   assert.equal(engine.evaluateLines(['1 + 1', '5']).startLine, 1);
   assert.equal(engine.evaluateLines(['1 + 1', '5']).startLine, -1, 'a pure sheet stays cached');
 });
+
+test('a midpoint is a whole day, the later one for an odd span', () => {
+  assert.equal(valueOf('midpoint between 2026-03-01 and 2026-04-01'), '17 March');
+  assert.equal(valueOf('midpoint between 2026-04-01 and 2026-03-01'), '17 March');
+  assert.equal(valueOf('midpoint between 2026-01-01 and 2026-01-03'), '2 January');
+});
+
+test('clock intervals are wall-clock minutes', () => {
+  assert.equal(valueOf('1:00 - 4:00'), '3 hours');
+  assert.equal(valueOf('0:00 to 23:00'), '23 hours');
+  assert.equal(valueOf('4pm to 3am'), '11 hours');
+  assert.equal(valueOf('4pm - 3am'), '13 hours');
+  assert.equal(valueOf('7:30am to 8:45pm'), '13 hours 15 minutes');
+});
