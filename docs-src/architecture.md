@@ -228,6 +228,15 @@ must stay correct across any sequence of interleaved calls (the cache is not
 per caller). Registering new currency rates bumps an _environment revision_
 that forces a full recompute, so cached conversions never go stale.
 
+A sheet is untrusted text, so `js/core/engineLock.js` locks the engine's maths
+after it is configured: `config`, `createUnit`, `import`, the functions that
+evaluate text (`evaluate`, `parse`, `compile`, `parser`, `simplify`, `derivative`,
+`help`, …) and the expression-node constructors are replaced, as a sheet sees them,
+by stubs that throw. The engine keeps the real ones through a `trusted` view and
+uses it to register rates, units and measurement systems and to check a line's
+size. Without this a line like `createUnit("USD", "2 EUR", {override: true})` would
+corrupt every tab until a reload.
+
 An expression line is evaluated against a scope created with
 `Object.create(ctx.variables)`: the sheet's variables are reached through the
 prototype instead of being copied for every line (which made a sheet of

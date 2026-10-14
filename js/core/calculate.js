@@ -23,6 +23,7 @@ import { unitMixError } from './unitMix.js';
 import { tagAggregate, tagAggregateMode, tagError, substituteTags } from './tags.js';
 import { resolveLineRefs } from './lineRefs.js';
 import { assertBoundedExpression } from './boundedExpression.js';
+import { lockDown } from './engineLock.js';
 import { friendlyError } from './friendlyErrors.js';
 import { substituteAggregates } from './aggregateSubstitution.js';
 import { firstDifference } from '../util/sequence.js';
@@ -150,6 +151,9 @@ function createEngine({ rates } = {}) {
   initTimespan(math);
   initCalendar(math);
   initCurrency(math, rates);
+  // From here a sheet cannot reach `config`, `createUnit` or the functions that
+  // evaluate text; the engine keeps the real ones through `trusted` (PRE-02).
+  const trusted = lockDown(math);
 
   const cache = {
     lines: [],
@@ -194,8 +198,8 @@ function createEngine({ rates } = {}) {
 
     try {
       const expression = preprocess(code, scope && { names: names || ownNames(scope) });
-      assertBoundedExpression(math, expression, scope);
-      result = math.evaluate(expression, scope);
+      assertBoundedExpression(trusted, expression, scope);
+      result = trusted.evaluate(expression, scope);
       const mixError = unitMixError(result);
       if (mixError) throw new Error(mixError);
       // The assignment statement already returns the rhs value; reuse it rather
@@ -222,7 +226,7 @@ function createEngine({ rates } = {}) {
   // Remove every user-defined unit so the sheet's definitions can be rebuilt
   // from scratch (editing or deleting a definition must not leave a stale unit).
   function resetUserUnits() {
-    for (let i = userUnits.length - 1; i >= 0; i--) removeUserUnit(math, userUnits[i]);
+    for (let i = userUnits.length - 1; i >= 0; i--) removeUserUnit(trusted, userUnits[i]);
     userUnits = [];
   }
 
@@ -230,7 +234,7 @@ function createEngine({ rates } = {}) {
   // before the first changed line (no re-evaluation needed).
   function rebuildUserUnit(name, value) {
     try {
-      userUnits.push(createUserUnit(math, name, value, { valueIsUnit: isUnitValue(value) }));
+      userUnits.push(createUserUnit(trusted, name, value, { valueIsUnit: isUnitValue(value) }));
     } catch {
       // The use sites will report the missing unit.
     }
@@ -253,7 +257,7 @@ function createEngine({ rates } = {}) {
       return { error: 'A unit definition must be a number or a unit' };
     }
     try {
-      userUnits.push(createUserUnit(math, name, value, { valueIsUnit: isUnitValue(value) }));
+      userUnits.push(createUserUnit(trusted, name, value, { valueIsUnit: isUnitValue(value) }));
     } catch (error) {
       return { error: error.message };
     }
@@ -579,14 +583,14 @@ function createEngine({ rates } = {}) {
   }
 
   function registerCurrencyRates(data) {
-    registerRates(math, data);
+    registerRates(trusted, data);
     environmentRevision++;
   }
 
   // Re-register the volume units for a measurement system and invalidate the
   // cache, so switching metric/us/imperial recomputes every line.
   function registerMeasurementSystem(system) {
-    applyMeasurementSystem(math, system);
+    applyMeasurementSystem(trusted, system);
     environmentRevision++;
   }
 
