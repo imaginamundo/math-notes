@@ -36,8 +36,10 @@ import {
   resolveInterval,
 } from './calendarArithmetic.js';
 import { preprocessCalendar } from './calendarGrammar.js';
+import { initDateOperators, intervalUnit } from './dateOperators.js';
 
 function initCalendar(math) {
+  initDateOperators(math);
   // A workday is eight hours, so `55h in workdays` converts.
   try {
     math.createUnit('workday', { definition: '8 h', aliases: ['workdays'] }, { override: true });
@@ -53,7 +55,7 @@ function initCalendar(math) {
       __clockInterval: (a, b, forward) => clockInterval(a, b, Number(forward) > 0, math),
       __dateInterval: (a, b, mode) => {
         const { a: from, b: to } = resolveInterval(a, b, mode);
-        return { type: 'calendarInterval', parts: dateDiff(from, to) };
+        return intervalUnit(math, from, to);
       },
       __dateFormat: (date, pattern) => formatDatePattern(date, pattern),
       __daysBetweenText: (a, b, extra, absolute, mode) => {

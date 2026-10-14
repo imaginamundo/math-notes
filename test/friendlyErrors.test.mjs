@@ -70,3 +70,14 @@ test('the conversion message needs a variable, not a unit, behind the target', (
 test('a conversion error without a `to` target is passed through', () => {
   assert.equal(friendlyError(math, err(CONVERSION), 'to(5, 3)', { m: 3 }), CONVERSION);
 });
+
+test('a date given to an operator that cannot take one reads as a sentence', () => {
+  const date = (fn, index) =>
+    err(
+      `Unexpected type of argument in function ${fn} (expected: number, actual: Date, index: ${index})`
+    );
+  assert.match(friendlyError(math, date('addScalar', 1), '5 + today', {}), /duration/);
+  assert.match(friendlyError(math, date('multiplyScalar', 0), 'today * 5', {}), /multiplied/);
+  assert.match(friendlyError(math, date('to', 1), '5 to today', {}), /converted/);
+  assert.match(friendlyError(math, date('sin', 0), 'sin(today)', {}), /cannot be used/);
+});

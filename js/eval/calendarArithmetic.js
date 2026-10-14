@@ -281,6 +281,7 @@ function resolveInterval(aValue, bValue, mode = 'forward') {
 
 export {
   WORKDAY_HOURS,
+  applyDuration,
   dateAdd,
   dateDiff,
   daysBetween,

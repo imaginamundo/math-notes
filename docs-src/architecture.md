@@ -223,6 +223,19 @@ later day for an odd span, so it is the same date in every time zone. A timespan
 years and months apart with mathjs's own sizes (365.25 and 30.4375 days), so `1 year`
 comes out as exactly 1 year.
 
+Dates as operands (`js/eval/dateOperators.js`): the engine adds typed `Date` overloads to
+mathjs's `add` and `subtract`, so a date in a variable, a chain (`start + 2 weeks + 3 days`)
+or a longer expression has its calendar meaning without a regex for every shape. `Date +/-
+duration` moves the calendar (a month or year unit is a calendar step, a whole number of
+days lands on a date); `Date - Date` is the interval between them. That interval, and
+`__dateInterval`, return a days Unit that also carries the calendar parts it is drawn with
+(`2 months 6 days`), so it sums, scales and converts like any duration and counts in group
+subtotals and the total bar. The grammar chains terms after a literal date or clock time
+and, when no anchored phrase matches, rewrites `today`/`now`/`tomorrow`/`yesterday`, written
+dates (`March 4, 2025`, padded ISO dates) and am/pm clock times wherever they stand (a bare
+`9:00` stays a range). A date given to an operator that cannot take one gets a sentence, not
+mathjs's type error.
+
 Tags in calculations: trailing `#tags` label a line only when the code before them is a
 finished expression (`isCompleteCode` in `parseLine.js`); after an operator, `=`, `(` or a
 word operator (`5 + #food`, `x = #food`) the tag is an operand and the line is not

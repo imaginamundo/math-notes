@@ -2,6 +2,7 @@
 // clock and workday phrases into `__*` helper calls for the engine. Pure string
 // work (no mathjs), so it can be unit-tested on its own.
 import parseLine from '../core/parseLine.js';
+import { outsideStrings } from '../core/stringMask.js';
 import { IDENTIFIER_SRC } from '../core/identifiers.js';
 import { MONTHS } from './calendarDate.js';
 
@@ -34,7 +35,10 @@ const DATE_ONLY = new RegExp(`^(${DATE_SRC})$`, 'i');
 const DATE_LITERAL = new RegExp(`^(?:${DATE_SRC})$`, 'i');
 const IDENT_ONLY = new RegExp(`^${IDENT}$`, 'u');
 const DATE_PAIR = new RegExp(`^(${DATE_SRC})\\s*(-|to)\\s*(${DATE_SRC})$`, 'i');
-const DATE_DURATION = new RegExp(`^(${DATE_OR_IDENT})\\s*([+-])\\s*(${DURATION_SRC})$`, 'iu');
+// One or more `+ duration` / `- duration` terms (`June 10 + 3 months + 5 days`).
+const TERMS_SRC = `(?:\\s*[+-]\\s*${DURATION_SRC})+`;
+const DATE_DURATION = new RegExp(`^(${DATE_OR_IDENT})(${TERMS_SRC})$`, 'iu');
+const TERM = new RegExp(`([+-])\\s*(${DURATION_SRC})`, 'giu');
 const DURATION_DATE = new RegExp(
   `^(${DURATION_SRC})\\s+(after|before)\\s+(${DATE_OR_IDENT})$`,
   'iu'
@@ -92,7 +96,7 @@ const WORK_HOURS_BETWEEN = new RegExp(
 );
 
 const CLOCK_ONLY = new RegExp(`^(${CLOCK_SRC})$`, 'i');
-const CLOCK_DURATION = new RegExp(`^(${CLOCK_SRC})\\s*([+-])\\s*(${DURATION_SRC})$`, 'i');
+const CLOCK_DURATION = new RegExp(`^(${CLOCK_SRC})(${TERMS_SRC})$`, 'i');
 // A clock pair (`to` is a forward interval, `-` the ambiguous same-day
 // difference) can sit inside a larger expression, so it is rewritten wherever
 // it occurs and composes with the arithmetic around it
@@ -109,6 +113,10 @@ const CLOCK_PAIR_PHRASE = new RegExp(
 // A date argument in a rewritten expression: a date literal becomes
 // `__date("...")`, while a variable is passed straight through (it already
 // holds a Date).
+function terms(text) {
+  return [...text.matchAll(TERM)].map((t) => ({ sign: t[1] === '-' ? -1 : 1, text: t[2].trim() }));
+}
+
 function dateArg(text) {
   return DATE_LITERAL.test(text) ? `__date(${JSON.stringify(text)})` : text;
 }
@@ -124,14 +132,52 @@ function isUnitSum(left, duration) {
   return components.length === 1 && /^\d+(?:\.\d+)?\s*(?:d|w|mo|y|h|m|s)$/i.test(components[0]);
 }
 
-function preprocessCalendar(expression) {
+// `today`, `now`, `tomorrow` and `yesterday` are dates wherever they stand in an
+// expression (`today - start`, `now + 3 hours + 15 minutes`), unless the sheet defines a
+// variable of that name.
+const DATE_WORD = /(?<![\w.])(today|now|tomorrow|yesterday)\b(?!\s*[(=])/gi;
+
+// A date written out inside a longer expression (`finish - March 4, 2025`) or a clock time with
+// am/pm (`wake - 5:00 am`). Only the unambiguous forms: a bare `9:00` stays a range and a
+// slashed number stays a number.
+const WRITTEN_DATE = new RegExp(
+  `(?<![\\w.])(` +
+    `(?:${MONTH_WORD})\\s+\\d{1,2}(?:st|nd|rd|th)?(?:,?\\s+\\d{4})?` +
+    `|\\d{1,2}(?:st|nd|rd|th)?\\s+(?:${MONTH_WORD})(?:,?\\s+\\d{4})?` +
+    `|\\d{4}-\\d{2}-\\d{2}|${HOLIDAY_WORD})(?![\\w])`,
+  'gi'
+);
+const MERIDIEM_CLOCK = new RegExp(
+  `(?<![\\w:.])((?:(?:0?\\d|1[0-2]):[0-5]\\d|(?:0?[1-9]|1[0-2]))\\s*[ap]\\.?m\\.?)(?![\\w:])`,
+  'gi'
+);
+
+// The helper calls already written (`__clockInterval("9:00", …)`) carry their dates as
+// strings, which are left as they are.
+function dateWords(expr, context) {
+  const names = context && context.names;
+  return outsideStrings(expr, (code) =>
+    code
+      .replace(DATE_WORD, (word) =>
+        names && names.has(word.toLowerCase())
+          ? word
+          : `__date(${JSON.stringify(word.toLowerCase())})`
+      )
+      .replace(WRITTEN_DATE, (text) =>
+        names && names.has(text.toLowerCase()) ? text : `__date(${JSON.stringify(text)})`
+      )
+      .replace(MERIDIEM_CLOCK, (text) => `__clock(${JSON.stringify(text)})`)
+  );
+}
+
+function preprocessCalendar(expression, context) {
   let expr = expression.trim().replace(/\bwork\s+days?\b/gi, 'workdays');
   if (!expr) return expression;
 
   // Rewrite the right-hand side of an assignment too, so a date (or a date
   // arithmetic expression) can be stored in a variable.
   const parsed = parseLine(expr);
-  if (parsed.isAssignment) return `${parsed.label} = ${preprocessCalendar(parsed.rhs)}`;
+  if (parsed.isAssignment) return `${parsed.label} = ${preprocessCalendar(parsed.rhs, context)}`;
 
   // Rewrite a `work hours in <month>` phrase wherever it sits, so it composes
   // with the arithmetic around it (`work hours in June * 25 EUR`).
@@ -157,7 +203,12 @@ function preprocessCalendar(expression) {
 
   // Clock times (`9:45 am`, `16:00`) and their arithmetic.
   if ((m = CLOCK_DURATION.exec(expr))) {
-    return `__clockAdd(${JSON.stringify(m[1])}, ${JSON.stringify(m[3])}, ${m[2] === '-' ? -1 : 1})`;
+    const [first, ...rest] = terms(m[2]);
+    const head = `__clockAdd(${JSON.stringify(m[1])}, ${JSON.stringify(first.text)}, ${first.sign})`;
+    return rest.reduce(
+      (inner, t) => `__dateAdd(${inner}, ${JSON.stringify(t.text)}, ${t.sign})`,
+      head
+    );
   }
   if ((m = CLOCK_ONLY.exec(expr))) return `__clock(${JSON.stringify(m[1])})`;
 
@@ -219,8 +270,14 @@ function preprocessCalendar(expression) {
     return `__dateInterval(${JSON.stringify(m[1])}, ${JSON.stringify(m[3])}, "${mode}")`;
   }
 
-  if ((m = DATE_DURATION.exec(expr)) && !isUnitSum(m[1], m[3])) {
-    return `__dateAdd(${dateArg(m[1])}, ${JSON.stringify(m[3])}, ${m[2] === '-' ? -1 : 1})`;
+  if ((m = DATE_DURATION.exec(expr))) {
+    const list = terms(m[2]);
+    if (!(list.length === 1 && isUnitSum(m[1], list[0].text))) {
+      return list.reduce(
+        (inner, t) => `__dateAdd(${inner}, ${JSON.stringify(t.text)}, ${t.sign})`,
+        dateArg(m[1])
+      );
+    }
   }
 
   if ((m = DURATION_DATE.exec(expr))) {
@@ -245,7 +302,7 @@ function preprocessCalendar(expression) {
   if (WEEK_OF_YEAR.test(expr)) return `__weekNumber(__date("today"))`;
   if ((m = DATE_ONLY.exec(expr))) return `__date(${JSON.stringify(m[1])})`;
 
-  return expr;
+  return dateWords(expr, context);
 }
 
 export { preprocessCalendar };

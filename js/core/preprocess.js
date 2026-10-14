@@ -4,6 +4,7 @@ import { preprocessPercent } from '../eval/percentage.js';
 import { preprocessUnitRuns } from '../eval/unitRuns.js';
 import { maskStrings } from './stringMask.js';
 import { IDENTIFIER_SRC } from './identifiers.js';
+import { MONTHS } from '../eval/calendarDate.js';
 import { stripGrouping } from './numberGrouping.js';
 import { preprocessWordOps } from '../eval/wordOperators.js';
 import { preprocessMeasures } from '../eval/measures.js';
@@ -72,6 +73,14 @@ function closingIndex(text, open) {
 }
 
 // Cut at commas that are not inside a bracket or brace.
+// The comma in `March 4, 2025` belongs to the date, not to an argument list.
+function isDateYearComma(text, index) {
+  const before = /([A-Za-z]+)\s+\d{1,2}(?:st|nd|rd|th)?$/.exec(text.slice(0, index));
+  return Boolean(
+    before && MONTHS[before[1].toLowerCase()] && /^\s*\d{4}(?!\d)/.test(text.slice(index + 1))
+  );
+}
+
 function splitArguments(text) {
   const parts = [];
   let depth = 0;
@@ -80,7 +89,7 @@ function splitArguments(text) {
     const ch = text[i];
     if (ch === '(' || ch === '[' || ch === '{') depth++;
     else if (ch === ')' || ch === ']' || ch === '}') depth--;
-    else if (ch === ',' && depth === 0) {
+    else if (ch === ',' && depth === 0 && !isDateYearComma(text, i)) {
       parts.push(text.slice(start, i));
       start = i + 1;
     }

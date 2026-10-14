@@ -32,7 +32,6 @@ function formatValue(value, depth, precision, clockFormat) {
   // BigNumber is formatted through the same precision as a plain number.
   if (value && value.isBigNumber === true) return formatNumber(Number(value), precision);
   if (value instanceof Date) return formatDate(value, clockFormat);
-  if (value && value.type === 'calendarInterval') return formatInterval(value.parts);
   if (value && value.isUnit === true) return decodeUserUnits(formatUnit(value, precision));
   // mathjs Fraction stringifies to its decimal; show the fraction instead.
   if (value && value.type === 'Fraction' && typeof value.toFraction === 'function') {
@@ -176,6 +175,11 @@ function formatUnit(unit, precision) {
 // (mirroring preprocess.js's STEPS).
 const PACE = /^min\s*\/\s*(km|mi)$/;
 const UNIT_FORMAT_RULES = [
+  {
+    // The interval between two dates, written as the calendar parts it was built from.
+    test: ({ unit }) => Boolean(unit.calendarParts),
+    format: ({ unit }) => formatInterval(unit.calendarParts),
+  },
   {
     // `2.3 in to nearest 16th`: the exact fraction the value was rounded to, then
     // the unit (`37/16 in`, `US$ 9/4`).
