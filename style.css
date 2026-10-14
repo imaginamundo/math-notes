@@ -250,7 +250,11 @@ html.i18n-pending .layout {
   outline-offset: -2px;
 }
 .tab-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin-left: 0.5em;
+  cursor: pointer;
 }
 .tab-close,
 .modal-close,
