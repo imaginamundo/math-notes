@@ -102,3 +102,15 @@ test('a partial unit typed and deleted does not corrupt later results', () => {
     '30.438… days'
   );
 });
+
+test('a negative duration keeps its sign', () => {
+  assert.equal(valueOf('2 hours - 3 hours'), '-1 hour');
+  assert.equal(valueOf('-2 hours'), '-2 hours');
+  assert.equal(valueOf('30 minutes - 1 hour'), '-30 min');
+  assert.equal(valueOf('-90 minutes as timespan'), '-1 hour 30 minutes');
+  assert.equal(valueOf('-90 s as timespan'), '-1 min 30 s');
+  assert.equal(valueOf('-3 days as timespan'), '-3 days');
+  assert.equal(valueOf('2 hours without 3 hours'), '-1 hour');
+  assert.equal(valueOf('-1.5 hours in hours and minutes'), '-1 hour 30 min');
+  assert.equal(valueOf('1.5 hours in hours and minutes'), '1 hour 30 min');
+});

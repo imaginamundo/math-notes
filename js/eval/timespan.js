@@ -199,19 +199,22 @@ function timespanParts(value, second, unitA, unitB) {
   const seconds = unit.value;
   const sizeA = UNIT_SECONDS[unitA];
   const sizeB = UNIT_SECONDS[unitB];
-  const countA = Math.floor(seconds / sizeA);
-  const remainder = seconds - countA * sizeA;
+  // The sign belongs to the whole span (`-1 hour 30 min`), so split on the size.
+  const sign = seconds < 0 ? -1 : 1;
+  const size = Math.abs(seconds);
+  const countA = Math.floor(size / sizeA);
+  const remainder = size - countA * sizeA;
   unit.timespan = true;
   unit.displayParts = [
-    { unit: unitA, value: countA },
-    { unit: unitB, value: remainder / sizeB },
+    { unit: unitA, value: sign * countA },
+    { unit: unitB, value: sign * (remainder / sizeB) },
   ];
   return unit;
 }
 
 function decompose(seconds) {
   const parts = [];
-  let rest = Math.round(seconds);
+  let rest = Math.abs(Math.round(seconds));
   for (const unit of DECOMPOSE_ORDER) {
     const size = UNIT_SECONDS[unit];
     const count = Math.floor(rest / size);
@@ -233,7 +236,12 @@ function unitLabel(unit, value, abbreviate) {
 // Renders a timespan unit's seconds as components. `formatNumber` is injected
 // so this stays pure and shares formatResult's number formatting.
 function formatTimespan(seconds, parts, formatNumber) {
-  const components = parts && parts.length ? parts : decompose(seconds);
+  const given = parts && parts.length ? parts : null;
+  // The sign is written once, in front: `-1 hour 30 min`.
+  const negative = given ? given.some(({ value }) => value < 0) : seconds < 0;
+  const components = given
+    ? given.map(({ unit, value }) => ({ unit, value: Math.abs(value) }))
+    : decompose(seconds);
   // `5 min 30 s` abbreviates small units; `4 hours 32 minutes 24 seconds` and
   // `10 weeks 2 days` spell them out. Double time units always abbreviate
   // minutes/seconds (`235 hours 12 min`).
@@ -241,11 +249,12 @@ function formatTimespan(seconds, parts, formatNumber) {
     parts && parts.length
       ? (unit) => unit === 'minute' || unit === 'second'
       : () => components[0].unit === 'minute' || components[0].unit === 'second';
-  return components
+  const text = components
     .map(
       ({ unit, value }) => `${formatNumber(value)} ${unitLabel(unit, value, abbreviateSmall(unit))}`
     )
     .join(' ');
+  return negative && components.some(({ value }) => value !== 0) ? `-${text}` : text;
 }
 
 function initTimespan(math) {
