@@ -933,3 +933,21 @@ test('NUM-03: a sum that balances reads 0 in the sum row and the total bar', () 
 test('NUM-03: an average of values that cancel is 0', () => {
   assert.equal(shownTotal(['0.1', '0.2', '-0.3', 'average']).rows[3], '0');
 });
+
+test('NUM-03: digits inside names are not numbers written in the expression', () => {
+  // The hex of an encoded unit name once read as 6e7473, an infinite literal.
+  const rows = createEngine().evaluateLines([
+    'unit monthly rent = 1500',
+    '2 monthly rents',
+  ]).results;
+  assert.equal(rows[1].value, 3000);
+  assert.equal(shownTotal(['x1 = 5', 'x1 - 5 + 1e-30']).rows[1], '0');
+  assert.equal(shownTotal(['x2 = 1e-20', 'x2 * 1']).rows[1], '0…');
+});
+
+test('NUM-03: a tiny value that is not the result of cancelling is not snapped', () => {
+  assert.equal(shownTotal(['x2 = 1e-20', 'x2 * 1']).rows[1], '0…');
+  assert.equal(shownTotal(['1e-8 * 3']).rows[0], '3e-8');
+  assert.equal(shownTotal(['3 * 1e-8']).rows[0], '3e-8');
+  assert.equal(shownTotal(['2e-8 + 1e-8']).rows[0], '3e-8');
+});

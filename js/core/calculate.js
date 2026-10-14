@@ -176,11 +176,21 @@ const PLAIN_LABEL = /^[A-Za-z_]\w*$/;
 // that is small on its own (`1e-8`) is compared with itself, so it stays.
 function snapResidue(result, expression) {
   if (typeof result !== 'number' || result === 0 || !Number.isFinite(result)) return result;
+  // Cancellation needs an addition or subtraction between numbers; `x * 1` with a
+  // tiny `x` is a tiny answer, not residue.
+  if (!/[\w)\]]\s*[+-]\s*[\w(.[]/.test(expression)) return result;
   let largest = 0;
-  for (const literal of expression.match(/\d+\.?\d*(?:e[+-]?\d+)?|\.\d+/gi) || []) {
-    largest = Math.max(largest, Math.abs(Number(literal)));
+  let count = 0;
+  // Only numbers standing on their own: not the digits inside a name (`x2`,
+  // `__line_1`, or the hex of an encoded unit name such as `unit6d6f6e74`).
+  for (const literal of expression.match(/(?<![\w.])(?:\d+\.?\d*(?:e[+-]?\d+)?|\.\d+)(?!\w)/gi) ||
+    []) {
+    const magnitude = Math.abs(Number(literal));
+    if (!Number.isFinite(magnitude)) continue;
+    largest = Math.max(largest, magnitude);
+    count++;
   }
-  return largest > 0 && Math.abs(result) < 1e-12 * largest ? 0 : result;
+  return count >= 2 && largest > 0 && Math.abs(result) < 1e-12 * largest ? 0 : result;
 }
 
 function createEngine({ rates } = {}) {

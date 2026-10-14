@@ -151,8 +151,9 @@ number and keeps the exact numerator and denominator (`fractionParts`), which
 
 Float residue is not an answer. `0.1 + 0.2 - 0.3` is 5.6e-17 in binary doubles, so
 `evaluateLine` snaps a number result that is below 1e-12 of the largest number written
-in the expression to 0 (a value that is small on its own, `1e-8`, is compared with
-itself and stays), and an aggregate snaps a sum that cancels below 1e-12 of its
+in the expression to 0, but only when the expression adds or subtracts at least two
+written numbers (a value that is small on its own, `1e-8`, or `tiny * 1`, is a small
+answer, not residue, and stays; digits inside names are not numbers), and an aggregate snaps a sum that cancels below 1e-12 of its
 largest term. Whatever residue is left reads `0…`, like any value below the
 precision step, instead of ten digits of exponent that ignore the setting.
 
