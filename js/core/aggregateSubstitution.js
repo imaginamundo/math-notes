@@ -1,3 +1,4 @@
+import { outsideStrings } from './stringMask.js';
 import { AGGREGATE_KEYWORDS, AGGREGATE_WORD_SOURCE } from './aggregate.js';
 
 // A standalone aggregate keyword (`sum`, `average`, …) not followed by `(`,
@@ -13,13 +14,15 @@ function substituteAggregates(parsed, sum, average, variables) {
   const values = {};
   let count = 0;
   const replace = (expression) =>
-    expression.replace(AGGREGATE_WORD_ALL, (word) => {
-      if (word in variables) return word;
-      const value = AGGREGATE_KEYWORDS[word.toLowerCase()] === 'average' ? average : sum;
-      const token = `__agg_${count++}`;
-      values[token] = value;
-      return token;
-    });
+    outsideStrings(expression, (code) =>
+      code.replace(AGGREGATE_WORD_ALL, (word) => {
+        if (word in variables) return word;
+        const value = AGGREGATE_KEYWORDS[word.toLowerCase()] === 'average' ? average : sum;
+        const token = `__agg_${count++}`;
+        values[token] = value;
+        return token;
+      })
+    );
 
   if (parsed.isAssignment) {
     const rhs = replace(parsed.rhs);

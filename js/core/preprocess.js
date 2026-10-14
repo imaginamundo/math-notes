@@ -2,6 +2,7 @@ import { preprocessSymbols } from '../eval/symbols.js';
 import { preprocessScales } from '../eval/scales.js';
 import { preprocessPercent } from '../eval/percentage.js';
 import { preprocessUnitRuns } from '../eval/unitRuns.js';
+import { maskStrings } from './stringMask.js';
 import { stripGrouping } from './numberGrouping.js';
 import { preprocessWordOps } from '../eval/wordOperators.js';
 import { preprocessMeasures } from '../eval/measures.js';
@@ -34,8 +35,10 @@ const STEPS = [
   preprocessRounding,
 ];
 
+// Quoted text is masked for the whole pipeline, so no step reads or rewrites it.
 function preprocess(expression, context) {
-  return STEPS.reduce((result, step) => step(result, context), expression);
+  const { text, restore } = maskStrings(expression);
+  return restore(STEPS.reduce((result, step) => step(result, context), text));
 }
 
 export { STEPS };

@@ -164,6 +164,12 @@ also separates its items with `, ` (`sum(1,000, 2,000)`); `max(10,200)` and `[1,
 two numbers, as they always were. Copy result now copies the number without its separators
 (`ungroupDisplay`), so what is copied reads back as the same value.
 
+Quoted text is data: `maskStrings` (`js/core/stringMask.js`) swaps every closed `"..."` or
+`'...'` for an inert slot before the preprocessing steps run and restores it afterwards,
+and aggregate substitution and multi-word-name mangling skip it through `outsideStrings`.
+So `"2k items"`, `"total"` and `"my rate"` come back as typed, and no internal name
+(`__agg_0`, `__var_my_rate`) can leak into a string. An unclosed quote is not a string.
+
 Tags in calculations: trailing `#tags` label a line only when the code before them is a
 finished expression (`isCompleteCode` in `parseLine.js`); after an operator, `=`, `(` or a
 word operator (`5 + #food`, `x = #food`) the tag is an operand and the line is not
