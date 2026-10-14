@@ -1,6 +1,6 @@
 // Served from the site root so its scope is `/` and it can cache the app shell
 // and the documentation (a worker under /js/ could only control /js/).
-const cacheName = 'math-notes-v69';
+const cacheName = 'math-notes-v70';
 const APP_SHELL = './index.html';
 const urlsToCache = [
   './',
@@ -32,6 +32,7 @@ const urlsToCache = [
   './js/core/totalMode.js',
   './js/core/unitMix.js',
   './js/core/unitNames.js',
+  './js/core/unitSimplify.js',
   './js/core/userUnits.js',
   './js/core/vocabulary.js',
   './js/eval/aliases.js',
