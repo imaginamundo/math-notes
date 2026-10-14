@@ -1,5 +1,5 @@
 {
-  "version": 82,
+  "version": 83,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "8ab30c03ce83a52ec3048a552d376b54d3b502247119c24db874b0251d059156",
@@ -19,8 +19,9 @@
     "js/core/measurementSystem.js": "431a6b83fa93d4ad4bedcc25c835416ee9e2818bc1eb4fe0cecd104ca9c660ae",
     "js/core/measures.js": "e7c39a900b014fe74fba923a1a5e4a513940c0b779082828b6507bc7671783ac",
     "js/core/multiWordVariables.js": "5be311c970961d3f335a40c46edd73ff956e66cbf3296ab76ecdbb65f5d147bd",
+    "js/core/numberGrouping.js": "4d841e7cb77074a6cec0d46c804369dfd5ab5e893ce390569ba4a180b49a4cd9",
     "js/core/parseLine.js": "a76e280d4ec3ccdac098393b458d915a45ad8f7bf077d155fb45f7de5eea8648",
-    "js/core/preprocess.js": "6b2737a6c79c9c262ffd3d0f72b12ff95a34bd3661942e6ec164aa8211c73fce",
+    "js/core/preprocess.js": "54f29696d747521bf0754dcc4152138ff40147ae84764e3b38a24a8a1609636c",
     "js/core/setting.js": "4b05c34e3d4fcb72abd06cf968399d7a8d2494bc7f5f059783f3702aa753e5f6",
     "js/core/sizeLimits.js": "36b290a4a6ec24c4b2bc60f1782c7d86846fd3eb6953e4f8268f5a495722143b",
     "js/core/tabsState.js": "a16f2326a41d8de34352ee3fcaa9f6962e3dccf302422cc4092bc5d372eed0dd",
@@ -92,7 +93,7 @@
     "js/ui/recipes.js": "3d3cfc472c52ed160a7864d4c8e7f3ce317c220c30fd6a26f15f0a9084252a25",
     "js/ui/settings.js": "c61b826b6ab3cb4dd7dbf69940cb268d95653aff3923f6eac4019e3ddfaa31b1",
     "js/ui/share.js": "c380b52980e542b02854eeafa8fee52c483e815aaeb1384f1c0d8bc121b9165c",
-    "js/ui/shortcuts.js": "6d8525840d1679008eb6c54401e927d44879f20119ae94c3f7db946ee50a0833",
+    "js/ui/shortcuts.js": "a1482c7d56b1b8283455e19080245f986bf0d69b87d5e24c6af4211c65c2659a",
     "js/ui/starterPrompt.js": "ef3b5561abfef800bea76f1c1aec58feddbaf41332a573f97f8bf57bcb94b080",
     "js/ui/tabTemplates.js": "56145a79ebc0c9542e9cb4c591129fe035627b01cb1790b75671d1d749d966d0",
     "js/ui/tabs.js": "b675d2e101898ef4ac31a5fdf04e574a7f647b4de8036e64ec411ea8527da35d",
