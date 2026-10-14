@@ -429,9 +429,15 @@ test('the tab bar is one tab stop: close buttons stay out of the order', async (
   }
   assert.deepEqual(stops, ['tab-template', 'tab-new']);
   assert.equal(
-    await page.evaluate(() => document.querySelector('.tab-close').tabIndex),
-    -1,
-    'the × is for pointers; Delete closes the focused tab'
+    await page.evaluate(() =>
+      document.querySelector('.tab button, .tab a, .tab input, .tab [tabindex]:not(.tab)')
+    ),
+    null,
+    'a tab holds no nested interactive control; Delete closes the focused tab'
+  );
+  assert.equal(
+    await page.evaluate(() => document.querySelector('.tab-close').getAttribute('aria-hidden')),
+    'true'
   );
   assert.deepEqual(errors, []);
 });
@@ -477,6 +483,116 @@ test('Escape leaves the editor for the active tab', async () => {
     await page.evaluate(() => document.activeElement.getAttribute('aria-selected')),
     'true'
   );
+  assert.deepEqual(errors, []);
+});
+
+test('autocomplete still knows the names after a line is inserted above them', async () => {
+  await newPage();
+  const open = (value, caret) =>
+    page.evaluate(
+      (v, c) => {
+        const ed = document.getElementById('content-editable');
+        ed.focus();
+        ed.value = v;
+        ed.setSelectionRange(c, c);
+        ed.dispatchEvent(new Event('input', { bubbles: true }));
+      },
+      value,
+      caret
+    );
+  const options = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('#autocomplete-list .autocomplete-text')].map(
+        (node) => node.textContent
+      )
+    );
+  const sheet = 'rent = 1\nfood = 2\nre';
+  await open(sheet, sheet.length);
+  await waitFor(async () => (await options()).includes('rent'));
+  // Insert two lines at the top: every name moves down, none is lost.
+  const shifted = 'a\nb\n' + sheet;
+  await open(shifted, shifted.length);
+  await waitFor(async () => (await options()).includes('rent'));
+  // Remove the first assignment: its name goes away.
+  const removed = 'food = 2\nre';
+  await open(removed, removed.length);
+  await waitFor(async () => !(await options()).includes('rent') || (await options()).length === 0);
+  assert.equal((await options()).includes('rent'), false);
+  assert.deepEqual(errors, []);
+});
+
+test('Escape closes an open find bar instead of leaving the editor', async () => {
+  await newPage();
+  await page.click('#content-editable');
+  await page.keyboard.down('Control');
+  await page.keyboard.press('f');
+  await page.keyboard.up('Control');
+  await waitFor(() => page.evaluate(() => document.querySelector('.find-bar.open') !== null));
+  // Back in the editor with the bar still open: Escape belongs to the bar.
+  await page.click('#content-editable');
+  await page.keyboard.press('Escape');
+  await waitFor(() => page.evaluate(() => document.querySelector('.find-bar.open') === null));
+  assert.equal(
+    await page.evaluate(() => document.activeElement.classList.contains('tab')),
+    false,
+    'the first Escape only closes the bar'
+  );
+  await page.click('#content-editable');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.evaluate(() => document.activeElement.classList.contains('tab')), true);
+  assert.deepEqual(errors, []);
+});
+
+test('Escape dismisses the suggestion popup before it leaves the editor', async () => {
+  await newPage();
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.focus();
+    ed.value = 'sqr';
+    ed.setSelectionRange(3, 3);
+    ed.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await waitFor(() => page.evaluate(() => !document.getElementById('autocomplete-list').hidden));
+  await page.keyboard.press('Escape');
+  await wait(100);
+  assert.equal(
+    await page.evaluate(() => document.getElementById('autocomplete-list').hidden),
+    true
+  );
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'content-editable');
+  assert.deepEqual(errors, []);
+});
+
+test('the textarea and the ghost layer stay aligned while the caret travels', async () => {
+  await newPage();
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.focus();
+    const long = 'x = ' + Array.from({ length: 120 }, (_, i) => i + 1).join(' + ');
+    ed.value = Array.from({ length: 60 }, (_, i) => (i % 7 === 0 ? long : `${i} + 1`)).join('\n');
+    ed.setSelectionRange(0, 0);
+    ed.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await wait(300);
+  const offsets = () =>
+    page.evaluate(() => {
+      const ed = document.getElementById('content-editable').getBoundingClientRect();
+      const view = document.getElementById('view').getBoundingClientRect();
+      const node = document.getElementById('content-editable');
+      return {
+        dx: Math.abs(ed.left - view.left),
+        dy: Math.abs(ed.top - view.top),
+        scrollLeft: node.scrollLeft,
+        scrollTop: node.scrollTop,
+      };
+    });
+  const keys = ['End', 'ArrowDown', 'ArrowDown', 'Home', 'ArrowDown', 'PageDown', 'End', 'PageUp'];
+  for (const key of keys) {
+    await page.keyboard.press(key);
+    await wait(60);
+    const now = await offsets();
+    assert.deepEqual(now, { dx: 0, dy: 0, scrollLeft: 0, scrollTop: 0 }, `after ${key}`);
+  }
   assert.deepEqual(errors, []);
 });
 
@@ -1014,8 +1130,9 @@ test('a focused tab renames with F2', async () => {
   assert.deepEqual(errors, []);
 });
 
-test('the editor exposes combobox state for the autocomplete', async () => {
+test('the autocomplete keeps the textbox role and announces its suggestions', async () => {
   await newPage();
+  const popupOpen = () => page.evaluate(() => !document.getElementById('autocomplete-list').hidden);
   await page.evaluate(() => {
     const ed = document.getElementById('content-editable');
     ed.focus();
@@ -1023,31 +1140,40 @@ test('the editor exposes combobox state for the autocomplete', async () => {
     ed.setSelectionRange(3, 3);
     ed.dispatchEvent(new Event('input', { bubbles: true }));
   });
-  await waitFor(() =>
-    page.evaluate(
-      () => document.getElementById('content-editable').getAttribute('aria-expanded') === 'true'
-    )
-  );
+  await waitFor(popupOpen);
   const state = await page.evaluate(() => {
     const ed = document.getElementById('content-editable');
+    const live = document.querySelector('.autocomplete-status');
     return {
       role: ed.getAttribute('role'),
+      expanded: ed.getAttribute('aria-expanded'),
       controls: ed.getAttribute('aria-controls'),
       autocomplete: ed.getAttribute('aria-autocomplete'),
+      announced: live.textContent,
+      options: document.querySelectorAll('#autocomplete-list [role="option"]').length,
     };
   });
-  assert.deepEqual(state, {
-    role: 'combobox',
-    controls: 'autocomplete-list',
-    autocomplete: 'list',
-  });
+  assert.equal(state.role, null, 'a textarea keeps its implicit textbox role');
+  assert.equal(state.expanded, null);
+  assert.equal(state.controls, 'autocomplete-list');
+  assert.equal(state.autocomplete, 'list');
+  assert.equal(
+    state.announced,
+    state.options === 1 ? '1 suggestion' : `${state.options} suggestions`
+  );
+  if (state.options > 1) {
+    await page.keyboard.press('ArrowDown');
+    const moved = await page.evaluate(
+      () => document.querySelector('.autocomplete-status').textContent
+    );
+    assert.match(moved, new RegExp(`, 2 of ${state.options}$`));
+  }
   await page.keyboard.press('Escape');
   await wait(100);
+  assert.equal(await popupOpen(), false);
   assert.equal(
-    await page.evaluate(() =>
-      document.getElementById('content-editable').getAttribute('aria-expanded')
-    ),
-    'false'
+    await page.evaluate(() => document.querySelector('.autocomplete-status').textContent),
+    ''
   );
   assert.deepEqual(errors, []);
 });
