@@ -38,9 +38,32 @@ test('localStorage is only accessed inside util/storage.js', () => {
 // collection persists, a font scale restored at startup, the first currency
 // rate — so every listener the composition root owns must be registered before
 // boot() runs, or that first message is dropped.
+// Source with comments and string literals blanked out (same length, so indexes
+// still point into the original), so a mention of a call is not mistaken for it.
+function codeOnly(source) {
+  const blank = (match) => match.replace(/[^\n]/g, ' ');
+  return source
+    .replace(/\/\*[\s\S]*?\*\//g, blank)
+    .replace(/(['"`])(?:\\.|(?!\1)[^\\\n])*\1/g, blank)
+    .replace(/\/\/[^\n]*/g, blank);
+}
+
+test('codeOnly ignores calls named in comments and strings', () => {
+  const source = [
+    "// window.addEventListener('x', f)",
+    "/* document.addEventListener('y', f) */",
+    "const note = 'el.addEventListener(';",
+    "real.addEventListener('z', f);",
+  ].join('\n');
+  const code = codeOnly(source);
+  assert.equal(code.length, source.length);
+  assert.equal(code.indexOf('addEventListener('), source.indexOf('real.') + 'real.'.length);
+  assert.equal(code.lastIndexOf('addEventListener('), code.indexOf('addEventListener('));
+});
+
 test('js/index.js registers its listeners before it calls boot', () => {
-  const source = readFileSync(join(root, 'js/index.js'), 'utf8');
-  const lastListener = source.lastIndexOf('addEventListener(');
+  const source = codeOnly(readFileSync(join(root, 'js/index.js'), 'utf8'));
+  const lastListener = source.lastIndexOf('.addEventListener(');
   const bootCall = source.indexOf('  boot();');
   assert.notEqual(lastListener, -1, 'no addEventListener call found in js/index.js');
   assert.notEqual(bootCall, -1, 'js/index.js no longer calls boot() the expected way');

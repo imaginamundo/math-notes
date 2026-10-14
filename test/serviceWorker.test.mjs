@@ -5,9 +5,12 @@ import { dirname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   cachedFiles as precachedUrls,
+  changed,
   hashCachedFiles,
+  nextVersion,
   readManifest,
   readWorkerVersion,
+  withCacheName,
 } from '../scripts/sw-manifest.mjs';
 
 // The offline shell can only work if every module the app imports at runtime is
@@ -86,4 +89,49 @@ test('the service worker cache version matches the manifest', () => {
     manifest.version,
     'cacheName in serviceWorker.js was not bumped — run `npm run build:sw-manifest`'
   );
+});
+
+// The pieces of the manifest script, on in-memory data so the bump rules are
+// pinned without touching the real worker or manifest.
+const manifestOf = (files) => ({ version: 1, files });
+
+test('a manifest is unchanged only when every precached hash matches', () => {
+  const files = { 'a.js': 'x', 'b.js': 'y' };
+  assert.equal(changed(manifestOf({ ...files }), files), false);
+  assert.equal(changed(null, files), true, 'no manifest means everything is new');
+  assert.equal(changed(manifestOf(files), { ...files, 'b.js': 'z' }), true, 'content changed');
+  assert.equal(changed(manifestOf(files), { ...files, 'c.js': 'w' }), true, 'file added');
+  assert.equal(changed(manifestOf(files), { 'a.js': 'x' }), true, 'file removed');
+  assert.equal(
+    changed(manifestOf({ 'a.js': 'x', 'b.js': 'y' }), { 'a.js': 'x', 'c.js': 'y' }),
+    true,
+    'a file swapped for another with the same count and hash'
+  );
+});
+
+test('the version is bumped once per change and never otherwise', () => {
+  const files = { 'a.js': 'x' };
+  assert.equal(nextVersion(manifestOf(files), files, 7), 7);
+  assert.equal(nextVersion(manifestOf(files), { 'a.js': 'y' }, 7), 8);
+  assert.equal(nextVersion(null, files, 7), 8);
+});
+
+test('the cache name keeps its prefix and takes the new version', () => {
+  const source = "const cacheName = 'math-notes-v59';\nconst other = 'v1';";
+  assert.deepEqual(readWorkerVersion(source), { name: 'math-notes-v', version: 59 });
+  const next = withCacheName(source, 'math-notes-v', 60);
+  assert.equal(next, "const cacheName = 'math-notes-v60';\nconst other = 'v1';");
+  assert.equal(readWorkerVersion(next).version, 60);
+});
+
+test('the worker version is read from a multi-digit suffix only', () => {
+  assert.equal(readWorkerVersion("const cacheName = 'app2-v100';").version, 100);
+  assert.throws(() => readWorkerVersion("const cacheName = 'no-version';"), /no version/);
+  assert.throws(() => readWorkerVersion('const x = 1;'), /no cacheName/);
+});
+
+test('the precache list is read from the worker source, deduplicated and sorted', () => {
+  const source = "const urlsToCache = [\n  './',\n  './b.js',\n  './a.js',\n  './b.js',\n];";
+  // './' is the same document as index.html, so it is not an entry of its own.
+  assert.deepEqual(precachedUrls(source), ['a.js', 'b.js']);
 });

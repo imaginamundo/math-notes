@@ -63,19 +63,27 @@ function changed(committed, files) {
   return keys.some((key) => committed.files[key] !== files[key]);
 }
 
+// The version to ship: bumped only when a precached file changed, so running the
+// script twice in a row is a no-op.
+function nextVersion(committed, files, version) {
+  return changed(committed, files) ? version + 1 : version;
+}
+
+// The worker's source with its cache name set to `name` + `version`.
+function withCacheName(source, name, version) {
+  return source.replace(/cacheName = '[^']+'/, `cacheName = '${name}${version}'`);
+}
+
 function rebuild() {
   const files = hashCachedFiles();
   const committed = readManifest();
   const { name, version } = readWorkerVersion();
-  const next = changed(committed, files) ? version + 1 : version;
+  const next = nextVersion(committed, files, version);
   const manifest = { version: next, files };
 
   writeFileSync(join(root, MANIFEST_FILE), `${JSON.stringify(manifest, null, 2)}\n`);
   const source = readFileSync(join(root, WORKER_FILE), 'utf8');
-  writeFileSync(
-    join(root, WORKER_FILE),
-    source.replace(/cacheName = '[^']+'/, `cacheName = '${name}${next}'`)
-  );
+  writeFileSync(join(root, WORKER_FILE), withCacheName(source, name, next));
 
   const verb = next === version ? 'unchanged' : `bumped to v${next}`;
   console.log(`${MANIFEST_FILE}: ${Object.keys(files).length} files, ${verb}`);
@@ -85,4 +93,12 @@ function rebuild() {
 const invokedDirectly = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (invokedDirectly) rebuild();
 
-export { cachedFiles, hashCachedFiles, readManifest, readWorkerVersion };
+export {
+  cachedFiles,
+  changed,
+  hashCachedFiles,
+  nextVersion,
+  readManifest,
+  readWorkerVersion,
+  withCacheName,
+};
