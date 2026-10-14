@@ -98,6 +98,25 @@ const WHOLE_RUN = new RegExp(`^\\s*${RUN_SOURCE}\\s*$`, 'i');
 // A number followed by `min` is minutes, but not inside a name (`top5min`) or
 // before the mathjs min() function (`min(2, 3)`).
 const MINUTE = new RegExp(`${BEFORE_WORD}(\\d+(?:\\.\\d+)?)\\s*min(?![${WORD}_.(])`, 'giu');
+const SECOND = new RegExp(`${BEFORE_WORD}(\\d+(?:\\.\\d+)?)\\s*secs?(?![${WORD}_.(])`, 'giu');
+// `min` and `sec` are also mathjs functions, so they only mean the unit where a unit
+// goes: after a number (above), as a conversion target (`to min`, `as sec`), and in
+// a compound unit (`km/min`, `m * min`). `min(2, 3)` and a name that merely starts
+// with them are left alone.
+const TARGET_UNIT = new RegExp(`\\b(to|in|as)\\s+(min|secs?)(?![${WORD}_.(])`, 'giu');
+const COMPOUND_UNIT = new RegExp(`([/*^]\\s*)(min|secs?)(?![${WORD}_.(])`, 'giu');
+
+function timeSymbolName(symbol) {
+  return symbol.toLowerCase() === 'min' ? 'minutes' : 'seconds';
+}
+
+function normalizeTimeSymbols(expression) {
+  return expression
+    .replace(MINUTE, '$1 minutes')
+    .replace(SECOND, '$1 seconds')
+    .replace(TARGET_UNIT, (match, word, symbol) => `${word} ${timeSymbolName(symbol)}`)
+    .replace(COMPOUND_UNIT, (match, operator, symbol) => `${operator}${timeSymbolName(symbol)}`);
+}
 
 // `3h 5m 10s` -> `3 hours + 5 minutes + 10 seconds`.
 function joinTimeComponents(expression) {
@@ -120,7 +139,7 @@ function preprocessTimespan(expression) {
   // (handled below) and `as a %` (percentage, already consumed).
   const converted = expression.replace(/\s+as\s+(?!timespan\b|a\s+%)/gi, ' to ');
   // mathjs reads `min` as the min() function; a number before it is a minute.
-  const normalized = converted.replace(MINUTE, '$1 minutes');
+  const normalized = normalizeTimeSymbols(converted);
 
   // A line that is nothing but time components displays as a timespan.
   if (WHOLE_RUN.test(normalized)) {

@@ -24,6 +24,20 @@ Converta entre unidades com `to`, `in` ou `as`, nomeie o que você está medindo
 100 lb in kg
 ```
 
+Um comprimento, massa ou volume escrito em duas unidades é a soma delas, na unidade menor, e `min` e `sec` são o minuto e o segundo onde quer que uma unidade caiba.
+
+```calc retorna 74 inch
+6 ft 2 in
+```
+
+```calc retorna 180 cm
+1 m 80 cm
+```
+
+```calc retorna 60 minutes
+1 h to min
+```
+
 Unidades CSS também são suportadas, para você conferir um layout:
 
 ```calc retorna 37.795… px

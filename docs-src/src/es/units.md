@@ -24,6 +24,20 @@ Convierte entre unidades con `to`, `in` o `as`, nombra lo que estás midiendo pa
 100 lb in kg
 ```
 
+Una longitud, masa o volumen escrito en dos unidades es su suma, en la unidad más pequeña, y `min` y `sec` son el minuto y el segundo allí donde va una unidad.
+
+```calc devuelve 74 inch
+6 ft 2 in
+```
+
+```calc devuelve 180 cm
+1 m 80 cm
+```
+
+```calc devuelve 60 minutes
+1 h to min
+```
+
 También se admiten unidades CSS, para revisar un diseño:
 
 ```calc devuelve 37.795… px

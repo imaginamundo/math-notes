@@ -24,6 +24,20 @@ Convert between units with `to`, `in` or `as`, name what you are measuring to co
 100 lb in kg
 ```
 
+A length, mass or volume written in two units is their sum, in the smaller unit, and `min` and `sec` are the minute and the second wherever a unit goes.
+
+```calc returns 74 inch
+6 ft 2 in
+```
+
+```calc returns 180 cm
+1 m 80 cm
+```
+
+```calc returns 60 minutes
+1 h to min
+```
+
 CSS units are supported too, so you can check a layout:
 
 ```calc returns 37.795… px

@@ -149,6 +149,18 @@ smallest one it names. `to nearest 16th` on a unit or currency rounds the unit's
 number and keeps the exact numerator and denominator (`fractionParts`), which
 `formatResult`draws as`37/16 in`.
 
+A measurement written in two units of one dimension, with nothing between them
+(`6 ft 2 in`, `1 m 80 cm`, `1 lb 4 oz`), is read by mathjs as a product, so it was an area.
+`preprocessUnitRuns` (`js/eval/unitRuns.js`, the first preprocessing step) turns such a
+run of length, mass or metric volume into `((6 ft + 2 inch) to inch)`: their sum, in the
+smallest unit named, as one operand, so a trailing `to cm` still works. Runs of different
+dimensions or of one unit twice are left alone. Time runs are joined by `timespan.js`,
+which also reads `min` and `sec` as the unit wherever a unit goes (after a number, as a
+conversion target, in a compound such as `km/min`) while `min(2, 3)` stays the function.
+In `rates.js`, `at` joins operands of any length, only lowercase `a`/`an` are rate words
+(a capital `A` is the ampere) and never before `to`/`as`/`in`, and a variable named `a`
+is not one.
+
 mathjs reads `%` followed by `+` or `-` as the remainder operator, so `50 + 10% + 1` was
 `50 + (10 % (+1))` and gave 50. `preprocessPercent` (`js/eval/percentage.js`) sets such a
 percentage apart: as the right operand of an additive chain it closes the chain

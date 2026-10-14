@@ -11,9 +11,13 @@ import { simplifyLocal } from '../core/unitSimplify.js';
 
 const TIME_TO = /^\s*time\s+to\s+\w+\s+(.+?)\s+at\s+(.+)$/i;
 const PACE = /^(.+?)\s+in\s+(.+)$/i;
-const AT = /^(.+\S)\s+at\s+(\S.+)$/i;
+// `at` between two operands of any length (`5 at 25`, `x at 3`); with a two-character
+// minimum mathjs read a one-character operand's `at` as the unit attotonne.
+const AT = /^(.*\S)\s+at\s+(\S.*)$/i;
 const FOR = /\s+for\s+(a|an|\d+(?:\.\d+)?)\s+([A-Za-zµ][A-Za-zµ0-9]*)\b/gi;
-const PER = /\s+(per|a|an)\s+([A-Za-zµ][A-Za-zµ0-9]*)\b/gi;
+// `per` in any case, but `a`/`an` only in lowercase (a capital `A` is the ampere,
+// `3 A h`), and never before a conversion word (`10 a to m`).
+const PER = /\s+([Pp][Ee][Rr]|a|an)\s+(?!(?:to|as|in)\b)([A-Za-zµ][A-Za-zµ0-9]*)\b/g;
 
 function preprocessRates(expression, context) {
   const names = context && context.names;
@@ -39,7 +43,10 @@ function preprocessRates(expression, context) {
   expr = expr.replace(PER, (match, connector, unit) => {
     // `a`/`an` between two variables is not a rate (`x a y`); only `per` always
     // means division.
-    if (connector.toLowerCase() !== 'per' && names && names.has(unit)) return match;
+    // A variable named `a` or `an` is a variable too (`x = a mod 3`).
+    if (connector.toLowerCase() !== 'per' && names && (names.has(unit) || names.has(connector))) {
+      return match;
+    }
     return ` / ${unit}`;
   });
   return expr;
