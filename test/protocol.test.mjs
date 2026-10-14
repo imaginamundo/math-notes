@@ -34,10 +34,12 @@ test('the fallback applies exactly the engine-owned settings', () => {
 });
 
 test('a fresh worker is seeded with every setting', () => {
-  const seeded = [...read('js/evalClient.js').matchAll(/seed\(SETTING\.(\w+),/g)].map((m) => {
-    assert.ok(m[1] in SETTING, `SETTING.${m[1]} is not defined`);
-    return SETTING[m[1]];
-  });
+  const seeded = [...read('js/evalClient.js').matchAll(/(?:seed|initial)\(SETTING\.(\w+),/g)].map(
+    (m) => {
+      assert.ok(m[1] in SETTING, `SETTING.${m[1]} is not defined`);
+      return SETTING[m[1]];
+    }
+  );
   assert.deepEqual([...seeded].sort(), [...SETTING_NAMES].sort());
 });
 

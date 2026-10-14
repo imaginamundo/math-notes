@@ -247,3 +247,117 @@ test('a stale reply does not consume a pending precision force', async () => {
   assert.equal(renders[0].data.startLine, -1, 'the pre-change reply is not forced');
   assert.equal(renders[1].data.startLine, 0, 'the post-change reply forces a full render');
 });
+
+// REVIEW.md CORE-01: a reply dropped because the sheet moved on still told the
+// worker's cache how far the sheet had changed, so the next reply, which only
+// covers the edit since, must not hide that: rows above it may need repainting.
+test('CORE-01: a dropped reply’s startLine is not lost to the next render', async () => {
+  const { client, node, renders } = setup();
+  await client.update(); // creates the worker
+  const worker = WorkerStub.latest;
+  worker.autoReply = false;
+  renders.length = 0;
+  const lastId = () => worker.sent.filter((m) => m.type === 'evaluate').at(-1).id;
+  const reply = (id, startLine) =>
+    worker.emit('message', { data: { id, type: 'result', results: [], total: '4', startLine } });
+
+  const dropped = client.update();
+  const id1 = lastId();
+  node.value = '1 + 2'; // supersede it
+  reply(id1, 0); // the engine changed everything from line 0
+  await dropped;
+  assert.equal(renders.length, 0);
+
+  const next = client.update();
+  reply(lastId(), 4); // the edit since only changed from line 4
+  await next;
+  assert.equal(renders.length, 1);
+  assert.equal(renders[0].data.startLine, 0, 'the earlier, wider change is still repainted');
+});
+
+test('CORE-01: a dropped reply that changed nothing does not widen the next render', async () => {
+  const { client, node, renders } = setup();
+  await client.update();
+  const worker = WorkerStub.latest;
+  worker.autoReply = false;
+  renders.length = 0;
+  const lastId = () => worker.sent.filter((m) => m.type === 'evaluate').at(-1).id;
+  const reply = (id, startLine) =>
+    worker.emit('message', { data: { id, type: 'result', results: [], total: '4', startLine } });
+
+  const dropped = client.update();
+  const id1 = lastId();
+  node.value = '1 + 2';
+  reply(id1, -1);
+  await dropped;
+  const next = client.update();
+  reply(lastId(), 3);
+  await next;
+  assert.equal(renders[0].data.startLine, 3);
+});
+
+test('CORE-01: the widened start line is used once, then cleared', async () => {
+  const { client, node, renders } = setup();
+  await client.update();
+  const worker = WorkerStub.latest;
+  worker.autoReply = false;
+  renders.length = 0;
+  const lastId = () => worker.sent.filter((m) => m.type === 'evaluate').at(-1).id;
+  const reply = (id, startLine) =>
+    worker.emit('message', { data: { id, type: 'result', results: [], total: '4', startLine } });
+  const dropped = client.update();
+  node.value = '1 + 2';
+  reply(lastId(), 1);
+  await dropped;
+  const second = client.update();
+  reply(lastId(), 5);
+  await second;
+  node.value = '1 + 3';
+  const third = client.update();
+  reply(lastId(), 5);
+  await third;
+  assert.deepEqual(
+    renders.map((r) => r.data.startLine),
+    [1, 5]
+  );
+});
+
+// REVIEW.md CORE-05: a restarted worker (and the main-thread fallback) took its
+// settings and rates from localStorage, not from what this window had last been
+// told, so a restart could silently change results.
+const sentSettings = (worker) =>
+  worker.sent.filter((m) => m.type === 'setting').map((m) => [m.name, m.value]);
+
+test('CORE-05: a restarted worker is seeded with this window’s settings and rates', async () => {
+  const { client, node } = setup();
+  await client.update(); // worker #1
+  const first = WorkerStub.latest;
+  client.syncMeasurement('us');
+  client.syncPrecision(4);
+  client.syncRates({ base: 'EUR', rates: { USD: 2 } });
+  first.autoReply = false;
+  first.throwOnEvaluate = true; // forces a restart
+  node.value = '2 + 2';
+  await client.update();
+  const fresh = WorkerStub.latest;
+  assert.notEqual(fresh, first);
+  const seeded = Object.fromEntries(sentSettings(fresh));
+  assert.equal(seeded.measurement, 'us');
+  assert.equal(seeded.precision, 4);
+  assert.deepEqual(seeded.rates, { base: 'EUR', rates: { USD: 2 } });
+});
+
+test('CORE-05: the main-thread fallback gets the settings it was sent before it loaded', async () => {
+  const { client, node, renders } = setup();
+  await client.update();
+  const worker = WorkerStub.latest;
+  client.syncMeasurement('us');
+  worker.autoReply = false;
+  node.value = '1 cup to ml';
+  const pending = client.update();
+  worker.crash();
+  await pending;
+  const value = renders.at(-1).data.results[0].value;
+  const ml = value.toNumber('ml');
+  assert.ok(Math.abs(ml - 236.588) < 0.01, `a US cup is 236.6 ml, got ${ml}`);
+});

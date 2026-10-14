@@ -823,3 +823,29 @@ test('a tag request gives each tag its share of a row tagged for several', () =>
   assert.equal(results[1].value, 50);
   assert.equal(results[2].value, 50);
 });
+
+// REVIEW.md CORE-10: every load registered the same cached rates twice, and each
+// registration threw away the whole per-line cache.
+test('CORE-10: registering an identical rates table keeps the cache', () => {
+  const engine = createEngine();
+  const table = { base: 'EUR', rates: { USD: 1.1, GBP: 0.85 } };
+  engine.registerCurrencyRates(table);
+  const lines = ['10 USD to EUR', '2 + 2'];
+  assert.equal(engine.evaluateLines(lines).startLine, 0, 'the first evaluation is complete');
+  assert.equal(engine.evaluateLines(lines).startLine, -1, 'nothing changed');
+
+  engine.registerCurrencyRates({ base: 'EUR', rates: { USD: 1.1, GBP: 0.85 } });
+  assert.equal(engine.evaluateLines(lines).startLine, -1, 'the same table changes nothing');
+
+  engine.registerCurrencyRates({ base: 'EUR', rates: { USD: 1.2, GBP: 0.85 } });
+  assert.equal(engine.evaluateLines(lines).startLine, 0, 'a different table recomputes');
+});
+
+test('CORE-10: a table the engine was created with is not re-registered either', () => {
+  const table = { base: 'EUR', rates: { USD: 1.1 } };
+  const engine = createEngine({ rates: table });
+  const lines = ['10 USD to EUR'];
+  engine.evaluateLines(lines);
+  engine.registerCurrencyRates({ base: 'EUR', rates: { USD: 1.1 } });
+  assert.equal(engine.evaluateLines(lines).startLine, -1);
+});

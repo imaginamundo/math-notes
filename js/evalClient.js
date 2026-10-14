@@ -54,6 +54,16 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
   // A normal close during an evaluation is not a crash: clear the marker so the
   // sheet is not paused for nothing. A real crash never reaches this handler.
   if (typeof window !== 'undefined') window.addEventListener('pagehide', () => guard.end());
+  // The last value of each setting (and the rates) this window was told. A worker
+  // started after a restart, and the main-thread engine when it loads, are seeded
+  // from these, not from localStorage: a restart is internal recovery and must not
+  // change results because a storage write failed or another window changed a
+  // setting (CORE-05).
+  const applied = new Map();
+  // Where the next rendered reply must start repainting at the latest, because a
+  // reply the sheet had moved on from was dropped and its changed rows are still
+  // on screen as they were (CORE-01).
+  let droppedFrom = Infinity;
   let worker = null;
   let workerUnavailable = false;
   let latestId = 0;
@@ -100,17 +110,18 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
     // Seed the worker with the stored settings; the worker defaults to the same
     // values, so only a non-default choice needs sending.
     const seed = (name, value) => created.postMessage({ type: MSG.setting, name, value });
-    const measurementSystem = readMeasurementSystem();
-    if (measurementSystem !== DEFAULT_MEASUREMENT_SYSTEM)
-      seed(SETTING.measurement, measurementSystem);
-    const precision = readDecimalPrecision();
-    if (precision !== DEFAULT_PRECISION) seed(SETTING.precision, precision);
-    const totalMode = readTotalMode();
-    if (totalMode !== DEFAULT_TOTAL_MODE) seed(SETTING.totalMode, totalMode);
-    const clockFormat = readClockFormat();
-    if (clockFormat !== DEFAULT_CLOCK_FORMAT) seed(SETTING.clockFormat, clockFormat);
-    const cachedRates = loadCached();
-    if (cachedRates) seed(SETTING.rates, cachedRates);
+    // What this window was last told wins; storage is only the first answer.
+    const initial = (name, read, defaultValue) => {
+      if (applied.has(name)) return seed(name, applied.get(name));
+      const value = read();
+      if (value !== defaultValue) seed(name, value);
+    };
+    initial(SETTING.measurement, readMeasurementSystem, DEFAULT_MEASUREMENT_SYSTEM);
+    initial(SETTING.precision, readDecimalPrecision, DEFAULT_PRECISION);
+    initial(SETTING.totalMode, readTotalMode, DEFAULT_TOTAL_MODE);
+    initial(SETTING.clockFormat, readClockFormat, DEFAULT_CLOCK_FORMAT);
+    const rates = applied.has(SETTING.rates) ? applied.get(SETTING.rates) : loadCached();
+    if (rates) seed(SETTING.rates, rates);
     // A fresh worker holds no sheet, so the next request must be a full one.
     lastSentLines = null;
     return created;
@@ -180,9 +191,16 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
       : import('./core/calculate.js').then((mod) => {
           fallbackModule = mod;
           // The engine takes rates as input; the composition root owns the
-          // cache, so seed the freshly loaded module with what is stored.
-          const cached = loadCached();
-          if (cached) mod.registerCurrencyRates(cached);
+          // cache, so seed the freshly loaded module with what this window was
+          // last told, else with what is stored, and replay the settings it was
+          // sent before it existed.
+          const rates = applied.has(SETTING.rates) ? applied.get(SETTING.rates) : loadCached();
+          if (rates) mod.registerCurrencyRates(rates);
+          for (const [name, value] of applied) {
+            if (name !== SETTING.rates && FALLBACK_SETTINGS[name]) {
+              applyToFallback((module) => FALLBACK_SETTINGS[name](module, value));
+            }
+          }
           return mod;
         });
     return withTimeout(
@@ -278,7 +296,16 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
         // guaranteed to change enough for the engine to report a full render).
         if (forcePrecision) precisionDirty = true;
         if (forceClock) clockFormatDirty = true;
+        // The engine's cache has already advanced past this reply, so the next
+        // reply only covers what changed since. Remember how far back this one
+        // reached, or rows above the next edit (a group subtotal, a conversion)
+        // are never repainted.
+        if (data.startLine >= 0) droppedFrom = Math.min(droppedFrom, data.startLine);
         return;
+      }
+      if (droppedFrom !== Infinity) {
+        data.startLine = data.startLine < 0 ? droppedFrom : Math.min(data.startLine, droppedFrom);
+        droppedFrom = Infinity;
       }
       if (forceRender) data.startLine = 0;
       onRender(lines, data);
@@ -321,6 +348,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
 
   // Every setting is sent as one message shape; the worker routes by name.
   function postSetting(name, value) {
+    if (value !== undefined) applied.set(name, value);
     if (worker && value !== undefined) worker.postMessage({ type: MSG.setting, name, value });
     const apply = FALLBACK_SETTINGS[name];
     if (apply) applyToFallback((mod) => apply(mod, value));

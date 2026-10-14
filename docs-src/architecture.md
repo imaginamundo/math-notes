@@ -370,9 +370,18 @@ rates, reported as `source: 'stale'`) and, on each `CURRENCY_UPDATED`, calls
 `evalClient.syncRates`. That posts a `{ type: 'setting', name: 'rates', value }`
 message and, when the main-thread fallback is in use, calls
 `registerCurrencyRates` on its engine directly. A lazy `calculate.js` import is
-the fallback when `Worker` is unavailable or dies; `evalClient` seeds a fresh
-worker, and a freshly loaded fallback engine, from the cached rates. The base
-currency (`BASE`) is defined once in `js/core/currencySymbols.js`.
+the fallback when `Worker` is unavailable or dies. `evalClient` remembers the last
+value of every setting, and the last rates, it was told, and seeds a restarted
+worker and a freshly loaded fallback engine from those; storage is only the answer
+before anything was sent. A restart is internal recovery and must not change results
+because a storage write failed or another window changed a setting. Registering a
+rates table identical to the one already registered is ignored by the engine: the
+same table arrives twice on every load (the seed, then the cached-rates event), and
+each registration would otherwise discard the whole per-line cache. When a reply is
+dropped because the sheet moved on, its `startLine` is remembered and the next
+rendered reply is widened to it, since the engine's cache has already advanced and
+the next reply only covers what changed since. The base currency (`BASE`) is
+defined once in `js/core/currencySymbols.js`.
 
 A sheet that still kills the tab (an out-of-memory worker takes the whole
 renderer with it) would otherwise be restored and re-run on every load, with no
