@@ -47,7 +47,7 @@ Cuando una línea no se puede evaluar, el error aparece en la propia línea, en 
 
 ## Autocompletado
 
-Mientras escribes, un cuadro de sugerencias propone las variables de la hoja y las `#tags`, además de las funciones, palabras clave, constantes y unidades integradas. Pulsa `Ctrl+Space` para abrirlo cuando quieras. **↑**/**↓** eligen, **Enter**/**Tab** insertan, **Esc** cierra.
+Mientras escribes, un cuadro de sugerencias propone las variables de la hoja y las `#tags`, además de las funciones, palabras clave, constantes y unidades integradas. Pulsa `Ctrl+Space` para abrirlo cuando quieras. **Tab** inserta la sugerencia resaltada; **↑**/**↓** eligen otra, y entonces **Enter** también la inserta (igual que cuando abriste el cuadro con `Ctrl+Space`). En otro caso **Enter** solo empieza una línea nueva, así que terminar una palabra como `grams` nunca la cambia por `kilograms`. Una palabra que ya es un nombre completo no abre el cuadro por sí sola. **Esc** cierra.
 
 ## Primera visita
 

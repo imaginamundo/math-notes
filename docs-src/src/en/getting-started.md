@@ -47,7 +47,7 @@ When a line cannot be evaluated, the error appears inline in red. Errors never s
 
 ## Autocomplete
 
-As you type, a popup suggests the sheet's variables and `#tags` plus the built-in functions, keywords, constants and units. Press `Ctrl+Space` to open it on demand. `↑`/`↓` choose, `Enter`/`Tab` insert, `Esc` dismisses.
+As you type, a popup suggests the sheet's variables and `#tags` plus the built-in functions, keywords, constants and units. Press `Ctrl+Space` to open it on demand. `Tab` inserts the highlighted suggestion; `↑`/`↓` choose another, after which `Enter` inserts it too (as it does when you opened the popup with `Ctrl+Space`). Otherwise `Enter` just starts a new line, so finishing a word like `grams` never swaps it for `kilograms`. A word that is already a complete name opens no popup on its own. `Esc` dismisses.
 
 ## First run
 

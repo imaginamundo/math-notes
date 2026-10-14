@@ -55,6 +55,11 @@ function initAutocomplete(editableNode, editorScroll) {
   let items = [];
   let activeIndex = 0;
   let range = null;
+  // Whether the user chose to look at the suggestions: they opened the popup with
+  // Ctrl+Space or moved the highlight with the arrow keys. A popup that opened by
+  // itself while typing is only offered, so Enter must not take it: at the end of
+  // a line it would swap a complete word for a longer one (`grams` for `kilograms`).
+  let chosen = false;
   // Set around an accepted edit so the input event it dispatches does not
   // immediately reopen the popup on the word just inserted.
   let suppress = false;
@@ -127,16 +132,30 @@ function initAutocomplete(editableNode, editorScroll) {
     // A dialog in front means no popup at all; asked for last, so the document
     // search it costs only happens for a word that would otherwise open one.
     if (blocked()) return close();
-    items = suggestionsFor(range.prefix, entries(), MAX_ITEMS);
+    const all = entries();
+    // A word that already names something needs no help: offering longer words
+    // for it only invites replacing it. Ctrl+Space still lists them.
+    if (!force && isKnown(range.prefix, all)) return close();
+    items = suggestionsFor(range.prefix, all, MAX_ITEMS);
     if (!items.length) return close();
     activeIndex = 0;
+    chosen = Boolean(force);
     render();
     popup.hidden = false;
     announce(countMessage());
     position();
   }
 
+  function isKnown(prefix, all) {
+    // The tag being typed is already a tag of the sheet, so it would always be
+    // "known"; a tag has no vocabulary of its own to be complete against.
+    if (prefix.startsWith('#')) return false;
+    const lower = prefix.toLowerCase();
+    return all.some((entry) => entry.text.toLowerCase() === lower);
+  }
+
   function close() {
+    chosen = false;
     if (popup.hidden) return;
     popup.hidden = true;
     popup.textContent = '';
@@ -199,6 +218,7 @@ function initAutocomplete(editableNode, editorScroll) {
   }
 
   function move(delta) {
+    chosen = true;
     activeIndex = (activeIndex + delta + items.length) % items.length;
     [...popup.children].forEach((child, index) => {
       child.classList.toggle('active', index === activeIndex);
@@ -288,10 +308,13 @@ function initAutocomplete(editableNode, editorScroll) {
       event.preventDefault();
       event.stopImmediatePropagation();
       move(event.key === 'ArrowDown' ? 1 : -1);
-    } else if (event.key === 'Enter' || event.key === 'Tab') {
+    } else if (event.key === 'Tab' || (event.key === 'Enter' && chosen)) {
       event.preventDefault();
       event.stopImmediatePropagation();
       accept();
+    } else if (event.key === 'Enter') {
+      // Not chosen: the popup steps aside and Enter is an ordinary line break.
+      close();
     } else if (event.key === 'Escape') {
       event.preventDefault();
       event.stopImmediatePropagation();

@@ -456,6 +456,15 @@ own assignments and tags plus the curated vocabulary in
 `js/core/vocabulary.js` (keywords, functions, constants and the units from
 `core/measures.js` and `core/currencySymbols.js`).
 
+A popup that opened by itself is only an offer. `Tab` takes the highlighted
+entry, but `Enter` does so only once the user has _chosen_ — moved the highlight
+with the arrow keys, or opened the popup with `Ctrl+Space`; otherwise `Enter`
+closes it and is an ordinary line break. Without that, finishing a complete word
+at the end of a line would replace it with a longer one (`grams` →
+`kilograms`, `pi` → `pint`). For the same reason a word that already names an
+entry (a unit, constant, function or variable; not a `#tag`, which is always in
+the sheet it is typed in) opens no popup on its own.
+
 The logic is pure and unit-tested in `js/core/autocomplete.js`: `wordRangeAt`
 finds the word around the caret (leading digits stay outside it, so `300g`
 completes `g`; a `#tag` comes back with `tag: true` and `-` allowed inside),

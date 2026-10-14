@@ -1070,19 +1070,82 @@ test('autocomplete offers variables and functions and inserts the choice', async
   await type('monthly rent = 1500\nmon');
   await waitFor(async () => (await suggestions())[0] === 'monthly rent');
   assert.equal((await suggestions())[0], 'monthly rent');
-  await page.keyboard.press('Enter');
+  await page.keyboard.press('Tab');
   assert.equal(await value(), 'monthly rent = 1500\nmonthly rent');
 
-  // Enter accepts and a function gets its opening bracket.
+  // Tab accepts and a function gets its opening bracket.
   await type('sqr');
   await waitFor(async () => (await suggestions())[0] === 'sqrt');
-  await page.keyboard.press('Enter');
+  await page.keyboard.press('Tab');
   assert.equal(await value(), 'sqrt(');
 
   // A number has no completable word, so the popup stays closed.
   await type('3.5');
   await wait(100);
   assert.deepEqual(await suggestions(), []);
+  assert.deepEqual(errors, []);
+});
+
+test('UIE-01: Enter at the end of a line does not swap the word for a suggestion', async () => {
+  await newPage();
+  const type = (content) =>
+    page.evaluate((v) => {
+      const ed = document.getElementById('content-editable');
+      ed.focus();
+      ed.value = v;
+      ed.setSelectionRange(v.length, v.length);
+      ed.dispatchEvent(new Event('input', { bubbles: true }));
+    }, content);
+  const value = () => page.evaluate(() => document.getElementById('content-editable').value);
+  const popupOpen = () => page.evaluate(() => !document.getElementById('autocomplete-list').hidden);
+  const suggestions = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('#autocomplete-list .autocomplete-text')].map(
+        (node) => node.textContent
+      )
+    );
+
+  // Complete words (units, a constant, a variable) and a unit the vocabulary does
+  // not list (`mi`, which the popup would complete to `min(`).
+  const lines = [
+    'flour = 300 grams',
+    'timeout = 500 ms',
+    'area = 2 * pi',
+    'taxRate = 0.2\nprice = 100 * tax',
+    'run = 5 mi',
+    'trip = 10 days',
+  ];
+  for (const line of lines) {
+    await type(line);
+    await wait(60);
+    await page.keyboard.press('Enter');
+    assert.equal(await value(), `${line}\n`, `Enter after ${JSON.stringify(line)}`);
+  }
+
+  // Tab still accepts the highlighted suggestion.
+  await type('sqr');
+  await waitFor(async () => (await suggestions())[0] === 'sqrt');
+  await page.keyboard.press('Tab');
+  assert.equal(await value(), 'sqrt(');
+
+  // Enter accepts once the user has picked with the arrow keys.
+  await type('lo');
+  await waitFor(async () => (await suggestions()).length > 1);
+  const second = (await suggestions())[1];
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  assert.ok((await value()).startsWith(second), `Enter accepted ${second} after ArrowDown`);
+
+  // And once the user opened the popup on purpose with Ctrl+Space.
+  await type('sqr');
+  await waitFor(popupOpen);
+  await page.keyboard.press('Escape');
+  await page.keyboard.down('Control');
+  await page.keyboard.press('Space');
+  await page.keyboard.up('Control');
+  await waitFor(popupOpen);
+  await page.keyboard.press('Enter');
+  assert.equal(await value(), 'sqrt(');
   assert.deepEqual(errors, []);
 });
 
@@ -1260,10 +1323,10 @@ test('autocomplete offers sheet tags after a #', async () => {
   assert.ok(items.includes('#fare'), 'tags from the sheet are offered');
   assert.ok(!items.includes('sqrt'), 'a # keeps the popup in tag mode only');
 
-  // The prefix filters, and Enter inserts the whole tag.
+  // The prefix filters, and Tab inserts the whole tag.
   await type('20 #food\n30 #fare\n#far');
   await waitFor(async () => (await suggestions())[0] === '#fare');
-  await page.keyboard.press('Enter');
+  await page.keyboard.press('Tab');
   assert.equal(await value(), '20 #food\n30 #fare\n#fare');
   assert.deepEqual(errors, []);
 });

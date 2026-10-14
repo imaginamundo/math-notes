@@ -47,7 +47,7 @@ Quando uma linha não pode ser calculada, o erro aparece na própria linha, em v
 
 ## Autocompletar
 
-Enquanto você digita, um pop-up sugere as variáveis da planilha e as `#tags`, além das funções, palavras-chave, constantes e unidades internas. Pressione `Ctrl+Space` para abri-lo quando quiser. **↑**/**↓** escolhem, **Enter**/**Tab** inserem, **Esc** fecha.
+Enquanto você digita, um pop-up sugere as variáveis da planilha e as `#tags`, além das funções, palavras-chave, constantes e unidades internas. Pressione `Ctrl+Space` para abri-lo quando quiser. **Tab** insere a sugestão destacada; **↑**/**↓** escolhem outra, e então **Enter** também a insere (como quando você abriu o pop-up com `Ctrl+Space`). Caso contrário **Enter** só começa uma nova linha, então terminar uma palavra como `grams` nunca a troca por `kilograms`. Uma palavra que já é um nome completo não abre o pop-up sozinha. **Esc** fecha.
 
 ## Primeira visita
 
