@@ -1,6 +1,6 @@
 # Lists & sequences
 
-Lists hold several values. Write one with square brackets, index it, slice it, and use mathjs functions to aggregate or transform it. Lists and ranges are capped at **100 items** so a runaway sequence cannot freeze the editor.
+Lists hold several values. Write one with square brackets, index it, slice it, and use mathjs functions to aggregate or transform it. Lists and ranges are capped at **100 items** so a runaway sequence cannot freeze the editor. The cap covers everything that builds a list or matrix (`ones`, `zeros`, `identity`, `random`, `concat`, `kron`, …) and assigning past the end of a list (`n[500] = 1`).
 
 ## Lists
 

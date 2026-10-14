@@ -23,9 +23,31 @@ function assertBoundedExpression(math, expression, scope) {
       return null;
     }
   };
+  // The largest number a list index evaluates to (`n[5]`, `n[v]`, `n[1:5]`), or
+  // null when it cannot be resolved without running the line (`n[end + 1]`).
+  const largestIndex = (node) => {
+    try {
+      let value = math.evaluate(node.toString(), scope);
+      if (value && typeof value.toArray === 'function') value = value.toArray();
+      const numbers = [value].flat(Infinity).map((item) => Number(item?.toString?.() ?? item));
+      return numbers.length && numbers.every(Number.isFinite) ? Math.max(...numbers) : null;
+    } catch {
+      return null;
+    }
+  };
   tree.traverse((node) => {
     if (node.isArrayNode && node.items.length > MAX_LIST_LENGTH) {
       throw new Error(`Lists are limited to ${MAX_LIST_LENGTH} items`);
+    }
+    // `n[1000000000] = 1` grows the list to fit, which allocates as much as
+    // `ones(1000000000)` would. A parsed assignment does not go through the
+    // maths namespace, so the sizeLimits wrapper never sees it; check it here.
+    if (node.isAssignmentNode && node.index && node.index.dimensions) {
+      for (const dimension of node.index.dimensions) {
+        if ((largestIndex(dimension) ?? 0) > MAX_LIST_LENGTH) {
+          throw new Error(`Lists are limited to ${MAX_LIST_LENGTH} items`);
+        }
+      }
     }
     if (node.isRangeNode) {
       const start = resolve(node.start, 1);

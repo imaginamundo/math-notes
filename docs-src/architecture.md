@@ -289,7 +289,19 @@ longer than `MAX_LIST_LENGTH` (100) before evaluation, so `1:1e9` cannot
 allocate an unbounded array in the worker. It also bounds `range(...)` and
 the `ones`/`zeros` constructors, whose size sits inside a call rather than a
 literal. It parses only when the expression contains `[`, `:` or one of those
-calls, so ordinary lines skip the extra parse.
+calls, so ordinary lines skip the extra parse. It also rejects an indexed
+assignment past the cap (`n[1000000000] = 1` grows the list to fit), because a
+parsed assignment does not go through the maths namespace.
+
+A static check can only read sizes that are literals, so `js/core/sizeLimits.js`
+enforces the same cap where the allocation happens. It wraps every size-taking
+function (`ones`, `zeros`, `identity`, `random`, `randomInt`, `resize`, `reshape`,
+`matrixFromFunction`, `kron`, `diag`, `concat`, `sparse`, `setCartesian`, `range`,
+`subset`) to count what it is about to build from its already-evaluated
+arguments (sizes held in variables, lists and BigNumbers included) and to throw
+past 100 items; `setPowerset` is capped at 16 elements because it doubles with
+each one. A worker that runs out of memory takes the whole tab down, so
+`test/sizeLimits.test.mjs` runs these lines in a child process with a small heap.
 
 ### The worker
 

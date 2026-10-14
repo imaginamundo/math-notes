@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Lists &amp; sequences · Documentation · Math Notes</title>
-  <meta name="description" content="Lists hold several values. Write one with square brackets, index it, slice it, and use mathjs functions to aggregate or transform it. Lists and ranges are capped at 100 items so a runaway sequence cannot freeze the editor.">
+  <meta name="description" content="Lists hold several values. Write one with square brackets, index it, slice it, and use mathjs functions to aggregate or transform it. Lists and ranges are capped at 100 items so a runaway sequence cannot freeze the editor. The cap covers everything that builds a list or matrix (ones, zeros, identity, random, concat, kron, …) and assigning past the end of a list (n[500] = 1).">
   <link rel="canonical" href="https://math.dio.dev/docs/lists/">
   <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/lists/">
   <link rel="alternate" hreflang="pt" href="https://math.dio.dev/docs/pt/lists/">
@@ -13,7 +13,7 @@
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Math Notes">
   <meta property="og:title" content="Lists &amp; sequences">
-  <meta property="og:description" content="Lists hold several values. Write one with square brackets, index it, slice it, and use mathjs functions to aggregate or transform it. Lists and ranges are capped at 100 items so a runaway sequence cannot freeze the editor.">
+  <meta property="og:description" content="Lists hold several values. Write one with square brackets, index it, slice it, and use mathjs functions to aggregate or transform it. Lists and ranges are capped at 100 items so a runaway sequence cannot freeze the editor. The cap covers everything that builds a list or matrix (ones, zeros, identity, random, concat, kron, …) and assigning past the end of a list (n[500] = 1).">
   <meta property="og:url" content="https://math.dio.dev/docs/lists/">
   <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
   <link rel="stylesheet" href="/style.css">
@@ -59,7 +59,7 @@
     <main class="doc-main" id="content">
       <article class="doc-content">
 <h1>Lists &amp; sequences</h1>
-<p>Lists hold several values. Write one with square brackets, index it, slice it, and use mathjs functions to aggregate or transform it. Lists and ranges are capped at <strong>100 items</strong> so a runaway sequence cannot freeze the editor.</p>
+<p>Lists hold several values. Write one with square brackets, index it, slice it, and use mathjs functions to aggregate or transform it. Lists and ranges are capped at <strong>100 items</strong> so a runaway sequence cannot freeze the editor. The cap covers everything that builds a list or matrix (<code>ones</code>, <code>zeros</code>, <code>identity</code>, <code>random</code>, <code>concat</code>, <code>kron</code>, …) and assigning past the end of a list (<code>n[500] = 1</code>).</p>
 <h2 id="lists">Lists<a class="doc-anchor" href="#lists" aria-label="Link to this section" title="Link to this section">#</a></h2>
 <p>Lists are <strong>1-indexed</strong>: <code>n[1]</code> is the first element.</p>
 <figure class="doc-example" data-expr="[1, 2, 3]"><pre class="doc-code"><code data-calc>[1, 2, 3]</code></pre><figcaption class="doc-example-result">[1, 2, 3]</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><figure class="doc-example" data-expr="n = [10, 20, 30]

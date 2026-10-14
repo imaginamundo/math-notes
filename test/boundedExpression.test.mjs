@@ -61,3 +61,17 @@ test('a malformed expression is left for evaluate to report', () => {
   assert.doesNotThrow(() => check('[1, 2'));
   assert.doesNotThrow(() => check('1 +: 2'));
 });
+
+test('PRE-01: assigning past the end of a list is bounded like building one', () => {
+  assert.throws(() => check('n[1000000000] = 1'), /Lists are limited to 100 items/);
+  assert.throws(() => check('n[1, 5000] = 1'), /Lists are limited/);
+  assert.throws(() => check('n[idx] = 1', { idx: 100000 }), /Lists are limited/);
+  assert.throws(() => check('n[[1, 2, 100000]] = 1'), /Lists are limited/);
+  assert.doesNotThrow(() => check('n[5] = 1'));
+  assert.doesNotThrow(() => check('n[1:5] = 1'));
+  assert.doesNotThrow(() => check('n[100] = 1'));
+  assert.doesNotThrow(
+    () => check('n[end + 1] = 1'),
+    'an index that needs the list is left to evaluation'
+  );
+});

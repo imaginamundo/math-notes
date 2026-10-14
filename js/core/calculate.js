@@ -24,6 +24,7 @@ import { tagAggregate, tagAggregateMode, tagError, substituteTags } from './tags
 import { resolveLineRefs } from './lineRefs.js';
 import { assertBoundedExpression } from './boundedExpression.js';
 import { lockDown } from './engineLock.js';
+import { limitSizes } from './sizeLimits.js';
 import { friendlyError } from './friendlyErrors.js';
 import { substituteAggregates } from './aggregateSubstitution.js';
 import { firstDifference } from '../util/sequence.js';
@@ -151,6 +152,8 @@ function createEngine({ rates } = {}) {
   initTimespan(math);
   initCalendar(math);
   initCurrency(math, rates);
+  // The size-taking constructors refuse to allocate past the list cap (PRE-01).
+  limitSizes(math);
   // From here a sheet cannot reach `config`, `createUnit` or the functions that
   // evaluate text; the engine keeps the real ones through `trusted` (PRE-02).
   const trusted = lockDown(math);

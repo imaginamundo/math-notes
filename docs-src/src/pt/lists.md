@@ -1,6 +1,6 @@
 # Listas & sequências
 
-Listas guardam vários valores. Escreva uma com colchetes, indexe, fatie e use as funções do mathjs para agregar ou transformar. Listas e intervalos são limitados a **100 itens** para que uma sequência descontrolada não trave o editor.
+Listas guardam vários valores. Escreva uma com colchetes, indexe, fatie e use as funções do mathjs para agregar ou transformar. Listas e intervalos são limitados a **100 itens** para que uma sequência descontrolada não trave o editor. O limite cobre tudo que constrói uma lista ou matriz (`ones`, `zeros`, `identity`, `random`, `concat`, `kron`, …) e atribuir além do fim de uma lista (`n[500] = 1`).
 
 ## Listas
 

@@ -1,6 +1,6 @@
 # Listas & secuencias
 
-Las listas guardan varios valores. Escribe una con corchetes, indexa, corta y usa las funciones de mathjs para agregar o transformar. Las listas y los rangos están limitados a **100 elementos** para que una secuencia descontrolada no bloquee el editor.
+Las listas guardan varios valores. Escribe una con corchetes, indexa, corta y usa las funciones de mathjs para agregar o transformar. Las listas y los rangos están limitados a **100 elementos** para que una secuencia descontrolada no bloquee el editor. El límite cubre todo lo que construye una lista o matriz (`ones`, `zeros`, `identity`, `random`, `concat`, `kron`, …) y asignar más allá del final de una lista (`n[500] = 1`).
 
 ## Listas
 

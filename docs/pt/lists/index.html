@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Listas &amp; sequências · Documentação · Math Notes</title>
-  <meta name="description" content="Listas guardam vários valores. Escreva uma com colchetes, indexe, fatie e use as funções do mathjs para agregar ou transformar. Listas e intervalos são limitados a 100 itens para que uma sequência descontrolada não trave o editor.">
+  <meta name="description" content="Listas guardam vários valores. Escreva uma com colchetes, indexe, fatie e use as funções do mathjs para agregar ou transformar. Listas e intervalos são limitados a 100 itens para que uma sequência descontrolada não trave o editor. O limite cobre tudo que constrói uma lista ou matriz (ones, zeros, identity, random, concat, kron, …) e atribuir além do fim de uma lista (n[500] = 1).">
   <link rel="canonical" href="https://math.dio.dev/docs/pt/lists/">
   <link rel="alternate" hreflang="en" href="https://math.dio.dev/docs/lists/">
   <link rel="alternate" hreflang="pt" href="https://math.dio.dev/docs/pt/lists/">
@@ -13,7 +13,7 @@
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Math Notes">
   <meta property="og:title" content="Listas &amp; sequências">
-  <meta property="og:description" content="Listas guardam vários valores. Escreva uma com colchetes, indexe, fatie e use as funções do mathjs para agregar ou transformar. Listas e intervalos são limitados a 100 itens para que uma sequência descontrolada não trave o editor.">
+  <meta property="og:description" content="Listas guardam vários valores. Escreva uma com colchetes, indexe, fatie e use as funções do mathjs para agregar ou transformar. Listas e intervalos são limitados a 100 itens para que uma sequência descontrolada não trave o editor. O limite cobre tudo que constrói uma lista ou matriz (ones, zeros, identity, random, concat, kron, …) e atribuir além do fim de uma lista (n[500] = 1).">
   <meta property="og:url" content="https://math.dio.dev/docs/pt/lists/">
   <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
   <link rel="stylesheet" href="/style.css">
@@ -59,7 +59,7 @@
     <main class="doc-main" id="content">
       <article class="doc-content">
 <h1>Listas &amp; sequências</h1>
-<p>Listas guardam vários valores. Escreva uma com colchetes, indexe, fatie e use as funções do mathjs para agregar ou transformar. Listas e intervalos são limitados a <strong>100 itens</strong> para que uma sequência descontrolada não trave o editor.</p>
+<p>Listas guardam vários valores. Escreva uma com colchetes, indexe, fatie e use as funções do mathjs para agregar ou transformar. Listas e intervalos são limitados a <strong>100 itens</strong> para que uma sequência descontrolada não trave o editor. O limite cobre tudo que constrói uma lista ou matriz (<code>ones</code>, <code>zeros</code>, <code>identity</code>, <code>random</code>, <code>concat</code>, <code>kron</code>, …) e atribuir além do fim de uma lista (<code>n[500] = 1</code>).</p>
 <h2 id="listas">Listas<a class="doc-anchor" href="#listas" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
 <p>As listas são <strong>indexadas a partir de 1</strong>: <code>n[1]</code> é o primeiro elemento.</p>
 <figure class="doc-example" data-expr="[1, 2, 3]"><pre class="doc-code"><code data-calc>[1, 2, 3]</code></pre><figcaption class="doc-example-result">[1, 2, 3]</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="n = [10, 20, 30]
