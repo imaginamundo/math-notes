@@ -29,10 +29,14 @@ n = [10, 20, 30]
 n[2] = 99
 ```
 
-A aritmética é elemento a elemento, e as listas se combinam com as funções do mathjs:
+`+` e `-` agem elemento a elemento, e as listas se combinam com as funções do mathjs. Os operadores `*`, `/` e `^` comuns seguem as regras de matrizes, então use `.*`, `./` e `.^` para multiplicar, dividir ou elevar elemento a elemento:
 
 ```calc [4, 6]
 [1, 2] + [3, 4]
+```
+
+```calc [3, 8]
+[1, 2] .* [3, 4]
 ```
 
 ```calc [1, 2, 3]
@@ -71,11 +75,16 @@ n[3]
 
 ## Iteração
 
-Chamar uma função com um intervalo a aplica a cada elemento.
+Uma função recebe a lista ou o intervalo inteiro com que é chamada. Um corpo como `x * 2` ou `x + 1` funciona com cada elemento, mas `x * x` é um produto escalar (então `sq(1:3)` é 14). Para aplicar uma função a cada elemento, use `map`.
 
 ```calc [2, 4, 6, 8, 10]
 double = f(x) = x * 2
 double(1:5)
+```
+
+```calc [1, 4, 9]
+sq = f(x) = x * x
+map(1:3, sq)
 ```
 
 ## Agregações
