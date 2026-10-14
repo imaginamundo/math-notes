@@ -88,6 +88,9 @@ export default {
   'starter.tagComment': '# Tags name rows; a bare #tag totals them:',
 
   'autocomplete.label': 'Suggestions',
+  'autocomplete.count': '{count} suggestions',
+  'autocomplete.one': '1 suggestion',
+  'autocomplete.position': '{text}, {index} of {count}',
   'example.addTitle': 'Click to add to the editor',
   'examples.loadFailed': 'The examples could not be loaded',
 

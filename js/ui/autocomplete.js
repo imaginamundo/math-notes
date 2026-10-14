@@ -34,13 +34,20 @@ function initAutocomplete(editableNode, editorScroll) {
   popup.setAttribute('aria-label', t('autocomplete.label'));
   popup.hidden = true;
   scroller.appendChild(popup);
-  // The editor is a combobox whose listbox is the popup. It is a multiline
-  // input, so this is the closest ARIA pattern; `aria-expanded` tracks the popup.
-  editableNode.setAttribute('role', 'combobox');
+  // The editor stays a plain multiline textbox: ARIA-in-HTML does not allow
+  // `combobox` on a textarea, and re-roling it would cost screen readers the
+  // textbox semantics. It only points at the listbox and says it autocompletes;
+  // what the popup holds is announced through the status region below.
   editableNode.setAttribute('aria-controls', 'autocomplete-list');
   editableNode.setAttribute('aria-autocomplete', 'list');
-  editableNode.setAttribute('aria-haspopup', 'listbox');
-  editableNode.setAttribute('aria-expanded', 'false');
+  // Outside the popup, so it outlives the popup's `hidden`, and outside the
+  // scroll container, so it cannot affect scrolling. Same pattern as the result
+  // announcer in js/render/renderInput.js.
+  const status = document.createElement('span');
+  status.className = 'sr-only autocomplete-status';
+  status.setAttribute('role', 'status');
+  status.setAttribute('aria-live', 'polite');
+  document.body.appendChild(status);
   window.addEventListener(LANGUAGE_UPDATED, () =>
     popup.setAttribute('aria-label', t('autocomplete.label'))
   );
@@ -125,7 +132,7 @@ function initAutocomplete(editableNode, editorScroll) {
     activeIndex = 0;
     render();
     popup.hidden = false;
-    editableNode.setAttribute('aria-expanded', 'true');
+    announce(countMessage());
     position();
   }
 
@@ -136,7 +143,17 @@ function initAutocomplete(editableNode, editorScroll) {
     items = [];
     range = null;
     editableNode.removeAttribute('aria-activedescendant');
-    editableNode.setAttribute('aria-expanded', 'false');
+    announce('');
+  }
+
+  function announce(text) {
+    if (status.textContent !== text) status.textContent = text;
+  }
+
+  function countMessage() {
+    return t(items.length === 1 ? 'autocomplete.one' : 'autocomplete.count', {
+      count: items.length,
+    });
   }
 
   // One option row per position, created once and then updated in place:
@@ -189,6 +206,15 @@ function initAutocomplete(editableNode, editorScroll) {
     });
     setActiveDescendant();
     revealActive();
+    // `aria-activedescendant` on a textbox is not reliably announced, so say
+    // the highlighted suggestion and where it sits.
+    announce(
+      t('autocomplete.position', {
+        text: items[activeIndex].text,
+        index: activeIndex + 1,
+        count: items.length,
+      })
+    );
   }
 
   // Keep the highlighted option inside the popup's own scroll area. `offsetTop`

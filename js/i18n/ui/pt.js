@@ -88,6 +88,9 @@ export default {
   'starter.tagComment': '# Tags nomeiam linhas; uma #tag sozinha soma todas elas:',
 
   'autocomplete.label': 'Sugestões',
+  'autocomplete.count': '{count} sugestões',
+  'autocomplete.one': '1 sugestão',
+  'autocomplete.position': '{text}, {index} de {count}',
   'example.addTitle': 'Clique para adicionar ao editor',
   'examples.loadFailed': 'Não foi possível carregar os exemplos',
 

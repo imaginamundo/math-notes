@@ -88,6 +88,9 @@ export default {
   'starter.tagComment': '# Las etiquetas marcan filas; una #etiqueta sola las suma todas:',
 
   'autocomplete.label': 'Sugerencias',
+  'autocomplete.count': '{count} sugerencias',
+  'autocomplete.one': '1 sugerencia',
+  'autocomplete.position': '{text}, {index} de {count}',
   'example.addTitle': 'Haz clic para añadir al editor',
   'examples.loadFailed': 'No se pudieron cargar los ejemplos',
 
