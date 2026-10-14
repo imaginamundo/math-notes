@@ -66,6 +66,15 @@ function buildUnit(group, target, amount) {
   }
 }
 
+// A Fraction (`to nearest 16th`) or a BigNumber is a number too, but neither is a
+// JavaScript number, so aggregates used to skip it without a word (NUM-04).
+function plainNumber(value) {
+  if (value && (value.isFraction === true || value.isBigNumber === true)) {
+    return Number(value.valueOf());
+  }
+  return value;
+}
+
 // Scan a range of results once into the plain numbers and the unit groups, so
 // totals and aggregates share the exact same rules.
 function scan(results) {
@@ -76,7 +85,7 @@ function scan(results) {
 
   for (const result of results) {
     if (result.type !== 'value' || result.aggregate) continue;
-    const value = result.value;
+    const value = plainNumber(result.value);
 
     if (typeof value === 'number' && Number.isFinite(value)) {
       numericSum = (numericSum ?? 0) + value;
