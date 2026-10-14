@@ -26,6 +26,8 @@ No se sube nada. La hoja viaja en el fragmento `#` del enlace, que los navegador
 
 Las ediciones de cada pestaña se copian a IndexedDB como snapshots versionados. Abre **Ajustes → Recuperar** para ver todos los snapshots, agrupados por pestaña, y restaurar cualquiera de ellos, o usa **Restaurar todo desde la última copia** para recuperar todas las pestañas. Cada pestaña conserva sus 10 snapshots más recientes, guardados un par de segundos después de que dejas de escribir. Cerrar una pestaña también elimina sus snapshots. Los snapshots se guardan comprimidos para ocupar poco.
 
+Si la aplicación se detiene mientras calcula una hoja, los resultados de esa hoja quedan en pausa al recargar la página (un aviso lo indica), así que una sola línea problemática no te deja fuera. Edita la hoja para calcularla de nuevo, o cierra la pestaña.
+
 Si localStorage no está disponible o está corrupto, las hojas se reconstruyen automáticamente desde las copias de seguridad, y un valor corrupto se copia aparte en vez de perderse.
 
 ## Restablecer

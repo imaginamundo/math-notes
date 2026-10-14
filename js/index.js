@@ -64,7 +64,16 @@ function activeLine() {
   return indexOfLineAt(contentEditableNode.value, contentEditableNode.selectionStart);
 }
 
+// Set while the active sheet's results are paused (it stopped the app last time).
+// The notice must outlive the rate messages that arrive after boot, and goes away
+// once real results are drawn again.
+let evaluationPaused = false;
+
 function renderResultLayer(lines, data) {
+  if (evaluationPaused && data.results.length > 0) {
+    evaluationPaused = false;
+    currencyStatusNode.classList.remove('visible');
+  }
   rowRenderer.patchResults(lines, data.results, data.startLine);
   renderTotal(totalNode, data.total);
   rowRenderer.updateActiveLine(activeLine());
@@ -78,7 +87,11 @@ const evalClient = createEvalClient(
   (busy) => (busy ? loadingIndicator.show() : loadingIndicator.hide()),
   // Nothing renders when a reply never arrives, so say so rather than leaving
   // results that look current but are not.
-  () => showCurrencyStatus(t('status.evaluationFailed'))
+  // A sheet that stopped the app last time is paused, not failed.
+  (error) =>
+    error && error.code === 'paused'
+      ? showPausedStatus()
+      : showCurrencyStatus(t('status.evaluationFailed'))
 );
 
 // Trigger changes: redraw what you typed immediately, then evaluate in the
@@ -108,6 +121,16 @@ function showCurrencyStatus(text, sticky = false) {
   statusTimer = setTimeout(() => currencyStatusNode.classList.remove('visible'), 5000);
 }
 
+function showPausedStatus() {
+  evaluationPaused = true;
+  showCurrencyStatus(t('status.evaluationPaused'), true);
+}
+
+// Rate notices are background news; they wait while a paused notice is up.
+function showRateStatus(key) {
+  if (!evaluationPaused) showCurrencyStatus(t(key));
+}
+
 window.addEventListener(CURRENCY_UPDATED, (event) => {
   evalClient.syncRates(event.detail && event.detail.data);
   evalClient.update();
@@ -118,12 +141,12 @@ window.addEventListener(CURRENCY_UPDATED, (event) => {
       : source === 'stale'
         ? 'status.ratesStale'
         : 'status.ratesLive';
-  showCurrencyStatus(t(key));
+  showRateStatus(key);
 });
 
 window.addEventListener(CURRENCY_ERROR, () => {
   evalClient.update();
-  showCurrencyStatus(t('status.ratesUnavailable'));
+  showRateStatus('status.ratesUnavailable');
 });
 
 // A failed localStorage write (usually the quota is full) must not be silent.

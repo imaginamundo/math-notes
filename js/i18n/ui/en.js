@@ -37,6 +37,8 @@ export default {
   'status.storageFull': 'storage is full — recent changes may not be saved',
   'status.bootFailed': 'Math Notes could not start — your saved sheets were left untouched',
   'status.evaluationFailed': 'evaluation failed — results could not be updated',
+  'status.evaluationPaused':
+    'this sheet stopped the app the last time it was calculated, so its results are paused — edit it to calculate again',
 
   'share.buildFailed': "Couldn't build a link for this sheet",
   'share.copiedLong': "Link copied — it's long, some apps may cut it",

@@ -1,4 +1,5 @@
 import { loadCached } from './storage/currencyRates.js';
+import { createEvalGuard } from './storage/evalGuard.js';
 import { MSG, SETTING } from './protocol.js';
 import { readMeasurementSystem } from './core/measurementSystem.js';
 import { DEFAULT_MEASUREMENT_SYSTEM } from './core/measures.js';
@@ -47,6 +48,12 @@ export function recoveryFor({ workerUnavailable, retried }) {
  * @param {(error: Error) => void} [onError]  Notified when a reply could not be produced.
  */
 export function createEvalClient(editableNode, onTextRender, onRender, onBusy, onError) {
+  // Remembers a sheet that was running when the page died, so it is not run again
+  // on the next load (PRE-01).
+  const guard = createEvalGuard();
+  // A normal close during an evaluation is not a crash: clear the marker so the
+  // sheet is not paused for nothing. A real crash never reaches this handler.
+  if (typeof window !== 'undefined') window.addEventListener('pagehide', () => guard.end());
   let worker = null;
   let workerUnavailable = false;
   let latestId = 0;
@@ -238,10 +245,19 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
   // skipped it by sequence number alone, the second would come back as "no
   // change" (startLine -1) and nothing would ever render.
   async function update() {
-    pendingUpdates++;
-    if (pendingUpdates === 1) setBusy(true);
     const text = editableNode.value;
     const lines = sheetLines(text);
+    // This exact sheet stopped the app last time it was calculated. Draw what was
+    // typed, blank any results left from another sheet, and say why there are none.
+    if (guard.isPaused(text)) {
+      if (onTextRender) onTextRender(lines);
+      onRender(lines, { results: [], total: null, startLine: 0 });
+      if (onError) onError(Object.assign(new Error('Evaluation is paused'), { code: 'paused' }));
+      return;
+    }
+    pendingUpdates++;
+    if (pendingUpdates === 1) setBusy(true);
+    guard.begin(text);
     // A display-option change only reformats results, so the engine reports "no
     // change" (startLine -1). Snapshot the dirty flags for THIS request and clear
     // them immediately: a stale in-flight reply must not consume a force that
@@ -272,7 +288,10 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
       if (onError) onError(error);
     } finally {
       pendingUpdates--;
-      if (pendingUpdates === 0) setBusy(false);
+      if (pendingUpdates === 0) {
+        setBusy(false);
+        guard.end();
+      }
     }
   }
 

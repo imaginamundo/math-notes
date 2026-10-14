@@ -355,6 +355,18 @@ the fallback when `Worker` is unavailable or dies; `evalClient` seeds a fresh
 worker, and a freshly loaded fallback engine, from the cached rates. The base
 currency (`BASE`) is defined once in `js/core/currencySymbols.js`.
 
+A sheet that still kills the tab (an out-of-memory worker takes the whole
+renderer with it) would otherwise be restored and re-run on every load, with no
+way to reach Settings. `js/storage/evalGuard.js` breaks that loop: before a sheet
+is evaluated its fingerprint is stored as _running_, and cleared when the reply or
+a failure arrives (and on `pagehide`, so a normal close is not mistaken for a
+crash). If the next load finds a _running_ fingerprint, the page died mid-
+evaluation, and that exact sheet text is kept on a short list of paused sheets.
+`evalClient.update` does not evaluate a paused sheet: it draws the typed text,
+clears any results, and reports `code: 'paused'`, which `js/index.js` shows as a
+notice that outlives the rate messages. Any edit changes the fingerprint, so one
+keystroke calculates the sheet again.
+
 ### The composition root
 
 `js/index.js` runs `boot()` in a fixed order, which is a contract: resolve the

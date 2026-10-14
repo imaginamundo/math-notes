@@ -36,6 +36,8 @@ export default {
   'status.storageFull': 'almacenamiento lleno — puede que los cambios recientes no se guarden',
   'status.bootFailed': 'Math Notes no pudo iniciarse — tus hojas guardadas se han conservado',
   'status.evaluationFailed': 'error de evaluación — no se pudieron actualizar los resultados',
+  'status.evaluationPaused':
+    'esta hoja detuvo la aplicación la última vez que se calculó, así que sus resultados están en pausa — edítala para calcularla de nuevo',
 
   'share.buildFailed': 'No se pudo crear un enlace para esta hoja',
   'share.copiedLong': 'Enlace copiado — es largo, algunas apps pueden cortarlo',

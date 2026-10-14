@@ -5,6 +5,7 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { fingerprint, GUARD_KEY } from '../js/storage/evalGuard.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const MIME = {
@@ -518,6 +519,42 @@ test('autocomplete still knows the names after a line is inserted above them', a
   await open(removed, removed.length);
   await waitFor(async () => !(await options()).includes('rent') || (await options()).length === 0);
   assert.equal((await options()).includes('rent'), false);
+  assert.deepEqual(errors, []);
+});
+
+test('PRE-01: a sheet that was being calculated when the tab died is not calculated on reload', async () => {
+  await newPage();
+  const sheet = '2 + 3\n4 * 5';
+  const ghosts = () => page.evaluate(() => document.querySelectorAll('.ghost-result').length);
+  const marker = () => page.evaluate((key) => localStorage.getItem(key), GUARD_KEY);
+
+  await setContent(sheet);
+  await waitFor(async () => (await ghosts()) === 2);
+  assert.equal(await marker(), null, 'a finished evaluation leaves no marker');
+
+  // Simulate the tab dying while this sheet was running: the marker is still set.
+  await page.evaluate(
+    (key, running) => localStorage.setItem(key, JSON.stringify({ running, paused: [] })),
+    GUARD_KEY,
+    fingerprint(sheet)
+  );
+  await page.reload({ waitUntil: 'load' });
+  await wait(900);
+  assert.equal(await value(), sheet, 'the sheet itself is restored');
+  assert.equal(await ghosts(), 0, 'but it is not calculated');
+  assert.match(
+    await page.evaluate(() => document.getElementById('currency-status').textContent),
+    /paused/i
+  );
+  assert.equal(await page.evaluate(() => document.getElementById('total').textContent), '');
+
+  // Another reload keeps it paused; one edit calculates it again.
+  await page.reload({ waitUntil: 'load' });
+  await wait(900);
+  assert.equal(await ghosts(), 0, 'still paused after another reload');
+  await setContent(`${sheet}\n1`);
+  await waitFor(async () => (await ghosts()) === 3);
+  assert.equal(JSON.parse(await marker()).running, null, 'nothing is running once it finishes');
   assert.deepEqual(errors, []);
 });
 

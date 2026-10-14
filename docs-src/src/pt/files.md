@@ -26,6 +26,8 @@ Nada é enviado. A planilha viaja no fragmento `#` do link, que os navegadores n
 
 As edições de cada aba são copiadas para o IndexedDB como snapshots versionados. Abra **Configurações → Recuperar** para ver todos os snapshots, agrupados por aba, e restaurar qualquer um deles, ou use **Restaurar tudo do backup mais recente** para trazer todas as abas de volta. Cada aba guarda os seus 10 snapshots mais recentes, salvos alguns segundos depois que você para de digitar. Fechar uma aba também remove os seus snapshots. Os snapshots são armazenados comprimidos para ocupar pouco espaço.
 
+Se o app parar enquanto calcula uma planilha, os resultados dela ficam em pausa quando a página recarrega (um aviso informa isso), então uma única linha problemática não deixa você de fora. Edite a planilha para calculá-la de novo, ou feche a aba.
+
 Se o localStorage estiver indisponível ou corrompido, as planilhas são reconstruídas automaticamente a partir dos backups, e um valor corrompido é copiado à parte em vez de ser perdido.
 
 ## Redefinir

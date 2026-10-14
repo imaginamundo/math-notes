@@ -37,6 +37,8 @@ export default {
   'status.bootFailed':
     'O Math Notes não conseguiu iniciar — as suas planilhas guardadas ficaram intactas',
   'status.evaluationFailed': 'falha na avaliação — não foi possível atualizar os resultados',
+  'status.evaluationPaused':
+    'esta planilha parou o app da última vez que foi calculada, então os resultados estão em pausa — edite-a para calcular de novo',
 
   'share.buildFailed': 'Não foi possível criar um link para esta planilha',
   'share.copiedLong': 'Link copiado — é longo, alguns apps podem cortá-lo',

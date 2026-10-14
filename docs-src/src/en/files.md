@@ -26,6 +26,8 @@ Nothing is uploaded. The sheet travels in the link's `#` fragment, which browser
 
 Every tab's edits are backed up to IndexedDB as versioned snapshots. Open **Settings → Recover** to see every snapshot, grouped by tab, and restore any of them, or use **Restore all from latest backup** to bring back every tab. Each tab keeps its 10 most recent snapshots, saved a couple of seconds after you stop typing. Closing a tab also removes its snapshots. Snapshots are stored deflated to keep them small.
 
+If the app stops while it is calculating a sheet, that sheet's results stay paused when the page reloads (a notice says so), so one bad line cannot lock you out. Edit the sheet to calculate it again, or close the tab.
+
 If localStorage is unavailable or corrupt, sheets are rebuilt automatically from the backups, and a corrupt value is copied aside rather than lost.
 
 ## Reset
