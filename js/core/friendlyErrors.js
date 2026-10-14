@@ -26,6 +26,11 @@ function conversionTarget(code, scope) {
 function friendlyError(math, error, code, scope) {
   const message = error && error.message ? error.message : String(error);
 
+  // `USD + 1 USD`: a bare unit has no amount to add to (CUR-07).
+  if (/contains a unit with undefined value/i.test(message)) {
+    return 'A unit on its own has no amount here; write one, e.g. "1 USD"';
+  }
+
   // `5km to m` after `m = …`: the variable shadows the metre unit, so mathjs
   // hands a number to `to`. Name the variable instead of leaking the type
   // error.

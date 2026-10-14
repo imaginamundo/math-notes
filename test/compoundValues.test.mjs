@@ -72,3 +72,25 @@ test('MIX-01: two different currencies are still reported, not summed', () => {
   assert.equal(row.type, 'error');
   assert.match(String(row.value), /Cannot combine/);
 });
+
+// CUR-07: a bare unit (`USD`, `km`, `hour`) showed 0 and counted as 0 in
+// totals, but acted as 1 in `x * 5` and `USD to EUR`: a line must show the value it
+// computes with.
+test('CUR-07: a bare unit is one of that unit, everywhere', () => {
+  assert.equal(show(['USD'], 0), 'US$ 1');
+  assert.equal(show(['EUR'], 0), '€ 1');
+  assert.equal(show(['km'], 0), '1 km');
+  assert.equal(show(['kg'], 0), '1 kg');
+  assert.equal(show(['hour'], 0), '1 hour');
+  assert.equal(show(['x = USD', 'x * 5'], 1), 'US$ 5');
+  assert.equal(show(['USD', 'prev * 3'], 1), 'US$ 3');
+  assert.equal(total(['USD', '10 USD']), 'US$ 11');
+  assert.equal(show(['USD', '5 USD', 'average'], 2), 'US$ 3');
+});
+
+test('CUR-07: adding to a bare unit explains what to write', () => {
+  const row = run(['USD + 1 USD']).results[0];
+  assert.equal(row.type, 'error');
+  assert.doesNotMatch(String(row.value), /Parameter x|undefined value/);
+  assert.match(String(row.value), /amount/i);
+});

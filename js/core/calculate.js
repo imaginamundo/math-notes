@@ -282,6 +282,12 @@ function createEngine({ rates } = {}) {
       if (mixError) throw new Error(mixError);
       // Store a compound that cancels to one unit as that unit (MIX-01).
       result = normalizeUnit(result);
+      // A bare unit (`USD`, `km`, `hour`) has no amount, so it showed as 0 and
+      // counted as 0 in totals, though `USD * 5` and `USD to EUR` read it as 1. Make
+      // the value agree with what it computes with (CUR-07).
+      if (isUnitValue(result) && result.value === null) {
+        result = math.unit(1, result.formatUnits());
+      }
       result = snapResidue(result, expression);
       // The assignment statement already returns the rhs value; reuse it rather
       // than evaluating the rhs a second time, which could disagree for impure

@@ -149,6 +149,11 @@ smallest one it names. `to nearest 16th` on a unit or currency rounds the unit's
 number and keeps the exact numerator and denominator (`fractionParts`), which
 `formatResult`draws as`37/16 in`.
 
+A bare unit (`USD`, `km`, `hour`) has no amount, so it showed as 0 and counted as 0 in
+totals while `USD * 5` and `USD to EUR` read it as 1; `evaluateLine` stores it as one
+of that unit, and a valueless operand elsewhere (`USD + 1 USD`) gets a plain hint
+instead of mathjs's "contains a unit with undefined value".
+
 Float residue is not an answer. `0.1 + 0.2 - 0.3` is 5.6e-17 in binary doubles, so
 `evaluateLine` snaps a number result that is below 1e-12 of the largest number written
 in the expression to 0, but only when the expression adds or subtracts at least two
