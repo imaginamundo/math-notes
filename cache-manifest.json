@@ -1,5 +1,5 @@
 {
-  "version": 77,
+  "version": 78,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "8ab30c03ce83a52ec3048a552d376b54d3b502247119c24db874b0251d059156",
@@ -42,7 +42,7 @@
     "js/eval/currency.js": "62adf6135432eee8d7530ef548e087fb007204e062bf69b5b2cc427b66964dda",
     "js/eval/datetime.js": "50945c260dd2415b8b9c91b6147644a5fc3af416fc5b88c325321a42b2b79eaa",
     "js/eval/measures.js": "eff2c2cd1a2d3938738962676c8fbeabdf7a2a1884dfe0945ea5e68735e03ce4",
-    "js/eval/percentage.js": "ab32876ae2bfb87df0a8a1845338d3c816a23be2a437b0a2b45b2a58f129f963",
+    "js/eval/percentage.js": "9d3430ba9a82402c714db37d95c2cda919b91715481750d1122a1f54a57bc422",
     "js/eval/rates.js": "880332e6e3ff4a914a1052d579bcfa8a597b8ad98d4a573b8393b938ae43837c",
     "js/eval/rounding.js": "1b35f816e6a85933948a8b56e6763a48d42c6cdb14f663b7bfc869814993710f",
     "js/eval/scales.js": "c0b16e007595a44d6150153e6842a0ae39b375d553cb720a323b2e2e4574c9a6",
