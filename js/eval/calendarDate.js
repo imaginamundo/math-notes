@@ -130,18 +130,32 @@ function normalizeYear(year) {
   return year < 70 ? 2000 + year : 1900 + year;
 }
 
-// A date without a year uses the nearest occurrence (this year or next).
+// A date without a year uses the nearest occurrence: the closest of the years around
+// this one in which the day exists (so Feb 29 finds the nearest leap day).
 function resolveYear(day, month, year, now) {
   if (year !== null) return makeDate(year, month, day);
-  const thisYear = makeDate(now.getFullYear(), month, day);
-  if (!thisYear) return null;
-  const nextYear = makeDate(now.getFullYear() + 1, month, day);
-  if (!nextYear) return thisYear;
-  const resolved = Math.abs(thisYear - now) <= Math.abs(nextYear - now) ? thisYear : nextYear;
-  // Remember that the year was implicit: only those dates may be nudged onto
-  // the other side of the later date when the interval has no year to place it.
-  resolved.implicitYear = true;
-  return resolved;
+  let best = null;
+  for (let candidate = now.getFullYear() - 4; candidate <= now.getFullYear() + 4; candidate++) {
+    const date = makeDate(candidate, month, day);
+    if (date && (!best || Math.abs(date - now) < Math.abs(best - now))) best = date;
+  }
+  if (best) best.implicitYear = true;
+  return best;
+}
+
+// The occurrence of a yearless date's month and day nearest an anchor date, on its
+// `side`: the latest one on or before it, or the earliest on or after it. Used when a
+// yearless date is measured against a date that has a year (`days since March 1`).
+function occurrenceAround(date, anchor, side) {
+  const limit = atNoon(anchor);
+  let best = null;
+  for (let year = anchor.getFullYear() - 5; year <= anchor.getFullYear() + 5; year++) {
+    const candidate = makeDate(year, date.getMonth() + 1, date.getDate());
+    if (!candidate) continue;
+    if (side === 'before' && candidate <= limit && (!best || candidate > best)) best = candidate;
+    if (side === 'after' && candidate >= limit && (!best || candidate < best)) best = candidate;
+  }
+  return best || date;
 }
 
 function parseDate(text, now) {
@@ -299,6 +313,7 @@ export {
   requireDate,
   addDays,
   addMonths,
+  occurrenceAround,
   shiftDays,
   shiftMonths,
   startOfDay,

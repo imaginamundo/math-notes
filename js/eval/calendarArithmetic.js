@@ -8,6 +8,7 @@ import {
   atNoon,
   addDays,
   addMonths,
+  occurrenceAround,
   shiftDays,
   shiftMonths,
   startOfDay,
@@ -243,15 +244,40 @@ function clockInterval(aText, bText, forward, math) {
   return unit;
 }
 
-// Resolve two dates so the second is not before the first — but only when the
-// second date's year was implicit (a `3 March to 30 May` written without years,
-// where the nearest occurrence of one date happens to fall after the other). An
-// explicit backward interval (`2020-06-01 - 2019-01-01`) keeps its real span and
-// `dateDiff` swaps the endpoints instead of dropping a whole year.
-function resolveInterval(aValue, bValue) {
-  const a = toDate(aValue);
+// Place the yearless end of an interval. A date written without a year has no year of
+// its own, so it takes one from the other end when that has one, and from the nearest
+// occurrence when neither does.
+//   `forward` (`to`, `through`, `since`, `until`): reads from the first date to the second,
+//     so a yearless first date is the latest occurrence on or before the second, and a
+//     yearless second date the earliest on or after the first (`days since March 1`,
+//     `today to Christmas`). Two yearless dates wrap forward (`Dec 1 to Feb 5`).
+//   `span` (`-`, `between`, `midpoint`): the size of the gap, the same in either order,
+//     so a yearless date is the latest occurrence on or before the dated end, and two
+//     yearless dates are the smaller gap between their month-days, wherever the year turns.
+// A backward interval with years (`2020-06-01 - 2019-01-01`) keeps its real span;
+// `dateDiff` swaps the endpoints.
+// The occurrence of a yearless date closest to another date.
+function nearestTo(date, other) {
+  const before = occurrenceAround(date, other, 'before');
+  const after = occurrenceAround(date, other, 'after');
+  return Math.abs(other - before) <= Math.abs(after - other) ? before : after;
+}
+
+function resolveInterval(aValue, bValue, mode = 'forward') {
+  let a = toDate(aValue);
   let b = toDate(bValue);
-  if (b < a && b.implicitYear === true) b = addMonths(b, 12);
+  const aYearless = a.implicitYear === true;
+  const bYearless = b.implicitYear === true;
+  if (aYearless && !bYearless) {
+    a = occurrenceAround(a, b, 'before');
+  } else if (!aYearless && bYearless) {
+    b = occurrenceAround(b, a, mode === 'forward' ? 'after' : 'before');
+  } else if (aYearless && bYearless) {
+    // Forward wraps (`Dec 1 to Feb 5`); a span takes the year of the second date that
+    // puts it closest to the first (`Mar 3 and May 30` are in one year, `Dec 25 and
+    // Jan 5` straddle two).
+    b = mode === 'forward' ? (b < a ? occurrenceAround(b, a, 'after') : b) : nearestTo(b, a);
+  }
   return { a, b };
 }
 

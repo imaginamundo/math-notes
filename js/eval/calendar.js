@@ -51,15 +51,15 @@ function initCalendar(math) {
       __clock: (text) => requireClock(text),
       __clockAdd: (text, duration, sign) => clockAdd(text, duration, sign),
       __clockInterval: (a, b, forward) => clockInterval(a, b, Number(forward) > 0, math),
-      __dateInterval: (a, b) => {
-        const { a: from, b: to } = resolveInterval(a, b);
+      __dateInterval: (a, b, mode) => {
+        const { a: from, b: to } = resolveInterval(a, b, mode);
         return { type: 'calendarInterval', parts: dateDiff(from, to) };
       },
       __dateFormat: (date, pattern) => formatDatePattern(date, pattern),
-      __daysBetweenText: (a, b, extra, absolute) => {
+      __daysBetweenText: (a, b, extra, absolute, mode) => {
         // `days between`/`through ... in days` describe a span, so an explicit
         // backward pair reports its magnitude; `days since`/`until` stay signed.
-        const { a: from, b: to } = resolveInterval(a, b);
+        const { a: from, b: to } = resolveInterval(a, b, mode);
         const span = daysBetween(from, to);
         return math.unit((absolute ? Math.abs(span) : span) + (Number(extra) || 0), 'days');
       },
@@ -69,7 +69,7 @@ function initCalendar(math) {
       __dayOfYear: (date) => dayOfYear(date),
       __weekNumber: (date) => isoWeek(date),
       __midpointText: (a, b) => {
-        const { a: from, b: to } = resolveInterval(a, b);
+        const { a: from, b: to } = resolveInterval(a, b, 'span');
         return new Date((atNoon(from).getTime() + atNoon(to).getTime()) / 2);
       },
       __workdaysInDuration: (text) => workdaysInDuration(text),
@@ -81,7 +81,7 @@ function initCalendar(math) {
       __weekday: (date) => WEEKDAYS[date.getDay()],
       __workHoursInMonth: (text) => workHoursInMonth(text),
       __workHoursBetween: (a, b) => {
-        const { a: from, b: to } = resolveInterval(a, b);
+        const { a: from, b: to } = resolveInterval(a, b, 'span');
         return countWorkdays(from, to) * WORKDAY_HOURS;
       },
     },

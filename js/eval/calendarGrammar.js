@@ -33,7 +33,7 @@ const CLOCK_SRC =
 const DATE_ONLY = new RegExp(`^(${DATE_SRC})$`, 'i');
 const DATE_LITERAL = new RegExp(`^(?:${DATE_SRC})$`, 'i');
 const IDENT_ONLY = new RegExp(`^${IDENT}$`, 'u');
-const DATE_PAIR = new RegExp(`^(${DATE_SRC})\\s*(?:-|to)\\s*(${DATE_SRC})$`, 'i');
+const DATE_PAIR = new RegExp(`^(${DATE_SRC})\\s*(-|to)\\s*(${DATE_SRC})$`, 'i');
 const DATE_DURATION = new RegExp(`^(${DATE_OR_IDENT})\\s*([+-])\\s*(${DURATION_SRC})$`, 'iu');
 const DURATION_DATE = new RegExp(
   `^(${DURATION_SRC})\\s+(after|before)\\s+(${DATE_OR_IDENT})$`,
@@ -192,7 +192,7 @@ function preprocessCalendar(expression) {
     const pair = DATE_AND_DATE.exec(m[2]);
     const convert = (call) => (m[3] ? `((${call}) to ${m[3]})` : call);
     if (verb === 'between' && pair) {
-      return convert(`__daysBetweenText(${dateArg(pair[1])}, ${dateArg(pair[2])}, 0, 1)`);
+      return convert(`__daysBetweenText(${dateArg(pair[1])}, ${dateArg(pair[2])}, 0, 1, "span")`);
     }
     const single = DATE_ONLY.exec(m[2]) || (IDENT_ONLY.test(m[2]) ? [null, m[2]] : null);
     if (single && verb !== 'between') {
@@ -206,7 +206,7 @@ function preprocessCalendar(expression) {
   }
 
   if ((m = INCLUSIVE.exec(expr))) {
-    return `__daysBetweenText(${dateArg(m[1])}, ${dateArg(m[2])}, 1, 1)`;
+    return `__daysBetweenText(${dateArg(m[1])}, ${dateArg(m[2])}, 1, 1, "forward")`;
   }
 
   if ((m = MIDPOINT.exec(expr))) {
@@ -214,7 +214,9 @@ function preprocessCalendar(expression) {
   }
 
   if ((m = DATE_PAIR.exec(expr))) {
-    return `__dateInterval(${JSON.stringify(m[1])}, ${JSON.stringify(m[2])})`;
+    // `-` is the size of the gap; `to` reads forward from the first date.
+    const mode = m[2] === '-' ? 'span' : 'forward';
+    return `__dateInterval(${JSON.stringify(m[1])}, ${JSON.stringify(m[3])}, "${mode}")`;
   }
 
   if ((m = DATE_DURATION.exec(expr)) && !isUnitSum(m[1], m[3])) {

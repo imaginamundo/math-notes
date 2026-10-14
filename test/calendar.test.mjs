@@ -15,7 +15,7 @@ test('preprocessCalendar rewrites date arithmetic and intervals', () => {
   );
   assert.equal(
     preprocessCalendar('January 10 - February 5'),
-    '__dateInterval("January 10", "February 5")'
+    '__dateInterval("January 10", "February 5", "span")'
   );
   assert.equal(
     preprocessCalendar('days until Christmas'),

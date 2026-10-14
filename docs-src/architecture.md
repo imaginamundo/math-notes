@@ -198,6 +198,17 @@ time counts from the start of its day and the result becomes a clock time
 (`today + 12 hours` is 12:00, and equals `today + 0.5 days`); the date is never left
 carrying a hidden noon. A clock time not in the current year shows the year.
 
+Yearless dates (`resolveInterval` and `resolveYear`): on its own a yearless date is the
+nearest occurrence of its month and day among the years around the current one (so
+`Dec 31` in early January is last December, and `Feb 29` finds the nearest leap day). Next
+to a date that has a year, it takes its year from that date: in a forward reading (`to`,
+`through`, `since`, `until`) a yearless first date is the latest occurrence on or before
+the second and a yearless second date the earliest on or after the first (`days since
+March 1`, `today to Christmas`); in a span (`-`, `between`, `midpoint`) it is the latest
+occurrence on or before the dated end. Two yearless dates in a span give the smaller gap
+(`Feb 5 - Jan 10` is the same 26 days either way round); in a forward reading they wrap
+into the next year (`Dec 1 to Feb 5`).
+
 Tags in calculations: trailing `#tags` label a line only when the code before them is a
 finished expression (`isCompleteCode` in `parseLine.js`); after an operator, `=`, `(` or a
 word operator (`5 + #food`, `x = #food`) the tag is an operand and the line is not
