@@ -239,7 +239,8 @@ export function trailingDimension(text) {
 // Optional convenience factors. A subject missing from here still works — the
 // label is free-form and the evaluator falls back to a default density.
 export const DEFAULT_FACTORS = {
-  // Cooking — density, grams per millilitre.
+  // Cooking — density, grams per millilitre. Household values (spooned and levelled, as
+  // in USDA portion weights and the King Arthur ingredient chart), not bulk density.
   water: '1 g/ml',
   milk: '1.03 g/ml',
   buttermilk: '1.03 g/ml',
@@ -266,19 +267,19 @@ export const DEFAULT_FACTORS = {
   'corn syrup': '1.38 g/ml',
   sugar: '0.845 g/ml',
   'brown sugar': '0.93 g/ml',
-  'powdered sugar': '0.56 g/ml',
-  'coconut sugar': '0.8 g/ml',
+  'powdered sugar': '0.5 g/ml',
+  'coconut sugar': '0.65 g/ml',
   flour: '0.53 g/ml',
   'bread flour': '0.55 g/ml',
-  'whole wheat flour': '0.55 g/ml',
+  'whole wheat flour': '0.5 g/ml',
   'almond flour': '0.4 g/ml',
-  'cocoa powder': '0.52 g/ml',
-  cornstarch: '0.63 g/ml',
+  'cocoa powder': '0.36 g/ml',
+  cornstarch: '0.52 g/ml',
   'baking powder': '0.9 g/ml',
   'baking soda': '0.9 g/ml',
   salt: '1.2 g/ml',
   rice: '0.85 g/ml',
-  oats: '0.41 g/ml',
+  oats: '0.36 g/ml',
   'peanut butter': '1.08 g/ml',
   nutella: '1.24 g/ml',
   jam: '1.3 g/ml',
