@@ -1,5 +1,5 @@
 {
-  "version": 83,
+  "version": 84,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "8ab30c03ce83a52ec3048a552d376b54d3b502247119c24db874b0251d059156",
@@ -45,10 +45,10 @@
     "js/eval/measures.js": "60b0b2779d6e75fe8b7703333421c635f657b38e6338bada614ed766978a7b87",
     "js/eval/percentage.js": "9d3430ba9a82402c714db37d95c2cda919b91715481750d1122a1f54a57bc422",
     "js/eval/rates.js": "b7729f8174fd26eb1c4bd25c71406ede9af01918c1bce9afdcb23475a55109f0",
-    "js/eval/rounding.js": "1b35f816e6a85933948a8b56e6763a48d42c6cdb14f663b7bfc869814993710f",
-    "js/eval/scales.js": "c0b16e007595a44d6150153e6842a0ae39b375d553cb720a323b2e2e4574c9a6",
+    "js/eval/rounding.js": "63df0aa2ff315762c9794c30914bc3419a7baa78d4a11af767479ea17d4b1b09",
+    "js/eval/scales.js": "6c82daf165a7ca07314372da2ec6e42ebe10f89be12e19d64275473f3aebca7d",
     "js/eval/symbols.js": "e6b5592fda6e5102330b9c5f2d714731f8ad118c01b5491b9c21e6bc92158924",
-    "js/eval/timespan.js": "c5a7f3360174115db6e58b37dfe1ea3eb6874a14cc44aa373c20a9db74b3f3eb",
+    "js/eval/timespan.js": "ac081272f3e336c104dab94a08a338ef603ac52312c3e41266a785973ca17309",
     "js/eval/unitRuns.js": "270cd389d4e32f9bd35709692dc5ab02c084117a8f88d4ad87acb2883b123e7f",
     "js/eval/units.js": "9d6375d090a78ecf70fe37919d8674d857ea450e37817a11948fc240e486526f",
     "js/eval/userUnits.js": "9608df18cbd323452702f87c86a05e77a9585ff442923d2fc0d0d317c69548e1",
