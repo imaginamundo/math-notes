@@ -64,11 +64,18 @@ monthly rent = 1500
 monthly rent * 12
 ```
 
-Você pode guardar uma função com `f(x) = …` e chamá-la depois.
+Se uma atribuição falhar (`x = foo + 1`), o nome continua sendo um erro até ser atribuído de novo, então as linhas seguintes que o usam mostram `"x" has an error on line 2` em vez de usar em silêncio um valor antigo.
+
+Você pode guardar uma função com `f(x) = …` e chamá-la depois, diretamente ou com outro nome.
 
 ```calc a última linha retorna 42
 double = f(x) = x * 2
 double(21)
+```
+
+```calc a última linha retorna 8
+f(x) = x * 2
+f(4)
 ```
 
 ## Objetos

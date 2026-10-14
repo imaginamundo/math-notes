@@ -14,7 +14,7 @@ function substituteAggregates(parsed, sum, average, variables) {
   let count = 0;
   const replace = (expression) =>
     expression.replace(AGGREGATE_WORD_ALL, (word) => {
-      if (variables[word] !== undefined) return word;
+      if (word in variables) return word;
       const value = AGGREGATE_KEYWORDS[word.toLowerCase()] === 'average' ? average : sum;
       const token = `__agg_${count++}`;
       values[token] = value;

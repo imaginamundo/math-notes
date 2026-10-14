@@ -8,7 +8,12 @@ function conversionTarget(code, scope) {
   const match = /(?:^|\s)(?:to|in|as)\s+([A-Za-z_]\w*)\s*$/i.exec(code.trim());
   if (!match) return null;
   const name = match[1];
-  const value = scope[name];
+  let value;
+  try {
+    value = scope[name];
+  } catch {
+    return null; // a name whose assignment failed raises when read
+  }
   if (value === undefined || value === null) return null;
   if (typeof value === 'object' && value.isUnit === true) return null;
   return name;

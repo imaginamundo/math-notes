@@ -849,3 +849,55 @@ test('CORE-10: a table the engine was created with is not re-registered either',
   engine.registerCurrencyRates({ base: 'EUR', rates: { USD: 1.1 } });
   assert.equal(engine.evaluateLines(lines).startLine, -1);
 });
+
+// REVIEW.md AGG-03: a line whose assignment failed used to leave the name bound to
+// whatever it was before, or to a unit or constant of the same name, so later
+// lines quietly used a stale or unrelated value. The docs say the app reports
+// such cases as errors rather than guessing.
+const rowsOf = (lines) => evaluateLines(lines).results;
+
+test('AGG-03: a name whose latest assignment failed is an error where it is read', () => {
+  const rows = rowsOf(['x = 5', 'x = foo + 1', 'x * 2']);
+  assert.equal(rows[1].type, 'error');
+  assert.equal(rows[2].type, 'error');
+  assert.match(String(rows[2].value), /"x" has an error on line 2/);
+});
+
+test('AGG-03: a failed assignment does not fall back to a unit or constant of that name', () => {
+  assert.equal(rowsOf(['m = foo', 'm * 3'])[1].type, 'error');
+  assert.equal(rowsOf(['pi = foo', 'pi * 2'])[1].type, 'error');
+  assert.equal(rowsOf(['e = foo', 'e * 2'])[1].type, 'error');
+});
+
+test('AGG-03: a later successful assignment clears the error', () => {
+  const rows = rowsOf(['x = 5', 'x = foo', 'x = 7', 'x * 2']);
+  assert.equal(rows[3].value, 14);
+});
+
+test('AGG-03: a line that does not read the name is unaffected', () => {
+  const rows = rowsOf(['x = 5', 'x = foo', '1 + 1']);
+  assert.equal(rows[2].value, 2);
+});
+
+test('AGG-03: names that were never assigned still say they are undefined', () => {
+  assert.match(String(rowsOf(['c * 2'])[0].value), /not defined|Undefined symbol/);
+});
+
+test('AGG-03: a failed assignment to a reserved word does not break the aggregate', () => {
+  const rows = rowsOf(['10', '20', 'total = 5', 'total']);
+  assert.equal(rows[2].type, 'error');
+  assert.equal(rows[3].type, 'value', 'the bare aggregate still works');
+  assert.doesNotMatch(String(rows[3].value), /has an error/);
+});
+
+test('AGG-03: the error is the same incrementally and from scratch', () => {
+  const engine = createEngine();
+  engine.evaluateLines(['x = 5', 'x = foo + 1', 'x * 2', '1']);
+  const after = engine.evaluateLines(['x = 5', 'x = foo + 1', 'x * 2', '2']).results;
+  const fresh = createEngine().evaluateLines(['x = 5', 'x = foo + 1', 'x * 2', '2']).results;
+  assert.deepEqual(
+    after.map((r) => [r.type, String(r.value)]),
+    fresh.map((r) => [r.type, String(r.value)])
+  );
+  assert.equal(after[2].type, 'error');
+});

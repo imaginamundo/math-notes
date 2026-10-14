@@ -140,6 +140,36 @@ function findGroups(lines) {
  * an argument — the engine never reads storage or subscribes to events.
  * @param {{ rates?: { base: string, rates: Record<string, number> } }} [options]
  */
+// A variable is bound by defining the property, which also replaces a failure
+// marker (below) that a plain assignment could not overwrite.
+function bindVariable(variables, label, value) {
+  Object.defineProperty(variables, label, {
+    value,
+    writable: true,
+    enumerable: true,
+    configurable: true,
+  });
+}
+
+// Bind a name whose assignment failed. Reading it raises the error instead of
+// quietly finding an older value, or a unit or constant of the same name, which
+// the line that failed was meant to replace (REVIEW.md AGG-03). Assigning to it
+// again, from any scope that inherits it, defines the new value on that scope.
+function bindFailure(variables, label, line) {
+  Object.defineProperty(variables, label, {
+    get() {
+      throw new Error(`"${label}" has an error on line ${line}`);
+    },
+    set(value) {
+      bindVariable(this, label, value);
+    },
+    enumerable: true,
+    configurable: true,
+  });
+}
+
+const PLAIN_LABEL = /^[A-Za-z_]\w*$/;
+
 function createEngine({ rates } = {}) {
   const math = create(all);
   initAliases(math);
@@ -324,13 +354,15 @@ function createEngine({ rates } = {}) {
       // text of a failed assignment as the variable's value, and lost assignments
       // whose line was rewritten before evaluation (`x = #a + #b`; SHEET-01).
       const assignment = results[i];
-      if (
+      if (assignment && assignment.type === 'error' && assignment.failedLabel) {
+        bindFailure(variables, assignment.failedLabel, i + 1);
+      } else if (
         assignment &&
         assignment.type === 'assignment' &&
         assignment.label &&
         assignment.assigned !== undefined
       ) {
-        variables[assignment.label] = assignment.assigned;
+        bindVariable(variables, assignment.label, assignment.assigned);
       }
       const endGroup = groups.byEnd.get(i);
       const result = results[i];
@@ -426,8 +458,7 @@ function createEngine({ rates } = {}) {
     const blockStart = group ? group.start + 1 : ctx.lastBlankIndex + 1;
     const bare = ctx.parsed.code.trim();
     // A variable named like an aggregate keyword shadows it (`total = 5`).
-    const keyword =
-      ctx.variables[bare] === undefined ? AGGREGATE_KEYWORDS[bare.toLowerCase()] : undefined;
+    const keyword = !(bare in ctx.variables) ? AGGREGATE_KEYWORDS[bare.toLowerCase()] : undefined;
     if (!keyword) return false;
     const value = aggregateAbove(ctx.results, blockStart, ctx.i, keyword);
     if (typeof value === 'string') {
@@ -444,6 +475,25 @@ function createEngine({ rates } = {}) {
   const ELEMENT_TARGET = /^([A-Za-z_]\w*)\s*[[.]/;
   // The name a plain function definition gives: `f` in `f(x) = x * 2`.
   const FUNCTION_TARGET = /^([A-Za-z_]\w*)\s*\(/;
+
+  // Record an error row. When the line was an assignment to a plain name, that name
+  // is bound to the failure (and remembered on the row, so a rebuild binds it
+  // again) instead of keeping an older value (AGG-03).
+  function failLine(ctx, parsed, message) {
+    const label =
+      parsed.isAssignment && PLAIN_LABEL.test(parsed.label || '') ? parsed.label : undefined;
+    ctx.results[ctx.i] = {
+      type: 'error',
+      value: message,
+      tags: ctx.tags.length ? ctx.tags : undefined,
+      failedLabel: label,
+    };
+    if (label) {
+      bindFailure(ctx.variables, label, ctx.i + 1);
+      ctx.names.add(label);
+    }
+    return true;
+  }
 
   function handleExpression(ctx) {
     const group = ctx.groups.groupOfLine.get(ctx.i);
@@ -464,28 +514,14 @@ function createEngine({ rates } = {}) {
       const blockAvg = aggregateAbove(ctx.results, blockStart, ctx.i, 'average');
       const conflict =
         typeof blockSum === 'string' ? blockSum : typeof blockAvg === 'string' ? blockAvg : null;
-      if (conflict) {
-        ctx.results[ctx.i] = {
-          type: 'error',
-          value: conflict,
-          tags: ctx.tags.length ? ctx.tags : undefined,
-        };
-        return true;
-      }
+      if (conflict) return failLine(ctx, ctx.parsed, conflict);
       const substituted = substituteAggregates(ctx.parsed, blockSum, blockAvg, ctx.variables);
       parsedLine = substituted.parsed;
       aggregateValues = substituted.values;
     }
 
     const resolved = resolveLineRefs(parsedLine, ctx.results, ctx.i);
-    if (resolved.error) {
-      ctx.results[ctx.i] = {
-        type: 'error',
-        value: resolved.error,
-        tags: ctx.tags.length ? ctx.tags : undefined,
-      };
-      return true;
-    }
+    if (resolved.error) return failLine(ctx, parsedLine, resolved.error);
     parsedLine = resolved.parsed;
     Object.assign(scope, resolved.values);
     if (aggregateValues) Object.assign(scope, aggregateValues);
@@ -503,6 +539,7 @@ function createEngine({ rates } = {}) {
 
     const evaluated = evaluateLine(parsedLine, scope, namesIn(ctx, scope));
     const { type, result } = evaluated;
+    if (type === 'error') return failLine(ctx, parsedLine, result);
     let { variable } = evaluated;
     if (elementBase && type === 'assignment' && Object.hasOwn(scope, elementBase)) {
       variable = { label: elementBase, value: scope[elementBase] };
@@ -523,7 +560,7 @@ function createEngine({ rates } = {}) {
       variable = { label: functionName, value: scope[functionName] };
     }
     if (variable) {
-      ctx.variables[variable.label] = variable.value;
+      bindVariable(ctx.variables, variable.label, variable.value);
       ctx.names.add(variable.label);
     }
     ctx.results[ctx.i] = {

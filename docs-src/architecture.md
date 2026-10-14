@@ -263,6 +263,17 @@ is assigned (`n[2] = 99`), and that object is also held by the rows above, by an
 variable set from it and by `prev`; so such a line works on a private copy of its
 base variable and records the base's new value as the variable (the row's `value`
 is still what was assigned), and a restored variable is therefore never mutated.
+`f(x) = x * 2` is kept as the variable `f` (the line's own scope is dropped after
+the line, and its label `f(x)` names nothing), so it shadows a built-in and survives
+an incremental edit.
+
+When an assignment to a plain name fails, the name is bound to a _failure_: reading
+it raises `"x" has an error on line 2`, so a later line cannot quietly use an older
+value, or a unit or constant of the same name (`m = foo` then `m * 3`). The row
+remembers the label (`failedLabel`) so a rebuild binds the same failure, and the next
+successful assignment replaces it (the marker has a setter for that). Reserved words
+and element or function targets are not bound, and code that reads variables
+generically must not trip over one (`in` rather than a value read).
 
 A line `unit widget = 3.5 kg` defines a custom unit (`js/core/userUnits.js`
 parses it, `js/eval/userUnits.js` registers it with its plural and removes it

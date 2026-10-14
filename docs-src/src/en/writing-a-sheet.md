@@ -64,11 +64,18 @@ monthly rent = 1500
 monthly rent * 12
 ```
 
-You can store a function with `f(x) = …` and call it later.
+If an assignment fails (`x = foo + 1`), the name stays an error until it is assigned again, so later lines that use it show `"x" has an error on line 2` instead of quietly using an older value.
+
+You can store a function with `f(x) = …` and call it later, either directly or under another name.
 
 ```calc last line returns 42
 double = f(x) = x * 2
 double(21)
+```
+
+```calc last line returns 8
+f(x) = x * 2
+f(4)
 ```
 
 ## Objects
