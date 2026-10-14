@@ -442,6 +442,8 @@ function createEngine({ rates } = {}) {
   // The variable an indexed or property assignment changes: `n` in `n[2] = 99`,
   // `p` in `p.x = 5`. Not a function definition (`f(x) = …`).
   const ELEMENT_TARGET = /^([A-Za-z_]\w*)\s*[[.]/;
+  // The name a plain function definition gives: `f` in `f(x) = x * 2`.
+  const FUNCTION_TARGET = /^([A-Za-z_]\w*)\s*\(/;
 
   function handleExpression(ctx) {
     const group = ctx.groups.groupOfLine.get(ctx.i);
@@ -504,6 +506,21 @@ function createEngine({ rates } = {}) {
     let { variable } = evaluated;
     if (elementBase && type === 'assignment' && Object.hasOwn(scope, elementBase)) {
       variable = { label: elementBase, value: scope[elementBase] };
+    }
+    // `f(x) = x * 2` defines `f` in this line's own scope, which is dropped after
+    // the line, and the label `f(x)` is no name an expression can reach. Keep the
+    // function under its name, so later lines (and a built-in it shadows) see it
+    // (SHEET-04). The `alias = f(x) = …` form already stores the alias.
+    const functionName = parsedLine.isAssignment
+      ? (FUNCTION_TARGET.exec(parsedLine.label || '') || [])[1]
+      : undefined;
+    if (
+      functionName &&
+      type === 'assignment' &&
+      Object.hasOwn(scope, functionName) &&
+      typeof scope[functionName] === 'function'
+    ) {
+      variable = { label: functionName, value: scope[functionName] };
     }
     if (variable) {
       ctx.variables[variable.label] = variable.value;

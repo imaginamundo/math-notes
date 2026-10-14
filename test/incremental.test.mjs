@@ -254,6 +254,16 @@ const KNOWN = [
     after: ['n = [1, 2, 3]', 'n[2] = 99', 'sum(n) * 1'],
   },
   {
+    id: 'SHEET-04-plain-definition',
+    before: ['f(x) = x * 2', 'f(4)'],
+    after: ['f(x) = x * 3', 'f(4)'],
+  },
+  {
+    id: 'SHEET-04-plain-definition-edit-below',
+    before: ['rate = 3', 'pay(h) = h * rate', 'pay(10)', '1'],
+    after: ['rate = 3', 'pay(h) = h * rate', 'pay(10)', '2'],
+  },
+  {
     id: 'AGG-01-other-tab',
     // A tab switch hands the engine a different sheet with the same opening lines.
     before: ['rate = 3', 'pay = p(h) = h * rate', 'pay(10)'],
