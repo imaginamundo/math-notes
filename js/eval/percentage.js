@@ -4,25 +4,11 @@
 // A sign that belongs to the percentage in `-20% on 50`: a minus (or U+2212) with
 // no operand before it. After an operand it is the binary minus of `10 - 20% on 50`.
 const SIGN = '(?:(?<![\\w.)%]\\s*)([-−])\\s*)?';
-const PCT = `${SIGN}(\\d*\\.?\\d+)`;
 
 const signed = (sign, pct) => `${sign ? '-' : ''}${pct}`;
 
 function preprocessPercent(expression) {
   let expr = expression;
-
-  // A% of|on|off what is B -> value by percent part / addition / subtraction.
-  // Each replacement is parenthesised, so it stays one operand of whatever
-  // surrounds it (`10 - 20% on 50` is `10 - (50 + 20%)`).
-  expr = expr.replace(
-    new RegExp(`${PCT}\\s*%\\s+(of|on|off)\\s+what\\s+is\\s+(.+)`, 'i'),
-    (match, sign, pct, word, value) => {
-      const p = signed(sign, pct);
-      if (word === 'of') return `((${value}) / ${p}%)`;
-      if (word === 'on') return `((${value}) / (1 + ${p}%))`;
-      return `((${value}) / (1 - ${p}%))`;
-    }
-  );
 
   // B as a % of|on|off A -> one value relative to another
   expr = expr.replace(/(.+)\s+as\s+a\s+%\s+(of|on|off)\s+(.+)/i, (match, value, word, base) => {
@@ -31,18 +17,85 @@ function preprocessPercent(expression) {
     return `(1 - (${value}) / (${base})) * 100`;
   });
 
-  // A% of|on|off B -> percentage value / addition / subtraction
-  expr = expr.replace(
-    new RegExp(`${PCT}\\s*%\\s+(of|on|off)\\s+(.+)`, 'i'),
-    (match, sign, pct, word, value) => {
-      const p = signed(sign, pct);
-      if (word === 'of') return `((${value}) * ${p}%)`;
-      if (word === 'on') return `((${value}) + ${p}%)`;
-      return `((${value}) - ${p}%)`;
-    }
-  );
+  return wrapPercentChains(applyPhrases(expr));
+}
 
-  return wrapPercentChains(expr);
+// `A% of|on|off B` and `A% of|on|off what is B`: the percentage is a number or a name.
+const HEAD = new RegExp(
+  `${SIGN}(\\d*\\.?\\d+|[A-Za-z_]\\w*)\\s*%\\s+(of|on|off)\\s+(?:(what)\\s+is\\s+)?`,
+  'gi'
+);
+const PHRASE_START = new RegExp(
+  `^${SIGN}(?:\\d*\\.?\\d+|[A-Za-z_]\\w*)\\s*%\\s+(?:of|on|off)\\b`,
+  'i'
+);
+// A conversion or rounding clause at the end of an operand (`in EUR`, `to 2 dp`,
+// `to nearest 5`, `rounded`) belongs to the whole result, not to the operand.
+const TRAILING_CLAUSE = /\s+(?:(?:to|in|as)\s+[^+\-*/()]+|rounded\b.*)$/i;
+
+// Where the operand of a phrase ends: the end of the line, but not past an unbalanced
+// closing bracket, a comma, or the operator in front of another percent phrase
+// (`10% of 50 + 10% of 20` is two phrases), and before a trailing conversion or
+// rounding clause. A phrase still takes the rest of the line otherwise, so
+// `10% of 50 + 5` is 5.5.
+function operandEnd(text, from) {
+  let depth = 0;
+  let end = text.length;
+  for (let i = from; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '(' || ch === '[') depth++;
+    else if (ch === ')' || ch === ']') {
+      if (depth === 0) {
+        end = i;
+        break;
+      }
+      depth--;
+    } else if (depth === 0 && ch === ',') {
+      end = i;
+      break;
+    } else if (
+      depth === 0 &&
+      '+-*/'.includes(ch) &&
+      PHRASE_START.test(text.slice(i + 1).trimStart())
+    ) {
+      end = i;
+      break;
+    }
+  }
+  const tail = TRAILING_CLAUSE.exec(text.slice(from, end));
+  return tail ? end - tail[0].length : end;
+}
+
+function applyPhrases(expression) {
+  let out = expression;
+  let from = 0;
+  for (;;) {
+    HEAD.lastIndex = from;
+    const match = HEAD.exec(out);
+    if (!match) return out;
+    const [head, sign, pct, word, what] = match;
+    const start = match.index;
+    const operandStart = start + head.length;
+    const end = operandEnd(out, operandStart);
+    const operand = out.slice(operandStart, end).trim();
+    if (!operand) {
+      from = operandStart;
+      continue;
+    }
+    // Phrases inside the operand (in brackets, say) are applied first, since the scan
+    // above does not look inside them.
+    const value = applyPhrases(operand);
+    const p = signed(sign, pct);
+    const kind = word.toLowerCase();
+    let replacement;
+    if (what) {
+      if (kind === 'of') replacement = `((${value}) / ${p}%)`;
+      else replacement = `((${value}) / (1 ${kind === 'on' ? '+' : '-'} ${p}%))`;
+    } else if (kind === 'of') replacement = `((${value}) * ${p}%)`;
+    else replacement = `((${value}) ${kind === 'on' ? '+' : '-'} ${p}%)`;
+    out = out.slice(0, start) + replacement + out.slice(end);
+    from = start + replacement.length;
+  }
 }
 
 // mathjs reads `%` followed by `+` or `-` as the remainder operator, so `50 + 10% + 1`

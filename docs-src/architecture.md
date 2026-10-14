@@ -198,7 +198,11 @@ mathjs reads `%` followed by `+` or `-` as the remainder operator, so `50 + 10% 
 percentage apart: as the right operand of an additive chain it closes the chain
 (`(50 + 10%) + 1`, which is what `50 + 10%` already means), and elsewhere it stands
 alone (`(10%) + 5`, and the `5%` in `(10%) + 5%`); `10 % 3` is still the remainder.
-The `of`/`on`/`off` phrases take a sign that belongs to the percentage (`-20% on 50`,
+A phrase's operand ends at the end of the line, an unbalanced closing bracket, a comma, the
+operator in front of another percent phrase (`10% of 50 + 10% of 20` is two phrases), or a
+trailing conversion or rounding clause (`to 2 dp`, `in EUR`), which then applies to the whole
+result; otherwise a phrase still takes the rest of the line, so `10% of 50 + 5` is 5.5. The
+percentage may be a number or a variable (`x% of 80`). The `of`/`on`/`off` phrases take a sign that belongs to the percentage (`-20% on 50`,
 but not the binary minus in `10 - 20% on 50`), and each replacement is parenthesised so
 it stays one operand of whatever surrounds it.
 
