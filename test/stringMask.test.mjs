@@ -49,3 +49,20 @@ test('aggregate keywords and multi-word names inside a string are left alone', (
   assert.equal(show(['my rate = 5', 'concat("my rate", "!")']), 'my rate!');
   assert.equal(show(['10', '20', 'concat("sum: ", string(sum))']), 'sum: 30');
 });
+
+test('an aggregate word that is a field name or a parameter is not an aggregate', () => {
+  assert.equal(show(['stats = {count: 4, sum: 10, avg: 2.5}', 'stats.avg']), '2.5');
+  assert.equal(show(['stats = {count: 4, sum: 10, avg: 2.5}', 'stats.sum']), '10');
+  assert.equal(show(['invoice = {subtotal: 120, tax: 12, total: 132}', 'invoice.total']), '132');
+  assert.equal(show(['stats = {avg: 2.5, sum: 10}', 'stats["sum"]']), '10');
+  assert.equal(show(['rent = 1000', 'tip = f(total) = total * 0.15', 'tip(80)']), '12');
+  assert.equal(show(['10', '20', 'half = f(avg) = avg / 2', 'half(100)']), '50');
+  assert.equal(show(['g = f(x, sum) = x + sum', 'g(1, 2)']), '3');
+});
+
+test('an aggregate word still works beside fields and functions', () => {
+  assert.equal(show(['10', '20', 'sum']), '30');
+  assert.equal(show(['10', '20', 'obj = {a: sum}', 'obj.a']), '30');
+  assert.equal(show(['10', '20', 'h = f(x) = x + sum', 'h(1)']), '31');
+  assert.equal(show(['10', '20', 'average * 2']), '30');
+});

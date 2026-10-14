@@ -1,9 +1,9 @@
 {
-  "version": 87,
+  "version": 88,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "8ab30c03ce83a52ec3048a552d376b54d3b502247119c24db874b0251d059156",
-    "js/core/aggregateSubstitution.js": "60dbde65e4fba7edf79abbce7be540c255522dea5b2d8404df180f44f317bff9",
+    "js/core/aggregateSubstitution.js": "89c1e045edf7b9f5540ec9017e1946d38fb7bfb56a2a7fc1ebd34ea7eeb8b645",
     "js/core/autocomplete.js": "ea628a9a58c7fd9b1cdb4d3e647f03a8c350a95c745e7f3506fecc84b987227d",
     "js/core/boundedExpression.js": "11d1a0a1414b3f8098892b7f755e34c543dd762bb72cea516f49463d253d71e1",
     "js/core/calculate.js": "3c1a18ad043c4283479337a24c56a23f1330e51000950b18338f7268b575f38b",

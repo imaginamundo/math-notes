@@ -170,6 +170,10 @@ and aggregate substitution and multi-word-name mangling skip it through `outside
 So `"2k items"`, `"total"` and `"my rate"` come back as typed, and no internal name
 (`__agg_0`, `__var_my_rate`) can leak into a string. An unclosed quote is not a string.
 
+Aggregate substitution also skips a keyword that is a field or a parameter: after a `.`
+(`stats.total`), as a key before `:` inside `{ }`, or named in a function's parameter
+list (`tip = f(total) = total * 0.15`), where it is that name and not the sheet's total.
+
 Tags in calculations: trailing `#tags` label a line only when the code before them is a
 finished expression (`isCompleteCode` in `parseLine.js`); after an operator, `=`, `(` or a
 word operator (`5 + #food`, `x = #food`) the tag is an operand and the line is not
