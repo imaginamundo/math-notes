@@ -89,8 +89,11 @@ function formatList(items, depth, precision, clockFormat) {
 }
 
 // Rounds to the chosen decimal places. When the value has more precision than
-// that, an ellipsis marks the display as truncated (the calculation itself
-// keeps full precision).
+// that, an ellipsis marks the display as truncated (the calculation itself keeps
+// full precision). A value is first cleaned of binary noise (one ulp, about the
+// 16th significant digit), so 700000.0000000001 shows as 700,000 and is not drawn
+// as exact trailing digits (CUR-02); whatever is left after that and is cut gets the
+// ellipsis, at every precision and size (NUM-12).
 function formatNumber(n, precision) {
   if (!isFinite(n)) return String(n);
   const abs = Math.abs(n);
@@ -98,13 +101,19 @@ function formatNumber(n, precision) {
   // so it reads like any value smaller than the precision step: 0 with more behind
   // it, not ten digits of exponent that ignore the setting (NUM-03).
   if (abs !== 0 && abs < 1e-12) return '0…';
-  if (abs !== 0 && (abs >= 1e16 || abs < 1e-7)) {
-    return n.toExponential(10).replace(/\.?0+e/, 'e');
-  }
-  const rounded = Number(n.toFixed(precision)) || 0;
+  const clean = Number(n.toPrecision(15));
+  if (abs !== 0 && (abs >= 1e16 || abs < 1e-7)) return formatScientific(clean, precision);
+  const rounded = Number(clean.toFixed(precision)) || 0;
   const text = formatterFor(precision).format(rounded);
-  const tolerance = Math.max(1e-9, abs * 1e-9);
-  return Math.abs(n - rounded) > tolerance ? `${text}…` : text;
+  return clean !== rounded ? `${text}…` : text;
+}
+
+// `1.845e+19…`: the mantissa follows the precision setting, trailing zeros go, and
+// an ellipsis marks a mantissa that was cut.
+function formatScientific(n, precision) {
+  const text = n.toExponential(precision);
+  const shown = text.replace(/\.?0+e/, 'e');
+  return Number(text) === n ? shown : `${shown}…`;
 }
 
 const DURATION_UNITS = new Set([

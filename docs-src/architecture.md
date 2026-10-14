@@ -156,6 +156,10 @@ written numbers (a value that is small on its own, `1e-8`, or `tiny * 1`, is a s
 answer, not residue, and stays; digits inside names are not numbers), and an aggregate snaps a sum that cancels below 1e-12 of its
 largest term. Whatever residue is left reads `0…`, like any value below the
 precision step, instead of ten digits of exponent that ignore the setting.
+`formatNumber` first rounds a value to 15 significant digits, so one ulp of binary
+noise (`700000.0000000001`) is not drawn as exact trailing digits, and then shows the
+ellipsis whenever that cleaned value was cut by the precision, at every precision and
+size; a scientific result follows the precision too (`1.845e+19…`).
 
 Which unit a compound result is shown in must depend only on that line. mathjs's
 `simplify()` follows its current unit system, and the default (`auto`) remembers the

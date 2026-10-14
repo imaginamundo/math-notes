@@ -18,7 +18,7 @@ test('formatResult groups large numbers', () => {
 test('formatResult trims long decimals to the precision with an ellipsis', () => {
   assert.equal(formatResult(0.1 + 0.2), '0.3');
   assert.equal(formatResult(1 / 3), '0.333…');
-  assert.equal(formatResult(1 / 3, 10), '0.3333333333');
+  assert.equal(formatResult(1 / 3, 10), '0.3333333333…', 'the ellipsis shows at 10 places too');
   assert.equal(formatResult(1.5), '1.5');
   assert.equal(formatResult(1234.5678, 2), '1,234.57…');
 });
@@ -197,4 +197,43 @@ test('NUM-03: genuinely small values and the large cutoff are unchanged', () => 
   assert.equal(formatResult(1.5e-9), '1.5e-9');
   assert.equal(formatResult(1e16), '1e+16');
   assert.equal(formatResult(0), '0');
+});
+
+// REVIEW.md NUM-12: a fixed 1e-9 tolerance hid the ellipsis at precision 9 and 10,
+// for large values, and on every scientific result.
+test('NUM-12: the ellipsis marks every cut, whatever the precision or magnitude', () => {
+  assert.equal(formatResult(1 / 3, 9), '0.333333333…');
+  assert.equal(formatResult(10 / 3, 9), '3.333333333…');
+  assert.equal(formatResult(Math.PI, 10), '3.1415926536…');
+  assert.equal(formatResult(1000000 / 3), '333,333.333…');
+  assert.equal(formatResult(9876543.21987), '9,876,543.22…');
+  assert.equal(formatResult(1234567.891, 2), '1,234,567.89…');
+  assert.equal(formatResult(1000000000.4, 0), '1,000,000,000…');
+  assert.equal(formatResult(499999.1234), '499,999.123…');
+});
+
+test('NUM-12: a value that is exact at the precision has no ellipsis', () => {
+  assert.equal(formatResult(1.5), '1.5');
+  assert.equal(formatResult(1000000), '1,000,000');
+  assert.equal(formatResult(0.125, 3), '0.125');
+  assert.equal(formatResult(9876543.22, 2), '9,876,543.22');
+});
+
+test('NUM-12: scientific results follow the precision and mark a cut', () => {
+  assert.equal(formatResult(2 ** 64), '1.845e+19…');
+  assert.equal(formatResult(2 ** 64, 10), '1.8446744074e+19…');
+  assert.equal(formatResult(2 ** 64, 0), '2e+19…');
+  assert.equal(formatResult(1e21), '1e+21');
+  assert.equal(formatResult(1e-8), '1e-8');
+  assert.equal(formatResult(1.5e-9), '1.5e-9');
+});
+
+// REVIEW.md CUR-02: 1 ulp of binary noise (700000.0000000001) was shown as exact
+// trailing digits, and a value shown with no ellipsis is meant to be exact.
+test('CUR-02: float noise past 15 significant digits is not displayed', () => {
+  assert.equal(formatResult(700000.0000000001, 10), '700,000');
+  assert.equal(formatResult(29999999999999.996), '30,000,000,000,000');
+  assert.equal(formatResult(1000000.2999999999, 10), '1,000,000.3');
+  assert.equal(formatResult(999999999.9999999, 10), '1,000,000,000');
+  assert.equal(formatResult(0.1 + 0.2, 10), '0.3');
 });
