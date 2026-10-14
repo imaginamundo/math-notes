@@ -185,6 +185,11 @@ the group as one operand. `(100 km at 10 km/hour) * 2`, `pay = f(h) = h at $20/h
 the whole line first, because a comma means something different once a line is cut into
 arguments.
 
+A custom unit cannot take a name the date grammar owns (`mo`, `mos`, `w`, `wk`, `wks`,
+`yr`, `yrs`), because the date and time-span phrases would capture it first. A plural that
+is already something else (`ds` is deciseconds) is dropped rather than failing the
+definition, so `unit d = 8 hours` defines `d` and the built-in keeps `ds`.
+
 Tags in calculations: trailing `#tags` label a line only when the code before them is a
 finished expression (`isCompleteCode` in `parseLine.js`); after an operator, `=`, `(` or a
 word operator (`5 + #food`, `x = #food`) the tag is an operand and the line is not

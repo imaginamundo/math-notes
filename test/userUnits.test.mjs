@@ -200,3 +200,22 @@ test('UNIT-06: deleting the definition removes the money kind with it', () => {
   const after = engine.evaluateLines(['3 coffees', '$10']).results[0];
   assert.equal(after.type, 'error');
 });
+
+test('a name that matches a prefixed unit as a plural can still be defined', () => {
+  const e = engine();
+  const out = e.evaluateLines(['unit d = 8 hours', '2 d in hours', 'unit q = 2', '3 q']);
+  assert.notEqual(out.results[0].type, 'error');
+  assert.match(String(out.results[1].value), /16/);
+  assert.match(String(out.results[3].value), /6/);
+  assert.equal(e.evaluateLines(['unit widget = 3', '2 widgets']).results[1].value, 6);
+});
+
+test('a name the date grammar owns is not a unit name', () => {
+  for (const name of ['mo', 'wk', 'w', 'yr', 'mos']) {
+    assert.match(
+      engine().evaluateLines([`unit ${name} = 5 days`]).results[0].value,
+      /already a unit/,
+      name
+    );
+  }
+});
