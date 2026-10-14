@@ -182,6 +182,15 @@ function createEngine({ rates } = {}) {
   initTimespan(math);
   initCalendar(math);
   initCurrency(math, rates);
+  // mathjs decides when a function body is compiled whether a free symbol names a
+  // unit, so a function defined above a `unit` line never saw that unit. A symbol
+  // that is neither a variable nor a unit when the body was compiled ends up in
+  // `onUndefinedSymbol` when the function is called, which is the moment to look
+  // again (AGG-04).
+  const { SymbolNode, Unit } = math;
+  const undefinedSymbol = SymbolNode.onUndefinedSymbol;
+  SymbolNode.onUndefinedSymbol = (name) =>
+    Unit.isValuelessUnit(name) ? new Unit(null, name) : undefinedSymbol(name);
   // `simplify()` picks the unit to show a compound result in from the unit system.
   // mathjs's default, `auto`, remembers the last unit of each dimension it parsed
   // anywhere (other lines, deleted lines, other tabs, startup), so the same line

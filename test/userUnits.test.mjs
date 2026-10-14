@@ -124,3 +124,26 @@ test('a single-word unit definition is not collected as a multi-word variable', 
   assert.equal(results[1].type, 'value');
   assert.equal(results[1].value.isUnit, true, 'widget resolves as the unit');
 });
+
+// REVIEW.md AGG-04: mathjs decides when a function body is compiled whether a free
+// symbol is a unit, so a function defined above a `unit` line could not use it.
+test('AGG-04: a function defined above a unit definition can use the unit', () => {
+  const show = (lines, index) => {
+    const row = createEngine().evaluateLines(lines).results[index];
+    return row.type === 'error' ? `ERR ${row.value}` : formatResult(row.value);
+  };
+  const above = ['f = g(x) = x * 1 widget', 'unit widget = 2 kg', 'f(3) to kg'];
+  assert.equal(show(above, 2), '6 kg');
+  assert.equal(show(['f = g(x) = x * 2 widgets', 'unit widget = 2 kg', 'f(3) to kg'], 2), '12 kg');
+  assert.equal(show(['f = g(x) = x kg to widget', 'unit widget = 2 kg', 'f(6)'], 2), '3 widget');
+  // The same function with the unit above it already worked.
+  assert.equal(show(['unit widget = 2 kg', 'f = g(x) = x * 1 widget', 'f(3) to kg'], 2), '6 kg');
+});
+
+test('AGG-04: deleting the unit definition makes the unit undefined again', () => {
+  const engine = createEngine();
+  engine.evaluateLines(['f = g(x) = x * 1 widget', 'unit widget = 2 kg', 'f(3)']);
+  const gone = engine.evaluateLines(['f = g(x) = x * 1 widget', 'f(3)']).results[1];
+  assert.equal(gone.type, 'error');
+  assert.match(String(gone.value), /widget/);
+});

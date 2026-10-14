@@ -279,7 +279,10 @@ A line `unit widget = 3.5 kg` defines a custom unit (`js/core/userUnits.js`
 parses it, `js/eval/userUnits.js` registers it with its plural and removes it
 when the line goes). A definition is excluded from the total and from `prev`,
 and a name already taken by a built-in unit, a symbol or a reserved word is an
-error.
+error. mathjs decides when a function body is compiled whether a free symbol names a
+unit, so a function defined above a `unit` line would never see it; the engine
+re-checks in `SymbolNode.onUndefinedSymbol`, which is reached when the function is
+called.
 
 A small structural pass (`findGroups`) pairs header lines (`Name:` with no
 expression) with `end` rows. A closed group's **header** row becomes an
