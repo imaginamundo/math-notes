@@ -99,8 +99,10 @@ const CLOCK_DURATION = new RegExp(`^(${CLOCK_SRC})\\s*([+-])\\s*(${DURATION_SRC}
 // (`9:00 am to 5:30 pm - 45 minutes`). `now` is a clock operand too, so the time
 // until a later clock time (`23:00 - now`) and forward intervals work.
 const CLOCK_OPERAND_SRC = `(?:${CLOCK_SRC}|now\\b)`;
+// `to` needs spaces; `-` does not (`9:00-17:00`, `9am-5pm`), as it did not for a date or a
+// duration. The operands are not part of a longer number or time.
 const CLOCK_PAIR_PHRASE = new RegExp(
-  `\\b(${CLOCK_OPERAND_SRC})\\s+(to|-)\\s+(${CLOCK_OPERAND_SRC})`,
+  `(?<![\\w:.])(${CLOCK_OPERAND_SRC})(?:\\s+(to)\\s+|\\s*(-)\\s*)(${CLOCK_OPERAND_SRC})(?![\\d:])`,
   'gi'
 );
 
@@ -144,10 +146,8 @@ function preprocessCalendar(expression) {
   // expression combines with.
   expr = expr.replace(
     CLOCK_PAIR_PHRASE,
-    (match, a, op, b) =>
-      `__clockInterval(${JSON.stringify(a)}, ${JSON.stringify(b)}, ${
-        op.toLowerCase() === 'to' ? 1 : 0
-      })`
+    (match, a, to, minus, b) =>
+      `__clockInterval(${JSON.stringify(a)}, ${JSON.stringify(b)}, ${to ? 1 : 0})`
   );
 
   let m;

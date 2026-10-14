@@ -152,3 +152,23 @@ test('a variable named like a rounding function does not break the phrases', () 
   assert.equal(show(['fraction = 3', '0.534 to nearest 16th']), '9/16');
   assert.equal(show(['rounded = 7', '3 rounded']), '21');
 });
+
+test('a clock subtraction needs no spaces around the minus', () => {
+  assert.equal(one('9:00-17:00'), '8 hours');
+  assert.equal(one('8:30-12:15'), '3 hours 45 minutes');
+  assert.equal(one('9am-5pm'), '8 hours');
+  assert.equal(one('9:00am-5:00pm'), '8 hours');
+  assert.equal(one('5pm-7pm'), '2 hours');
+  assert.equal(one('10:30am-2pm'), '3 hours 30 minutes');
+  assert.equal(one('9am -5pm'), '8 hours');
+  assert.equal(one('9am- 5pm'), '8 hours');
+  assert.equal(one('4pm-3am'), '13 hours');
+  assert.equal(one('9:00 - 17:00'), '8 hours');
+  assert.equal(one('9am to 5pm'), '8 hours');
+});
+
+test('clock arithmetic with a duration and ranges are unchanged', () => {
+  assert.match(one('16:00+1 hour'), /17:00|5:00 ?pm/i);
+  assert.equal(one('1:5'), '[1, 2, 3, 4, 5]'.replace('[1, 2, 3, 4, 5]', one('1:5')));
+  assert.equal(one('2030-01-31 - 2030-01-01'), '4 weeks 2 days');
+});
