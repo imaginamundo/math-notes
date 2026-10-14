@@ -162,7 +162,7 @@ html[data-theme='light'] {
   --color-link: #4078f2;
   --color-link-visited: #a626a4;
   --color-ghost: rgba(0, 0, 0, 0.6);
-  --color-ghost-error: #c92f2f;
+  --color-ghost-error: #b02626;
   --color-group-bg: rgba(0, 0, 0, 0.05);
   --border-light: rgba(0, 0, 0, 0.14);
   --border-faint: rgba(0, 0, 0, 0.1);

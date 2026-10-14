@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { ratchet } from './helpers/ratchet.mjs';
 
 // Text drawn on the editor background must reach WCAG AA (4.5:1) in every
 // theme: the syntax colours, and the dimmed inline results (a translucent
@@ -84,4 +85,48 @@ test('editor text reaches WCAG AA contrast in every theme', () => {
     }
   }
   assert.deepEqual(failures, []);
+});
+
+// Resolve one theme's variables (the default theme's, overridden by its own).
+function themeVars(name) {
+  const all = themes();
+  return { ...all[':root'], ...all[name] };
+}
+
+// Results and errors are drawn on a chip (`.ghost-result`), not on the editor
+// background, so that is what they must be measured against (REVIEW.md UIE-10).
+test('results and errors reach AA on the chip they are drawn on, in every theme', () => {
+  const failures = [];
+  for (const name of Object.keys(themes())) {
+    const vars = themeVars(name);
+    const chip = parseColor(vars['--color-footer']);
+    assert.ok(chip, `${name} has no readable --color-footer`);
+    for (const token of ['--color-ghost', '--color-ghost-error']) {
+      const ratio = contrast(parseColor(vars[token]), chip);
+      if (ratio < AA) failures.push(`${name} ${token} on the result chip: ${ratio.toFixed(2)}:1`);
+    }
+  }
+  assert.deepEqual(failures, []);
+});
+
+// Text the stylesheet dims with `opacity` (comments, gutter numbers, placeholder)
+// is measured as its colour at that opacity over the surface behind it
+// (REVIEW.md UIE-19). Several themes are not there yet, so this is a ratchet.
+const DIMMED = [
+  { label: 'comment', token: '--color-text', opacity: 0.5, surface: '--color-primary' },
+  { label: 'gutter number', token: '--color-text', opacity: 0.55, surface: '--color-surface' },
+  { label: 'placeholder', token: '--color-text', opacity: 0.55, surface: '--color-primary' },
+];
+
+test('dimmed text keeps AA contrast (ratchet: UIE-19)', () => {
+  const failing = [];
+  for (const name of Object.keys(themes())) {
+    const vars = themeVars(name);
+    for (const { label, token, opacity, surface } of DIMMED) {
+      const [r, g, b] = parseColor(vars[token]);
+      const ratio = contrast([r, g, b, opacity], parseColor(vars[surface]));
+      if (ratio < AA) failing.push(`${name} ${label}`);
+    }
+  }
+  ratchet('contrast-dimmed', failing);
 });
