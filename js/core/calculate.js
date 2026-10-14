@@ -640,7 +640,16 @@ function createEngine({ rates } = {}) {
     return { results, total: computeTotal(results, totalMode), startLine };
   }
 
+  // The table last registered, as text. The same table arrives twice on every
+  // load (the startup seed, then the cached rates event), and each registration
+  // invalidates the whole per-line cache, so an identical table is ignored
+  // (CORE-10).
+  let registeredRates = rates ? JSON.stringify(rates) : null;
+
   function registerCurrencyRates(data) {
+    const key = JSON.stringify(data ?? null);
+    if (key === registeredRates) return;
+    registeredRates = key;
     registerRates(trusted, data);
     environmentRevision++;
   }
