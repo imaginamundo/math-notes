@@ -394,16 +394,26 @@ content persists to localStorage (debounced). The caret is captured as the user
 moves it and restored on load through `normalizeCaret`, which drops anything
 that is not a valid in-range selection, so a corrupt value simply leaves the
 caret where the browser put it. Separately, versioned
-**snapshots** of each tab (id, name, content, timestamp, capped at 10 per tab)
-are auto-saved to IndexedDB (`js/storage/snapshots.js`) on a pause in typing and
+**snapshots** of each tab (id, name, content, timestamp, and its position in the
+bar, capped at 10 per tab) are auto-saved to IndexedDB (`js/storage/snapshots.js`) on a pause in typing and
 on blur/tab-switch/close/pagehide; the content is stored deflated through
 `js/util/compress.js` when the platform supports it, and inflated on read.
+
+A tab the app fills in itself (a template or share import through `openSheet`,
+the Welcome sheet through `seedSheet`) is never typed in, so no edit would ever
+snapshot it; both snapshot it as soon as it is filled in, or a restore would not
+know it existed.
 
 If localStorage is unavailable or corrupt on load, the collection is rebuilt
 from the latest snapshot of each tab; a corrupt value is first copied to
 `math-notes-tabs-backup` so it is never silently lost. Settings shows every
 snapshot grouped by tab (not just the latest) plus a "restore all" action, and
-closing a tab deletes its snapshots.
+closing a tab deletes its snapshots. Both paths go through `mergeSnapshots` in
+`js/core/tabsState.js`: a snapshot only supplies a tab's name and content, the
+open tabs keep their order and the active tab, a tab with no snapshot is kept,
+and snapshots of tabs that are no longer open are appended by their recorded
+position. The rebuild after unreadable storage also drops the one fresh empty tab
+the app wrote over the unreadable collection.
 
 Undo/redo is per tab, kept in memory only: edits are grouped into bursts
 (a 700ms idle timer commits the draft), each burst becoming one undo step —

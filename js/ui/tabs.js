@@ -11,6 +11,7 @@ import {
   normalizeCaret,
   moveTab,
   deriveNextTabNumber,
+  mergeSnapshots,
 } from '../core/tabsState.js';
 import { STORAGE_KEY, LEGACY_KEY, loadTabsState, createTabsWriter } from '../storage/tabsStore.js';
 import { isTypingTarget } from '../util/dom.js';
@@ -88,7 +89,10 @@ function initTabs(editableNode, onUpdate) {
     if (resetting) return;
     const tab = getActiveTab();
     if (!tab) return;
-    enqueueSnapshot(() => saveSnapshot({ id: tab.id, name: tab.name, content: tab.content }));
+    const position = state.tabs.findIndex((entry) => entry.id === tab.id);
+    enqueueSnapshot(() =>
+      saveSnapshot({ id: tab.id, name: tab.name, content: tab.content, position })
+    );
   }
 
   function scheduleSnapshot() {
@@ -277,6 +281,9 @@ function initTabs(editableNode, onUpdate) {
     state = createTab(state, name || t('share.defaultName'));
     state = setContent(state, state.activeId, content || '');
     present(content || '');
+    // The tab was filled in by the app, not typed in, so no edit will ever
+    // snapshot it; without one a restore would not know it existed (SEC-01).
+    saveActiveSnapshot();
   }
 
   function getActiveSheet() {
@@ -292,6 +299,7 @@ function initTabs(editableNode, onUpdate) {
     state = setContent(state, state.activeId, content);
     history.reset(state.activeId);
     present(content, { focus: false });
+    saveActiveSnapshot();
   }
 
   // Return to a first-run state: drop every tab, its undo history and any
@@ -356,19 +364,11 @@ function initTabs(editableNode, onUpdate) {
     present(restored.content, { caret: restored.caret });
   }
 
-  function restoreAll(snapshots) {
+  // Bring back each tab's latest snapshot without disturbing the rest: tabs with
+  // no snapshot stay, the order and the active tab are kept (see mergeSnapshots).
+  function restoreAll(snapshots, options) {
     leaveActiveTab();
-    const tabs = snapshots.map((snapshot) => ({
-      id: snapshot.tabId || generateId(),
-      name: snapshot.name,
-      content: snapshot.content,
-    }));
-    state = {
-      ...state,
-      tabs,
-      activeId: tabs.length ? tabs[0].id : state.activeId,
-      nextTabNumber: deriveNextTabNumber(tabs),
-    };
+    state = mergeSnapshots(state, snapshots, options);
     history.clear();
     const restored = getActiveTab();
     present(restored.content, { caret: restored.caret });
@@ -379,7 +379,8 @@ function initTabs(editableNode, onUpdate) {
   async function recoverFromSnapshots() {
     try {
       const snapshots = await latestPerTab();
-      if (snapshots.length) restoreAll(snapshots);
+      // The collection was unreadable, so what is open is a fresh empty tab.
+      if (snapshots.length) restoreAll(snapshots, { dropPristine: true });
     } catch {
       // storage unavailable
     }

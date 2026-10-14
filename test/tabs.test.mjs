@@ -154,3 +154,93 @@ test('createTab + setContent adds a named sheet without touching the others', ()
     assert.deepEqual(after, tab, `tab ${tab.id} was modified`);
   }
 });
+
+// REVIEW.md SEC-01: Restore all and automatic recovery rebuilt the collection
+// from snapshots alone, so a tab that was never typed in vanished and the rest
+// came back newest-first. A restore merges instead.
+import { mergeSnapshots } from '../js/core/tabsState.js';
+
+const snap = (tabId, name, content, timestamp, position) => ({
+  tabId,
+  name,
+  content,
+  timestamp,
+  position,
+});
+
+test('mergeSnapshots keeps the current tabs, their order and the active tab', () => {
+  const state = baseState();
+  const merged = mergeSnapshots({ ...state, activeId: 'b' }, [snap('c', 'C', 'old c', 5, 2)]);
+  assert.deepEqual(
+    merged.tabs.map((tab) => tab.id),
+    ['a', 'b', 'c']
+  );
+  assert.equal(merged.activeId, 'b');
+  assert.equal(merged.tabs[0].content, '1', 'a tab with no snapshot is kept as it is');
+  assert.equal(merged.tabs[2].content, 'old c', 'a tab with a snapshot takes its content');
+});
+
+test('mergeSnapshots takes the snapshot name and content, and clears a stale caret', () => {
+  const state = {
+    tabs: [{ id: 'a', name: 'Now', content: 'new', caret: { start: 2, end: 2 } }],
+    activeId: 'a',
+    nextTabNumber: 2,
+  };
+  const [tab] = mergeSnapshots(state, [snap('a', 'Before', 'old', 1, 0)]).tabs;
+  assert.equal(tab.name, 'Before');
+  assert.equal(tab.content, 'old');
+  assert.equal(tab.caret, null);
+});
+
+test('mergeSnapshots appends tabs that exist only as snapshots, in their original order', () => {
+  const state = { tabs: [{ id: 'a', name: 'A', content: '' }], activeId: 'a', nextTabNumber: 2 };
+  const merged = mergeSnapshots(state, [
+    snap('z', 'Third', '3', 30, 2),
+    snap('y', 'Second', '2', 20, 1),
+    snap('x', 'No position, older', 'x', 5, undefined),
+    snap('w', 'No position, newer', 'w', 9, undefined),
+  ]);
+  assert.deepEqual(
+    merged.tabs.map((tab) => tab.id),
+    ['a', 'y', 'z', 'x', 'w'],
+    'by position, then positionless ones oldest first'
+  );
+});
+
+test('mergeSnapshots repairs the active tab and the tab counter', () => {
+  const merged = mergeSnapshots({ tabs: [], activeId: 'gone', nextTabNumber: 1 }, [
+    snap('a', 'Tab 7', '7', 1, 0),
+    snap('b', 'Budget', 'b', 2, 1),
+  ]);
+  assert.equal(merged.activeId, 'a');
+  assert.equal(merged.nextTabNumber, 8);
+});
+
+test('mergeSnapshots can drop a pristine empty tab, but never the last tab', () => {
+  const fresh = {
+    tabs: [{ id: 'new', name: 'Tab 1', content: '' }],
+    activeId: 'new',
+    nextTabNumber: 2,
+  };
+  const recovered = mergeSnapshots(fresh, [snap('a', 'Budget', 'b', 1, 0)], { dropPristine: true });
+  assert.deepEqual(
+    recovered.tabs.map((tab) => tab.id),
+    ['a']
+  );
+  assert.equal(recovered.activeId, 'a');
+  const alone = mergeSnapshots(fresh, [], { dropPristine: true });
+  assert.equal(alone.tabs.length, 1, 'an empty collection is never produced');
+  const kept = mergeSnapshots(fresh, [snap('a', 'Budget', 'b', 1, 0)]);
+  assert.equal(kept.tabs.length, 2, 'without the option nothing is dropped');
+});
+
+test('mergeSnapshots never loses a tab that has content', () => {
+  const state = baseState();
+  const merged = mergeSnapshots(state, [snap('b', 'B', 'x', 1, 1), snap('q', 'Q', 'q', 2, 5)]);
+  for (const tab of state.tabs)
+    assert.ok(
+      merged.tabs.some((t) => t.id === tab.id),
+      tab.id
+    );
+  assert.ok(merged.tabs.some((t) => t.id === 'q'));
+});

@@ -126,7 +126,7 @@ export default {
   'settings.resetConfirm': 'Isso redefinirá o tema, as abas e todos os dados salvos. Continuar?',
   'settings.restoreConfirm': 'Restaurar "{name}" de {ago}? Isso substitui o conteúdo atual.',
   'settings.restoreAllConfirm':
-    'Substituir todas as abas pelo snapshot mais recente de cada uma? Isso descarta as abas atuais.',
+    'Restaurar cada aba para o snapshot mais recente? O texto atual dessas abas é substituído; abas sem snapshot ficam como estão.',
 
   'time.justNow': 'agora mesmo',
   'time.minutesAgo': 'há {n} min',

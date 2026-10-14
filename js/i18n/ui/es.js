@@ -129,7 +129,7 @@ export default {
     'Esto restablecerá el tema, las pestañas y todos los datos guardados. ¿Continuar?',
   'settings.restoreConfirm': '¿Restaurar "{name}" de {ago}? Esto reemplaza su contenido actual.',
   'settings.restoreAllConfirm':
-    '¿Reemplazar todas las pestañas por la copia más reciente de cada una? Esto descarta las pestañas actuales.',
+    '¿Restaurar cada pestaña a su copia más reciente? El texto actual de esas pestañas se reemplaza; las pestañas sin copia se quedan como están.',
 
   'time.justNow': 'ahora mismo',
   'time.minutesAgo': 'hace {n} min',

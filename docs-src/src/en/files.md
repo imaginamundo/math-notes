@@ -24,7 +24,7 @@ Nothing is uploaded. The sheet travels in the link's `#` fragment, which browser
 
 ## Auto-saved snapshots
 
-Every tab's edits are backed up to IndexedDB as versioned snapshots. Open **Settings → Recover** to see every snapshot, grouped by tab, and restore any of them, or use **Restore all from latest backup** to bring back every tab. Each tab keeps its 10 most recent snapshots, saved a couple of seconds after you stop typing. Closing a tab also removes its snapshots. Snapshots are stored deflated to keep them small.
+Every tab's edits are backed up to IndexedDB as versioned snapshots. Open **Settings → Recover** to see every snapshot, grouped by tab, and restore any of them, or use **Restore all from latest backup** to bring back every tab. It puts each tab's latest snapshot back and leaves tabs without one, their order and the active tab alone. Sheets the app fills in for you (a template, a shared sheet, Welcome) are backed up as soon as they open. Each tab keeps its 10 most recent snapshots, saved a couple of seconds after you stop typing. Closing a tab also removes its snapshots. Snapshots are stored deflated to keep them small.
 
 If the app stops while it is calculating a sheet, that sheet's results stay paused when the page reloads (a notice says so), so one bad line cannot lock you out. Edit the sheet to calculate it again, or close the tab.
 

@@ -91,7 +91,48 @@ function deriveNextTabNumber(tabs) {
   return next;
 }
 
+// Merge the latest snapshot of each tab into the open collection, for "Restore
+// all" and for rebuilding after unreadable storage. A snapshot only supplies a
+// tab's name and content: the tabs that are open stay, in their order and with
+// their active tab, even when they have no snapshot (a tab the app filled in and
+// the user never typed in has none). Snapshots of tabs that are no longer open
+// are appended in their original order, by recorded position and then age.
+// `dropPristine` removes a still-empty tab with no snapshot, which is how an
+// unreadable collection looks after the app wrote a fresh one over it.
+function mergeSnapshots(state, snapshots, { dropPristine = false } = {}) {
+  const byTab = new Map(snapshots.map((snapshot) => [snapshot.tabId, snapshot]));
+  const open = new Set(state.tabs.map((tab) => tab.id));
+  const restored = state.tabs.map((tab) => {
+    const snapshot = byTab.get(tab.id);
+    return snapshot ? { ...tab, name: snapshot.name, content: snapshot.content, caret: null } : tab;
+  });
+  const missing = snapshots
+    .filter((snapshot) => !open.has(snapshot.tabId))
+    .sort((a, b) => {
+      const positionA = Number.isInteger(a.position) ? a.position : Infinity;
+      const positionB = Number.isInteger(b.position) ? b.position : Infinity;
+      return positionA - positionB || a.timestamp - b.timestamp;
+    })
+    .map((snapshot) => ({
+      id: snapshot.tabId || generateId(),
+      name: snapshot.name,
+      content: snapshot.content,
+      caret: null,
+    }));
+
+  let tabs = [...restored, ...missing];
+  if (dropPristine) {
+    const kept = tabs.filter((tab) => tab.content !== '' || byTab.has(tab.id));
+    if (kept.length > 0) tabs = kept;
+  }
+  const activeId = tabs.some((tab) => tab.id === state.activeId)
+    ? state.activeId
+    : (tabs[0] && tabs[0].id) || state.activeId;
+  return { ...state, tabs, activeId, nextTabNumber: deriveNextTabNumber(tabs) };
+}
+
 export {
+  mergeSnapshots,
   generateId,
   createTab,
   closeTab,

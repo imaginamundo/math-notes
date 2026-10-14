@@ -676,6 +676,82 @@ test('the new-tab button stays reachable when tabs overflow', async () => {
   assert.deepEqual(errors, []);
 });
 
+const tabNames = () =>
+  page.evaluate(() => [...document.querySelectorAll('.tab .tab-name')].map((n) => n.textContent));
+const activeTabName = () =>
+  page.evaluate(() => document.querySelector('.tab.active .tab-name').textContent);
+
+async function openTemplate(name) {
+  await page.click('.tab-template');
+  await waitFor(() => page.$('.tab-template-menu:not([hidden])'));
+  await page.$$eval(
+    '.tab-template-option',
+    (nodes, wanted) => nodes.find((node) => node.textContent === wanted).click(),
+    name
+  );
+}
+
+// REVIEW.md SEC-01: tabs the app filled in (a template, a share import, Welcome)
+// were never snapshotted, so Restore all and automatic recovery dropped them and
+// reversed the order of the rest.
+test('SEC-01: Restore all keeps every tab, in order, including filled-in ones', async () => {
+  await newPage();
+  page.on('dialog', (dialog) => dialog.accept());
+  await openTemplate('Budget');
+  await waitFor(async () => (await tabNames()).length === 2);
+  await page.evaluate(() => document.querySelector('.tab-new').click());
+  await waitFor(async () => (await tabNames()).length === 3);
+  await setContent('1 + 1');
+  await wait(3500); // the typed tab's snapshot is debounced
+
+  const before = await tabNames();
+  assert.deepEqual(before, ['Tab 1', 'Budget', 'Tab 3']);
+  const budget = await page.evaluate(() => {
+    document.querySelectorAll('.tab')[1].click();
+    return document.getElementById('content-editable').value;
+  });
+  assert.ok(budget.includes('income = 3200'));
+
+  await page.click('#settings-button');
+  await waitFor(() => page.evaluate(() => !document.getElementById('restore-all-button').disabled));
+  await page.click('#restore-all-button');
+  await wait(400);
+
+  assert.deepEqual(await tabNames(), before, 'no tab is lost or reordered');
+  assert.equal(await activeTabName(), 'Budget', 'the active tab stays active');
+  assert.equal(await value(), budget, 'and its content is intact');
+  assert.deepEqual(errors, []);
+});
+
+test('SEC-01: automatic recovery from corrupt storage rebuilds tabs in order', async () => {
+  await newPage();
+  await openTemplate('Budget');
+  await waitFor(async () => (await tabNames()).length === 2);
+  await page.evaluate(() => document.querySelector('.tab-new').click());
+  await waitFor(async () => (await tabNames()).length === 3);
+  await setContent('2 * 3');
+  await wait(3500);
+  // Corrupt the storage from another page of the same origin: the app writes its
+  // state back when it unloads, so doing it from the app itself would be undone.
+  // Both the collection and its backup copy are unusable, so only snapshots remain.
+  const origin = new URL(page.url()).origin;
+  await page.goto(`${origin}/docs/`, { waitUntil: 'load' });
+  await page.evaluate(() => {
+    localStorage.setItem('math-notes-tabs', '{not json');
+    localStorage.setItem('math-notes-tabs-backup', '{not json either');
+  });
+  await page.goto(`${origin}/`, { waitUntil: 'load' });
+  await waitFor(async () => (await tabNames()).includes('Tab 3'));
+  await wait(500);
+  const names = await tabNames();
+  assert.deepEqual(
+    names.filter((name) => name !== 'Tab 1'),
+    ['Budget', 'Tab 3'],
+    'the template tab survives, in its original order'
+  );
+  assert.deepEqual(errors, []);
+});
+
 test('the starter-sheet menu opens a new tab with the template', async () => {
   await newPage();
   await page.click('.tab-template');

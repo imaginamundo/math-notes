@@ -124,7 +124,7 @@ export default {
   'settings.resetConfirm': 'This will reset the theme, tabs and all stored data. Continue?',
   'settings.restoreConfirm': 'Restore "{name}" from {ago}? This replaces its current content.',
   'settings.restoreAllConfirm':
-    'Replace all tabs with the latest snapshot of each? This discards the current tabs.',
+    'Restore every tab to its latest snapshot? Your current text in those tabs is replaced; tabs without a snapshot stay as they are.',
 
   'time.justNow': 'just now',
   'time.minutesAgo': '{n}m ago',
