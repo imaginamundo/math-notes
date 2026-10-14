@@ -97,15 +97,19 @@
 </tr>
 <tr>
 <td><code>Tab</code> <code>Shift+Tab</code></td>
-<td>Indent / outdent</td>
+<td>Indent / outdent at a line start</td>
+</tr>
+<tr>
+<td><code>Esc</code></td>
+<td>Leave the editor for the tab bar</td>
 </tr>
 <tr>
 <td><code>⇧⌘C</code> <code>Ctrl+Shift+C</code></td>
 <td>Copy the current line&#39;s result</td>
 </tr>
 <tr>
-<td><code>⇧⌘S</code> <code>Ctrl+Shift+S</code></td>
-<td>Copy a share link</td>
+<td><code>⇧⌘S</code> <code>⇧⌘L</code> <code>Ctrl+Shift+S</code> <code>Ctrl+Shift+L</code></td>
+<td>Copy a share link (<code>L</code> also works where the browser reserves <code>Ctrl+Shift+S</code>)</td>
 </tr>
 </tbody></table>
 </div>
@@ -113,7 +117,10 @@
 <ul>
 <li>The text size control scales from your browser&#39;s default size, so it honours your system preference.</li>
 <li>The editor has an accessible label, the status bar announces state with <code>aria-live</code>, and the active line&#39;s result is announced through a separate polite live region.</li>
-<li>The autocomplete is exposed as a combobox (<code>aria-expanded</code>, <code>aria-controls</code>, <code>aria-activedescendant</code>), and tabs can be renamed from the keyboard (<code>F2</code>) or by touch (press and hold).</li>
+<li>The autocomplete keeps the editor a plain text box (<code>aria-controls</code>, <code>aria-autocomplete</code>) and announces the number of suggestions and the highlighted one through a status message.</li>
+<li>Tabs can be renamed from the keyboard (<code>F2</code>) or by touch (press and hold).</li>
+<li>The tab bar is a roving-tabindex tablist: <code>Tab</code> reaches it in one stop, <code>←</code>/<code>→</code> switch tabs, and <code>Delete</code> / <code>Backspace</code> closes the focused tab.</li>
+<li>The editor never traps the keyboard: <code>Tab</code> indents at a line start and moves focus on anywhere else, and <code>Esc</code> leaves the editor for the tab bar (an open suggestion popup or find bar takes <code>Esc</code> first).</li>
 <li>The modals are native <code>&lt;dialog&gt;</code> elements with a labelled header and a close button that is reachable by keyboard, and closing one returns focus to the button that opened it.</li>
 <li>The total bar&#39;s aggregate is a labelled <code>&lt;select&gt;</code>.</li>
 <li>The documentation you are reading is static HTML with a skip link, landmarks and a keyboard-reachable sidebar.</li>

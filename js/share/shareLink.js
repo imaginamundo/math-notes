@@ -85,7 +85,14 @@ async function decodeSheet(token) {
     const parsed = JSON.parse(new TextDecoder().decode(bytes));
     if (!parsed || typeof parsed !== 'object') return null;
     if (typeof parsed.c !== 'string') return null;
-    return { name: typeof parsed.n === 'string' ? parsed.n : 'Shared sheet', content: parsed.c };
+    return {
+      name: typeof parsed.n === 'string' ? parsed.n : 'Shared sheet',
+      // A sheet composed on Windows arrives with CRLF. The editor stores LF, so
+      // passing it through unchanged would make the restored text differ from
+      // what the textarea holds and turn the first keystroke into a bogus undo
+      // step.
+      content: parsed.c.replace(/\r\n?/g, '\n'),
+    };
   } catch {
     return null;
   }

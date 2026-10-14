@@ -2,11 +2,10 @@ import {
   wordRangeAt,
   suggestionsFor,
   applyCompletion,
-  collectAssignments,
-  collectTags,
+  suggestionFacts,
+  suggestionsFrom,
 } from '../core/autocomplete.js';
 import { VOCABULARY } from '../core/vocabulary.js';
-import { collectUnitDefinitions } from '../core/userUnits.js';
 import { setEditorValue } from './editorInput.js';
 import { sheetLines } from '../util/text.js';
 import { t } from '../i18n/index.js';
@@ -35,13 +34,20 @@ function initAutocomplete(editableNode, editorScroll) {
   popup.setAttribute('aria-label', t('autocomplete.label'));
   popup.hidden = true;
   scroller.appendChild(popup);
-  // The editor is a combobox whose listbox is the popup. It is a multiline
-  // input, so this is the closest ARIA pattern; `aria-expanded` tracks the popup.
-  editableNode.setAttribute('role', 'combobox');
+  // The editor stays a plain multiline textbox: ARIA-in-HTML does not allow
+  // `combobox` on a textarea, and re-roling it would cost screen readers the
+  // textbox semantics. It only points at the listbox and says it autocompletes;
+  // what the popup holds is announced through the status region below.
   editableNode.setAttribute('aria-controls', 'autocomplete-list');
   editableNode.setAttribute('aria-autocomplete', 'list');
-  editableNode.setAttribute('aria-haspopup', 'listbox');
-  editableNode.setAttribute('aria-expanded', 'false');
+  // Outside the popup, so it outlives the popup's `hidden`, and outside the
+  // scroll container, so it cannot affect scrolling. Same pattern as the result
+  // announcer in js/render/renderInput.js.
+  const status = document.createElement('span');
+  status.className = 'sr-only autocomplete-status';
+  status.setAttribute('role', 'status');
+  status.setAttribute('aria-live', 'polite');
+  document.body.appendChild(status);
   window.addEventListener(LANGUAGE_UPDATED, () =>
     popup.setAttribute('aria-label', t('autocomplete.label'))
   );
@@ -62,11 +68,18 @@ function initAutocomplete(editableNode, editorScroll) {
   }
 
   // Suggestions come from every assignment and tag in the sheet, so building
-  // them means parsing every line. Cache the result and, when the text changes,
-  // rebuild only if a changed line could have added or removed one (`=` or `#`).
+  // them means parsing every line. The parsed facts are kept line by line, so
+  // an edit re-parses only the lines it touched: a keystroke in a
+  // thousand-line sheet costs one line instead of four parses of each, and
+  // inserting a line costs one parse, not one per line below it. On top of
+  // that, a change that cannot add or remove a name (`=` or `#` is what
+  // can) reuses the whole list.
   let cachedValue = null;
   let cachedLines = null;
   let cachedEntries = null;
+  // Facts by line text: they depend on nothing but the line, so a line that
+  // moved (Enter near the top shifts every line below it) is still found.
+  let factsByLine = new Map();
 
   function couldAffectEntries(line) {
     return line.includes('=') || line.includes('#');
@@ -93,30 +106,33 @@ function initAutocomplete(editableNode, editorScroll) {
       }
     }
 
-    const variables = collectAssignments(lines).map((text) => ({ text, kind: 'variable' }));
-    const customUnits = collectUnitDefinitions(lines).flatMap(({ name, aliases }) =>
-      [name, ...aliases].map((text) => ({ text, kind: 'unit', detail: 'custom unit' }))
-    );
-    const tags = collectTags(lines).map((text) => ({ text: `#${text}`, kind: 'tag' }));
+    const next = new Map();
+    for (const line of lines) {
+      if (!next.has(line)) next.set(line, factsByLine.get(line) || suggestionFacts(line));
+    }
+    factsByLine = next;
     cachedValue = value;
     cachedLines = lines;
-    cachedEntries = [...variables, ...customUnits, ...tags, ...VOCABULARY];
+    cachedEntries = [...suggestionsFrom(next.values()), ...VOCABULARY];
     return cachedEntries;
   }
 
   function refresh(force) {
-    if (suppress || blocked()) return close();
+    if (suppress) return close();
     if (editableNode.selectionStart !== editableNode.selectionEnd) return close();
     range = wordRangeAt(editableNode.value, editableNode.selectionStart);
     if (!range) return close();
     // A `#tag` opens after the single `#`; a plain word needs MIN_PREFIX.
     if (!force && !range.tag && range.prefix.length < MIN_PREFIX) return close();
+    // A dialog in front means no popup at all; asked for last, so the document
+    // search it costs only happens for a word that would otherwise open one.
+    if (blocked()) return close();
     items = suggestionsFor(range.prefix, entries(), MAX_ITEMS);
     if (!items.length) return close();
     activeIndex = 0;
     render();
     popup.hidden = false;
-    editableNode.setAttribute('aria-expanded', 'true');
+    announce(countMessage());
     position();
   }
 
@@ -127,32 +143,56 @@ function initAutocomplete(editableNode, editorScroll) {
     items = [];
     range = null;
     editableNode.removeAttribute('aria-activedescendant');
-    editableNode.setAttribute('aria-expanded', 'false');
+    announce('');
+  }
+
+  function announce(text) {
+    if (status.textContent !== text) status.textContent = text;
+  }
+
+  function countMessage() {
+    return t(items.length === 1 ? 'autocomplete.one' : 'autocomplete.count', {
+      count: items.length,
+    });
+  }
+
+  // One option row per position, created once and then updated in place:
+  // rebuilding all eight on every keystroke was the largest remaining cost of
+  // typing inside a word once the parser stopped being the bottleneck.
+  function optionAt(index) {
+    const existing = popup.children[index];
+    if (existing) return existing;
+    const option = document.createElement('div');
+    option.className = 'autocomplete-option';
+    option.id = `autocomplete-option-${index}`;
+    option.setAttribute('role', 'option');
+    const text = document.createElement('span');
+    text.className = 'autocomplete-text';
+    option.appendChild(text);
+    option.addEventListener('mousedown', (event) => {
+      event.preventDefault();
+      accept(index);
+    });
+    popup.appendChild(option);
+    return option;
   }
 
   function render() {
-    popup.textContent = '';
+    while (popup.children.length > items.length) popup.lastChild.remove();
     items.forEach((entry, index) => {
-      const option = document.createElement('div');
-      option.className = 'autocomplete-option' + (index === activeIndex ? ' active' : '');
-      option.id = `autocomplete-option-${index}`;
-      option.setAttribute('role', 'option');
-      option.setAttribute('aria-selected', String(index === activeIndex));
-      const text = document.createElement('span');
-      text.className = 'autocomplete-text';
-      text.textContent = entry.text;
-      option.appendChild(text);
+      const option = optionAt(index);
+      const text = option.firstChild;
+      if (text.textContent !== entry.text) text.textContent = entry.text;
+      const detail = option.children[1];
       if (entry.detail) {
-        const detail = document.createElement('span');
-        detail.className = 'autocomplete-detail';
-        detail.textContent = entry.detail;
-        option.appendChild(detail);
+        const span = detail || option.appendChild(document.createElement('span'));
+        span.className = 'autocomplete-detail';
+        if (span.textContent !== entry.detail) span.textContent = entry.detail;
+      } else if (detail) {
+        detail.remove();
       }
-      option.addEventListener('mousedown', (event) => {
-        event.preventDefault();
-        accept(index);
-      });
-      popup.appendChild(option);
+      option.classList.toggle('active', index === activeIndex);
+      option.setAttribute('aria-selected', String(index === activeIndex));
     });
     popup.scrollTop = 0;
     setActiveDescendant();
@@ -166,6 +206,15 @@ function initAutocomplete(editableNode, editorScroll) {
     });
     setActiveDescendant();
     revealActive();
+    // `aria-activedescendant` on a textbox is not reliably announced, so say
+    // the highlighted suggestion and where it sits.
+    announce(
+      t('autocomplete.position', {
+        text: items[activeIndex].text,
+        index: activeIndex + 1,
+        count: items.length,
+      })
+    );
   }
 
   // Keep the highlighted option inside the popup's own scroll area. `offsetTop`

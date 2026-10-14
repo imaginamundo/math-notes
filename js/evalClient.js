@@ -1,4 +1,5 @@
-import { fetchRates, loadCached, startRateRefresh } from './storage/currencyRates.js';
+import { loadCached } from './storage/currencyRates.js';
+import { MSG, SETTING } from './protocol.js';
 import { readMeasurementSystem } from './core/measurementSystem.js';
 import { DEFAULT_MEASUREMENT_SYSTEM } from './core/measures.js';
 import { DEFAULT_PRECISION, readDecimalPrecision } from './core/decimalPrecision.js';
@@ -12,6 +13,29 @@ const EVALUATE_TIMEOUT = 10000;
 const UPDATE_DELAY = 250;
 
 /**
+ * How to recover from a failed evaluation request. A pure function because the
+ * alternative — waiting out the real timeout twice — is not a test anyone can
+ * run.
+ *
+ *   'fallback'  The worker could not load or crashed, which is permanent for the
+ *               session: the main thread owns evaluation from here on.
+ *   'restart'   A timeout only means this worker is stuck. Terminate it and send
+ *               the same request to a fresh one.
+ *   'fail'      A second timeout for the same request. Give up on this reply
+ *               instead of falling back: running the sheet on the main thread
+ *               would block typing for at least as long as the worker already
+ *               needed — exactly what the worker exists to avoid.
+ *
+ * @param {{ workerUnavailable: boolean, retried: boolean }} failure
+ * @returns {'fallback'|'restart'|'fail'}
+ */
+export function recoveryFor({ workerUnavailable, retried }) {
+  if (workerUnavailable) return 'fallback';
+  if (retried) return 'fail';
+  return 'restart';
+}
+
+/**
  * Client for the evaluation worker. Owns the worker connection, the
  * request/reply protocol (with timeout and render gating), the debounced
  * update scheduling, and forwarding currency rates to the worker.
@@ -20,8 +44,9 @@ const UPDATE_DELAY = 250;
  * @param {(lines: string[]) => void} onTextRender  Draws the typed input synchronously.
  * @param {(lines: string[], data: SheetResult) => void} onRender  Renders the results.
  * @param {(busy: boolean) => void} [onBusy]  Notified while an evaluation is in flight.
+ * @param {(error: Error) => void} [onError]  Notified when a reply could not be produced.
  */
-export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
+export function createEvalClient(editableNode, onTextRender, onRender, onBusy, onError) {
   let worker = null;
   let workerUnavailable = false;
   let latestId = 0;
@@ -67,17 +92,18 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     created.addEventListener('error', dropWorker);
     // Seed the worker with the stored settings; the worker defaults to the same
     // values, so only a non-default choice needs sending.
-    const seed = (name, value) => created.postMessage({ type: 'setting', name, value });
+    const seed = (name, value) => created.postMessage({ type: MSG.setting, name, value });
     const measurementSystem = readMeasurementSystem();
-    if (measurementSystem !== DEFAULT_MEASUREMENT_SYSTEM) seed('measurement', measurementSystem);
+    if (measurementSystem !== DEFAULT_MEASUREMENT_SYSTEM)
+      seed(SETTING.measurement, measurementSystem);
     const precision = readDecimalPrecision();
-    if (precision !== DEFAULT_PRECISION) seed('precision', precision);
+    if (precision !== DEFAULT_PRECISION) seed(SETTING.precision, precision);
     const totalMode = readTotalMode();
-    if (totalMode !== DEFAULT_TOTAL_MODE) seed('total-mode', totalMode);
+    if (totalMode !== DEFAULT_TOTAL_MODE) seed(SETTING.totalMode, totalMode);
     const clockFormat = readClockFormat();
-    if (clockFormat !== DEFAULT_CLOCK_FORMAT) seed('clock-format', clockFormat);
+    if (clockFormat !== DEFAULT_CLOCK_FORMAT) seed(SETTING.clockFormat, clockFormat);
     const cachedRates = loadCached();
-    if (cachedRates) seed('rates', cachedRates);
+    if (cachedRates) seed(SETTING.rates, cachedRates);
     // A fresh worker holds no sheet, so the next request must be a full one.
     lastSentLines = null;
     return created;
@@ -97,7 +123,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     worker = null;
     for (const [id, callback] of pending) {
       pending.delete(id);
-      callback({ type: 'error', message: 'The evaluation worker failed' });
+      callback({ type: MSG.error, message: 'The evaluation worker failed' });
     }
   }
 
@@ -112,7 +138,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
     failed.terminate();
     for (const [id, callback] of pending) {
       pending.delete(id);
-      callback({ type: 'error', message: 'The evaluation worker timed out' });
+      callback({ type: MSG.error, message: 'The evaluation worker timed out' });
     }
     lastSentLines = null;
   }
@@ -127,25 +153,31 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
   function requestEvaluate(lines, retried = false) {
     const active = ensureWorker();
     if (!active) return fallbackEvaluate(lines);
-    // If the worker cannot load (common offline, when its module graph was
-    // never fetched) or crashes, evaluate this request on the main thread
-    // instead of leaving the sheet blank, and fall back for later requests.
     return workerEvaluate(active, lines).catch(() => {
-      // A failed load/crash is permanent; a timeout just needs a fresh worker.
-      if (workerUnavailable) return fallbackEvaluate(lines);
+      const action = recoveryFor({ workerUnavailable, retried });
+      if (action === 'fallback') return fallbackEvaluate(lines);
       if (worker === active) restartWorker();
-      if (retried) return fallbackEvaluate(lines);
+      if (action === 'fail') return Promise.reject(new Error('Evaluation timed out twice'));
       return requestEvaluate(lines, true);
     });
   }
 
   // Evaluate on the main thread when there is no worker or it failed. The raw
   // values this resolves with are formatted by `patchResults`, which accepts
-  // both the worker's pre-formatted strings and these numbers/units.
+  // both the worker's pre-formatted strings and these numbers/units. This path
+  // is synchronous, so the timeout here only bounds the module import; it can
+  // never interrupt the evaluation itself.
   function fallbackEvaluate(lines) {
     const load = fallbackModule
       ? Promise.resolve(fallbackModule)
-      : import('./core/calculate.js').then((mod) => (fallbackModule = mod));
+      : import('./core/calculate.js').then((mod) => {
+          fallbackModule = mod;
+          // The engine takes rates as input; the composition root owns the
+          // cache, so seed the freshly loaded module with what is stored.
+          const cached = loadCached();
+          if (cached) mod.registerCurrencyRates(cached);
+          return mod;
+        });
     return withTimeout(
       load.then((mod) => ({ id: 0, data: mod.evaluateLines(lines) })),
       EVALUATE_TIMEOUT
@@ -161,7 +193,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
       }, EVALUATE_TIMEOUT);
       pending.set(id, (data) => {
         clearTimeout(timer);
-        if (data.type === 'error') reject(new Error(data.message));
+        if (data.type === MSG.error) reject(new Error(data.message));
         else resolve({ id, data });
       });
       // Send only the suffix from the first changed line. `from` is -1 when
@@ -170,7 +202,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
       const suffix = from > 0 ? lines.slice(from) : from === 0 ? lines : [];
       worker.postMessage({
         id,
-        type: 'evaluate',
+        type: MSG.evaluate,
         lines: suffix,
         from: from === -1 ? lines.length : from,
       });
@@ -236,6 +268,8 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
       onRender(lines, data);
     } catch (error) {
       console.error('Failed to update the sheet:', error);
+      // The results are now stale and nothing on screen says so; tell the UI.
+      if (onError) onError(error);
     } finally {
       pendingUpdates--;
       if (pendingUpdates === 0) setBusy(false);
@@ -246,8 +280,9 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
 
   // The main-thread engine is created lazily by the fallback path, so apply a
   // setting to it directly when it exists. A freshly created engine reads the
-  // stored settings and the cached rates itself, so anything changed before it
-  // loads is already picked up.
+  // stored measurement system itself and is seeded with the cached rates when
+  // the fallback first loads it, so anything changed before then is already
+  // picked up.
   function applyToFallback(apply) {
     if (!fallbackModule) return;
     try {
@@ -260,42 +295,39 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy) {
   // Settings the main-thread engine also owns; precision and clock format are
   // module-level state the UI sets directly, so only the worker needs them.
   const FALLBACK_SETTINGS = {
-    rates: (mod, value) => mod.registerCurrencyRates(value),
-    measurement: (mod, value) => mod.registerMeasurementSystem(value),
-    'total-mode': (mod, value) => mod.registerTotalMode(value),
+    [SETTING.rates]: (mod, value) => mod.registerCurrencyRates(value),
+    [SETTING.measurement]: (mod, value) => mod.registerMeasurementSystem(value),
+    [SETTING.totalMode]: (mod, value) => mod.registerTotalMode(value),
   };
 
   // Every setting is sent as one message shape; the worker routes by name.
   function postSetting(name, value) {
-    if (worker && value !== undefined) worker.postMessage({ type: 'setting', name, value });
+    if (worker && value !== undefined) worker.postMessage({ type: MSG.setting, name, value });
     const apply = FALLBACK_SETTINGS[name];
     if (apply) applyToFallback((mod) => apply(mod, value));
   }
 
   function syncRates(data) {
-    if (data) postSetting('rates', data);
+    if (data) postSetting(SETTING.rates, data);
   }
 
   function syncMeasurement(system) {
-    if (system) postSetting('measurement', system);
+    if (system) postSetting(SETTING.measurement, system);
   }
 
   function syncPrecision(value) {
-    if (value !== undefined) postSetting('precision', value);
+    if (value !== undefined) postSetting(SETTING.precision, value);
     precisionDirty = true;
   }
 
   function syncTotalMode(mode) {
-    if (mode) postSetting('total-mode', mode);
+    if (mode) postSetting(SETTING.totalMode, mode);
   }
 
   function syncClockFormat(format) {
-    if (format) postSetting('clock-format', format);
+    if (format) postSetting(SETTING.clockFormat, format);
     clockFormatDirty = true;
   }
-
-  fetchRates();
-  startRateRefresh();
 
   return {
     update,

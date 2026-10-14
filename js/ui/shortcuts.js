@@ -3,6 +3,7 @@ import { getDecimalPrecision } from '../core/decimalPrecision.js';
 import { getClockFormat } from '../core/clockFormat.js';
 import { indexOfLineAt } from '../util/text.js';
 import { copyText } from '../util/clipboard.js';
+import { isTypingTarget } from '../util/dom.js';
 import { setEditorValue } from './editorInput.js';
 import { SHARE_COPY } from '../util/events.js';
 
@@ -12,7 +13,9 @@ function initShortcuts(editableNode, requestResults, switchTab) {
     if (!mod) return;
     if (document.querySelector('dialog[open]')) return;
     const active = document.activeElement;
-    if (active && active !== editableNode && active.tagName === 'INPUT') return;
+    // Anything but the editor that takes the keyboard — a field, a select,
+    // contenteditable — keeps these combinations for itself.
+    if (active && active !== editableNode && isTypingTarget(active)) return;
     const shift = event.shiftKey;
     const key = event.key.toLowerCase();
 
@@ -52,7 +55,7 @@ async function copyCurrentLineResult(editableNode, requestResults) {
     const { results } = await requestResults(value.split('\n'));
     const result = results[lineIndex];
     if (result && result.type !== 'error' && result.value !== undefined) {
-      copyText(formatResult(result.value, getDecimalPrecision(), getClockFormat()));
+      await copyText(formatResult(result.value, getDecimalPrecision(), getClockFormat()));
     }
   } catch {
     // evaluation failed; nothing to copy

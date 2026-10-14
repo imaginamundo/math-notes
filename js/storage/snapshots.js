@@ -25,7 +25,7 @@ function requestToPromise(request) {
 
 function openDb() {
   if (dbPromise) return dbPromise;
-  dbPromise = new Promise((resolve, reject) => {
+  const opened = new Promise((resolve, reject) => {
     if (typeof indexedDB === 'undefined') {
       reject(new Error('IndexedDB is unavailable'));
       return;
@@ -40,6 +40,13 @@ function openDb() {
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
+  });
+  // Cache only successes. A rejected open (quota, a blocked upgrade, a
+  // private-mode browser) must not stay cached for the whole session, or one
+  // early failure would silently disable snapshots and recovery from then on.
+  dbPromise = opened.catch((error) => {
+    dbPromise = null;
+    throw error;
   });
   return dbPromise;
 }

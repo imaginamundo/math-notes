@@ -34,6 +34,8 @@ export default {
   'status.ratesLive': 'tasas: en vivo',
   'status.ratesUnavailable': 'tasas de cambio no disponibles',
   'status.storageFull': 'almacenamiento lleno — puede que los cambios recientes no se guarden',
+  'status.bootFailed': 'Math Notes no pudo iniciarse — tus hojas guardadas se han conservado',
+  'status.evaluationFailed': 'error de evaluación — no se pudieron actualizar los resultados',
 
   'share.buildFailed': 'No se pudo crear un enlace para esta hoja',
   'share.copiedLong': 'Enlace copiado — es largo, algunas apps pueden cortarlo',
@@ -86,7 +88,11 @@ export default {
   'starter.tagComment': '# Las etiquetas marcan filas; una #etiqueta sola las suma todas:',
 
   'autocomplete.label': 'Sugerencias',
+  'autocomplete.count': '{count} sugerencias',
+  'autocomplete.one': '1 sugerencia',
+  'autocomplete.position': '{text}, {index} de {count}',
   'example.addTitle': 'Haz clic para añadir al editor',
+  'examples.loadFailed': 'No se pudieron cargar los ejemplos',
 
   'settings.files': 'Archivos',
   'settings.filesBody': 'Exporta la hoja activa como texto o importa una desde un archivo.',

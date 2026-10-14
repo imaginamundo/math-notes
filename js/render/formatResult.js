@@ -346,4 +346,29 @@ function formatPace(unit, name) {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}/${name}`;
 }
 
+// Prepare results for the structured-clone boundary: values become formatted
+// strings so no mathjs class instance crosses, and the clone-safe flags ride
+// along so both paths agree on shape. `assigned` is dropped (functions cannot
+// clone); the engine path keeps it.
+function serializeResults(
+  results,
+  precision = DEFAULT_PRECISION,
+  clockFormat = DEFAULT_CLOCK_FORMAT
+) {
+  return results.map((result) => ({
+    type: result.type,
+    value:
+      result.value === undefined
+        ? undefined
+        : result.type === 'error'
+          ? result.value
+          : formatResult(result.value, precision, clockFormat),
+    aggregate: result.aggregate,
+    unitDef: result.unitDef,
+    tags: result.tags,
+    group: result.group,
+  }));
+}
+
 export default formatResult;
+export { serializeResults };

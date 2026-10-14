@@ -4,8 +4,8 @@
 // units lives in js/eval/currency.js.
 import storage from '../util/storage.js';
 import { CURRENCY_UPDATED, CURRENCY_ERROR } from '../util/events.js';
+import { BASE } from '../core/currencySymbols.js';
 
-const BASE = 'EUR';
 const API_URL = 'https://api.frankfurter.dev/v1/latest?from=' + BASE;
 const STORAGE_KEY = 'math-notes-currency-rates';
 const FETCH_TIMEOUT = 10000;
@@ -74,4 +74,4 @@ function startRateRefresh() {
   }, REFRESH_INTERVAL);
 }
 
-export { BASE, STORAGE_KEY, loadCached, fetchRates, startRateRefresh };
+export { STORAGE_KEY, loadCached, fetchRates, startRateRefresh };

@@ -20,11 +20,15 @@ import {
   computeTotal,
 } from './aggregate.js';
 import { unitMixError } from './unitMix.js';
+import { tagAggregate, tagAggregateMode, tagError, substituteTags } from './tags.js';
+import { resolveLineRefs } from './lineRefs.js';
+import { assertBoundedExpression } from './boundedExpression.js';
+import { friendlyError } from './friendlyErrors.js';
+import { substituteAggregates } from './aggregateSubstitution.js';
 import { firstDifference } from '../util/sequence.js';
-import { mangleLines, unmangleName } from './multiWordVariables.js';
+import { mangleLines } from './multiWordVariables.js';
 import { unitDefinition } from './userUnits.js';
 import { createUserUnit, removeUserUnit } from '../eval/userUnits.js';
-import { IDENTIFIER_SRC, TAG_NAME_SRC, WORD } from './identifiers.js';
 
 /**
  * One row's result. Every `results[i]` is exactly one of these variants:
@@ -50,11 +54,17 @@ import { IDENTIFIER_SRC, TAG_NAME_SRC, WORD } from './identifiers.js';
  * present only on the rows of a closed group (`'header'`, `'body'`, `'end'`),
  * so the renderer can shade the block.
  *
+ * The worker path (see `worker.js`) matches this shape except where the
+ * structured clone cannot: `value` is pre-formatted to a string, and
+ * `assigned` is dropped (functions cannot clone). Every other field is
+ * clone-safe and rides along, so the two paths agree on shape.
+ *
  * @typedef {Object} LineResult
  * @property {('value'|'assignment'|'error')} type
  * @property {*} value
- * @property {*} [assigned]
+ * @property {*} [assigned]  Engine path only; stripped by the worker.
  * @property {boolean} [aggregate]
+ * @property {boolean} [unitDef]
  * @property {string[]} [tags]
  * @property {('header'|'body'|'end')} [group]
  */
@@ -62,22 +72,15 @@ import { IDENTIFIER_SRC, TAG_NAME_SRC, WORD } from './identifiers.js';
 /**
  * @typedef {Object} SheetResult
  * @property {LineResult[]} results
- * @property {*} total  The running total (number, Unit, or formatted string).
+ * @property {*} total  The running total: a number/Unit (engine path) or a
+ *   pre-formatted string (worker path); an error message string when the
+ *   aggregate fails (e.g. mixed currencies).
  * @property {number} startLine  First line that changed (-1 when input is unchanged).
  */
-
-// Guard against expressions that would materialise unbounded arrays. A range
-// like `1:1000000000` or a function over one (e.g. `sum(1:1e9)`) allocates the
-// whole list up front and would lock the worker up, so reject anything a
-// literal array or a (statically resolvable) range would expand beyond this.
-const MAX_LIST_LENGTH = 100;
 
 // Matches a standalone aggregate keyword, i.e. not a mathjs function call
 // like `sum([1, 2, 3])`. The words come from AGGREGATE_KEYWORDS.
 const AGGREGATE_WORD = new RegExp(`\\b(?:${AGGREGATE_WORD_SOURCE})\\b(?!\\s*\\()`, 'i');
-const AGGREGATE_WORD_ALL = new RegExp(`\\b(${AGGREGATE_WORD_SOURCE})\\b(?!\\s*\\()`, 'gi');
-// A tag request line's `sum|average` prefix (`sum #food`).
-const TAG_AGGREGATE = new RegExp(`^(${AGGREGATE_WORD_SOURCE})\\s*(of)?$`, 'i');
 
 // Labels a line may not assign to: `prev` and the unconditional date keywords
 // (rewritten before mathjs, so a variable of that name could never be read
@@ -128,129 +131,14 @@ function findGroups(lines) {
   return { byEnd, groupOfLine };
 }
 
-// A tag request line: bare `#food` sums, and `sum|total|average|avg [#food]`
-// (optionally `... of #food`) picks the mode. Returns null when the code is an
-// ordinary expression.
-function tagAggregateMode(code) {
-  const text = code.trim();
-  if (text === '') return 'sum';
-  const match = TAG_AGGREGATE.exec(text);
-  if (!match) return null;
-  return AGGREGATE_KEYWORDS[match[1].toLowerCase()];
-}
-
-// Combine every tagged value row above the request, using the same unit rules
-// as the running total. A row tagged for several people is the item's full
-// amount, split equally between them, so each tag gets its share while the row
-// itself (and the group total) keeps the full price. Returns null when no row
-// carries any of the requested tags.
-function tagAggregate(results, tags, toIndex, mode, math) {
-  const tagged = results
-    .slice(0, toIndex)
-    .filter(
-      (result) =>
-        result &&
-        result.type === 'value' &&
-        !result.aggregate &&
-        Array.isArray(result.tags) &&
-        tags.some((tag) => result.tags.includes(tag))
-    );
-  if (!tagged.length) return null;
-  const shares = tagged.map((result) => ({
-    type: 'value',
-    value: splitShare(result.value, result.tags.length, math),
-  }));
-  return aggregateAbove(shares, 0, shares.length, mode);
-}
-
-// One person's share of a value split `count` ways (a number or a Unit).
-function splitShare(value, count, math) {
-  if (count <= 1) return value;
-  if (typeof value === 'number') return value / count;
-  if (value && value.isUnit === true) return math.multiply(value, 1 / count);
-  return value;
-}
-
-function tagError(tags) {
-  return `No values tagged ${tags.map((tag) => `#${tag}`).join(', ')}`;
-}
-
-// Rewrite a line whose tags take part in the calculation (`#food * 2`) so each
-// `#tag` becomes a scope variable holding the tag's aggregate over the rows
-// above. Returns the rewritten text, the values to inject, or an error when a
-// tag has no tagged rows.
-function substituteTags(parsed, results, index, math) {
-  const text = parsed.rawCode + parsed.tail.slice(0, parsed.tail.length - parsed.comment.length);
-  const values = {};
-  let error = null;
-
-  const substituted = text.replace(new RegExp(`#(${TAG_NAME_SRC})`, 'gu'), (match, tag) => {
-    const name = `__tag_${tag.replace(/[^\p{L}\p{N}\p{M}_]/gu, '_')}`;
-    if (name in values) return name;
-    if (error) return match;
-    const value = tagAggregate(results, [tag], index, 'sum', math);
-    if (value === null) {
-      error = tagError([tag]);
-      return match;
-    }
-    values[name] = value;
-    return name;
-  });
-
-  return { text: substituted, values, error };
-}
-
-// Replace `line(n)` with an internal token bound to the value of line n, which
-// must be a value row above the current line. Returns the rewritten parsed line
-// and the scope values to inject, or an error message.
-function resolveLineRefs(parsed, results, index) {
-  const values = {};
-  let error = null;
-
-  const replace = (text) =>
-    text.replace(/\bline\s*\(\s*(\d+)\s*\)/g, (match, digits) => {
-      if (error) return match;
-      const n = Number(digits);
-      if (n < 1) {
-        error = `Line ${n} does not exist`;
-        return match;
-      }
-      if (n > index) {
-        error = `Line ${n} is below this line`;
-        return match;
-      }
-      const ref = results[n - 1];
-      if (
-        !ref ||
-        ref.type !== 'value' ||
-        ref.value === undefined ||
-        typeof ref.value === 'function'
-      ) {
-        error = `Line ${n} has no value`;
-        return match;
-      }
-      const token = `__line_${n}`;
-      values[token] = ref.value;
-      return token;
-    });
-
-  return {
-    parsed: {
-      ...parsed,
-      code: replace(parsed.code),
-      rhs: parsed.rhs ? replace(parsed.rhs) : parsed.rhs,
-    },
-    values,
-    error,
-  };
-}
-
 /**
  * Build an isolated evaluation engine: its own mathjs instance (aliases, css
  * and currency units configured), its own incremental result cache and its own
- * currency-rate revision. Nothing is constructed at import time.
+ * currency-rate revision. Nothing is constructed at import time, and rates are
+ * an argument — the engine never reads storage or subscribes to events.
+ * @param {{ rates?: { base: string, rates: Record<string, number> } }} [options]
  */
-function createEngine() {
+function createEngine({ rates } = {}) {
   const math = create(all);
   initAliases(math);
   initCssUnits(math);
@@ -261,7 +149,7 @@ function createEngine() {
   initRates(math);
   initTimespan(math);
   initCalendar(math);
-  initCurrency(math);
+  initCurrency(math, rates);
 
   const cache = {
     lines: [],
@@ -282,71 +170,22 @@ function createEngine() {
   // can be deleted and rebuilt when the definitions change.
   let userUnits = [];
 
-  function assertBoundedExpression(expression, scope) {
-    // Only a list literal, a range or a size-taking constructor can materialise
-    // unboundedly; skip the extra parse for every other expression.
-    if (!/\[|:/.test(expression) && !/\b(?:range|ones|zeros)\s*\(/i.test(expression)) return;
-    let tree;
-    try {
-      tree = math.parse(expression);
-    } catch {
-      return; // math.evaluate reports the parse error itself
-    }
-    const resolve = (node, fallback) => {
-      if (node === null || node === undefined) return fallback;
-      try {
-        const value = math.evaluate(node.toString(), scope);
-        return typeof value === 'number' && Number.isFinite(value) ? value : null;
-      } catch {
-        return null;
-      }
-    };
-    tree.traverse((node) => {
-      if (node.isArrayNode && node.items.length > MAX_LIST_LENGTH) {
-        throw new Error(`Lists are limited to ${MAX_LIST_LENGTH} items`);
-      }
-      if (node.isRangeNode) {
-        const start = resolve(node.start, 1);
-        const end = resolve(node.end, null);
-        const step = resolve(node.step, 1);
-        if (end !== null && step !== null) {
-          // Sign-aware count: a range that descends (or steps the wrong way)
-          // materialises nothing, while a genuinely long ascending one does.
-          const count = Math.max(0, Math.floor((end - start) / step) + 1);
-          if (count > MAX_LIST_LENGTH) {
-            throw new Error(`Ranges are limited to ${MAX_LIST_LENGTH} items`);
-          }
-        }
-      }
-      // `range(1, 1e9)` and `ones(1e5, 1e5)` bypass the node checks above because
-      // the size is inside a function call, not a literal.
-      if (node.isFunctionNode) {
-        const name = node.fn && node.fn.name;
-        if (name === 'range') {
-          const args = node.args.map((arg) => resolve(arg, null));
-          const start = args.length >= 2 ? args[0] : 1;
-          const end = args.length >= 2 ? args[1] : args[0];
-          const step = args.length >= 3 ? args[2] : 1;
-          if (start !== null && end !== null && step !== null) {
-            const count = Math.max(0, Math.floor((end - start) / step) + 1);
-            if (count > MAX_LIST_LENGTH) {
-              throw new Error(`Ranges are limited to ${MAX_LIST_LENGTH} items`);
-            }
-          }
-        } else if (name === 'ones' || name === 'zeros') {
-          const sizes = node.args.map((arg) => resolve(arg, null));
-          if (sizes.length && sizes.every((size) => size !== null)) {
-            const count = sizes.reduce((total, size) => total * Math.max(0, Math.floor(size)), 1);
-            if (count > MAX_LIST_LENGTH) {
-              throw new Error(`Lists are limited to ${MAX_LIST_LENGTH} items`);
-            }
-          }
-        }
-      }
-    });
+  // The default name set for a scope built by hand (unit definitions, the
+  // public `evaluateLine`): every own key of the object it was handed.
+  function ownNames(scope) {
+    return new Set(Object.keys(scope));
   }
 
-  function evaluateLine(line, scope) {
+  // What `preprocess` sees for one line: the sheet's running variables plus
+  // whatever only this line put in its own scope (`prev`, tag aggregates, line
+  // references). A view over both, so a sheet with thousands of variables never
+  // rebuilds the whole set per line — that, together with copying the scope
+  // per line, is what used to make a sheet of assignments cost O(lines²).
+  function namesIn(ctx, scope) {
+    return { has: (name) => ctx.names.has(name) || Object.hasOwn(scope, name) };
+  }
+
+  function evaluateLine(line, scope, names) {
     const parsed = typeof line === 'string' ? parseLine(line) : line;
     const { code, label, isAssignment } = parsed;
     let type = isAssignment ? 'assignment' : 'value';
@@ -354,8 +193,8 @@ function createEngine() {
     let result;
 
     try {
-      const expression = preprocess(code, scope && { names: new Set(Object.keys(scope)) });
-      assertBoundedExpression(expression, scope);
+      const expression = preprocess(code, scope && { names: names || ownNames(scope) });
+      assertBoundedExpression(math, expression, scope);
       result = math.evaluate(expression, scope);
       const mixError = unitMixError(result);
       if (mixError) throw new Error(mixError);
@@ -364,7 +203,7 @@ function createEngine() {
       // expressions (e.g. `x = unix()`).
       value = isAssignment ? result : undefined;
     } catch (error) {
-      result = friendlyError(error, code, scope);
+      result = friendlyError(math, error, code, scope);
       value = undefined;
       type = 'error';
     }
@@ -399,13 +238,14 @@ function createEngine() {
 
   // Evaluate a definition line's value and register the unit. Returns the value
   // to display, or an error message.
-  function defineUserUnit(name, definition, scope) {
+  function defineUserUnit(name, definition, scope, names) {
     if (isReservedLabel(name) || name.toLowerCase() === 'end') {
       return { error: `"${name}" is a reserved word` };
     }
     const evaluated = evaluateLine(
       { code: definition, label: '', isAssignment: false, rhs: '' },
-      scope
+      scope,
+      names
     );
     if (evaluated.type === 'error') return { error: evaluated.result };
     const value = evaluated.result;
@@ -418,95 +258,6 @@ function createEngine() {
       return { error: error.message };
     }
     return { value };
-  }
-
-  // The identifier after `to`/`in`/`as` when it names a scope variable rather
-  // than a Unit, so a conversion error can point at the shadowing variable.
-  function conversionTarget(code, scope) {
-    const match = /(?:^|\s)(?:to|in|as)\s+([A-Za-z_]\w*)\s*$/i.exec(code.trim());
-    if (!match) return null;
-    const name = match[1];
-    const value = scope[name];
-    if (value === undefined || value === null) return null;
-    if (typeof value === 'object' && value.isUnit === true) return null;
-    return name;
-  }
-
-  // Turn mathjs's terse "Undefined symbol x" into a phrase-level message when
-  // the unknown symbol is part of a multi-word name (`monthly rent`) or a
-  // mangled forward reference (`__var_monthly_rent`). Single unknowns keep the
-  // original message.
-  function friendlyError(error, code, scope) {
-    const message = error && error.message ? error.message : String(error);
-
-    // `5km to m` after `m = …`: the variable shadows the metre unit, so mathjs
-    // hands a number to `to`. Name the variable instead of leaking the type
-    // error.
-    if (/Unexpected type of argument in function to\b/.test(message)) {
-      const target = conversionTarget(code, scope);
-      if (target) {
-        return `"${target}" is a variable, so it cannot be used as a unit in a conversion. Rename the variable to convert to ${target}.`;
-      }
-    }
-
-    const match = new RegExp(`^Undefined symbol (${IDENTIFIER_SRC})$`, 'u').exec(message);
-    if (!match) return message;
-    const symbol = match[1];
-
-    const original = unmangleName(symbol);
-    if (original) return `"${original}" is not defined`;
-
-    let expression = code;
-    try {
-      expression = preprocess(code);
-    } catch {
-      // keep the raw code
-    }
-    const run = new RegExp(
-      `(?<![${WORD}_])(${IDENTIFIER_SRC}(?:\\s+${IDENTIFIER_SRC})+)(?![${WORD}_])`,
-      'gu'
-    );
-    let matchRun;
-    while ((matchRun = run.exec(expression)) !== null) {
-      const words = matchRun[1].split(/\s+/);
-      if (!words.includes(symbol)) continue;
-      const known = words.some(
-        (word) => word !== symbol && (math[word] !== undefined || word in scope)
-      );
-      if (!known) return `"${matchRun[1]}" is not defined`;
-    }
-    return message;
-  }
-
-  // Replace aggregate keywords in an expression with scope variables holding the
-  // block's values, rather than pasting the value into the text. Pasting broke
-  // precedence (`-5` then `sum^2` read as `-5^2`) and units (`sum * 2 kg`); a
-  // scope variable is a real value, exactly like `line(n)`. A keyword the user
-  // has redefined as a variable is left alone, so the variable shadows it.
-  function substituteAggregates(parsed, sum, average, variables) {
-    const values = {};
-    let count = 0;
-    const replace = (expression) =>
-      expression.replace(AGGREGATE_WORD_ALL, (word) => {
-        if (variables[word] !== undefined) return word;
-        const value = AGGREGATE_KEYWORDS[word.toLowerCase()] === 'average' ? average : sum;
-        const token = `__agg_${count++}`;
-        values[token] = value;
-        return token;
-      });
-
-    if (parsed.isAssignment) {
-      const rhs = replace(parsed.rhs);
-      return { parsed: { ...parsed, code: `${parsed.label} = ${rhs}`, rhs }, values };
-    }
-    return {
-      parsed: {
-        ...parsed,
-        code: replace(parsed.code),
-        rhs: parsed.rhs ? replace(parsed.rhs) : parsed.rhs,
-      },
-      values,
-    };
   }
 
   // Whether a result row becomes the `prev` for later lines. A group header's
@@ -579,8 +330,8 @@ function createEngine() {
     const endGroup = ctx.groups.byEnd.get(ctx.i);
     if (!endGroup) return false;
     const value = aggregateAbove(ctx.results, endGroup.start + 1, ctx.i, 'sum');
-    if (value instanceof Error) {
-      ctx.results[endGroup.start] = { type: 'error', value: value.message };
+    if (typeof value === 'string') {
+      ctx.results[endGroup.start] = { type: 'error', value };
       ctx.results[ctx.i] = { type: 'value', value: undefined };
       return true;
     }
@@ -599,7 +350,8 @@ function createEngine() {
   function handleUnitDefinition(ctx) {
     const unit = unitDefinition(ctx.inputLines[ctx.i]);
     if (!unit) return false;
-    const outcome = defineUserUnit(unit.name, parseLine(ctx.line).rhs, { ...ctx.variables });
+    const scope = Object.create(ctx.variables);
+    const outcome = defineUserUnit(unit.name, parseLine(ctx.line).rhs, scope, namesIn(ctx, scope));
     ctx.results[ctx.i] = outcome.error
       ? { type: 'error', value: outcome.error }
       : { type: 'value', value: outcome.value, aggregate: true, unitDef: true };
@@ -626,8 +378,8 @@ function createEngine() {
     const mode = tagAggregateMode(ctx.parsed.code);
     if (!mode) return false;
     const value = tagAggregate(ctx.results, ctx.tags, ctx.i, mode, math);
-    if (value instanceof Error) {
-      ctx.results[ctx.i] = { type: 'error', value: value.message };
+    if (typeof value === 'string') {
+      ctx.results[ctx.i] = { type: 'error', value };
       return true;
     }
     if (value === null) {
@@ -654,8 +406,8 @@ function createEngine() {
       ctx.variables[bare] === undefined ? AGGREGATE_KEYWORDS[bare.toLowerCase()] : undefined;
     if (!keyword) return false;
     const value = aggregateAbove(ctx.results, blockStart, ctx.i, keyword);
-    if (value instanceof Error) {
-      ctx.results[ctx.i] = { type: 'error', value: value.message };
+    if (typeof value === 'string') {
+      ctx.results[ctx.i] = { type: 'error', value };
       return true;
     }
     ctx.results[ctx.i] = { type: 'value', value, aggregate: true };
@@ -666,7 +418,12 @@ function createEngine() {
   function handleExpression(ctx) {
     const group = ctx.groups.groupOfLine.get(ctx.i);
     const blockStart = group ? group.start + 1 : ctx.lastBlankIndex + 1;
-    const scope = { ...ctx.variables };
+    // The sheet's variables are reached through the prototype rather than
+    // copied in: the copy alone was O(variables) for every line of the sheet.
+    // What only this line needs (`prev`, tag aggregates, line references) is
+    // assigned below as own properties of this fresh object, so nothing from a
+    // previous line survives into this one.
+    const scope = Object.create(ctx.variables);
     if (ctx.tagScope) Object.assign(scope, ctx.tagScope);
     if (ctx.previousResult !== undefined) scope.prev = ctx.previousResult;
 
@@ -676,11 +433,11 @@ function createEngine() {
       const blockSum = aggregateAbove(ctx.results, blockStart, ctx.i, 'sum');
       const blockAvg = aggregateAbove(ctx.results, blockStart, ctx.i, 'average');
       const conflict =
-        blockSum instanceof Error ? blockSum : blockAvg instanceof Error ? blockAvg : null;
+        typeof blockSum === 'string' ? blockSum : typeof blockAvg === 'string' ? blockAvg : null;
       if (conflict) {
         ctx.results[ctx.i] = {
           type: 'error',
-          value: conflict.message,
+          value: conflict,
           tags: ctx.tags.length ? ctx.tags : undefined,
         };
         return true;
@@ -703,8 +460,11 @@ function createEngine() {
     Object.assign(scope, resolved.values);
     if (aggregateValues) Object.assign(scope, aggregateValues);
 
-    const { type, result, variable } = evaluateLine(parsedLine, scope);
-    if (variable) ctx.variables[variable.label] = variable.value;
+    const { type, result, variable } = evaluateLine(parsedLine, scope, namesIn(ctx, scope));
+    if (variable) {
+      ctx.variables[variable.label] = variable.value;
+      ctx.names.add(variable.label);
+    }
     ctx.results[ctx.i] = {
       type,
       value: result,
@@ -773,6 +533,9 @@ function createEngine() {
       results,
       groups,
       variables: replayed.variables,
+      // The names the preprocessors may ask about, grown as the loop assigns.
+      // Built once per run rather than from the scope for every line.
+      names: new Set(Object.keys(replayed.variables)),
       previousResult: replayed.previousResult,
       lastBlankIndex: replayed.lastBlankIndex,
       i: 0,

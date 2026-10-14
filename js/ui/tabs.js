@@ -13,6 +13,7 @@ import {
   deriveNextTabNumber,
 } from '../core/tabsState.js';
 import { STORAGE_KEY, LEGACY_KEY, loadTabsState, createTabsWriter } from '../storage/tabsStore.js';
+import { isTypingTarget } from '../util/dom.js';
 import createHistoryStore from './tabsHistory.js';
 import createTabsView from './tabsView.js';
 import debounce from '../util/debounce.js';
@@ -69,11 +70,25 @@ function initTabs(editableNode, onUpdate) {
   const burst = debounce(() => history.commit(state.activeId, editableNode.value), 700);
   const snapshot = debounce(saveActiveSnapshot, SNAPSHOT_DELAY);
 
+  // Snapshot writes are asynchronous (compression, then an IndexedDB
+  // transaction), so they run one at a time in the order they were requested.
+  // Closing a tab issues a delete straight after that tab's last save; without
+  // this queue the delete could land first and the save would resurrect the
+  // history "Restore all" is meant to forget.
+  let snapshotQueue = Promise.resolve();
+  function enqueueSnapshot(work) {
+    const next = snapshotQueue.then(work, work);
+    // One failed write (quota, storage blocked) must not break the queue for
+    // every write behind it, so absorb the error after handing it on.
+    snapshotQueue = next.catch(() => {});
+    return snapshotQueue;
+  }
+
   function saveActiveSnapshot() {
     if (resetting) return;
     const tab = getActiveTab();
     if (!tab) return;
-    saveSnapshot({ id: tab.id, name: tab.name, content: tab.content }).catch(() => {});
+    enqueueSnapshot(() => saveSnapshot({ id: tab.id, name: tab.name, content: tab.content }));
   }
 
   function scheduleSnapshot() {
@@ -221,7 +236,7 @@ function initTabs(editableNode, onUpdate) {
     const key = event.key.toLowerCase();
     if (key !== 'z' && key !== 'y') return;
     const active = document.activeElement;
-    if (active && active !== editableNode && active.tagName === 'INPUT') return;
+    if (active && active !== editableNode && isTypingTarget(active)) return;
     if (document.querySelector('dialog[open]')) return;
     event.preventDefault();
     if (event.shiftKey || key === 'y') redo();
@@ -309,8 +324,8 @@ function initTabs(editableNode, onUpdate) {
       state = createTab(state, t('tabs.defaultName', { n: state.nextTabNumber }));
     history.remove(id);
     // Forget the tab's snapshots too, so "Restore all" cannot resurrect a tab
-    // the user closed.
-    deleteSnapshots(id).catch(() => {});
+    // the user closed. Enqueued behind any save leaveActiveTab just flushed.
+    enqueueSnapshot(() => deleteSnapshots(id));
     const active = getActiveTab();
     present(active.content, { caret: active.caret });
   }

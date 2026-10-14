@@ -3,6 +3,7 @@ import renderTotal from './render/renderTotal.js';
 import { indexOfLineAt, sheetLines } from './util/text.js';
 import registerServiceWorker from './registerServiceWorker.js';
 import { createEvalClient } from './evalClient.js';
+import { fetchRates, startRateRefresh } from './storage/currencyRates.js';
 import initRecipes from './ui/recipes.js';
 import initDocsLink from './ui/docsLink.js';
 import initSettings from './ui/settings.js';
@@ -74,7 +75,10 @@ const evalClient = createEvalClient(
   contentEditableNode,
   renderTextLayer,
   renderResultLayer,
-  (busy) => (busy ? loadingIndicator.show() : loadingIndicator.hide())
+  (busy) => (busy ? loadingIndicator.show() : loadingIndicator.hide()),
+  // Nothing renders when a reply never arrives, so say so rather than leaving
+  // results that look current but are not.
+  () => showCurrencyStatus(t('status.evaluationFailed'))
 );
 
 // Trigger changes: redraw what you typed immediately, then evaluate in the
@@ -89,49 +93,20 @@ contentEditableNode.addEventListener('input', (event) => {
 contentEditableNode.addEventListener('click', () => rowRenderer.updateActiveLine(activeLine()));
 contentEditableNode.addEventListener('keyup', () => rowRenderer.updateActiveLine(activeLine()));
 
-// The composition root runs in a fixed order — that ordering is a contract, so
-// boot() states it explicitly rather than leaving it to line position.
-function boot() {
-  // 0. Resolve the interface language before any module builds its UI.
-  initI18n();
-
-  // 1. Capture the onboarding keys BEFORE initTabs persists a fresh collection.
-  const onboardingState = readOnboardingState();
-
-  // 2. Tabs own the sheet content and evaluate whatever was restored.
-  const tabsApi = initTabs(contentEditableNode, evalClient.update);
-
-  // 3. Features that read or seed the active sheet.
-  initShare(tabsApi);
-  initDocsLink();
-  initRecipes(contentEditableNode);
-  initSettings(tabsApi);
-  initFontControls(editorScroll.refreshMetrics);
-  window.addEventListener(FONT_SIZE_CHANGED, () => rowRenderer.relayout());
-  initIo(contentEditableNode);
-  initShortcuts(contentEditableNode, evalClient.requestLines, tabsApi.switchTab);
-  initFind(contentEditableNode, viewNode);
-  initLineNumbers(contentEditableNode);
-  initGoToLine(contentEditableNode);
-  // Before initIndent: when the popup is open it swallows Tab, so the
-  // autocomplete's keydown listener must run first.
-  initAutocomplete(contentEditableNode, editorScroll);
-  initIndent(contentEditableNode);
-  initTotalMode();
-
-  // 4. The starter prompt is wired before onboarding can seed the sheet that
-  //    it floats beneath.
-  initStarterPrompt(contentEditableNode);
-
-  // 5. Onboarding seeds the starter sheet last, once everything else is wired.
-  initOnboarding(contentEditableNode, tabsApi, onboardingState);
+// Status and reactivity are wired before boot(): the inits inside it notify
+// synchronously (a quota hit while the collection persists, a font size
+// restored at startup), and a listener registered afterwards would drop that
+// first message.
+let statusTimer = null;
+// `sticky` keeps the notice up until the next one: a boot failure is not
+// something the reader should have to catch within five seconds.
+function showCurrencyStatus(text, sticky = false) {
+  currencyStatusNode.textContent = text;
+  currencyStatusNode.classList.add('visible');
+  clearTimeout(statusTimer);
+  if (sticky) return;
+  statusTimer = setTimeout(() => currencyStatusNode.classList.remove('visible'), 5000);
 }
-boot();
-
-// The active sheet is now in the textarea, so the placeholder may show (only
-// when the sheet is empty). Keeping it hidden until here avoids a flash of the
-// placeholder before a saved sheet is restored.
-contentEditableNode.classList.add('ready');
 
 window.addEventListener(CURRENCY_UPDATED, (event) => {
   evalClient.syncRates(event.detail && event.detail.data);
@@ -160,6 +135,8 @@ window.addEventListener(STORAGE_ERROR, () => {
 window.addEventListener(STATUS_MESSAGE, (event) => {
   if (event.detail) showCurrencyStatus(event.detail);
 });
+
+window.addEventListener(FONT_SIZE_CHANGED, () => rowRenderer.relayout());
 
 // A setting change forwards the new value to the engine, then recomputes. The
 // per-call comments below explain any extra sequencing.
@@ -191,12 +168,66 @@ onSettingUpdated(CLOCK_FORMAT_UPDATED, (value) => {
   evalClient.syncClockFormat(value);
 });
 
-let statusTimer = null;
-function showCurrencyStatus(text) {
-  currencyStatusNode.textContent = text;
-  currencyStatusNode.classList.add('visible');
-  clearTimeout(statusTimer);
-  statusTimer = setTimeout(() => currencyStatusNode.classList.remove('visible'), 5000);
+// The composition root runs in a fixed order — that ordering is a contract, so
+// boot() states it explicitly rather than leaving it to line position.
+function boot() {
+  // 0. Resolve the interface language before any module builds its UI.
+  initI18n();
+
+  // 1. Capture the onboarding keys BEFORE initTabs persists a fresh collection.
+  const onboardingState = readOnboardingState();
+
+  // 2. Tabs own the sheet content and evaluate whatever was restored.
+  const tabsApi = initTabs(contentEditableNode, evalClient.update);
+
+  // 3. Features that read or seed the active sheet.
+  initShare(tabsApi);
+  initDocsLink();
+  initRecipes(contentEditableNode);
+  initSettings(tabsApi);
+  initFontControls(editorScroll.refreshMetrics);
+  initIo(contentEditableNode);
+  initShortcuts(contentEditableNode, evalClient.requestLines, tabsApi.switchTab);
+  initFind(contentEditableNode, viewNode);
+  initLineNumbers(contentEditableNode);
+  initGoToLine(contentEditableNode);
+  // Before initIndent: when the popup is open it swallows Tab, so the
+  // autocomplete's keydown listener must run first.
+  initAutocomplete(contentEditableNode, editorScroll);
+  initIndent(contentEditableNode);
+  initTotalMode();
+
+  // 4. The starter prompt is wired before onboarding can seed the sheet that
+  //    it floats beneath.
+  initStarterPrompt(contentEditableNode);
+
+  // 5. Onboarding seeds the starter sheet last, once everything else is wired.
+  initOnboarding(contentEditableNode, tabsApi, onboardingState);
+}
+// A failed boot must not die silently on a blank page: report it, and leave the
+// saved collection untouched (tabs persistence starts inside initTabs, so
+// whatever failed before it is never written over).
+try {
+  boot();
+} catch (error) {
+  console.error('Math Notes failed to start:', error);
+  try {
+    showCurrencyStatus(t('status.bootFailed'), true);
+  } catch {
+    // the translator itself is unavailable
+  }
 }
 
+// The active sheet is now in the textarea, so the placeholder may show (only
+// when the sheet is empty). Keeping it hidden until here avoids a flash of the
+// placeholder before a saved sheet is restored.
+contentEditableNode.classList.add('ready');
+
 registerServiceWorker();
+
+// Rates are fetched here rather than inside the eval client, and only after
+// every CURRENCY listener above exists: the first update can be dispatched
+// synchronously from the cache, and the client itself should never have to
+// touch the network to be constructed.
+fetchRates();
+startRateRefresh();

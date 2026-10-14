@@ -98,18 +98,47 @@ function outdentSelection(value, start, end, unit = INDENT) {
   return { value: next, start: shifted(start), end: shifted(end) };
 }
 
-// Tab indents and Shift+Tab outdents, always trapping focus in the editor (the
-// usual code-editor behaviour). Writes go through setEditorValue so undo, the
-// renderer, line numbers and find all treat it as a normal edit.
+// Tab / Shift+Tab indent where that is what the key means — a multi-line
+// selection, or a caret inside its line's leading whitespace — and otherwise
+// leave the key to the browser, so focus can walk out of the editor (WCAG
+// 2.1.2). Escape is the always-available way out: it moves focus to the active
+// tab, from which the tab bar, and then the rest of the page, are reachable.
+// Writes go through setEditorValue so undo, the renderer, line numbers and find
+// all treat an indent as a normal edit.
+function takesIndent(value, start, end) {
+  if (start !== end) return value.slice(start, end).includes('\n');
+  const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+  return value.slice(lineStart, start).trim() === '';
+}
+
+function exitToTabs(editableNode) {
+  const tab = document.querySelector('.tab.active');
+  if (tab) tab.focus();
+  else editableNode.blur();
+}
+
 function initIndent(editableNode) {
   editableNode.addEventListener('keydown', (event) => {
-    if (event.key !== 'Tab') return;
+    if (event.isComposing) return;
     if (event.metaKey || event.ctrlKey || event.altKey) return;
     if (document.querySelector('dialog[open]')) return;
 
-    event.preventDefault();
+    if (event.key === 'Escape') {
+      // The suggestion popup and the find bar own Escape while they are open —
+      // their listeners run first and stop it from reaching this one.
+      if (document.querySelector('.find-bar.open')) return;
+      event.preventDefault();
+      exitToTabs(editableNode);
+      return;
+    }
+    if (event.key !== 'Tab') return;
+
     const start = editableNode.selectionStart;
     const end = editableNode.selectionEnd;
+    // Mid-line (after real content) Tab moves focus instead of indenting.
+    if (!takesIndent(editableNode.value, start, end)) return;
+
+    event.preventDefault();
     const next = event.shiftKey
       ? outdentSelection(editableNode.value, start, end)
       : indentSelection(editableNode.value, start, end);
@@ -119,5 +148,5 @@ function initIndent(editableNode) {
   });
 }
 
-export { INDENT, indentSelection, outdentSelection };
+export { INDENT, indentSelection, outdentSelection, takesIndent };
 export default initIndent;

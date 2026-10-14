@@ -43,11 +43,17 @@ function createTabsView(tabBarNode, handlers) {
     nameNode.textContent = tab.name;
     nameNode.title = t('tabs.rename');
 
-    const closeNode = document.createElement('button');
+    // The tab itself is the tab stop (roving tabindex), and a tab must not
+    // contain another interactive control, so the × is a plain pointer target
+    // hidden from assistive technology; the click is handled by delegation on
+    // the bar. The keyboard way to close a tab is Delete or Backspace, which
+    // `aria-keyshortcuts` advertises.
+    tabNode.setAttribute('aria-keyshortcuts', 'Delete');
+    const closeNode = document.createElement('span');
     closeNode.className = 'tab-close';
+    closeNode.setAttribute('aria-hidden', 'true');
     closeNode.textContent = '×';
     closeNode.title = t('tabs.close');
-    closeNode.setAttribute('aria-label', t('tabs.close'));
 
     tabNode.appendChild(nameNode);
     tabNode.appendChild(closeNode);

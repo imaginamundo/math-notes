@@ -6,6 +6,10 @@
   <title>Math Notes</title>
   <meta name="description" content="Inline calculator for modern browsers.">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!-- GitHub Pages cannot send response headers, so the policy lives here. The
+       hash must cover every inline script below: test/conventions.test.mjs
+       recomputes it and fails if the two drift apart. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'sha256-NNbKEBhhcBNQmTgdHPhEgZdnXEp1BtJyaDfZpXGKyEM='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self' https://api.frankfurter.dev; worker-src 'self'; manifest-src 'self'; frame-src 'none'; form-action 'none'">
   <script>
     (function () {
       try {

@@ -152,16 +152,16 @@ html[data-theme='light'] {
   --color-text-strong: #202124;
   --color-text-muted: #6f7681;
   --color-footer: #e3e5ea;
-  --color-variable: #e45649;
+  --color-variable: #c23b2f;
   --color-number: #986801;
-  --color-operator: #0184bc;
-  --color-currency: #50a14f;
-  --color-title: #7f848e;
+  --color-operator: #00709f;
+  --color-currency: #3a7b39;
+  --color-title: #696e79;
   --color-tag-bg: #a626a4;
   --color-tag-text: #ffffff;
   --color-link: #4078f2;
   --color-link-visited: #a626a4;
-  --color-ghost: rgba(0, 0, 0, 0.45);
+  --color-ghost: rgba(0, 0, 0, 0.6);
   --color-ghost-error: #c92f2f;
   --color-group-bg: rgba(0, 0, 0, 0.05);
   --border-light: rgba(0, 0, 0, 0.14);
@@ -250,7 +250,11 @@ html.i18n-pending .layout {
   outline-offset: -2px;
 }
 .tab-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin-left: 0.5em;
+  cursor: pointer;
 }
 .tab-close,
 .modal-close,

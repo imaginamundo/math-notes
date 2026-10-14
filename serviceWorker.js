@@ -1,20 +1,24 @@
 // Served from the site root so its scope is `/` and it can cache the app shell
 // and the documentation (a worker under /js/ could only control /js/).
-const cacheName = 'math-notes-v44';
+const cacheName = 'math-notes-v63';
 const APP_SHELL = './index.html';
 const urlsToCache = [
   './',
   './index.html',
   './style.css',
   './js/core/aggregate.js',
+  './js/core/aggregateSubstitution.js',
   './js/core/autocomplete.js',
+  './js/core/boundedExpression.js',
   './js/core/calculate.js',
   './js/core/clockFormat.js',
   './js/core/currencySymbols.js',
   './js/core/decimalPrecision.js',
+  './js/core/friendlyErrors.js',
   './js/core/history.js',
   './js/core/identifiers.js',
   './js/core/language.js',
+  './js/core/lineRefs.js',
   './js/core/measurementSystem.js',
   './js/core/measures.js',
   './js/core/multiWordVariables.js',
@@ -22,6 +26,7 @@ const urlsToCache = [
   './js/core/preprocess.js',
   './js/core/setting.js',
   './js/core/tabsState.js',
+  './js/core/tags.js',
   './js/core/totalMode.js',
   './js/core/unitMix.js',
   './js/core/unitNames.js',
@@ -56,6 +61,7 @@ const urlsToCache = [
   './js/i18n/ui/pt.js',
   './js/index.js',
   './js/lib/math.bundle.min.js',
+  './js/protocol.js',
   './js/registerServiceWorker.js',
   './js/render/exampleText.js',
   './js/render/format.js',
@@ -94,6 +100,7 @@ const urlsToCache = [
   './js/util/clipboard.js',
   './js/util/compress.js',
   './js/util/debounce.js',
+  './js/util/dom.js',
   './js/util/events.js',
   './js/util/scroll.js',
   './js/util/sequence.js',

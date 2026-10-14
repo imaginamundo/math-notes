@@ -35,6 +35,8 @@ export default {
   'status.ratesLive': 'rates: live',
   'status.ratesUnavailable': 'exchange rates unavailable',
   'status.storageFull': 'storage is full — recent changes may not be saved',
+  'status.bootFailed': 'Math Notes could not start — your saved sheets were left untouched',
+  'status.evaluationFailed': 'evaluation failed — results could not be updated',
 
   'share.buildFailed': "Couldn't build a link for this sheet",
   'share.copiedLong': "Link copied — it's long, some apps may cut it",
@@ -86,7 +88,11 @@ export default {
   'starter.tagComment': '# Tags name rows; a bare #tag totals them:',
 
   'autocomplete.label': 'Suggestions',
+  'autocomplete.count': '{count} suggestions',
+  'autocomplete.one': '1 suggestion',
+  'autocomplete.position': '{text}, {index} of {count}',
   'example.addTitle': 'Click to add to the editor',
+  'examples.loadFailed': 'The examples could not be loaded',
 
   'settings.files': 'Files',
   'settings.filesBody': 'Export the active sheet as text or import one from a file.',
