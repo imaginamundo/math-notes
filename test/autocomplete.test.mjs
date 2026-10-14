@@ -4,10 +4,11 @@ import {
   wordRangeAt,
   suggestionsFor,
   applyCompletion,
-  collectAssignments,
-  collectTags,
+  suggestionFacts,
+  suggestionsFrom,
 } from '../js/core/autocomplete.js';
 import { VOCABULARY } from '../js/core/vocabulary.js';
+import parseLine from '../js/core/parseLine.js';
 import { collectUnitDefinitions } from '../js/core/userUnits.js';
 
 test('wordRangeAt finds the word around the caret', () => {
@@ -126,13 +127,6 @@ test('suggestionsFor keeps tags and names in separate modes', () => {
   );
 });
 
-test('collectTags lists the tags used in the sheet', () => {
-  assert.deepEqual(collectTags(['20 #food #urgent', '30 #food', '#food', 'x = 1']), [
-    'food',
-    'urgent',
-  ]);
-});
-
 test('applyCompletion replaces the word, bracketing functions', () => {
   assert.deepEqual(applyCompletion('100 usd', wordRangeAt('100 usd', 7), 'USD'), {
     value: '100 USD',
@@ -144,12 +138,80 @@ test('applyCompletion replaces the word, bracketing functions', () => {
   });
 });
 
-test('collectAssignments lists assigned names, single and multi word', () => {
+const listFor = (lines) => suggestionsFrom(lines.map(suggestionFacts));
+const textsOf = (list, kind) => list.filter((entry) => entry.kind === kind).map((e) => e.text);
+
+test('suggestionFacts reads one line: its variable, unit definition and tags', () => {
+  assert.deepEqual(suggestionFacts('x = 1'), { variable: 'x', unit: null, tags: [] });
+  assert.deepEqual(suggestionFacts('monthly rent = 1500'), {
+    variable: 'monthly rent',
+    unit: null,
+    tags: [],
+  });
+  assert.deepEqual(suggestionFacts('20 #food #urgent'), {
+    variable: null,
+    unit: null,
+    tags: ['food', 'urgent'],
+  });
+  assert.deepEqual(suggestionFacts('Price: 2'), { variable: null, unit: null, tags: [] });
+});
+
+test('a unit definition names a unit, not a variable', () => {
+  const facts = suggestionFacts('unit box = 12');
+  assert.equal(facts.variable, null);
+  assert.deepEqual(facts.unit, { name: 'box', aliases: ['boxes'] });
+});
+
+test('suggestionFacts accepts an already parsed line', () => {
+  assert.deepEqual(suggestionFacts(parseLine('x = 1')), suggestionFacts('x = 1'));
+});
+
+test('suggestionsFrom lists assigned names, single and multi word, once each', () => {
+  const list = listFor([
+    'x = 1',
+    'monthly rent = 1500',
+    'Price: 2',
+    'y = 3',
+    'x = 4',
+    'unit box = 12',
+  ]);
+  assert.deepEqual(textsOf(list, 'variable'), ['x', 'monthly rent', 'y']);
+});
+
+test('suggestionsFrom lists the tags used in the sheet, once each', () => {
+  const list = listFor(['20 #food #urgent', '30 #food', '#food', 'x = 1']);
   assert.deepEqual(
-    collectAssignments(['x = 1', 'monthly rent = 1500', 'Price: 2', 'y = 3', 'unit box = 12']),
-    ['x', 'monthly rent', 'y'],
-    'a unit definition is not a variable'
+    list.filter((entry) => entry.kind === 'tag'),
+    [
+      { text: '#food', kind: 'tag' },
+      { text: '#urgent', kind: 'tag' },
+    ]
   );
+});
+
+test('suggestionsFrom offers a custom unit with its plural, first definition winning', () => {
+  const list = listFor(['unit widget = 3.5 kg', 'unit Widget = 9 kg', 'unit monthly rent = 1500']);
+  assert.deepEqual(
+    list.filter((entry) => entry.kind === 'unit'),
+    [
+      { text: 'widget', kind: 'unit', detail: 'custom unit' },
+      { text: 'widgets', kind: 'unit', detail: 'custom unit' },
+      { text: 'monthly rent', kind: 'unit', detail: 'custom unit' },
+      { text: 'monthly rents', kind: 'unit', detail: 'custom unit' },
+    ]
+  );
+});
+
+test('suggestionsFrom orders variables, then units, then tags', () => {
+  const list = listFor(['#food', 'unit box = 12', 'x = 1']);
+  assert.deepEqual([...new Set(list.map((entry) => entry.kind))], ['variable', 'unit', 'tag']);
+});
+
+test('suggestionsFrom accepts any iterable and an empty sheet', () => {
+  assert.deepEqual(suggestionsFrom([]), []);
+  assert.deepEqual(suggestionsFrom(new Set([suggestionFacts('x = 1')])), [
+    { text: 'x', kind: 'variable' },
+  ]);
 });
 
 test('collectUnitDefinitions lists custom units with their plurals', () => {

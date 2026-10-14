@@ -149,32 +149,4 @@ function suggestionsFrom(facts) {
   ];
 }
 
-// Every assigned name in the sheet (`x = 1`, `monthly rent = 1500`). A `unit`
-// definition names a unit, not a variable, so it is offered separately.
-function collectAssignments(lines) {
-  const names = new Set();
-  for (const line of lines) {
-    const { variable } = suggestionFacts(line);
-    if (variable) names.add(variable);
-  }
-  return [...names];
-}
-
-// Every tag used in the sheet (`20 #food`), without the leading `#`.
-function collectTags(lines) {
-  const tags = new Set();
-  for (const line of lines) {
-    for (const tag of suggestionFacts(line).tags) tags.add(tag);
-  }
-  return [...tags];
-}
-
-export {
-  wordRangeAt,
-  suggestionsFor,
-  applyCompletion,
-  collectAssignments,
-  collectTags,
-  suggestionFacts,
-  suggestionsFrom,
-};
+export { wordRangeAt, suggestionsFor, applyCompletion, suggestionFacts, suggestionsFrom };

@@ -63,13 +63,16 @@ function initAutocomplete(editableNode, editorScroll) {
   // Suggestions come from every assignment and tag in the sheet, so building
   // them means parsing every line. The parsed facts are kept line by line, so
   // an edit re-parses only the lines it touched: a keystroke in a
-  // thousand-line sheet costs one line instead of four parses of each. On top
-  // of that, a change that cannot add or remove a name (`=` or `#` is what
+  // thousand-line sheet costs one line instead of four parses of each, and
+  // inserting a line costs one parse, not one per line below it. On top of
+  // that, a change that cannot add or remove a name (`=` or `#` is what
   // can) reuses the whole list.
   let cachedValue = null;
   let cachedLines = null;
   let cachedEntries = null;
-  let facts = [];
+  // Facts by line text: they depend on nothing but the line, so a line that
+  // moved (Enter near the top shifts every line below it) is still found.
+  let factsByLine = new Map();
 
   function couldAffectEntries(line) {
     return line.includes('=') || line.includes('#');
@@ -96,17 +99,14 @@ function initAutocomplete(editableNode, editorScroll) {
       }
     }
 
-    const next = new Array(lines.length);
-    for (let i = 0; i < lines.length; i++) {
-      next[i] =
-        facts[i] && cachedLines && cachedLines[i] === lines[i]
-          ? facts[i]
-          : suggestionFacts(lines[i]);
+    const next = new Map();
+    for (const line of lines) {
+      if (!next.has(line)) next.set(line, factsByLine.get(line) || suggestionFacts(line));
     }
-    facts = next;
+    factsByLine = next;
     cachedValue = value;
     cachedLines = lines;
-    cachedEntries = [...suggestionsFrom(next), ...VOCABULARY];
+    cachedEntries = [...suggestionsFrom(next.values()), ...VOCABULARY];
     return cachedEntries;
   }
 
