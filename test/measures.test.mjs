@@ -88,3 +88,27 @@ test('measures keep other syntax working', () => {
   assert.equal(valueOf('20% of 10'), 2);
   assert.equal(valueOf('1/3 to 2 dp'), 0.33);
 });
+
+test('every spelling of a volume unit follows the measurement system', () => {
+  const ml = (engine, line) => engine.evaluateLines([line]).results[0].value.toNumeric('ml');
+  const close = (a, b) => Math.abs(a - b) < 1e-6;
+  for (const [system, tbsp, cup, floz] of [
+    ['metric', 15, 250, 30],
+    ['us', 14.78676478125, 236.5882365, 29.5735295625],
+    ['imperial', 17.7581640625, 284.130625, 28.4130625],
+  ]) {
+    const engine = createEngine();
+    engine.registerMeasurementSystem(system);
+    for (const name of ['tbsp', 'tablespoon', 'tablespoons']) {
+      assert.ok(close(ml(engine, `1 ${name} to ml`), tbsp), `${system} ${name}`);
+    }
+    for (const name of ['cup', 'cups', 'cp']) {
+      assert.ok(close(ml(engine, `1 ${name} to ml`), cup), `${system} ${name}`);
+    }
+    for (const name of ['floz', 'fluidounce', 'fluidounces']) {
+      assert.ok(close(ml(engine, `1 ${name} to ml`), floz), `${system} ${name}`);
+    }
+    const tsp = engine.evaluateLines(['1 cup to teaspoons', '1 cup to tsp']).results;
+    assert.ok(close(tsp[0].value.toNumeric('teaspoons'), tsp[1].value.toNumeric('tsp')), system);
+  }
+});

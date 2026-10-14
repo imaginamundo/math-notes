@@ -45,6 +45,9 @@ export const DIMENSIONS = {
     'carat',
     'carats',
     'cwt',
+    'ct',
+    'stick',
+    'sticks',
   ]),
   volume: new Set([
     'ml',
@@ -86,8 +89,16 @@ export const DIMENSIONS = {
     'fluiddram',
     'gill',
     'drop',
-    'barrel',
     'bbl',
+    'obl',
+    'oilbarrel',
+    'beerbarrel',
+    'gal',
+    'pt',
+    'qt',
+    'lt',
+    'gi',
+    'cp',
     'hogshead',
   ]),
   time: new Set([
@@ -205,7 +216,6 @@ export const DIMENSIONS = {
     'furlong',
     'ftm',
     'fathom',
-    'nm',
     'ly',
   ]),
 };
@@ -223,7 +233,8 @@ export function isUnit(token) {
   return unitDimension(token) !== null;
 }
 
-const TRAILING_UNIT = /([A-Za-zµ][A-Za-zµ]*)\s*$/;
+// A unit may end in a power digit (`m3`, `cm3`).
+const TRAILING_UNIT = /([A-Za-zµ][A-Za-zµ]*\d?)\s*$/;
 
 // The unit symbol at the end of a value (`300g` -> `g`, `10 cups` -> `cups`).
 export function trailingUnit(text) {
@@ -322,31 +333,33 @@ export const MEASUREMENT_SYSTEMS = ['metric', 'us', 'imperial'];
 export const DEFAULT_MEASUREMENT_SYSTEM = 'metric';
 
 // Volume units per measurement system, in millilitres. `cup` is included in
-// every system (imperial cup = 284.13 ml).
+// every system (imperial cup = 284.13 ml). mathjs makes its own copy of each plural and
+// short spelling when it loads, so every spelling is listed here or it would keep the
+// fixed size it started with.
 export const VOLUME_UNITS = {
   metric: {
-    teaspoon: { definition: '5 ml', aliases: ['tsp'] },
-    tablespoon: { definition: '15 ml', aliases: ['tbsp'] },
-    fluidounce: { definition: '30 ml', aliases: ['floz'] },
-    cup: { definition: '250 ml', aliases: ['cups'] },
+    teaspoon: { definition: '5 ml', aliases: ['teaspoons', 'tsp'] },
+    tablespoon: { definition: '15 ml', aliases: ['tablespoons', 'tbsp'] },
+    fluidounce: { definition: '30 ml', aliases: ['fluidounces', 'floz'] },
+    cup: { definition: '250 ml', aliases: ['cups', 'cp'] },
     pint: { definition: '500 ml', aliases: ['pints', 'pt'] },
     quart: { definition: '1 l', aliases: ['quarts', 'qt'] },
     gallon: { definition: '4 l', aliases: ['gallons', 'gal'] },
   },
   us: {
-    teaspoon: { definition: '4.92892159375 ml', aliases: ['tsp'] },
-    tablespoon: { definition: '14.78676478125 ml', aliases: ['tbsp'] },
-    fluidounce: { definition: '29.5735295625 ml', aliases: ['floz'] },
-    cup: { definition: '236.5882365 ml', aliases: ['cups'] },
+    teaspoon: { definition: '4.92892159375 ml', aliases: ['teaspoons', 'tsp'] },
+    tablespoon: { definition: '14.78676478125 ml', aliases: ['tablespoons', 'tbsp'] },
+    fluidounce: { definition: '29.5735295625 ml', aliases: ['fluidounces', 'floz'] },
+    cup: { definition: '236.5882365 ml', aliases: ['cups', 'cp'] },
     pint: { definition: '473.176473 ml', aliases: ['pints', 'pt'] },
     quart: { definition: '946.352946 ml', aliases: ['quarts', 'qt'] },
     gallon: { definition: '3785.411784 ml', aliases: ['gallons', 'gal'] },
   },
   imperial: {
-    teaspoon: { definition: '5.919388020833 ml', aliases: ['tsp'] },
-    tablespoon: { definition: '17.7581640625 ml', aliases: ['tbsp'] },
-    fluidounce: { definition: '28.4130625 ml', aliases: ['floz'] },
-    cup: { definition: '284.130625 ml', aliases: ['cups'] },
+    teaspoon: { definition: '5.919388020833 ml', aliases: ['teaspoons', 'tsp'] },
+    tablespoon: { definition: '17.7581640625 ml', aliases: ['tablespoons', 'tbsp'] },
+    fluidounce: { definition: '28.4130625 ml', aliases: ['fluidounces', 'floz'] },
+    cup: { definition: '284.130625 ml', aliases: ['cups', 'cp'] },
     pint: { definition: '568.26125 ml', aliases: ['pints', 'pt'] },
     quart: { definition: '1136.5225 ml', aliases: ['quarts', 'qt'] },
     gallon: { definition: '4546.09 ml', aliases: ['gallons', 'gal'] },

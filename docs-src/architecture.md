@@ -236,6 +236,15 @@ dates (`March 4, 2025`, padded ISO dates) and am/pm clock times wherever they st
 `9:00` stays a range). A date given to an operator that cannot take one gets a sentence, not
 mathjs's type error.
 
+Unit data (`js/eval/units.js`, `js/core/measures.js`): `ton` is the metric tonne with its plural
+and SI prefixes (`tons`, `kton`), `ct` is the 200 mg carat, a stick is 4 oz, and units mathjs
+lacks (pound, metre, fathom, furlong, lightyear, nautical mile `nmi`, `knot`) are created only
+when missing. Every spelling of a cooking volume unit (`tablespoons`, `fluidounces`, `cp`) is
+listed under its measurement system, because mathjs copies each plural and short name when it
+loads and an override of the base would leave the copy at its old size. Cooking densities are
+household values (spooned and levelled, as in USDA portion weights). `unit:` names offered by
+autocomplete are held to the engine by the vocabulary ratchet.
+
 Tags in calculations: trailing `#tags` label a line only when the code before them is a
 finished expression (`isCompleteCode` in `parseLine.js`); after an operator, `=`, `(` or a
 word operator (`5 + #food`, `x = #food`) the tag is an operand and the line is not

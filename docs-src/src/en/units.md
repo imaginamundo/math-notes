@@ -155,14 +155,15 @@ Units only combine in shapes that mean something. `kg L`, `BRL hour`, `h^2` and 
 
 | Dimension | Units |
 | --- | --- |
-| Length | meter (m), inch (in), foot (ft), yard (yd), mile (mi), link (li), rod (rd), chain (ch), angstrom, mil |
+| Length | meter (m), inch (in), foot (ft), yard (yd), mile (mi), link (li), rod (rd), chain (ch), nautical mile (nmi), fathom, furlong, lightyear (ly), angstrom, mil |
 | Surface area | m2, sqin, sqft, sqyd, sqmi, sqrd, sqch, sqmil, acre, hectare |
 | Volume | m3, litre (l, L, lt, liter), cc, cuin, cuft, cuyd, teaspoon, tablespoon |
 | Liquid volume | minim, fluiddram (fldr), fluidounce (floz), gill (gi), cup (cp), pint (pt), quart (qt), gallon (gal), beerbarrel (bbl), oilbarrel (obl), hogshead, drop (gtt) |
 | Angles | rad (radian), deg (degree), grad (gradian), cycle, arcsec (arcsecond), arcmin (arcminute) |
 | Time | second (s), minute (min), hour (h), day, week, month, year, decade, century, millennium |
+| Speed | knot (kn) |
 | Frequency | hertz (Hz) |
-| Mass | gram (g), tonne, ton, grain (gr), dram (dr), ounce (oz), poundmass (lbm, lb, lbs), hundredweight (cwt), stick, stone |
+| Mass | gram (g), tonne, ton, grain (gr), dram (dr), ounce (oz), poundmass (lbm, lb, lbs), hundredweight (cwt), carat (ct), stick (4 oz), stone |
 | Electric current | ampere (A) |
 | Temperature | kelvin (K), celsius (degC), fahrenheit (degF), rankine (degR) |
 | Amount of substance | mole (mol) |

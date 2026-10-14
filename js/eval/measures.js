@@ -15,7 +15,7 @@ import { LETTER, WORD } from '../core/identifiers.js';
 // algebra via the `__measure` helper below.
 
 const CONVERSION = /^(.*\S)\s+(?:in|to)\s+(\S.*)$/i;
-const TRAILING_UNIT = /([A-Za-zµ][A-Za-zµ]*)\s*$/;
+const TRAILING_UNIT = /([A-Za-zµ][A-Za-zµ]*\d?)\s*$/;
 const HAS_LETTER = /[A-Za-zµ]/;
 
 function preprocessMeasures(expression) {

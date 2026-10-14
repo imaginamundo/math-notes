@@ -33,3 +33,34 @@ test('household cooking densities match USDA and King Arthur cup weights', () =>
   assert.ok(within(cup('coconut sugar'), 154));
   assert.ok(cup('whole wheat flour') < cup('flour'), 'whole wheat is lighter than all-purpose');
 });
+
+test('carat, nautical mile, knot and the other listed units exist', () => {
+  const to = (line, unit) => evaluateLines([line]).results[0].value.toNumeric(unit);
+  assert.equal(to('1.5 ct in g', 'g'), 0.3);
+  assert.equal(to('2 carats in mg', 'mg'), 400);
+  assert.equal(to('10 nmi in m', 'm'), 18520);
+  assert.equal(to('1 nm in m', 'm'), 1e-9, 'nm is still the nanometre');
+  assert.ok(Math.abs(to('10 knots in km/h', 'km/h') - 18.52) < 1e-9);
+  assert.equal(to('2 pounds in lb', 'lb'), 2);
+  assert.equal(to('1 fathom in m', 'm'), 1.8288);
+  assert.equal(to('1 furlong in m', 'm'), 201.168);
+  assert.equal(to('2 metres in m', 'm'), 2);
+});
+
+test('a stick of butter is four ounces, half a US cup', () => {
+  const grams = (line) => evaluateLines([line]).results[0].value.toNumeric('g');
+  assert.ok(Math.abs(grams('1 stick in g') - 113.3980925) < 1e-6);
+  assert.ok(Math.abs(grams('2 sticks butter in g') - 226.796185) < 1e-5);
+});
+
+test('short and digit unit names convert with a subject', () => {
+  const kgOf = (line) => evaluateLines([line]).results[0].value.toNumeric('kg');
+  const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, actual);
+  near(kgOf('1 gallon water in kg'), 4);
+  near(kgOf('1 gal water in kg'), 4);
+  near(kgOf('1 m3 water in kg'), 1000);
+  near(kgOf('1 pt water in kg'), 0.5);
+  const gallons = evaluateLines(['1 kg water in gal']).results[0].value.toNumeric('gal');
+  assert.ok(Math.abs(gallons - 0.25) < 1e-9);
+  assert.ok(kgOf('100 obl oil in kg') > 10000);
+});

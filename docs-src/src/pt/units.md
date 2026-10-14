@@ -155,14 +155,14 @@ Unidades só se combinam em formas que fazem sentido. `kg L`, `BRL hour`, `h^2` 
 
 | Base | Unidades |
 | --- | --- |
-| Comprimento | meter (m), inch (in), foot (ft), yard (yd), mile (mi), link (li), rod (rd), chain (ch), angstrom, mil |
+| Comprimento | meter (m), inch (in), foot (ft), yard (yd), mile (mi), link (li), rod (rd), chain (ch), nautical mile (nmi), fathom, furlong, lightyear (ly), angstrom, mil |
 | Área de superfície | m2, sqin, sqft, sqyd, sqmi, sqrd, sqch, sqmil, acre, hectare |
 | Volume | m3, litre (l, L, lt, liter), cc, cuin, cuft, cuyd, teaspoon, tablespoon |
 | Volume líquido | minim, fluiddram (fldr), fluidounce (floz), gill (gi), cup (cp), pint (pt), quart (qt), gallon (gal), beerbarrel (bbl), oilbarrel (obl), hogshead, drop (gtt) |
 | Ângulos | rad (radian), deg (degree), grad (gradian), cycle, arcsec (arcsecond), arcmin (arcminute) |
 | Tempo | second (s), minute (min), hour (h), day, week, month, year, decade, century, millennium |
 | Frequência | hertz (Hz) |
-| Massa | gram (g), tonne, ton, grain (gr), dram (dr), ounce (oz), poundmass (lbm, lb, lbs), hundredweight (cwt), stick, stone |
+| Massa | gram (g), tonne, ton, grain (gr), dram (dr), ounce (oz), poundmass (lbm, lb, lbs), hundredweight (cwt), carat (ct), stick (4 oz), stone |
 | Corrente elétrica | ampere (A) |
 | Temperatura | kelvin (K), celsius (degC), fahrenheit (degF), rankine (degR) |
 | Quantidade de matéria | mole (mol) |
