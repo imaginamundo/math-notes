@@ -108,6 +108,12 @@ A rate is one unit per another. mathjs does the arithmetic; these phrases make r
 time to upload 3 GB at 10 MB/s
 ```
 
+The verb is optional.
+
+```calc returns 2 hours
+time to 100 km at 50 km/h
+```
+
 ```calc 05:00/km
 5 km in 25 min
 ```

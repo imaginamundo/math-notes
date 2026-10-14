@@ -108,6 +108,12 @@ Uma taxa é uma unidade por outra. O mathjs faz a aritmética; estas frases faci
 time to upload 3 GB at 10 MB/s
 ```
 
+O verbo é opcional.
+
+```calc retorna 2 hours
+time to 100 km at 50 km/h
+```
+
 ```calc 05:00/km
 5 km in 25 min
 ```

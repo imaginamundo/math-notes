@@ -78,3 +78,46 @@ test('units that do not combine, or the same unit twice, are left alone', () => 
   assert.equal(one('2 m * 3 m'), '6 m^2');
   assert.equal(one('2 kg * 3'), '6 kg');
 });
+
+test('time to works with and without a verb, and keeps a leading amount', () => {
+  assert.equal(one('time to 100 km at 50 km/h'), '2 hours');
+  assert.equal(one('time to 3 GB at 10 MB/s'), '5 min');
+  assert.equal(one('time to $100 at $10/hour'), '10 hours');
+  assert.equal(one('time to 1.5 km at 3 km/h'), '30 min');
+  assert.equal(one('time to drive 100 km at 50 km/h'), '2 hours');
+  assert.equal(one('time to upload 3 GB at 10 MB/s'), '5 min');
+  assert.equal(show(['d = 100 km', 'time to d at 50 km/h']), '2 hours');
+});
+
+test('a day count converts the count, not one day', () => {
+  const days = ['a = 2030-01-01', 'b = 2030-01-15'];
+  assert.match(show([...days, 'days between a and b in weeks']), /^2 weeks/);
+  // 336 hours, which the app draws as the duration it is.
+  assert.match(show([...days, 'days between a and b to hours']), /^2 weeks/);
+  assert.match(show([...days, 'days between a and b as days']), /^14 days/);
+  assert.match(show([...days, 'days since a in weeks']), /weeks$/);
+  assert.match(show([...days, 'days between a and b']), /^14 days/);
+});
+
+test('workdays in takes a period or a duration, and nothing else', () => {
+  assert.equal(one('workdays in June 2026'), '22');
+  assert.equal(one('workdays in 3 weeks'), '15');
+  assert.match(one('workdays in June 2026 - 2 days'), /^ERR.*not a period/);
+  assert.match(one('workdays in 4 weeks / 2'), /^ERR.*not a period/);
+  assert.match(one('workdays in 3 weeks * 25 EUR'), /^ERR.*not a period/);
+  assert.match(one('workdays in 2 weeks in hours'), /^ERR.*not a period/);
+  assert.match(one('workdays in 2 weeks + 3 kg'), /^ERR.*not a period/);
+});
+
+test('a single bare letter after a name is a unit, not a date duration', () => {
+  assert.equal(show(['width = 120 cm', 'width + 30 m']), '3,120 cm');
+  assert.equal(show(['width = 120 cm', 'width - 30 cm']), '90 cm');
+  assert.equal(show(['3 m', 'prev + 3 m']), '6 m');
+  assert.equal(show(['y = 1', 'x = 3', 'x + 2y']), '5');
+});
+
+test('a name that holds a date still takes a duration', () => {
+  assert.match(show(['start = 2030-01-01', 'start + 2 days']), /Jan|2030/);
+  assert.match(show(['start = 2030-01-01', 'start + 2 weeks']), /Jan|2030/);
+  assert.match(one('2030-01-01 + 4h 3m'), /2030|Jan/);
+});

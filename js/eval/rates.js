@@ -9,7 +9,9 @@ import { simplifyLocal } from '../core/unitSimplify.js';
 //   `time to upload 3GB at 10 MB/s`  -> (3 GB) / (10 MB/s)
 //   `5 km in 25 min`                 -> __pace(5 km, 25 min)
 
-const TIME_TO = /^\s*time\s+to\s+\w+\s+(.+?)\s+at\s+(.+)$/i;
+// The verb is optional (`time to upload 3 GB at …`, `time to 100 km at …`); a number
+// is never a verb, or the amount's own number was dropped and the time came out for 1.
+const TIME_TO = /^\s*time\s+to\s+(?:[A-Za-z]\w*\s+)?(.+?)\s+at\s+(.+)$/i;
 const PACE = /^(.+?)\s+in\s+(.+)$/i;
 // `at` between two operands of any length (`5 at 25`, `x at 3`); with a two-character
 // minimum mathjs read a one-character operand's `at` as the unit attotonne.

@@ -108,6 +108,12 @@ Una tasa es una unidad por otra. mathjs hace la aritmética; estas frases facili
 time to upload 3 GB at 10 MB/s
 ```
 
+El verbo es opcional.
+
+```calc devuelve 2 hours
+time to 100 km at 50 km/h
+```
+
 ```calc 05:00/km
 5 km in 25 min
 ```

@@ -149,6 +149,15 @@ smallest one it names. `to nearest 16th` on a unit or currency rounds the unit's
 number and keeps the exact numerator and denominator (`fractionParts`), which
 `formatResult`draws as`37/16 in`.
 
+Other phrases fixed at the text level: `time to` takes an optional verb (a number is never
+one, or the amount's own number was dropped); `days until|since|between … in|to|as <unit>`
+is a calendar phrase with a conversion on the end, so the measures step skips it and the
+grammar converts the day count; `workdays in` accepts a period or a plain run of
+number-and-unit pairs (`parseDurationExact`) and reports anything else instead of
+adding the pairs it happens to contain; and a name followed by one bare-letter
+duration (`width + 30 m`) is ordinary arithmetic, while a date, or a name followed by
+a full duration word (`start + 2 days`), is still date arithmetic.
+
 A measurement written in two units of one dimension, with nothing between them
 (`6 ft 2 in`, `1 m 80 cm`, `1 lb 4 oz`), is read by mathjs as a product, so it was an area.
 `preprocessUnitRuns` (`js/eval/unitRuns.js`, the first preprocessing step) turns such a

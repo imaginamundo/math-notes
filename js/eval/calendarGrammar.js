@@ -42,7 +42,8 @@ const DURATION_DATE = new RegExp(
 const DURATION_FROM = new RegExp(`^(${DURATION_SRC})\\s+from\\s+(now|today)$`, 'i');
 const DURATION_AGO = new RegExp(`^(${DURATION_SRC})\\s+ago$`, 'i');
 const DATE_AS = new RegExp(`^(${DATE_SRC})\\s+as\\s+(.+)$`, 'i');
-const DAYS_VERB = /^days\s+(until|till|since|between)\s+(.+)$/i;
+// An optional `in|to|as <unit>` converts the day count (`days until X in weeks`).
+const DAYS_VERB = /^days\s+(until|till|since|between)\s+(.+?)(?:\s+(?:in|to|as)\s+([A-Za-z]+))?$/i;
 const INCLUSIVE = new RegExp(
   `^(${DATE_OR_IDENT})\\s+through\\s+(${DATE_OR_IDENT})\\s+in\\s+days?$`,
   'iu'
@@ -108,6 +109,17 @@ const CLOCK_PAIR_PHRASE = new RegExp(
 // holds a Date).
 function dateArg(text) {
   return DATE_LITERAL.test(text) ? `__date(${JSON.stringify(text)})` : text;
+}
+
+// `width + 30 m` is a length plus 30 metres, not a date plus 30 minutes: a name that
+// is not a date, followed by one component written with a bare letter (`d w mo y h m s`),
+// is ordinary arithmetic. `now + 4h 3m 5s` and `start + 2 days` are still dates.
+function isUnitSum(left, duration) {
+  // A date, or a literal that can never hold a quantity, keeps the date reading (and its
+  // plain message).
+  if (DATE_LITERAL.test(left) || /^(?:true|false)$/i.test(left)) return false;
+  const components = duration.match(/\d+(?:\.\d+)?\s*[a-z]+/gi) || [];
+  return components.length === 1 && /^\d+(?:\.\d+)?\s*(?:d|w|mo|y|h|m|s)$/i.test(components[0]);
 }
 
 function preprocessCalendar(expression) {
@@ -178,15 +190,18 @@ function preprocessCalendar(expression) {
   if ((m = DAYS_VERB.exec(expr))) {
     const verb = m[1].toLowerCase();
     const pair = DATE_AND_DATE.exec(m[2]);
+    const convert = (call) => (m[3] ? `((${call}) to ${m[3]})` : call);
     if (verb === 'between' && pair) {
-      return `__daysBetweenText(${dateArg(pair[1])}, ${dateArg(pair[2])}, 0, 1)`;
+      return convert(`__daysBetweenText(${dateArg(pair[1])}, ${dateArg(pair[2])}, 0, 1)`);
     }
     const single = DATE_ONLY.exec(m[2]) || (IDENT_ONLY.test(m[2]) ? [null, m[2]] : null);
     if (single && verb !== 'between') {
       const arg = dateArg(single[1]);
-      return verb === 'since'
-        ? `__daysBetweenText(${arg}, "today")`
-        : `__daysBetweenText("today", ${arg})`;
+      return convert(
+        verb === 'since'
+          ? `__daysBetweenText(${arg}, "today")`
+          : `__daysBetweenText("today", ${arg})`
+      );
     }
   }
 
@@ -202,7 +217,7 @@ function preprocessCalendar(expression) {
     return `__dateInterval(${JSON.stringify(m[1])}, ${JSON.stringify(m[2])})`;
   }
 
-  if ((m = DATE_DURATION.exec(expr))) {
+  if ((m = DATE_DURATION.exec(expr)) && !isUnitSum(m[1], m[3])) {
     return `__dateAdd(${dateArg(m[1])}, ${JSON.stringify(m[3])}, ${m[2] === '-' ? -1 : 1})`;
   }
 

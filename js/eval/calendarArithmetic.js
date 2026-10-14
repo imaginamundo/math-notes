@@ -9,6 +9,7 @@ import {
   addDays,
   addMonths,
   parseDuration,
+  parseDurationExact,
   requireClock,
   requireDate,
   markClock,
@@ -180,10 +181,10 @@ function workdaysInPeriod(text) {
 function workdaysInDuration(text) {
   const period = workdaysInPeriod(text);
   if (period !== null) return period;
-  const parts = parseDuration(text);
-  if (!Object.keys(parts).length) {
-    throw new Error(`"${text}" is not a period I understand`);
-  }
+  // Only a period or a plain run of number-and-unit pairs: `3 weeks - 1 week` or
+  // `3 weeks * 25 EUR` is not one, and used to be read as the pairs it contained.
+  const parts = parseDurationExact(text);
+  if (!parts) throw new Error(`"${text}" is not a period I understand`);
   const days =
     (parts.week || 0) * 7 +
     (parts.day || 0) +

@@ -229,6 +229,21 @@ function parseDuration(text) {
   return parts;
 }
 
+// The parts of a duration, or null when the text is anything more than number and
+// unit pairs (joined by `and`, `,` or `+`): `3 weeks`, `1 year and 2 months`. The lenient
+// `parseDuration` skips what it does not understand, so `3 weeks * 25 EUR` read as 3 weeks.
+function parseDurationExact(text) {
+  const parts = {};
+  const rest = String(text).replace(/(\d+(?:\.\d+)?)\s*([a-z]+)/gi, (match, amount, word) => {
+    const unit = DURATION_UNITS[word.toLowerCase()];
+    if (!unit) return match;
+    parts[unit] = (parts[unit] || 0) + Number(amount);
+    return '';
+  });
+  const leftover = rest.replace(/\b(?:and)\b|[,+\s]/gi, '');
+  return leftover === '' && Object.keys(parts).length ? parts : null;
+}
+
 function requireDate(text) {
   const date = parseDate(text, new Date());
   if (!date) throw new Error(`"${text}" is not a date I understand`);
@@ -263,5 +278,6 @@ export {
   addDays,
   addMonths,
   parseDuration,
+  parseDurationExact,
   toDate,
 };
