@@ -209,10 +209,14 @@ function createTabsView(tabBarNode, handlers) {
       render();
     };
     input.addEventListener('keydown', (event) => {
+      // The key is consumed here. Otherwise its default (a line break) lands in
+      // the editor that `focusEditor` hands focus to, at its remembered caret.
       if (event.key === 'Enter') {
+        event.preventDefault();
         finish(true);
         handlers.focusEditor();
       } else if (event.key === 'Escape') {
+        event.preventDefault();
         finish(false);
       }
     });

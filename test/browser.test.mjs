@@ -1130,6 +1130,61 @@ test('a focused tab renames with F2', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('UID-01: confirming a tab rename does not type Enter into the sheet', async () => {
+  await newPage();
+  const sheet = 'price = 1200\nprice * 2';
+  const setUp = (start, end) =>
+    page.evaluate(
+      (value, from, to) => {
+        const ed = document.getElementById('content-editable');
+        ed.focus();
+        ed.value = value;
+        ed.setSelectionRange(from, to);
+        ed.dispatchEvent(new Event('input', { bubbles: true }));
+      },
+      sheet,
+      start,
+      end
+    );
+  const editorValue = () => page.evaluate(() => document.getElementById('content-editable').value);
+  const rename = async (name, confirmKey) => {
+    await page.evaluate(() => document.querySelector('.tab.active').focus());
+    await page.keyboard.press('F2');
+    await waitFor(() => page.$('.tab-rename'));
+    await page.keyboard.type(name);
+    await page.keyboard.press(confirmKey);
+    await wait(150);
+  };
+
+  // A caret inside a number, a selected number, and the whole sheet selected.
+  for (const [start, end] of [
+    [10, 10],
+    [8, 12],
+    [0, sheet.length],
+  ]) {
+    await setUp(start, end);
+    await rename('Budget', 'Enter');
+    assert.equal(await editorValue(), sheet, `Enter with selection ${start}-${end}`);
+    assert.equal(
+      await page.evaluate(() => document.querySelector('.tab-name').textContent),
+      'Budget'
+    );
+    assert.equal(
+      await page.evaluate(() => document.activeElement.id),
+      'content-editable',
+      'focus returns to the editor'
+    );
+  }
+
+  await setUp(10, 10);
+  await rename('Other', 'NumpadEnter');
+  assert.equal(await editorValue(), sheet, 'NumpadEnter');
+  await setUp(10, 10);
+  await rename('Ignored', 'Escape');
+  assert.equal(await editorValue(), sheet, 'Escape');
+  assert.deepEqual(errors, []);
+});
+
 test('the autocomplete keeps the textbox role and announces its suggestions', async () => {
   await newPage();
   const popupOpen = () => page.evaluate(() => !document.getElementById('autocomplete-list').hidden);
