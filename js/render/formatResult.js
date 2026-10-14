@@ -4,6 +4,7 @@ import { isCurrencyCode, CURRENCY_DISPLAY } from '../core/currencySymbols.js';
 import { DEFAULT_PRECISION } from '../core/decimalPrecision.js';
 import { DEFAULT_CLOCK_FORMAT } from '../core/clockFormat.js';
 import { readableUnit } from '../core/unitNames.js';
+import { simplifyLocal } from '../core/unitSimplify.js';
 import { decodeUserUnits } from '../core/userUnits.js';
 
 const formatters = new Map();
@@ -147,7 +148,7 @@ function formatUnit(unit, precision) {
     // Deferred: only the rules that need it call simplify(), which can fold a
     // compound into a surprising unit.
     get simple() {
-      return (simple ??= typeof unit.simplify === 'function' ? unit.simplify() : unit);
+      return (simple ??= simplifyLocal(unit));
     },
   };
   for (const rule of UNIT_FORMAT_RULES) {

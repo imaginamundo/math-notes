@@ -152,6 +152,12 @@ function createEngine({ rates } = {}) {
   initTimespan(math);
   initCalendar(math);
   initCurrency(math, rates);
+  // `simplify()` picks the unit to show a compound result in from the unit system.
+  // mathjs's default, `auto`, remembers the last unit of each dimension it parsed
+  // anywhere (other lines, deleted lines, other tabs, startup), so the same line
+  // read `gallon` or `BTU` depending on what else was in the sheet (UNIT-02). A
+  // fixed system makes the unit depend only on the line.
+  math.Unit.setUnitSystem('si');
   // The size-taking constructors refuse to allocate past the list cap (PRE-01).
   limitSizes(math);
   // From here a sheet cannot reach `config`, `createUnit` or the functions that

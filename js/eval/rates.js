@@ -1,4 +1,5 @@
 import { trailingDimension } from '../core/measures.js';
+import { simplifyLocal } from '../core/unitSimplify.js';
 
 // Rate phrasing on top of mathjs's compound units. mathjs already multiplies,
 // adds and simplifies rates (`90 km / 3 day`); this only translates the words:
@@ -45,10 +46,7 @@ function preprocessRates(expression, context) {
 }
 
 function simplifyUnit(value) {
-  if (value && value.isUnit === true && typeof value.simplify === 'function') {
-    return value.simplify();
-  }
-  return value;
+  return simplifyLocal(value);
 }
 
 // `X at R`: keep whichever of X*R / X/R has the fewest unit factors. A rate of

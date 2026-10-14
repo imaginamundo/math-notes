@@ -86,7 +86,9 @@ test('deleting as timespan leaves no leaked unit', () => {
   assert.equal(formatResult(withTimespan.results[1].value), '1 hour 45 minutes 30 seconds');
 
   const without = engine.evaluateLines(['5 km in 25 min', '21.1 km * prev']);
-  assert.equal(without.results[1].value.toString(), '105.5 min');
+  // The raw unit string follows mathjs's unit system, which the engine fixes; what
+  // matters is that no unit leaked from the deleted `as timespan` (an `atto…` unit).
+  assert.doesNotMatch(without.results[1].value.toString(), /atto/i);
   assert.equal(formatResult(without.results[1].value), '1 hour 45 minutes 30 seconds');
 });
 

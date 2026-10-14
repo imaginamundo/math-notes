@@ -128,6 +128,16 @@ right after `math.evaluate`, so the message flows through the normal error path
 (`Cannot combine "kg" and "m" — that unit has no meaning`,
 `Cannot multiply a currency by "hour" — use a rate like "BRL per hour"`).
 
+Which unit a compound result is shown in must depend only on that line. mathjs's
+`simplify()` follows its current unit system, and the default (`auto`) remembers the
+last unit of each dimension it parsed anywhere, so the same line once read `gallon`
+or `BTU` depending on other lines, deleted lines and other tabs. The engine therefore
+runs on the fixed `si` system, and every simplification goes through `simplifyLocal`
+(`js/core/unitSimplify.js`), which builds a one-off preference list from SI plus the
+unit's own factors (the first unit of each dimension it was written with, prefix
+included) and restores the system afterwards. `24 km a day for a year` stays in km,
+`5 N * 2 m` is `J`, and `2 m * 300 cm * 4 m` is `24 m^3`, whatever else is in the sheet.
+
 `js/eval/timespan.js` handles durations. Consecutive time components are joined
 with `+` (mathjs would multiply them) and `m` means minutes, so `3h 5m 10s`
 evaluates as a timespan. A line that is only a timespan, `X as timespan`, and

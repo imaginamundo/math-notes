@@ -1,6 +1,7 @@
 import { isCurrencyCode } from './currencySymbols.js';
 import { readableUnit } from './unitNames.js';
 import { decodeUnitName } from './userUnits.js';
+import { simplifyLocal } from './unitSimplify.js';
 
 const LENGTH = 'LENGTH';
 
@@ -17,7 +18,7 @@ export function unitMixError(value) {
 
   let simple = value;
   try {
-    if (typeof value.simplify === 'function') simple = value.simplify();
+    simple = simplifyLocal(value);
   } catch {
     // Fall back to the raw unit.
   }
