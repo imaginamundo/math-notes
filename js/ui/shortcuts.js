@@ -1,3 +1,4 @@
+import { ungroupDisplay } from '../core/numberGrouping.js';
 import formatResult from '../render/formatResult.js';
 import { getDecimalPrecision } from '../core/decimalPrecision.js';
 import { getClockFormat } from '../core/clockFormat.js';
@@ -55,7 +56,9 @@ async function copyCurrentLineResult(editableNode, requestResults) {
     const { results } = await requestResults(value.split('\n'));
     const result = results[lineIndex];
     if (result && result.type !== 'error' && result.value !== undefined) {
-      await copyText(formatResult(result.value, getDecimalPrecision(), getClockFormat()));
+      // Without the thousands separators, so pasting it back reads as the same number.
+      const shown = formatResult(result.value, getDecimalPrecision(), getClockFormat());
+      await copyText(ungroupDisplay(shown));
     }
   } catch {
     // evaluation failed; nothing to copy

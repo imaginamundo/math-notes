@@ -149,6 +149,14 @@ smallest one it names. `to nearest 16th` on a unit or currency rounds the unit's
 number and keeps the exact numerator and denominator (`fractionParts`), which
 `formatResult`draws as`37/16 in`.
 
+Numbers grouped in threes: results print `1,500` and Copy result copies that text, but
+pasting it back was a syntax error, and inside a call or list the comma silently split the
+number in two. `stripGrouping` (`js/core/numberGrouping.js`, the first preprocessing step)
+removes the commas of a grouped number outside any bracket, and inside a bracket that
+also separates its items with `, ` (`sum(1,000, 2,000)`); `max(10,200)` and `[1,234]` stay
+two numbers, as they always were. Copy result now copies the number without its separators
+(`ungroupDisplay`), so what is copied reads back as the same value.
+
 Tags in calculations: trailing `#tags` label a line only when the code before them is a
 finished expression (`isCompleteCode` in `parseLine.js`); after an operator, `=`, `(` or a
 word operator (`5 + #food`, `x = #food`) the tag is an operand and the line is not

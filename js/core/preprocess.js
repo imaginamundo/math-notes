@@ -2,6 +2,7 @@ import { preprocessSymbols } from '../eval/symbols.js';
 import { preprocessScales } from '../eval/scales.js';
 import { preprocessPercent } from '../eval/percentage.js';
 import { preprocessUnitRuns } from '../eval/unitRuns.js';
+import { stripGrouping } from './numberGrouping.js';
 import { preprocessWordOps } from '../eval/wordOperators.js';
 import { preprocessMeasures } from '../eval/measures.js';
 import { preprocessRates } from '../eval/rates.js';
@@ -20,6 +21,7 @@ import { preprocessRounding } from '../eval/rounding.js';
 // `context` is passed to every step (most ignore it); the currency step uses
 // `context.names` to leave a code that is a defined variable alone.
 const STEPS = [
+  stripGrouping,
   preprocessUnitRuns,
   preprocessMeasures,
   preprocessScales,
