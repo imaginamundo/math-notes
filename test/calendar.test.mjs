@@ -250,3 +250,27 @@ test('an interval is counted from its start, so start + interval is the end', ()
   assert.equal(valueOf('2024-01-29 to 2024-03-29'), '2 months');
   assert.equal(valueOf('2024-03-31 to 2024-01-31'), '2 months');
 });
+
+test('a date literal does not read the clock; today and now do', async () => {
+  const { createEngine } = await import('../js/core/calculate.js');
+  const run = (lines) => createEngine().evaluateLines(lines).results;
+  const results = run(['2024-01-31', 'January 1 2025 + 1 day', 'today', 'now']);
+  assert.equal(results[0].volatile, undefined);
+  assert.equal(results[1].volatile, undefined);
+  assert.equal(results[2].volatile, true);
+  assert.equal(results[3].volatile, true);
+});
+
+test('lines that read the clock are evaluated again when the sheet is unchanged', async () => {
+  const { createEngine } = await import('../js/core/calculate.js');
+  const engine = createEngine();
+  const lines = ['1 + 1', 'unix()', '5', 'now'];
+  const first = engine.evaluateLines(lines);
+  assert.equal(first.startLine, 0);
+  const again = engine.evaluateLines(lines);
+  assert.equal(again.startLine, 1, 'from the first line that read the clock');
+  assert.equal(again.results[0], first.results[0], 'lines above it are reused');
+  assert.notEqual(again.results[3], first.results[3]);
+  assert.equal(engine.evaluateLines(['1 + 1', '5']).startLine, 1);
+  assert.equal(engine.evaluateLines(['1 + 1', '5']).startLine, -1, 'a pure sheet stays cached');
+});

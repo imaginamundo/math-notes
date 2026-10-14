@@ -1,3 +1,4 @@
+import { currentTime } from './clock.js';
 // Date helpers on top of mathjs. Unix timestamps are rendered in UTC so the
 // result is stable across time zones.
 function initDatetime(math) {
@@ -16,7 +17,7 @@ function initDatetime(math) {
           second: '2-digit',
         });
       },
-      unix: () => Math.floor(Date.now() / 1000),
+      unix: () => Math.floor(currentTime().getTime() / 1000),
     },
     { override: true }
   );

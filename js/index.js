@@ -183,6 +183,14 @@ window.addEventListener(STATUS_MESSAGE, (event) => {
 
 window.addEventListener(FONT_SIZE_CHANGED, () => rowRenderer.relayout());
 
+// A line that reads the clock (`now`, `today`, `unix()`) is stale once time has passed,
+// so coming back to the page re-evaluates the sheet from the first such line. A sheet
+// that never reads the clock is served from the engine's cache.
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) evalClient.update();
+});
+window.addEventListener('focus', () => evalClient.update());
+
 // A setting change forwards the new value to the engine, then recomputes. The
 // per-call comments below explain any extra sequencing.
 function onSettingUpdated(name, apply) {

@@ -28,6 +28,7 @@ import { normalizeUnit } from './unitForm.js';
 import { limitSizes } from './sizeLimits.js';
 import { friendlyError } from './friendlyErrors.js';
 import { substituteAggregates } from './aggregateSubstitution.js';
+import { clockReads } from '../eval/clock.js';
 import { firstDifference } from '../util/sequence.js';
 import { mangleLines } from './multiWordVariables.js';
 import { unitDefinition } from './userUnits.js';
@@ -641,7 +642,11 @@ function createEngine({ rates } = {}) {
       cache.groups = findGroups([]);
       cache.revision = environmentRevision;
     }
-    const changed = firstDifference(cache.lines, lines);
+    // A line that read the clock is as stale as a changed one: evaluate again from
+    // the first of them, even when no text changed.
+    const volatile = cache.results.findIndex((result) => result && result.volatile);
+    let changed = firstDifference(cache.lines, lines);
+    if (volatile !== -1 && (changed === -1 || volatile < changed)) changed = volatile;
     if (changed === -1) {
       return {
         results: cache.results,
@@ -694,9 +699,11 @@ function createEngine({ rates } = {}) {
       context.original = parseLine(inputLines[i]);
       context.tags = context.parsed.tags;
       context.tagScope = null;
+      const readsBefore = clockReads();
       for (const handle of LINE_HANDLERS) {
         if (handle(context)) break;
       }
+      if (results[i] && clockReads() !== readsBefore) results[i].volatile = true;
     }
 
     cache.lines = lines;

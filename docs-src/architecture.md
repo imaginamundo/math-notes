@@ -209,6 +209,13 @@ occurrence on or before the dated end. Two yearless dates in a span give the sma
 (`Feb 5 - Jan 10` is the same 26 days either way round); in a forward reading they wrap
 into the next year (`Dec 1 to Feb 5`).
 
+Clock-dependent lines: every read of the wall clock goes through `currentTime()`
+(`js/eval/clock.js`), which counts reads. `evaluateLines` compares the count around each
+line and marks a line that read the clock `volatile`; the next evaluation starts no later
+than the first volatile line, even when no text changed, so `now`, `today`, `unix()` and
+`days until X` are not frozen while lines below them are edited. A date literal does not
+read the clock. The page re-evaluates when it becomes visible or regains focus.
+
 Tags in calculations: trailing `#tags` label a line only when the code before them is a
 finished expression (`isCompleteCode` in `parseLine.js`); after an operator, `=`, `(` or a
 word operator (`5 + #food`, `x = #food`) the tag is an operand and the line is not

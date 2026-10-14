@@ -1,3 +1,4 @@
+import { currentTime } from './clock.js';
 // Date primitives shared by the calendar modules: the month/weekday tables, the
 // duration vocabulary, and parsers for dates, clock times and `2 weeks 3 days`
 // durations. Pure (no mathjs), so formatting, arithmetic and the grammar can
@@ -132,8 +133,9 @@ function normalizeYear(year) {
 
 // A date without a year uses the nearest occurrence: the closest of the years around
 // this one in which the day exists (so Feb 29 finds the nearest leap day).
-function resolveYear(day, month, year, now) {
+function resolveYear(day, month, year, clock) {
   if (year !== null) return makeDate(year, month, day);
+  const now = clock();
   let best = null;
   for (let candidate = now.getFullYear() - 4; candidate <= now.getFullYear() + 4; candidate++) {
     const date = makeDate(candidate, month, day);
@@ -158,12 +160,15 @@ function occurrenceAround(date, anchor, side) {
   return best || date;
 }
 
-function parseDate(text, now) {
+// `clock` is the time, or a function that reads it: a literal date (`2024-01-31`) never
+// asks, so a line made only of those is not clock-dependent.
+function parseDate(text, clock) {
+  const now = typeof clock === 'function' ? clock : () => clock;
   const s = String(text).trim().toLowerCase().replace(/\.$/, '');
-  if (s === 'today') return atNoon(now);
-  if (s === 'now') return markClock(new Date(now));
-  if (s === 'yesterday') return addDays(atNoon(now), -1);
-  if (s === 'tomorrow') return addDays(atNoon(now), 1);
+  if (s === 'today') return atNoon(now());
+  if (s === 'now') return markClock(new Date(now()));
+  if (s === 'yesterday') return addDays(atNoon(now()), -1);
+  if (s === 'tomorrow') return addDays(atNoon(now()), 1);
   if (NAMED_DATES[s]) {
     const [month, day] = NAMED_DATES[s];
     return resolveYear(day, month, null, now);
@@ -213,7 +218,7 @@ function to24(hour, mer) {
 }
 
 function requireClock(text) {
-  const clock = parseClock(text, new Date());
+  const clock = parseClock(text, currentTime());
   if (!clock) throw new Error(`"${text}" is not a clock time I understand`);
   return clock;
 }
@@ -281,7 +286,7 @@ function parseDurationExact(text) {
 }
 
 function requireDate(text) {
-  const date = parseDate(text, new Date());
+  const date = parseDate(text, currentTime);
   if (!date) throw new Error(`"${text}" is not a date I understand`);
   return date;
 }

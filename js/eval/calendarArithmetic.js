@@ -1,6 +1,7 @@
 // Date, clock and workday arithmetic. Everything works on the plain Date
 // primitives from calendarDate.js; mathjs only enters through the `math`
 // argument for duration Units.
+import { currentTime } from './clock.js';
 import {
   MONTHS,
   MONTH_NAMES,
@@ -122,7 +123,7 @@ function daysInMonth(text) {
 
 function daysInQuarter(value) {
   const quarter = Math.min(4, Math.max(1, Math.round(Number(value))));
-  const year = new Date().getFullYear();
+  const year = currentTime().getFullYear();
   const start = new Date(year, (quarter - 1) * 3, 1);
   const end = new Date(year, quarter * 3, 1);
   return Math.round((end - start) / DAY_MS);
@@ -166,7 +167,7 @@ function workdaysInMonth(text) {
     throw new Error(`"${text}" is not a month I understand`);
   }
   const month = MONTHS[m[1].toLowerCase()];
-  const year = m[2] ? +m[2] : new Date().getFullYear();
+  const year = m[2] ? +m[2] : currentTime().getFullYear();
   return countWorkdays(new Date(year, month - 1, 1, 12), new Date(year, month, 1, 12));
 }
 
@@ -179,7 +180,7 @@ function workdaysInYear(year) {
 // duration so the caller can fall back.
 function workdaysInPeriod(text) {
   const s = String(text).trim();
-  const now = new Date();
+  const now = currentTime();
   if (/^this\s+month$/i.test(s)) {
     return workdaysInMonth(`${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}`);
   }
@@ -203,7 +204,7 @@ function workdaysInDuration(text) {
     (parts.day || 0) +
     (parts.month || 0) * 30.4375 +
     (parts.year || 0) * 365.2425;
-  const start = atNoon(new Date());
+  const start = atNoon(currentTime());
   return countWorkdays(start, addDays(start, Math.round(days)));
 }
 
