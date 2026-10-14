@@ -51,3 +51,39 @@ test('NUM-07: rounding keeps a timespan a timespan', () => {
   assert.equal(show('90 minutes rounded'), '1 hour 30 minutes');
   assert.equal(show('2.4 hours rounded'), '2 hours');
 });
+
+// REVIEW.md NUM-05: a bare step was read in the first unit of a multi-part
+// duration (`2 hours 17 minutes to nearest 15` rounded in hours and gave 0 s).
+test('NUM-05: a multi-part duration rounds in the smallest unit written', () => {
+  assert.equal(show('2 hours 17 minutes to nearest 15'), '2 hours 15 minutes');
+  assert.equal(show('17 minutes 2 hours to nearest 15'), '2 hours 15 minutes');
+  assert.equal(show('2h 17min to nearest 15'), '2 hours 15 minutes');
+  assert.equal(show('3 hours 50 minutes to nearest 5'), '3 hours 50 minutes');
+  assert.equal(show('2 days 5 hours to nearest 12'), '2 days');
+  assert.equal(show('2 hours 17 minutes rounded down to nearest 15'), '2 hours 15 minutes');
+  assert.equal(show('137 minutes to nearest 15'), '2 hours 15 minutes');
+});
+
+test('NUM-05: the step may carry its own unit', () => {
+  assert.equal(show('2 hours 17 minutes to nearest 15 minutes'), '2 hours 15 minutes');
+  assert.equal(show('2 hours 17 minutes to nearest 30 min'), '2 hours 30 minutes');
+  assert.equal(show('47 cm to nearest 5 cm'), '45 cm');
+  assert.equal(show('$47 to nearest 5 USD'), 'US$ 45');
+});
+
+// REVIEW.md NUM-06: fraction rounding failed on every unit or currency value with
+// a leaked mathjs error.
+test('NUM-06: to nearest Nth works on units and currencies', () => {
+  assert.equal(show('2.3 in to nearest 16th'), '37/16 in');
+  assert.equal(show('2.3 inch to nearest 8th'), '9/4 inch');
+  assert.equal(show('$2.37 to nearest 4th'), 'US$ 9/4');
+  assert.equal(show('5 m to nearest 2nd'), '5 m');
+  assert.equal(show('-2.3 in to nearest 8th'), '-9/4 in');
+});
+
+test('NUM-06: plain numbers keep working, with or without "rounded"', () => {
+  assert.equal(show('2.3 to nearest 16th'), '37/16');
+  assert.equal(show('0.534 to nearest 16th'), '9/16');
+  assert.equal(show('2.3 rounded to the nearest 16th'), '37/16');
+  assert.equal(show('2.3 in rounded to the nearest 16th'), '37/16 in');
+});

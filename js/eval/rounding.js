@@ -22,9 +22,11 @@ const MAGNITUDES = {
 };
 
 const DECIMALS = /^(.*\S)\s+to\s+(\d+)\s*(?:dps?|digits?|decimals?|decimal\s+places?)$/i;
-const FRACTION = /^(.*\S)\s+(?:rounded\s+)?to\s+(?:the\s+)?nearest\s+(\d+)(?:st|nd|rd|th)$/i;
+const FRACTION = /^(.*?\S)\s+(?:rounded\s+)?to\s+(?:the\s+)?nearest\s+(\d+)(?:st|nd|rd|th)$/i;
+// The step is a magnitude word (`hundred`) or a number, which may carry its own
+// unit (`nearest 15 minutes`, `nearest 5 cm`).
 const NEAREST =
-  /^(.*?\S)\s+(?:rounded\s+(up|down)\s+to|rounded\s+to|to)\s+(?:the\s+)?nearest\s+([A-Za-z]+|\d[\d,]*)$/i;
+  /^(.*?\S)\s+(?:rounded\s+(up|down)\s+to|rounded\s+to|to)\s+(?:the\s+)?nearest\s+([A-Za-z]+|\d[\d,]*(?:\.\d+)?)(?:\s+([A-Za-z$€£]+))?$/i;
 const WHOLE = /^(.*\S)\s+rounded(?:\s+(up|down))?$/i;
 
 function preprocessRounding(expression) {
@@ -42,7 +44,7 @@ function rewrite(expression) {
   let match = FRACTION.exec(expression);
   if (match) {
     const [, value, denominator] = match;
-    return `fraction(round((${value}) * ${denominator}), ${denominator})`;
+    return `__fractionRound(${value}, ${denominator})`;
   }
 
   match = DECIMALS.exec(expression);
@@ -53,10 +55,17 @@ function rewrite(expression) {
 
   match = NEAREST.exec(expression);
   if (match) {
-    const [, value, direction, target] = match;
-    const step = magnitude(target);
-    if (step === null) return expression;
-    return `${directionFn(direction)}((${value}) / ${step}) * ${step}`;
+    const [, value, direction, target, unit] = match;
+    const amount = magnitude(target);
+    if (amount === null) return expression;
+    // A step with its own unit is a quantity (`15 minutes`), and the ratio of the
+    // two does not depend on what unit the value is written in. A bare step is
+    // read in the value's own unit, and a duration written in several units
+    // (`2 hours 17 minutes`) is first expressed in the smallest one it names, so
+    // the step is not read in hours (NUM-05).
+    const step = unit ? `(${amount} ${unit})` : amount;
+    const rounded = unit ? value : inSmallestTimeUnit(value);
+    return `${directionFn(direction)}((${rounded}) / ${step}) * ${step}`;
   }
 
   match = WHOLE.exec(expression);
@@ -66,6 +75,35 @@ function rewrite(expression) {
   }
 
   return expression;
+}
+
+// The time units a duration can be written in, smallest first, with the plural
+// name mathjs accepts for each.
+const TIME_UNITS = [
+  ['milliseconds', ['ms', 'millisecond', 'milliseconds']],
+  ['seconds', ['s', 'sec', 'secs', 'second', 'seconds']],
+  ['minutes', ['m', 'min', 'mins', 'minute', 'minutes']],
+  ['hours', ['h', 'hr', 'hrs', 'hour', 'hours']],
+  ['days', ['d', 'day', 'days']],
+  ['weeks', ['w', 'week', 'weeks']],
+  ['months', ['mo', 'month', 'months']],
+  ['years', ['y', 'yr', 'yrs', 'year', 'years']],
+];
+const TIME_TOKEN = /(\d*\.?\d+)\s*([A-Za-z]+)/g;
+
+// `(2 hours + 17 minutes)` → `((2 hours + 17 minutes) to minutes)`: a value made of
+// two or more time units, expressed in the smallest of them. Anything else (one
+// unit, or a quantity with other units in it) is returned unchanged.
+function inSmallestTimeUnit(value) {
+  const found = [];
+  for (const [, amount, token] of value.matchAll(TIME_TOKEN)) {
+    const index = TIME_UNITS.findIndex(([, names]) => names.includes(token.toLowerCase()));
+    if (index === -1) return value;
+    found.push({ amount, index });
+  }
+  if (found.length < 2 || new Set(found.map((entry) => entry.index)).size < 2) return value;
+  const smallest = Math.min(...found.map((entry) => entry.index));
+  return `(${value}) to ${TIME_UNITS[smallest][0]}`;
 }
 
 function directionFn(direction) {
@@ -125,8 +163,25 @@ function initRounding(math) {
     return call(fn, value, decimals, unit);
   };
 
+  const fraction = math.fraction;
+
+  // `to nearest 16th`: a plain number becomes a Fraction. A unit or currency is
+  // rounded to the nearest 1/d in its own unit and keeps the exact numerator and
+  // denominator, so it can be drawn as `37/16 in` rather than `2.313… in` (NUM-06).
+  const fractionRound = (value, denominator) => {
+    if (value && value.isUnit === true) {
+      const source = normalizeUnit(value);
+      const numerator = round(source.toNumber() * denominator);
+      const result = math.unit(numerator / denominator, source.formatUnits());
+      result.fractionParts = { numerator, denominator };
+      return result;
+    }
+    return fraction(round(value * denominator), denominator);
+  };
+
   math.import(
     {
+      __fractionRound: fractionRound,
       round: unitAware(round),
       ceil: unitAware(ceil),
       floor: unitAware(floor),

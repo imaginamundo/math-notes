@@ -27,7 +27,7 @@ test('preprocessRounding rewrites nearest-magnitude phrases', () => {
 });
 
 test('preprocessRounding rewrites fraction rounding', () => {
-  assert.equal(preprocessRounding('0.534 to nearest 16th'), 'fraction(round((0.534) * 16), 16)');
+  assert.equal(preprocessRounding('0.534 to nearest 16th'), '__fractionRound(0.534, 16)');
 });
 
 test('preprocessRounding rounds an assignment right-hand side', () => {

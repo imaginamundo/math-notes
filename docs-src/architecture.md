@@ -142,7 +142,12 @@ as `m^3`) is left as it was. Rounding reduces its argument the same way, because
 `$24 a day for a year to nearest 100`rounds an intermediate value that never
 passed through`evaluateLine`, and it uses mathjs's own `round`, `ceil`and`floor`
 on the number, so halves, negatives and a value a hair off a whole number behave
-exactly as they do for a plain number.
+exactly as they do for a plain number. A rounding step may carry its own unit
+(`to nearest 15 minutes`), a bare step is read in the value's own unit, and a
+duration written in several units (`2 hours 17 minutes`) is first expressed in the
+smallest one it names. `to nearest 16th` on a unit or currency rounds the unit's own
+number and keeps the exact numerator and denominator (`fractionParts`), which
+`formatResult`draws as`37/16 in`.
 
 Which unit a compound result is shown in must depend only on that line. mathjs's
 `simplify()` follows its current unit system, and the default (`auto`) remembers the

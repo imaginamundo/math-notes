@@ -143,6 +143,20 @@ $490 rounded to nearest hundred
 0.534 to nearest 16th
 ```
 
+A step can carry its own unit, and a duration written in several units is rounded in the smallest one. Units and currencies round to a fraction too.
+
+```calc returns 2 hours 15 minutes
+2 hours 17 minutes to nearest 15
+```
+
+```calc returns 45 cm
+47 cm to nearest 5 cm
+```
+
+```calc returns 37/16 in
+2.3 in to nearest 16th
+```
+
 ## Constants and functions
 
 `pi` and `π` are available, along with the standard mathjs functions and these aliases:

@@ -164,6 +164,18 @@ function formatUnit(unit, precision) {
 const PACE = /^min\s*\/\s*(km|mi)$/;
 const UNIT_FORMAT_RULES = [
   {
+    // `2.3 in to nearest 16th`: the exact fraction the value was rounded to, then
+    // the unit (`37/16 in`, `US$ 9/4`).
+    test: ({ unit }) => Boolean(unit.fractionParts),
+    format: ({ unit }) => {
+      const { numerator, denominator } = unit.fractionParts;
+      const amount = reducedFraction(numerator, denominator);
+      const symbol = currencyOf(unit);
+      if (symbol) return formatCurrency(symbol, amount);
+      return `${amount} ${cleanUnits(withCurrencySymbols(unit.formatUnits()))}`;
+    },
+  },
+  {
     // A pure time value renders as a timespan when it is a marked timespan, an
     // explicit minutes/hours value, or a compound that reduces to pure time (a
     // computed duration like `time to upload 3 GB at 10 MB/s` -> `(GB s) / MB`).
@@ -255,6 +267,18 @@ function isPlainRatio(unit) {
     else if (entry.power < 0) denominator += 1;
   }
   return numerator <= 1 && denominator <= 1;
+}
+
+function gcd(a, b) {
+  return b === 0 ? Math.abs(a) : gcd(b, a % b);
+}
+
+// `37/16`, `9/4`, `-9/4`, or `5` when the denominator divides out.
+function reducedFraction(numerator, denominator) {
+  const divisor = gcd(numerator, denominator) || 1;
+  const top = numerator / divisor;
+  const bottom = denominator / divisor;
+  return bottom === 1 ? String(top) : `${top}/${bottom}`;
 }
 
 function formatAmount(value, precision) {

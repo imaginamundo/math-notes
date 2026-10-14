@@ -143,6 +143,20 @@ $490 rounded to nearest hundred
 0.534 to nearest 16th
 ```
 
+Um passo pode ter a sua própria unidade, e uma duração escrita com várias unidades é arredondada na menor delas. Unidades e moedas também são arredondadas para uma fração.
+
+```calc retorna 2 hours 15 minutes
+2 hours 17 minutes to nearest 15
+```
+
+```calc retorna 45 cm
+47 cm to nearest 5 cm
+```
+
+```calc retorna 37/16 in
+2.3 in to nearest 16th
+```
+
 ## Constantes e funções
 
 `pi` e `π` estão disponíveis, junto com as funções padrão do mathjs e estes aliases:
