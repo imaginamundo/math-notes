@@ -958,3 +958,29 @@ test('assigning to end says it is a reserved word', () => {
   }
   assert.equal(evaluateLines(['End = 5']).results[0].value, 5);
 });
+
+test('// starts a comment, as in Numi and Soulver sheets', async () => {
+  const { createEngine } = await import('../js/core/calculate.js');
+  const { FIXTURE_RATES } = await import('./helpers/rates.mjs');
+  const rows = createEngine({ rates: FIXTURE_RATES }).evaluateLines([
+    'Hotel: $300 // 3 nights',
+    '$600 // food',
+    'sum',
+    '// groceries',
+    '5 + 3 // note',
+  ]).results;
+  assert.equal(rows[0].type, 'value');
+  assert.equal(rows[2].value.toNumber('USD'), 900);
+  assert.equal(rows[3].value, undefined);
+  assert.equal(rows[4].value, 8);
+  assert.equal(evaluateLines(['"a // b"']).results[0].value, 'a // b');
+  assert.equal(evaluateLines(['10 #food // dinner', 'sum #food']).results[1].value, 10);
+});
+
+test('CORE-04: a semicolon does not make two calculations on one line', () => {
+  const rows = evaluateLines(['aa = 1; bb = 2', '5; 6', 'bb', '[1, 2; 3, 4]']).results;
+  assert.match(rows[0].value, /one calculation/);
+  assert.match(rows[1].value, /one calculation/);
+  assert.match(String(rows[2].value), /not defined/);
+  assert.equal(rows[3].type, 'value');
+});

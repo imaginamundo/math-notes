@@ -233,6 +233,8 @@ html.i18n-pending .layout {
   border-bottom: 1px solid var(--border-light);
   overflow-x: auto;
   scrollbar-width: thin;
+  /* Keep a tab brought into view clear of the sticky actions at the end of the bar. */
+  scroll-padding-inline-end: 7em;
 }
 .tab {
   display: flex;

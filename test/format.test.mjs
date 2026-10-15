@@ -360,3 +360,13 @@ test('UIE-15: an emoji stays in one text node instead of lone surrogates', () =>
   assert.ok(texts.includes('🍕'));
   assert.ok(texts.includes('👨‍👩‍👧'));
 });
+
+test('CORE-02: a multi-line message is one line in its ghost', () => {
+  const view = new El('pre');
+  const renderer = createRowRenderer(view);
+  renderer.renderText(['p(2)']);
+  renderer.patchResults(['p(2)'], [{ type: 'error', value: "'p' is not a function\n  3" }], 0);
+  const ghost = view.children[0].children[1];
+  assert.equal(ghost.textContent, "'p' is not a function 3");
+  assert.equal(ghost.textContent.includes('\n'), false);
+});

@@ -87,6 +87,23 @@ import { createUserUnit, removeUserUnit } from '../eval/userUnits.js';
 // like `sum([1, 2, 3])`. The words come from AGGREGATE_KEYWORDS.
 const AGGREGATE_WORD = new RegExp(`\\b(?:${AGGREGATE_WORD_SOURCE})\\b(?!\\s*\\()`, 'i');
 
+// A `;` outside quotes and brackets (inside `[1, 2; 3, 4]` it separates matrix rows).
+function hasStatementSeparator(code) {
+  let depth = 0;
+  let quote = '';
+  for (let i = 0; i < code.length; i++) {
+    const ch = code[i];
+    if (quote) {
+      if (ch === '\\') i++;
+      else if (ch === quote) quote = '';
+    } else if (ch === '"' || ch === "'") quote = ch;
+    else if (ch === '[' || ch === '(' || ch === '{') depth++;
+    else if (ch === ']' || ch === ')' || ch === '}') depth--;
+    else if (ch === ';' && depth <= 0) return true;
+  }
+  return false;
+}
+
 // A group opens with a header line (`Name:` with no expression) and closes with
 // a line whose code is exactly `end`. Groups are flat: an unterminated header is
 // just a label, and an `end` with no open group is reported as an error.
@@ -252,6 +269,11 @@ function createEngine({ rates } = {}) {
     let result;
 
     try {
+      // `a = 1; b = 2` is a mathjs block: it would run both statements, store a list and
+      // define `b` behind the sheet's back. A line is one calculation.
+      if (hasStatementSeparator(code)) {
+        throw new Error('A line is one calculation; ";" does not separate two');
+      }
       const expression = preprocess(code, scope && { names: names || ownNames(scope) });
       assertBoundedExpression(trusted, expression, scope);
       result = trusted.evaluate(expression, scope);

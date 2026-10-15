@@ -2527,3 +2527,18 @@ test('UID-11: the theme-color meta follows the saved theme after a load', async 
   assert.equal(meta, '#ffffff');
   assert.deepEqual(errors, []);
 });
+
+test('UIE-09: a new tab is scrolled into view in a crowded tab bar', async () => {
+  await newPage();
+  await page.setViewport({ width: 700, height: 800 });
+  for (let i = 0; i < 14; i++)
+    await page.evaluate(() => document.querySelector('.tab-new').click());
+  await wait(300);
+  const visible = await page.evaluate(() => {
+    const bar = document.querySelector('.tabs-bar').getBoundingClientRect();
+    const active = document.querySelector('.tab.active').getBoundingClientRect();
+    return active.left >= bar.left - 1 && active.right <= bar.right + 1;
+  });
+  assert.equal(visible, true);
+  assert.deepEqual(errors, []);
+});

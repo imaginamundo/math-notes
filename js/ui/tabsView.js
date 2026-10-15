@@ -23,6 +23,12 @@ function createTabsView(tabBarNode, handlers) {
     state.tabs.forEach((tab) => tabBarNode.appendChild(renderTab(tab, state.activeId)));
     tabBarNode.appendChild(renderActions());
     fillMenu();
+    // Whatever made this tab active (+, a template, Ctrl+Tab, a reload), it is brought into
+    // the visible part of the bar, clear of the sticky actions at the end.
+    const activeTab = tabBarNode.querySelector('.tab.active, [aria-selected="true"]');
+    if (activeTab && typeof activeTab.scrollIntoView === 'function') {
+      activeTab.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+    }
     const panel = document.getElementById('editor-panel');
     if (panel) panel.setAttribute('aria-labelledby', state.activeId);
   }

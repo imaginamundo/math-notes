@@ -288,6 +288,8 @@ Safari/WebKit (Wave 9, untested here: no WebKit available): the editor remembers
 
 Language and rates (Wave 9): the clear-sheet confirm, the fallback tab names and the share default name come from `t()` in every language, the next tab number counts `Tab`, `Aba` and `Hoja` names and a restore never lowers it, and Go to line reads full-width digits and stays put on input that is not a number. A currency code with no rate behind it says the exchange rates are not available yet (not "undefined symbol"), the notice stays up until rates arrive, and a damaged cached rate table is dropped and fetched again.
 
+Line syntax (Wave 9): `//` starts a comment like `#` (outside quotes), a `;` between statements is an error (a line is one calculation; inside `[...]` it still separates matrix rows), a ghost result is always one line (a line break in a message or a `help()` text becomes a space), and the active tab is scrolled into view in the tab bar whenever the bar renders.
+
 Evaluation scheduling (Wave 9): the client runs one evaluation at a time; an edit that arrives meanwhile
 sets a flag and a single follow-up evaluates the newest text, so a slow sheet never queues one evaluation per
 keystroke. The worker posts `ready` (with `PROTOCOL_VERSION`) once its bundle has loaded; an evaluation is timed

@@ -28,6 +28,12 @@ function parseLine(line) {
       i++;
       continue;
     }
+    // `//` starts a comment too, as in Numi and Soulver sheets (mathjs has no `//` operator).
+    if (ch === '/' && line[i + 1] === '/') {
+      if (firstSpecial === -1) firstSpecial = i;
+      comment = line.slice(i);
+      break;
+    }
     if (ch !== '#') {
       i++;
       continue;
@@ -136,6 +142,7 @@ function tagsAtEnd(tail) {
       }
       return true; // '#' treated as a comment start
     }
+    if (ch === '/' && tail[i + 1] === '/') return true; // a `//` comment to the end
     if (sawTag) return false;
     i++;
   }
