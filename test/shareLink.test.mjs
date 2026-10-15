@@ -92,7 +92,7 @@ test('decodeSheet leaves the name empty when only the content is present', async
   for (const byte of bytes) binary += String.fromCharCode(byte);
   const payload = btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   assert.deepEqual(await decodeSheet(`0.${payload}`), {
-    name: 'Shared sheet',
+    name: '',
     content: '1 + 1',
   });
 });
