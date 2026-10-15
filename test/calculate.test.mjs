@@ -951,3 +951,10 @@ test('NUM-03: a tiny value that is not the result of cancelling is not snapped',
   assert.equal(shownTotal(['3 * 1e-8']).rows[0], '3e-8');
   assert.equal(shownTotal(['2e-8 + 1e-8']).rows[0], '3e-8');
 });
+
+test('assigning to end says it is a reserved word', () => {
+  for (const line of ['end = 5', 'end=5', 'end = 5 m', '  end = 2 + 3']) {
+    assert.equal(evaluateLines([line]).results[0].value, '"end" is a reserved word', line);
+  }
+  assert.equal(evaluateLines(['End = 5']).results[0].value, 5);
+});

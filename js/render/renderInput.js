@@ -377,6 +377,14 @@ function createRowRenderer(view) {
         ghost.dataset.full = text.full;
       }
       ghost.title = text.full;
+    } else {
+      // Row nodes are reused, so what an earlier, longer error left behind must go: a stale
+      // full text would be shown again the next time the line is expanded.
+      if (ghost.dataset) {
+        delete ghost.dataset.short;
+        delete ghost.dataset.full;
+      }
+      ghost.title = '';
     }
   }
 

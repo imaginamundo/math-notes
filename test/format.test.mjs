@@ -334,3 +334,17 @@ test('group results add shading classes to their rows', () => {
   assert.equal(view.children[1].classList.contains('group-body'), false);
   assert.equal(view.children[2].classList.contains('group-end'), false);
 });
+
+test('SEC-02: a short error after a long one does not bring the long text back', () => {
+  const view = new El('pre');
+  const renderer = createRowRenderer(view);
+  const longError = 'Undefined symbol something'.padEnd(120, '!');
+  renderer.renderText(['boom']);
+  renderer.patchResults(['boom'], [{ type: 'error', value: longError }], 0);
+  renderer.patchResults(['boom'], [{ type: 'error', value: 'short problem' }], 0);
+  const ghost = view.children[0].children[1];
+  assert.equal(ghost.dataset.full, undefined);
+  renderer.updateActiveLine(0);
+  assert.equal(ghost.textContent, 'short problem');
+  renderer.updateActiveLine(-1); // nothing left to announce
+});

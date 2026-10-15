@@ -20,5 +20,6 @@ const RESERVED_LABELS = new Set([
 ]);
 
 export function isReservedLabel(label) {
-  return RESERVED_LABELS.has(label.toLowerCase()) || label.startsWith('__');
+  // `end` closes a group, and only in lowercase (`End = 5` is an ordinary name).
+  return RESERVED_LABELS.has(label.toLowerCase()) || label === 'end' || label.startsWith('__');
 }

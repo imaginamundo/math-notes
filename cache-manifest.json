@@ -1,5 +1,5 @@
 {
-  "version": 111,
+  "version": 112,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "9a0f23e09eb4e11fe2870a1f325b9a3e20e7fbced26cee8d4a1b2d84aea4ece6",
@@ -23,7 +23,7 @@
     "js/core/numberGrouping.js": "4d841e7cb77074a6cec0d46c804369dfd5ab5e893ce390569ba4a180b49a4cd9",
     "js/core/parseLine.js": "a76e280d4ec3ccdac098393b458d915a45ad8f7bf077d155fb45f7de5eea8648",
     "js/core/preprocess.js": "9de4efec77cccd46c87c483384d9dd826341ac66f0f414a1a702711828dd89ce",
-    "js/core/reservedWords.js": "b04af7d2fa04dd673550f9c6fe56a21f6073a3fbf719d5a510db0239009bc16a",
+    "js/core/reservedWords.js": "bde8ca93d18efa86776de283d63c2238ce9f68da641455e52f1e7b3143f73fce",
     "js/core/setting.js": "4b05c34e3d4fcb72abd06cf968399d7a8d2494bc7f5f059783f3702aa753e5f6",
     "js/core/sizeLimits.js": "36b290a4a6ec24c4b2bc60f1782c7d86846fd3eb6953e4f8268f5a495722143b",
     "js/core/stringMask.js": "5a66301bec1c68e51a5e2c072ff00c08971b818bd0b830a2559930b74f1956ed",
@@ -74,7 +74,7 @@
     "js/render/format.js": "e1924113a687e02ef6abc3cf551d3dabf3f8b56746fd2d1a79fa23a07a05569a",
     "js/render/formatResult.js": "d82494dc644d62dea96c216a0c70cb3ff75a045a3a88e047042bf921af7d1b61",
     "js/render/marks.js": "339def83f5e1158c2744190b6ea2d9d45571f4eb07ddf83780efa81fb463b6fe",
-    "js/render/renderInput.js": "5f3718344bf8659fd6eefb97d91138efdb2f6985d2ed8f9afe7c95ebf33ef218",
+    "js/render/renderInput.js": "d80cb5061424b9a198ba759f966302cce74faef4f7b8220be1d1d824ce7b0c13",
     "js/render/renderTotal.js": "1fe8248620d101edb7a79ebacb2c94958ac7b2e6faf3e04ea96026e182761b26",
     "js/share/shareLink.js": "0d10f4fdab60f774f6a3a8e8d9b5f4abb36ed8391065dc9a9fdd9a196ffd88e2",
     "js/storage/currencyRates.js": "ec873f7137fbb4cd89b200ebf7353034fb104d860e0d5e258c3ef57d8b325e33",
