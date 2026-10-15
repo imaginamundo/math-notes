@@ -1,5 +1,5 @@
 {
-  "version": 107,
+  "version": 108,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "9a0f23e09eb4e11fe2870a1f325b9a3e20e7fbced26cee8d4a1b2d84aea4ece6",
@@ -87,8 +87,8 @@
     "js/ui/editor.js": "4c0f33e69f7aa8baaef4775d0bb9b728c2259dcad8156a05f7e3b7356785b076",
     "js/ui/editorInput.js": "fa8ebc7d53c0c5ac8e3ed728469f9c23c4f00d8b6a261dc9a22a89d97ed603c6",
     "js/ui/examples.js": "081e408def7b07b75b3fbeead07b376c760f405d74d220893d1ee64e375da28a",
-    "js/ui/find.js": "3f873770f70ee45cff333a0108cdbb6b97d6fc8913edfebd2b38910489acb450",
-    "js/ui/goToLine.js": "16362a99be4089630dffed0f2099d6dae3481d8cb1f371ad6c59262ff410a1bc",
+    "js/ui/find.js": "cd2b458a678d2e97e371e40c4b6da5c6a712ed1a8527ee1a6a3b14ec2c0bf8d7",
+    "js/ui/goToLine.js": "03f438fb36e271330c8ff4ce7d4972a1ef9d71b49980f304aa53d746cfce8f6e",
     "js/ui/indent.js": "0ee470083ef66d9cc6e65ef2cba628a91129cbbff80b3ae36f71c81f93b548e9",
     "js/ui/io.js": "e692197481364a3160d7425b7a905f5163bf22bae3b6c374f9f05d62bc5ea392",
     "js/ui/lineNumbers.js": "c6124160af3d10a426f923bf6c12b364d04b417b7ca3ee54fdad7119d0495b3b",
@@ -103,7 +103,7 @@
     "js/ui/tabTemplates.js": "56145a79ebc0c9542e9cb4c591129fe035627b01cb1790b75671d1d749d966d0",
     "js/ui/tabs.js": "b675d2e101898ef4ac31a5fdf04e574a7f647b4de8036e64ec411ea8527da35d",
     "js/ui/tabsHistory.js": "8cc423a29c2f11e6e2ce03643bfc89b85b7fe83f5f3b336c740baaa9f34dd066",
-    "js/ui/tabsView.js": "8f36bfce5e59944394fcf62b9246d309cce5020a07295367b722669a8be22e36",
+    "js/ui/tabsView.js": "e79e485e9c58ca691e228638d1f8def955cbb3aec218dd705f91a770f71ae8fb",
     "js/ui/totalModeControl.js": "05aa533bb1d0c2bb708f7855cb7a700dc03565a7f79061604717ad59d1164404",
     "js/util/clipboard.js": "21f8c5dd9736c3d93195ab42e03eee5953c4a89b8080c4645235bd4875615ac1",
     "js/util/compress.js": "282e1aba454d161627571c43f53b942c80d5da4ca986fba69c23645e8afdc816",
@@ -115,6 +115,6 @@
     "js/util/storage.js": "b2d149129745093034c0ba0209bf33ef207f032cd56b400ae78d459cbfe7cf2e",
     "js/util/text.js": "b5a945f08ce595855b42b2da43292dec11c2cfc194a2ba6a47ecb8d9330af4e8",
     "js/worker.js": "10330fbc6f630e1045ac57fdc8c13b504189480161812ee00a22ce1dd5752710",
-    "style.css": "61c57a78f74291f1c894f680e5eebc91d8ca44b31717f01e3f59d369b7ace3d1"
+    "style.css": "3821f0e4177bee59849c0ffb515f2384f97b6fca42622d500112bab0fc8c9221"
   }
 }

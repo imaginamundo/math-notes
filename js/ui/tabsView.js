@@ -209,6 +209,8 @@ function createTabsView(tabBarNode, handlers) {
       render();
     };
     input.addEventListener('keydown', (event) => {
+      // While an IME is composing, Enter and Esc belong to it: converting or cancelling.
+      if (event.isComposing || event.keyCode === 229) return;
       // The key is consumed here. Otherwise its default (a line break) lands in
       // the editor that `focusEditor` hands focus to, at its remembered caret.
       if (event.key === 'Enter') {

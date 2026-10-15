@@ -209,6 +209,60 @@ test('replace does not grow when the replacement contains the query', async () =
   assert.deepEqual(errors, []);
 });
 
+const openFind = (query, replacement) =>
+  page.evaluate(
+    (q, r) => {
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'f', metaKey: true, bubbles: true, cancelable: true })
+      );
+      const find = document.querySelector('.find-input');
+      find.value = q;
+      find.dispatchEvent(new Event('input', { bubbles: true }));
+      const replace = document.querySelector('.replace-input');
+      replace.value = r;
+      replace.dispatchEvent(new Event('input', { bubbles: true }));
+    },
+    query,
+    replacement
+  );
+
+test('UIE-08: replacing the last match wraps to the first remaining one', async () => {
+  await newPage();
+  await setContent('apple = 1\napple + 2\napple');
+  await wait(300);
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.setSelectionRange(ed.value.length, ed.value.length);
+  });
+  await openFind('apple', 'pear');
+  await wait(100);
+  const replaceOne = () => page.evaluate(() => document.querySelector('.replace-one').click());
+  for (let i = 0; i < 3; i++) {
+    await replaceOne();
+    await wait(150);
+  }
+  assert.equal(await value(), 'pear = 1\npear + 2\npear');
+  assert.deepEqual(errors, []);
+});
+
+test('UIE-20: closing the find bar leaves the caret on the active match', async () => {
+  await newPage();
+  await setContent('a = 1\nb = 2\nb + 1');
+  await wait(300);
+  await openFind('b', '');
+  await wait(100);
+  await page.keyboard.press('Escape');
+  await wait(100);
+  const selection = await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    return [ed.selectionStart, ed.selectionEnd, document.activeElement === ed];
+  });
+  // The first `b` after the caret's starting point is the active one; it is selected.
+  assert.equal(selection[1] - selection[0], 1);
+  assert.equal(selection[2], true);
+  assert.deepEqual(errors, []);
+});
+
 test('undo restores the sheet and redo brings the change back', async () => {
   await newPage();
   await setContent('1 + 1');

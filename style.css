@@ -544,6 +544,11 @@ textarea {
   /* On a phone a long total wraps rather than being cut off. */
   overflow-wrap: anywhere;
 }
+/* The transparent textarea sits above the glyphs it selects, so the browser's opaque default
+   highlight would wash them out (1.4 to 2.2:1). A translucent one keeps them readable. */
+.content-editable::selection {
+  background: color-mix(in srgb, var(--color-link) 30%, transparent);
+}
 .total.error {
   color: var(--color-ghost-error);
 }

@@ -73,6 +73,8 @@ function initGoToLine(editableNode) {
 
   inputNode.addEventListener('input', refresh);
   inputNode.addEventListener('keydown', (event) => {
+    // While an IME is composing, Enter and Esc belong to it.
+    if (event.isComposing || event.keyCode === 229) return;
     if (event.key === 'Enter') {
       event.preventDefault();
       jump();

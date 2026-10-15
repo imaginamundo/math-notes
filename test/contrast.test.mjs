@@ -130,3 +130,9 @@ test('dimmed text keeps AA contrast (ratchet: UIE-19)', () => {
   }
   ratchet('contrast-dimmed', failing);
 });
+
+test('the editor selection is translucent, so the text under it stays readable', async () => {
+  const { readFileSync } = await import('node:fs');
+  const css = readFileSync(new URL('../style.css', import.meta.url), 'utf8');
+  assert.match(css, /\.content-editable::selection\s*\{[^}]*color-mix\([^}]*transparent\)/);
+});
