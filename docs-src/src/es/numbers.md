@@ -121,7 +121,7 @@ Redondea un resultado con una frase al final de la línea, o llama directamente 
 1/3 to 2 dp
 ```
 
-```calc devuelve 3.14159
+```calc devuelve 3.142
 π to 3 digits
 ```
 

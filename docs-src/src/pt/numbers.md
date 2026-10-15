@@ -121,7 +121,7 @@ Arredonde um resultado com uma frase no fim da linha, ou chame `round`, `ceil` o
 1/3 to 2 dp
 ```
 
-```calc retorna 3.14159
+```calc retorna 3.142
 π to 3 digits
 ```
 

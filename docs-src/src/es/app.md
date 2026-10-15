@@ -14,7 +14,7 @@ Las tasas de cambio también se guardan en caché, así que las conversiones sig
 
 ## Atajos de teclado
 
-Toda acción tiene un atajo; la lista completa está en la [Referencia](/docs/reference/). Los más comunes:
+Las acciones más comunes tienen un atajo; la lista completa está en la [Referencia](/docs/reference/). Los más comunes:
 
 | Atajo | Acción |
 | --- | --- |

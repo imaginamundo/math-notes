@@ -107,7 +107,7 @@ March 12, 2023 as EEEE, MMM d, yyyy
 
 Una hora como `9:45 am`, `1:30` o `16:00` acepta duraciones y mide intervalos. Las horas se muestran en formato de 24 horas por defecto; **Ajustes → Reloj** cambia a 12 horas.
 
-```calc una hora 3¼ horas después
+```calc una hora 3 horas y 12 minutos después
 16:00 + 3 hours 12 minutes
 ```
 

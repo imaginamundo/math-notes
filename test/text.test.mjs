@@ -56,3 +56,16 @@ test('localDateStamp is the local calendar day', async () => {
   assert.equal(localDateStamp(new Date(2026, 9, 13, 23, 57)), '2026-10-13');
   assert.equal(localDateStamp(new Date(2026, 0, 5, 0, 1)), '2026-01-05');
 });
+
+test('UID-14: a snapshot is identified by its time and a preview', async () => {
+  const { snapshotStamp, snapshotPreview } = await import('../js/util/text.js');
+  const now = new Date(2026, 9, 14, 12, 0, 0).getTime();
+  const today = new Date(2026, 9, 14, 9, 5, 7).getTime();
+  const earlier = new Date(2026, 9, 12, 9, 5, 7).getTime();
+  assert.match(snapshotStamp(today, now, 'en-GB'), /09:05:07/);
+  assert.doesNotMatch(snapshotStamp(today, now, 'en-GB'), /Oct/);
+  assert.match(snapshotStamp(earlier, now, 'en-GB'), /12 Oct 2026/);
+  assert.equal(snapshotPreview('\n\n  rent = 1200  \nfood = 300'), 'rent = 1200');
+  assert.equal(snapshotPreview(''), '');
+  assert.equal(snapshotPreview('x'.repeat(100)).length, 40);
+});

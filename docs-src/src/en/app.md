@@ -14,7 +14,7 @@ Currency rates are cached too, so conversions keep working offline using the mos
 
 ## Keyboard shortcuts
 
-Every action has a shortcut; the full list is in [Reference](/docs/reference/). The most common ones:
+The common actions have a shortcut; the full list is in [Reference](/docs/reference/). The most common ones:
 
 | Shortcut | Action |
 | --- | --- |

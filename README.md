@@ -52,7 +52,7 @@ Based on [Numi](https://numi.app/) and [Soulver](https://soulver.app/).
   `em`, `point`).
 - **Custom units** — `unit widget = 3.5 kg` defines a unit you can use like any
   other: `2 widgets` is `2 widgets`, and it merges with real units in the total
-  (`2 widgets + 1 kg` → 8 kg). Names may be multi-word or non-ASCII
+  (`1 kg + 2 widgets` → 8 kg). Names may be multi-word or non-ASCII
   (`unit monthly rent = 1500`, then `2 monthly rents`) and a unit can be built
   from another (`unit box = 12 widgets`). Definitions are sheet-scoped, so
   removing the line removes the unit. `unit` and `total` cannot be variable

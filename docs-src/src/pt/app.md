@@ -14,7 +14,7 @@ As taxas de câmbio também ficam em cache, então as conversões continuam func
 
 ## Atalhos de teclado
 
-Toda ação tem um atalho; a lista completa está na [Referência](/docs/reference/). Os mais comuns:
+As ações mais comuns têm um atalho; a lista completa está na [Referência](/docs/reference/). Os mais comuns:
 
 | Atalho | Ação |
 | --- | --- |

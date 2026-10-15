@@ -107,7 +107,7 @@ March 12, 2023 as EEEE, MMM d, yyyy
 
 A clock time such as `9:45 am`, `1:30` or `16:00` takes durations and measures intervals. Clock times show in 24-hour by default; **Settings → Clock** switches to 12-hour.
 
-```calc a clock time 3¼ hours later
+```calc a clock time 3 hours 12 minutes later
 16:00 + 3 hours 12 minutes
 ```
 

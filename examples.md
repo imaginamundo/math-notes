@@ -179,7 +179,7 @@ invoice.subtotal + invoice.tax
 ### References
 
 5
-line(122) * 2
+line(181) * 2
 
 20
 prev * 4
@@ -334,7 +334,6 @@ unit monthly rent = 1500
 unit açai = 2 kg
 3 açais
 
-unit widget = 3.5 kg
 unit box = 12 widgets
 2 boxes in kg
 

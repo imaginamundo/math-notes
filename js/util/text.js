@@ -64,4 +64,32 @@ function localDateStamp(date = new Date()) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
-export { indexOfLineAt, startOfLine, sheetLines, changeCaret, looksLikeText, localDateStamp };
+// When a snapshot was taken, as a clock time with seconds, plus the date unless it is today.
+// The relative age alone ("1m ago") cannot tell two snapshots apart.
+function snapshotStamp(timestamp, now = Date.now(), locale) {
+  const date = new Date(timestamp);
+  const time = new Intl.DateTimeFormat(locale, { timeStyle: 'medium' }).format(date);
+  if (new Date(now).toDateString() === date.toDateString()) return time;
+  return `${new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(date)} ${time}`;
+}
+
+// The first non-empty line of a snapshot, cut to fit a row, so a version can be recognised.
+function snapshotPreview(content, max = 40) {
+  const first = String(content ?? '')
+    .split('\n')
+    .map((line) => line.trim())
+    .find(Boolean);
+  if (!first) return '';
+  return first.length > max ? `${first.slice(0, max - 1)}…` : first;
+}
+
+export {
+  indexOfLineAt,
+  startOfLine,
+  sheetLines,
+  changeCaret,
+  looksLikeText,
+  localDateStamp,
+  snapshotStamp,
+  snapshotPreview,
+};
