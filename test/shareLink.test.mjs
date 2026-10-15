@@ -86,7 +86,7 @@ test('decodeSheet returns null for JSON that is not a sheet', async () => {
   assert.equal(await decodeSheet(encode(null)), null, 'null');
 });
 
-test('decodeSheet falls back to a name when only the content is present', async () => {
+test('decodeSheet leaves the name empty when only the content is present', async () => {
   const bytes = new TextEncoder().encode(JSON.stringify({ c: '1 + 1' }));
   let binary = '';
   for (const byte of bytes) binary += String.fromCharCode(byte);
