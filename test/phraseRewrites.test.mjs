@@ -210,3 +210,32 @@ test('fractional day, week, month and year counts are not rounded away', () => {
   assert.equal(show(['June 10 2024 + 1 day']), '11 June 2024');
   assert.equal(show(['March 1 2024 + 1.5 months']), '16 April 2024 at 05:15');
 });
+
+test('SHEET-14: word forms of areas and volumes', () => {
+  assert.equal(one('20 sq cm in m2'), '0.002 m2');
+  assert.equal(one('30 square inches in sqin'), '30 in^2');
+  assert.equal(one('5 m squared in m2'), '5 m2');
+  assert.equal(one('2 ft cubed in cuft'), '2 cuft');
+  assert.equal(one('10 m²'), one('10 m^2'));
+  assert.equal(one('2 m³'), one('2 m^3'));
+  assert.equal(one('11 sqm'), one('11 m^2'));
+  assert.equal(one('11 cbm'), one('11 m^3'));
+  assert.equal(show(['sq = 4', 'sq * 2']), '8', 'a variable named sq is left alone');
+});
+
+test('SHEET-12: base and notation conversions', () => {
+  assert.equal(one('255 in hex'), '0xff');
+  assert.equal(one('255 to bin'), '0b11111111');
+  assert.equal(one('255 as octal'), '0o377');
+  assert.equal(one('0x9F31 to decimal'), '40,753');
+  assert.equal(one('5300 in sci'), '5.3e+3');
+  assert.equal(one('100 in cm').startsWith('ERR'), false, 'inches still read after a number');
+});
+
+test('SHEET-15: a currency code decides the currency after a symbol', () => {
+  assert.equal(one('$30 CAD'), one('30 CAD'));
+  assert.equal(one('€5 EUR'), one('5 EUR'));
+  assert.equal(one('$30 USD'), one('30 USD'));
+  assert.equal(show(['x = $30 CAD', 'x + 1 CAD']), one('31 CAD'));
+  assert.equal(one('$30 in CAD'), one('30 USD in CAD'));
+});

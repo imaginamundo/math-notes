@@ -984,3 +984,33 @@ test('CORE-04: a semicolon does not make two calculations on one line', () => {
   assert.match(String(rows[2].value), /not defined/);
   assert.equal(rows[3].type, 'value');
 });
+
+test('SHEET-06: a range that starts with a variable is a range, not a label', () => {
+  const rows = evaluateLines([
+    'start = 1',
+    'stop = 5',
+    'start:stop',
+    'start:2:stop',
+    'Rent: 1200',
+    'i = 3',
+    'i:10',
+  ]).results;
+  assert.equal(String(rows[2].value), '[1, 2, 3, 4, 5]');
+  assert.equal(String(rows[3].value), '[1, 3, 5]');
+  assert.equal(rows[4].value, 1200);
+  assert.equal(String(rows[6].value), '[3, 4, 5, 6, 7, 8, 9, 10]');
+});
+
+test('SHEET-09: bit operators are exact beyond 32 bits', () => {
+  const value = (line) => evaluateLines([line]).results[0].value;
+  assert.equal(value('1 << 32'), 4294967296);
+  assert.equal(value('1 << 40'), 1099511627776);
+  assert.equal(value('2^40 >> 1'), 549755813888);
+  assert.equal(value('0xFFFFFFFF | 0'), 4294967295);
+  assert.equal(value('5 & 3'), 1);
+  assert.equal(value('5 | 3'), 7);
+  assert.equal(value('5 ^| 3'), 6);
+  assert.equal(value('~5'), -6);
+  assert.equal(value('1 << 4'), 16);
+  assert.match(String(value('1 << 80')), /too large/);
+});

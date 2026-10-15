@@ -18,6 +18,8 @@ Price: 10 + 5
 
 A single `#` at the very start of a line also works as a comment.
 
+`//` also starts a comment, as in Numi and Soulver sheets. A line is one calculation: a `;` between two statements is an error.
+
 ## Tags
 
 With no space after the `#`, a word is a **tag** rather than a comment. Tags label lines so you can total them elsewhere.

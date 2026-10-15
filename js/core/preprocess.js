@@ -2,6 +2,7 @@ import { preprocessSymbols } from '../eval/symbols.js';
 import { preprocessScales } from '../eval/scales.js';
 import { preprocessPercent } from '../eval/percentage.js';
 import { preprocessUnitRuns } from '../eval/unitRuns.js';
+import { preprocessUnitWords } from '../eval/unitWords.js';
 import { maskStrings } from './stringMask.js';
 import { IDENTIFIER_SRC } from './identifiers.js';
 import { MONTHS } from '../eval/calendarDate.js';
@@ -25,6 +26,7 @@ import { preprocessRounding } from '../eval/rounding.js';
 // `context.names` to leave a code that is a defined variable alone.
 const STEPS = [
   stripGrouping,
+  preprocessUnitWords,
   preprocessUnitRuns,
   preprocessMeasures,
   preprocessScales,

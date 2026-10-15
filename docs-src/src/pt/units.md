@@ -48,6 +48,8 @@ Unidades CSS também são suportadas, para você conferir um layout:
 2 em in px
 ```
 
+Áreas e volumes podem ser escritos por extenso: `20 sq cm`, `30 square inches`, `5 m squared`, `3 ft cubed`, `11 sqm`, `11 cbm` ou com `²` e `³` (`10 m²`). São lidos como `cm^2`, `inches^2`, `m^2`, e assim por diante.
+
 ## Sistema de medidas
 
 As unidades de volume de cozinha seguem o sistema de medidas em **Configurações → Sistema de medidas** — Métrico (padrão), Americano ou Imperial. Ele define `cup` como 250, 236.6 ou 284.1 ml, respectivamente, junto com `tsp`, `tbsp`, `fl oz`, `pint`, `quart` e `gallon`.

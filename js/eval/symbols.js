@@ -36,10 +36,20 @@ const CODE_AFTER_IN = new RegExp(`\\bin(\\s+)(${CODE})${AFTER_WORD}`, 'giu');
 // The codes that act as currency units live in core/currencySymbols.js, so the
 // domain (aggregate/unitMix) and this evaluator read one vocabulary.
 
+// A symbol and a code together (`$30 CAD`, `€5 EUR`): the code says which currency, so the
+// symbol is dropped. Left in, `30 USD CAD` is a product of two currencies.
+const SYMBOL_THEN_CODE = new RegExp(
+  `(?<![${WORD}_])(?:${SYMBOL_SOURCE})\\s*(\\d[\\d.]*)\\s*([A-Za-z]{3})(?![${WORD}_])`,
+  'gu'
+);
+
 function preprocessSymbols(expression, context) {
   const names = context && context.names;
   return uppercaseCurrencyCodes(
     expression
+      .replace(SYMBOL_THEN_CODE, (match, number, code) =>
+        isCurrencyCode(code) && !(names && names.has(code)) ? `${number} ${code}` : match
+      )
       .replace(
         SYMBOL_AFTER_NUMBER,
         (match, number, symbol) => `${number} ${CURRENCY_SYMBOLS[symbol]}`

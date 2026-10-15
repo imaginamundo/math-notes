@@ -290,6 +290,8 @@ Language and rates (Wave 9): the clear-sheet confirm, the fallback tab names and
 
 Line syntax (Wave 9): `//` starts a comment like `#` (outside quotes), a `;` between statements is an error (a line is one calculation; inside `[...]` it still separates matrix rows), a ghost result is always one line (a line break in a message or a `help()` text becomes a space), and the active tab is scrolled into view in the tab bar whenever the bar renders.
 
+Sheet language (Wave 9): `js/eval/unitWords.js` rewrites area and volume words (`sq cm`, `square inches`, `m squared`, `sqm`, `cbm`, `²`/`³`) and base conversions (`in hex|bin|oct|decimal|sci`); a symbol followed by a code (`$30 CAD`) takes the code; `start:stop` with `start` a variable above is a range, not a label; a resolved `line(n)` is parenthesised so a unit or digit after it is a separate factor; the bit operators are exact for whole numbers (arbitrary-size integers, refusing a result a number cannot hold). A user function still receives the whole list (the documented, pinned behaviour); `map` and the dot operators work element by element.
+
 Evaluation scheduling (Wave 9): the client runs one evaluation at a time; an edit that arrives meanwhile
 sets a flag and a single follow-up evaluates the newest text, so a slow sheet never queues one evaluation per
 keystroke. The worker posts `ready` (with `PROTOCOL_VERSION`) once its bundle has loaded; an evaluation is timed

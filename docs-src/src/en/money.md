@@ -32,6 +32,8 @@ Results use the currency's symbol where it has one (`350usd` becomes `US$ 350`);
 
 A currency can be divided by another unit to make a rate (`USD/hour`, `USD/km`, `USD/kg`), but it cannot be multiplied by an unrelated unit. `BRL hour` is reported as an error rather than as a strange combined unit — use a rate instead.
 
+A symbol and a code together (`$30 CAD`, `€5 EUR`) mean the code's currency.
+
 ## Supported codes
 
 `AUD`, `BRL`, `CAD`, `CHF`, `CNY`, `CZK`, `DKK`, `EUR`, `GBP`, `HKD`, `HUF`, `IDR`, `ILS`, `INR`, `ISK`, `JPY`, `KRW`, `MXN`, `MYR`, `NOK`, `NZD`, `PHP`, `PLN`, `RON`, `SEK`, `SGD`, `THB`, `TRY`, `USD`, `ZAR`.

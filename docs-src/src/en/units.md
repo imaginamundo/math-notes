@@ -48,6 +48,8 @@ CSS units are supported too, so you can check a layout:
 2 em in px
 ```
 
+Areas and volumes can be written in words: `20 sq cm`, `30 square inches`, `5 m squared`, `3 ft cubed`, `11 sqm`, `11 cbm` or with `²` and `³` (`10 m²`). They read as `cm^2`, `inches^2`, `m^2`, and so on.
+
 ## Measurement system
 
 Cooking volume units follow the measurement system in **Settings → Measurement system** — Metric (default), US customary or Imperial. It sets `cup` to 250, 236.6 or 284.1 ml respectively, along with `tsp`, `tbsp`, `fl oz`, `pint`, `quart` and `gallon`.

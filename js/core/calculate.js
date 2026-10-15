@@ -4,6 +4,7 @@ import initCurrency, { registerRates } from '../eval/currency.js';
 import initAliases from '../eval/aliases.js';
 import initCssUnits from '../eval/cssUnits.js';
 import initUnits from '../eval/units.js';
+import initBitwise from '../eval/bitwise.js';
 import initDatetime from '../eval/datetime.js';
 import initRounding from '../eval/rounding.js';
 import initMeasures, { applyMeasurementSystem } from '../eval/measures.js';
@@ -104,6 +105,24 @@ function hasStatementSeparator(code) {
   return false;
 }
 
+// `start:stop` reads as a label (`Rent: 1200`) to the line parser, which knows no variables. When
+// the word before the colon is a variable defined above, the colon is a range (`start:2:stop`).
+function rangeNotLabel(parsed, names) {
+  if (parsed.titleIndex === -1 || !parsed.code.trim()) return parsed;
+  if (!/^[\p{L}_][\p{L}\p{N}_]*$/u.test(parsed.title) || !names.has(parsed.title)) return parsed;
+  const code = parsed.rawCode.trim();
+  return {
+    ...parsed,
+    code,
+    title: '',
+    titleIndex: -1,
+    equalsIndex: -1,
+    label: '',
+    rhs: '',
+    isAssignment: false,
+  };
+}
+
 // A group opens with a header line (`Name:` with no expression) and closes with
 // a line whose code is exactly `end`. Groups are flat: an unterminated header is
 // just a label, and an `end` with no open group is reported as an error.
@@ -192,6 +211,7 @@ function createEngine({ rates } = {}) {
   initAliases(math);
   initCssUnits(math);
   initUnits(math);
+  initBitwise(math);
   initDatetime(math);
   initRounding(math);
   initMeasures(math, readMeasurementSystem());
@@ -693,8 +713,8 @@ function createEngine({ rates } = {}) {
       context.i = i;
       context.line = lines[i];
       if (context.line.trim() === '' && !groups.groupOfLine.has(i)) context.lastBlankIndex = i;
-      context.parsed = parseLine(context.line);
-      context.original = parseLine(inputLines[i]);
+      context.parsed = rangeNotLabel(parseLine(context.line), context.names);
+      context.original = rangeNotLabel(parseLine(inputLines[i]), context.names);
       context.tags = context.parsed.tags;
       context.tagScope = null;
       const readsBefore = clockReads();

@@ -32,6 +32,8 @@ Los resultados usan el símbolo de la moneda cuando lo tienen (`350usd` pasa a `
 
 Una moneda se puede dividir por otra unidad para formar una tasa (`USD/hour`, `USD/km`, `USD/kg`), pero no se puede multiplicar por una unidad no relacionada. `BRL hour` se informa como error, no como una unidad combinada extraña — usa una tasa.
 
+Un símbolo y un código juntos (`$30 CAD`, `€5 EUR`) significan la moneda del código.
+
 ## Códigos admitidos
 
 `AUD`, `BRL`, `CAD`, `CHF`, `CNY`, `CZK`, `DKK`, `EUR`, `GBP`, `HKD`, `HUF`, `IDR`, `ILS`, `INR`, `ISK`, `JPY`, `KRW`, `MXN`, `MYR`, `NOK`, `NZD`, `PHP`, `PLN`, `RON`, `SEK`, `SGD`, `THB`, `TRY`, `USD`, `ZAR`.

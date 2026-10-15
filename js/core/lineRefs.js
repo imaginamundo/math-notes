@@ -29,7 +29,9 @@ function resolveLineRefs(parsed, results, index) {
       }
       const token = `__line_${n}`;
       values[token] = ref.value;
-      return token;
+      // Parenthesised, so a unit or digit typed right after it is a separate factor
+      // (`line(1)km`), not part of the token's name.
+      return `(${token})`;
     });
 
   return {

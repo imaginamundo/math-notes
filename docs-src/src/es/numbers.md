@@ -167,6 +167,10 @@ Un paso puede llevar su propia unidad, y una duración escrita con varias unidad
 2.3 in to nearest 16th
 ```
 
+## Bases numéricas
+
+Convierte un número entero con `in`, `to` o `as`: `255 in hex` es `0xff`, `255 to bin` es `0b11111111`, `255 as octal` es `0o377`, `0x9F31 to decimal` es 40.753 y `5300 in sci` es `5.3e+3`. Los operadores de bits `<<`, `>>`, `&`, `|`, `^|` y `~` son exactos para enteros mucho más allá de 32 bits.
+
 ## Constantes y funciones
 
 `pi` y `π` están disponibles, junto con las funciones estándar de mathjs y estos alias:

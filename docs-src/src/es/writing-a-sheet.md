@@ -18,6 +18,8 @@ Price: 10 + 5
 
 Un único `#` al principio de la línea también funciona como comentario.
 
+`//` también inicia un comentario, como en las hojas de Numi y Soulver. Una línea es un cálculo: un `;` entre dos instrucciones es un error.
+
 ## Tags
 
 Sin espacio después del `#`, una palabra es una **tag**, no un comentario. Las tags marcan líneas para que puedas sumarlas en otro lugar.

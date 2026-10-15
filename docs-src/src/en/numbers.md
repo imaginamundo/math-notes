@@ -167,6 +167,10 @@ A step can carry its own unit, and a duration written in several units is rounde
 2.3 in to nearest 16th
 ```
 
+## Number bases
+
+Convert a whole number with `in`, `to` or `as`: `255 in hex` is `0xff`, `255 to bin` is `0b11111111`, `255 as octal` is `0o377`, `0x9F31 to decimal` is 40,753 and `5300 in sci` is `5.3e+3`. The bit operators `<<`, `>>`, `&`, `|`, `^|` and `~` are exact for whole numbers well past 32 bits.
+
 ## Constants and functions
 
 `pi` and `π` are available, along with the standard mathjs functions and these aliases:

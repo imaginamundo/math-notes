@@ -8,19 +8,19 @@ const value = (v) => ({ type: 'value', value: v });
 test("line(n) becomes a token bound to that line's value", () => {
   const out = resolveLineRefs(parsed('line(1) + line(2)'), [value(10), value(5)], 2);
   assert.equal(out.error, null);
-  assert.equal(out.parsed.code, '__line_1 + __line_2');
+  assert.equal(out.parsed.code, '(__line_1) + (__line_2)');
   assert.deepEqual(out.values, { __line_1: 10, __line_2: 5 });
 });
 
 test('whitespace inside the reference is accepted', () => {
   const out = resolveLineRefs(parsed('line ( 1 )'), [value(3)], 1);
   assert.equal(out.error, null);
-  assert.equal(out.parsed.code, '__line_1');
+  assert.equal(out.parsed.code, '(__line_1)');
 });
 
 test('an assignment rewrites its right-hand side too', () => {
   const out = resolveLineRefs(parsed('x = line(1) * 2', 'line(1) * 2'), [value(4)], 1);
-  assert.equal(out.parsed.rhs, '__line_1 * 2');
+  assert.equal(out.parsed.rhs, '(__line_1) * 2');
   assert.deepEqual(out.values, { __line_1: 4 });
 });
 
@@ -65,4 +65,12 @@ test('a value of zero is still a value', () => {
   const out = resolveLineRefs(parsed('line(1)'), [value(0)], 1);
   assert.equal(out.error, null);
   assert.deepEqual(out.values, { __line_1: 0 });
+});
+
+test('SHEET-07: a unit or digit right after line(n) is a separate factor', async () => {
+  const { evaluateLines } = await import('../js/core/calculate.js');
+  const row = (lines, i) => evaluateLines(lines).results[i];
+  assert.equal(row(['5', 'line(1)km'], 1).value.toNumeric('km'), 5);
+  assert.equal(row(['5', 'line(1)2'], 1).value, 10);
+  assert.equal(row(['5', 'line(1) km'], 1).value.toNumeric('km'), 5);
 });
