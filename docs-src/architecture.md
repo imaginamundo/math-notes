@@ -284,6 +284,14 @@ window's changes to the tab list and to other tabs are adopted, and this window'
 text changed. The docs search is an ARIA combobox (options, active descendant, a live result count, closes when focus
 leaves it), and the mobile drawer is a modal: dialog semantics, the page behind it inert and Tab wrapping inside it.
 
+Evaluation scheduling (Wave 9): the client runs one evaluation at a time; an edit that arrives meanwhile
+sets a flag and a single follow-up evaluates the newest text, so a slow sheet never queues one evaluation per
+keystroke. The worker posts `ready` (with `PROTOCOL_VERSION`) once its bundle has loaded; an evaluation is timed
+from then, with a longer allowance before it (a slow first download is not a stuck worker). A worker that reports
+another protocol version, or answers before ever reporting, is another release's worker (a hard reload pairs a page
+with the worker the old service worker serves) and is not used: the main thread evaluates. Copy result waits at
+most three seconds and writes nothing if the sheet or the caret moved meanwhile.
+
 Rate and worker notes (Wave 9): a worker that errors is started again once; a second error moves evaluation to the main thread for the session, and a failed fallback import is retried under a new URL (the browser remembers a failed import by URL). Assigning to `end` says it is a reserved word, and a row's old error text is cleared when a shorter message replaces it.
 
 Tags in calculations: trailing `#tags` label a line only when the code before them is a

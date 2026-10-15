@@ -1,6 +1,6 @@
 import { loadCached } from './storage/currencyRates.js';
 import { createEvalGuard } from './storage/evalGuard.js';
-import { MSG, SETTING } from './protocol.js';
+import { MSG, SETTING, PROTOCOL_VERSION } from './protocol.js';
 import { readMeasurementSystem } from './core/measurementSystem.js';
 import { DEFAULT_MEASUREMENT_SYSTEM } from './core/measures.js';
 import { DEFAULT_PRECISION, readDecimalPrecision } from './core/decimalPrecision.js';
@@ -11,6 +11,8 @@ import { sheetLines } from './util/text.js';
 import { firstDifference } from './util/sequence.js';
 
 const EVALUATE_TIMEOUT = 10000;
+// A worker that has not reported in yet may still be downloading its bundle.
+const LOAD_TIMEOUT = 60000;
 const UPDATE_DELAY = 250;
 
 /**
@@ -98,6 +100,19 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
       return null;
     }
     created.addEventListener('message', (event) => {
+      const data = event.data || {};
+      if (data.type === MSG.ready) {
+        created.loaded = true;
+        // A worker from another release (a hard reload pairs this page with the worker the
+        // old service worker still serves) speaks a different protocol: do not use it.
+        if (data.protocol !== PROTOCOL_VERSION && created === worker) dropWorker();
+        return;
+      }
+      // An older worker never says it has loaded, so a reply before that is the same case.
+      if (!created.loaded && data.type === MSG.result && created === worker) {
+        dropWorker();
+        return;
+      }
       const callback = pending.get(event.data.id);
       if (!callback) return;
       pending.delete(event.data.id);
@@ -231,10 +246,16 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
   function workerEvaluate(worker, lines) {
     return new Promise((resolve, reject) => {
       const id = ++latestId;
-      const timer = setTimeout(() => {
-        pending.delete(id);
-        reject(new Error('Evaluation timed out'));
-      }, EVALUATE_TIMEOUT);
+      // Time the evaluation, not the download: until the worker says it has loaded its
+      // bundle (a first visit on a slow link), it gets the longer load allowance, and a
+      // worker that fails to load is reported by its error event instead.
+      const timer = setTimeout(
+        () => {
+          pending.delete(id);
+          reject(new Error('Evaluation timed out'));
+        },
+        worker.loaded ? EVALUATE_TIMEOUT : LOAD_TIMEOUT
+      );
       pending.set(id, (data) => {
         clearTimeout(timer);
         if (data.type === MSG.error) reject(new Error(data.message));
@@ -281,7 +302,28 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
   // one to resolve advances the worker's diff cache and renders, and if we had
   // skipped it by sequence number alone, the second would come back as "no
   // change" (startLine -1) and nothing would ever render.
-  async function update() {
+  // One evaluation at a time: an edit that arrives while one is running is not sent behind it
+  // (a slow sheet would queue one full evaluation per keystroke and the watchdog would time
+  // the queue). It marks the sheet dirty and a single follow-up evaluates the newest text.
+  let running = null;
+  let rerun = false;
+  function update() {
+    if (running) {
+      rerun = true;
+      return running;
+    }
+    running = (async () => {
+      do {
+        rerun = false;
+        await runUpdate();
+      } while (rerun);
+    })().finally(() => {
+      running = null;
+    });
+    return running;
+  }
+
+  async function runUpdate() {
     const text = editableNode.value;
     const lines = sheetLines(text);
     // This exact sheet stopped the app last time it was calculated. Draw what was

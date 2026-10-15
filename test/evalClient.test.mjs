@@ -4,19 +4,28 @@ import assert from 'node:assert/strict';
 // A tiny Worker stand-in that records messages and can auto-answer or be
 // crashed, so evalClient's scheduling/gating/fallback logic can be unit-tested
 // instead of relying on browser e2e only.
+import { PROTOCOL_VERSION } from '../js/protocol.js';
+
 class WorkerStub {
   static latest = null;
   static defaultAutoReply = true;
+  static readyProtocol = PROTOCOL_VERSION;
   constructor() {
     this.listeners = {};
     this.sent = [];
     this.autoReply = WorkerStub.defaultAutoReply;
+    // What the worker reports about its protocol when it first hears from the page.
+    this.readyProtocol = WorkerStub.readyProtocol;
     WorkerStub.latest = this;
   }
   addEventListener(type, fn) {
     (this.listeners[type] ||= []).push(fn);
   }
   postMessage(message) {
+    if (this.readyProtocol !== null && !this.said) {
+      this.said = true;
+      this.emit('message', { data: { type: 'ready', protocol: this.readyProtocol } });
+    }
     if (this.throwOnEvaluate && message.type === 'evaluate') {
       this.throwOnEvaluate = false;
       throw new Error('postMessage failed');
@@ -237,19 +246,22 @@ test('a stale reply does not consume a pending precision force', async () => {
 
   const r1 = client.update();
   const id1 = evaluateIds().at(-1);
+  const sentBefore = evaluateIds().length;
   client.syncPrecision(5);
+  // One evaluation at a time: this one waits for the first and then runs once.
   const r2 = client.update();
-  const id2 = evaluateIds().at(-1);
-  assert.notEqual(id1, id2);
+  assert.equal(evaluateIds().length, sentBefore, 'nothing is queued behind the running one');
 
   const reply = (id) =>
     worker.emit('message', {
       data: { id, type: 'result', results: [], total: '4', startLine: -1 },
     });
   reply(id1);
-  await r1;
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const id2 = evaluateIds().at(-1);
+  assert.notEqual(id1, id2);
   reply(id2);
-  await r2;
+  await Promise.all([r1, r2]);
 
   assert.equal(renders.length, 2);
   assert.equal(renders[0].data.startLine, -1, 'the pre-change reply is not forced');
@@ -373,4 +385,29 @@ test('CORE-05: the main-thread fallback gets the settings it was sent before it 
   const value = renders.at(-1).data.results[0].value;
   const ml = value.toNumber('ml');
   assert.ok(Math.abs(ml - 236.588) < 0.01, `a US cup is 236.6 ml, got ${ml}`);
+});
+
+test('a worker from another release is not used', async () => {
+  const { client, renders } = setup();
+  WorkerStub.readyProtocol = PROTOCOL_VERSION + 1;
+  try {
+    await client.update();
+  } finally {
+    WorkerStub.readyProtocol = PROTOCOL_VERSION;
+  }
+  assert.equal(renders.at(-1).data.total, 2, 'the main-thread engine evaluated 1 + 1');
+  const before = WorkerStub.latest;
+  await client.update();
+  assert.equal(WorkerStub.latest, before, 'no new worker is started');
+});
+
+test('a worker that replies without ever loading is an older release', async () => {
+  const { client, renders } = setup();
+  WorkerStub.readyProtocol = null;
+  try {
+    await client.update();
+  } finally {
+    WorkerStub.readyProtocol = PROTOCOL_VERSION;
+  }
+  assert.equal(renders.at(-1).data.total, 2);
 });

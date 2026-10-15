@@ -49,7 +49,7 @@ test('both ends import the protocol', () => {
     assert.ok(code.includes("from './protocol.js'"), `${rel} does not import js/protocol.js`);
     assert.ok(code.includes('MSG.'), `${rel} does not use MSG`);
   }
-  assert.deepEqual(Object.keys(MSG), ['evaluate', 'setting', 'result', 'error']);
+  assert.deepEqual(Object.keys(MSG), ['evaluate', 'setting', 'result', 'error', 'ready']);
 });
 
 test('no setting name is spelled as a string literal outside the protocol', () => {

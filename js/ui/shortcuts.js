@@ -53,7 +53,18 @@ async function copyCurrentLineResult(editableNode, requestResults) {
   const value = editableNode.value;
   const lineIndex = indexOfLineAt(value, editableNode.selectionStart);
   try {
-    const { results } = await requestResults(value.split('\n'));
+    // Give up rather than write seconds later over whatever was copied in between.
+    const { results } = await Promise.race([
+      requestResults(value.split('\n')),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('copy timed out')), 3000)),
+    ]);
+    // The sheet or the caret moved while waiting: that result is no longer the current line's.
+    if (
+      editableNode.value !== value ||
+      indexOfLineAt(editableNode.value, editableNode.selectionStart) !== lineIndex
+    ) {
+      return;
+    }
     const result = results[lineIndex];
     if (result && result.type !== 'error' && result.value !== undefined) {
       // Without the thousands separators, so pasting it back reads as the same number.

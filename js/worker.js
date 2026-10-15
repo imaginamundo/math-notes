@@ -6,7 +6,7 @@ import {
 } from './core/calculate.js';
 import { DEFAULT_PRECISION, normalizeDecimalPrecision } from './core/decimalPrecision.js';
 import { DEFAULT_CLOCK_FORMAT } from './core/clockFormat.js';
-import { MSG, SETTING } from './protocol.js';
+import { MSG, SETTING, PROTOCOL_VERSION } from './protocol.js';
 import formatResult, { serializeResults } from './render/formatResult.js';
 import { applyLinePatch } from './util/sequence.js';
 
@@ -63,3 +63,7 @@ self.addEventListener('message', (event) => {
     }
   }
 });
+
+// Say so once the bundle has loaded and the handler is installed, so the client times an
+// evaluation from here and not from the start of the download.
+self.postMessage({ type: MSG.ready, protocol: PROTOCOL_VERSION });
