@@ -219,8 +219,8 @@ test('undefined multi-word names give a phrase-level error', () => {
 });
 
 test('single unknown symbols keep the mathjs message', () => {
-  assert.equal(evaluateLines(['foo + 1']).results[0].value, 'Undefined symbol foo');
-  assert.equal(evaluateLines(['sin x']).results[0].value, 'Undefined symbol x');
+  assert.equal(evaluateLines(['foo + 1']).results[0].value, '"foo" is not defined');
+  assert.equal(evaluateLines(['sin x']).results[0].value, '"x" is not defined');
 });
 
 test('a variable shadowing a unit is named in the conversion error', () => {
@@ -228,7 +228,7 @@ test('a variable shadowing a unit is named in the conversion error', () => {
   assert.equal(results[1].type, 'error');
   assert.equal(
     results[1].value,
-    '"m" is a variable, so it cannot be used as a unit in a conversion. Rename the variable to convert to m.'
+    '"m" is a variable, so it cannot be a unit here; rename it to convert to m'
   );
   // Without the shadowing variable the conversion still works.
   assert.equal(evaluateLines(['5km to m']).results[0].value.toNumber(), 5000);

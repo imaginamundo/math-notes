@@ -1,12 +1,4 @@
 {
-  "total": 903,
-  "categories": [
-    "cannot calculate max, unexpected type",
-    "function cot",
-    "function for",
-    "function in",
-    "function of",
-    "too few arguments",
-    "unexpected type of argument"
-  ]
+  "total": 0,
+  "categories": []
 }

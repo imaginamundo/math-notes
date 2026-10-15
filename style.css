@@ -544,6 +544,9 @@ textarea {
   /* On a phone a long total wraps rather than being cut off. */
   overflow-wrap: anywhere;
 }
+.total.error {
+  color: var(--color-ghost-error);
+}
 .variable {
   color: var(--color-variable);
 }

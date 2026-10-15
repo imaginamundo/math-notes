@@ -37,9 +37,9 @@ test('unitMixError rejects a product of two kinds', () => {
 });
 
 test('unitMixError rejects a power that is not length area or volume', () => {
-  assert.equal(mix('2 h * 3 h'), '"h" cannot be used with that power');
-  assert.equal(mix('5 kg^2'), '"kg" cannot be used with that power');
-  assert.equal(mix('(4 m)^0.5'), '"m" cannot be used with that power');
+  assert.equal(mix('2 h * 3 h'), 'A power of "h" has no meaning here');
+  assert.equal(mix('5 kg^2'), 'A power of "kg" has no meaning here');
+  assert.equal(mix('(4 m)^0.5'), 'A power of "m" has no meaning here');
 });
 
 test('unitMixError keeps the currency messages', () => {

@@ -79,5 +79,5 @@ function broken(value) {
   if (labels.length > 1) {
     return `Cannot combine "${labels[0]}" and "${labels[1]}" — that unit has no meaning`;
   }
-  return `"${labels[0]}" cannot be used with that power`;
+  return `A power of "${labels[0]}" has no meaning here`;
 }

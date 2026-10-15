@@ -148,9 +148,12 @@ const WRITTEN_DATE = new RegExp(
   'gi'
 );
 const MERIDIEM_CLOCK = new RegExp(
-  `(?<![\\w:.])((?:(?:0?\\d|1[0-2]):[0-5]\\d|(?:0?[1-9]|1[0-2]))\\s*[ap]\\.?m\\.?)(?![\\w:])`,
+  `(?<![\\w:.])((?:\\d{1,2}:\\d{2}|(?:0?[1-9]|1[0-2]))\\s*[ap]\\.?m\\.?)(?![\\w:])`,
   'gi'
 );
+// A time-shaped `h:mm` that cannot be a time (`25:00`, `9:75`). Reading it as a range would
+// give a list nobody meant, so it is reported as the invalid time it is.
+const IMPOSSIBLE_CLOCK = /(?<![\w:."])(\d{1,2}:\d{2})(?![\w:]|\s*[ap]\.?m)/g;
 
 // The helper calls already written (`__clockInterval("9:00", …)`) carry their dates as
 // strings, which are left as they are.
@@ -167,6 +170,10 @@ function dateWords(expr, context) {
         names && names.has(text.toLowerCase()) ? text : `__date(${JSON.stringify(text)})`
       )
       .replace(MERIDIEM_CLOCK, (text) => `__clock(${JSON.stringify(text)})`)
+      .replace(IMPOSSIBLE_CLOCK, (text) => {
+        const [hour, minute] = text.split(':').map(Number);
+        return hour > 23 || minute > 59 ? `__clock(${JSON.stringify(text)})` : text;
+      })
   );
 }
 

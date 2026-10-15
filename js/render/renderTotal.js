@@ -12,6 +12,12 @@ let announceTimer = null;
 function renderTotal(totalNode, total) {
   const text = total === null ? '' : formatResult(total, getDecimalPrecision(), getClockFormat());
   totalNode.textContent = text;
+  // A total that could not be worked out (different currencies) is an error string, and
+  // looks like one, as the same message on a `sum` line does.
+  const failed = typeof total === 'string';
+  totalNode.classList.toggle('error', failed);
+  if (failed) totalNode.setAttribute('aria-invalid', 'true');
+  else totalNode.removeAttribute('aria-invalid');
 
   const live = liveRegionFor(totalNode);
   if (!live) return;

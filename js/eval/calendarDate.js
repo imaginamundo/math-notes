@@ -200,9 +200,11 @@ function parseClock(text, now) {
   const s = String(text).trim().toLowerCase().replace(/\./g, '').replace(/\s+/g, ' ');
   if (s === 'now') return markClock(new Date(now));
   let m = /^(\d{1,2}):(\d{2}) ?([ap])m$/.exec(s);
-  if (m) return markClock(clockAt(now, to24(+m[1], m[3]), +m[2]));
+  if (m && +m[1] >= 1 && +m[1] <= 12 && +m[2] <= 59) {
+    return markClock(clockAt(now, to24(+m[1], m[3]), +m[2]));
+  }
   m = /^(\d{1,2}) ?([ap])m$/.exec(s);
-  if (m) return markClock(clockAt(now, to24(+m[1], m[2]), 0));
+  if (m && +m[1] >= 1 && +m[1] <= 12) return markClock(clockAt(now, to24(+m[1], m[2]), 0));
   m = /^(\d{1,2}):(\d{2})$/.exec(s);
   if (m && +m[1] <= 23 && +m[2] <= 59) return markClock(clockAt(now, +m[1], +m[2]));
   return null;
@@ -219,7 +221,7 @@ function to24(hour, mer) {
 
 function requireClock(text) {
   const clock = parseClock(text, currentTime());
-  if (!clock) throw new Error(`"${text}" is not a clock time I understand`);
+  if (!clock) throw new Error(`"${text}" is not a valid time`);
   return clock;
 }
 
@@ -287,7 +289,7 @@ function parseDurationExact(text) {
 
 function requireDate(text) {
   const date = parseDate(text, currentTime);
-  if (!date) throw new Error(`"${text}" is not a date I understand`);
+  if (!date) throw new Error(`"${text}" is not a valid date`);
   return date;
 }
 

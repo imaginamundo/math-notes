@@ -252,6 +252,18 @@ symbol followed by digits and then more letters (`cad3d`, `RM2x`, `top10RM`) is 
 money; `usd2024` alone still is. `coulomb` is the unit (mathjs's constant of that name is
 shadowed).
 
+Error messages (`js/core/errorCatalogue.js`, `friendlyErrors.js`): one catalogue maps the mathjs
+message patterns (type errors by operation and operand kind, wrong argument counts, parse errors,
+unit mismatches, undefined names) to short plain sentences in one voice: impersonal, the user's own
+words in double quotes, "list" for matrix, no internal function names and no `(char N)` offsets,
+which count the rewritten text and not the typed line. A conversion error names the unit as it was
+typed (`Cannot convert "g" to "m"`, not the `1.5 kg` mathjs simplified it to). An unknown name is
+`"x" is not defined` (and `"f" is not a known function`), and the unknown word is named alone when a
+unit or connector sits beside it (`5 kg in zorkmids`). A time that cannot exist (`25:00`, `9:75`)
+is reported as an invalid time instead of becoming a range. A total that cannot be worked out (two
+currencies) is styled as an error, like the same message on a `sum` line. The error-leak ratchet
+sweeps value kinds against operators and functions and is at zero.
+
 Tags in calculations: trailing `#tags` label a line only when the code before them is a
 finished expression (`isCompleteCode` in `parseLine.js`); after an operator, `=`, `(` or a
 word operator (`5 + #food`, `x = #food`) the tag is an operand and the line is not

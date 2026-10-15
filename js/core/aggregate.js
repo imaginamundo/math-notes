@@ -213,7 +213,7 @@ function groupCount(group) {
 function currencyConflict(groups) {
   const currencies = groups.filter((group) => group.kind === 'currency');
   if (currencies.length < 2) return null;
-  const names = currencies.map((group) => group.name);
+  const names = currencies.map((group) => `"${group.name}"`);
   const last = names.pop();
   return `Cannot combine ${names.join(', ')} and ${last} — convert them first`;
 }

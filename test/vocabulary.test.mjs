@@ -12,7 +12,7 @@ import { ratchet } from './helpers/ratchet.mjs';
 const engine = createEngine({ rates: FIXTURE_RATES });
 const run = (line) => engine.evaluateLines([line]).results[0];
 
-const UNDEFINED = /Undefined (symbol|function)|is not defined/;
+const UNDEFINED = /Undefined (symbol|function)|is not defined|is not a known function/;
 
 function failure(entry) {
   const { text, kind } = entry;

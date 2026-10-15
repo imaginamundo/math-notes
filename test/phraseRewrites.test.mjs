@@ -102,11 +102,11 @@ test('a day count converts the count, not one day', () => {
 test('workdays in takes a period or a duration, and nothing else', () => {
   assert.equal(one('workdays in June 2026'), '22');
   assert.equal(one('workdays in 3 weeks'), '15');
-  assert.match(one('workdays in June 2026 - 2 days'), /^ERR.*not a period/);
-  assert.match(one('workdays in 4 weeks / 2'), /^ERR.*not a period/);
-  assert.match(one('workdays in 3 weeks * 25 EUR'), /^ERR.*not a period/);
-  assert.match(one('workdays in 2 weeks in hours'), /^ERR.*not a period/);
-  assert.match(one('workdays in 2 weeks + 3 kg'), /^ERR.*not a period/);
+  assert.match(one('workdays in June 2026 - 2 days'), /^ERR.*not a valid period/);
+  assert.match(one('workdays in 4 weeks / 2'), /^ERR.*not a valid period/);
+  assert.match(one('workdays in 3 weeks * 25 EUR'), /^ERR.*not a valid period/);
+  assert.match(one('workdays in 2 weeks in hours'), /^ERR.*not a valid period/);
+  assert.match(one('workdays in 2 weeks + 3 kg'), /^ERR.*not a valid period/);
 });
 
 test('a single bare letter after a name is a unit, not a date duration', () => {

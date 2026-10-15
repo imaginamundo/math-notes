@@ -165,7 +165,7 @@ function addWorkdays(date, amount) {
 function workdaysInMonth(text) {
   const m = /^([a-z]+)(?:\s+(\d{4}))?$/i.exec(String(text).trim());
   if (!m || !MONTHS[m[1].toLowerCase()]) {
-    throw new Error(`"${text}" is not a month I understand`);
+    throw new Error(`"${text}" is not a valid month`);
   }
   const month = MONTHS[m[1].toLowerCase()];
   const year = m[2] ? +m[2] : currentTime().getFullYear();
@@ -199,7 +199,7 @@ function workdaysInDuration(text) {
   // Only a period or a plain run of number-and-unit pairs: `3 weeks - 1 week` or
   // `3 weeks * 25 EUR` is not one, and used to be read as the pairs it contained.
   const parts = parseDurationExact(text);
-  if (!parts) throw new Error(`"${text}" is not a period I understand`);
+  if (!parts) throw new Error(`"${text}" is not a valid period`);
   const days =
     (parts.week || 0) * 7 +
     (parts.day || 0) +

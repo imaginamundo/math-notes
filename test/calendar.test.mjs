@@ -111,7 +111,7 @@ test('workdays in a calendar period', () => {
 test('workdays in unrecognised text is an error, not zero', () => {
   const { results } = evaluateLines(['workdays in banana']);
   assert.equal(results[0].type, 'error');
-  assert.match(results[0].value, /not a period/);
+  assert.match(results[0].value, /not a valid period/);
 });
 
 test('adding and subtracting workdays', () => {
