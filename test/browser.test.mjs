@@ -2600,3 +2600,89 @@ test('UIE-24: a Replace All is its own undo step', async () => {
   assert.equal(await value(), 'apple + apple');
   assert.deepEqual(errors, []);
 });
+
+test('UIE-06: the textarea is as wide as the text the view draws, whatever the glyphs', async () => {
+  await newPage();
+  await page.setViewport({ width: 700, height: 600 });
+  const lines = [
+    '1'.repeat(200),
+    `# ${'漢'.repeat(150)}`,
+    `Rent\t\t\t1200 # ${'😀'.repeat(60)}`,
+    `# ${'e\u0301'.repeat(120)}`,
+  ];
+  await setContent(lines.join('\n'));
+  await wait(400);
+  // Scroll each line's end into view and look at what is under it: the textarea, so that a
+  // click there places the caret, and not the empty editor surface.
+  const hits = await page.evaluate(() => {
+    const scroller = document.querySelector('.editor-scroll');
+    const textarea = document.getElementById('content-editable');
+    const results = [];
+    for (const line of document.querySelectorAll('#view .line')) {
+      scroller.scrollLeft = 0;
+      const end = line.getBoundingClientRect().right - scroller.getBoundingClientRect().left;
+      scroller.scrollLeft = Math.max(0, end - scroller.clientWidth + 60);
+      const rect = line.getBoundingClientRect();
+      const hit = document.elementFromPoint(rect.right - 2, rect.top + rect.height / 2);
+      results.push(hit === textarea);
+    }
+    return results;
+  });
+  assert.deepEqual(hits, [true, true, true, true]);
+  assert.deepEqual(errors, []);
+});
+
+test('UIE-06: End on a line of wide glyphs keeps the caret in view', async () => {
+  await newPage();
+  await page.setViewport({ width: 700, height: 600 });
+  await setContent(`# ${'漢'.repeat(120)}`);
+  await wait(300);
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.focus();
+    ed.setSelectionRange(ed.value.length, ed.value.length);
+  });
+  await page.keyboard.press('End');
+  await page.keyboard.type('x');
+  await wait(200);
+  const state = await page.evaluate(() => {
+    const scroller = document.querySelector('.editor-scroll');
+    const textarea = document.getElementById('content-editable');
+    const probe = document.createElement('span');
+    probe.style.cssText = `position:absolute;visibility:hidden;white-space:pre;font:${getComputedStyle(textarea).font}`;
+    probe.textContent = textarea.value;
+    document.body.appendChild(probe);
+    const textWidth = probe.getBoundingClientRect().width;
+    probe.remove();
+    const padLeft = parseFloat(getComputedStyle(textarea).paddingLeft);
+    const caretX = padLeft + textWidth;
+    return {
+      caretX,
+      left: scroller.scrollLeft,
+      right: scroller.scrollLeft + scroller.clientWidth,
+    };
+  });
+  assert.ok(state.caretX <= state.right && state.caretX >= state.left, JSON.stringify(state));
+  assert.deepEqual(errors, []);
+});
+
+test('UIE-05: a result chip stays after a right-to-left line instead of joining it', async () => {
+  await newPage();
+  await setContent('5 + 5 # עברית\n2 + 2 # שלום 3');
+  await wait(500);
+  const placed = await page.evaluate(() =>
+    [...document.querySelectorAll('#view .line-row')].map((row) => {
+      const line = row.querySelector('.line').getBoundingClientRect();
+      const ghost = row.querySelector('.ghost-result');
+      return {
+        bidi: getComputedStyle(ghost).unicodeBidi,
+        after: ghost.getBoundingClientRect().left >= line.right - 1,
+      };
+    })
+  );
+  for (const row of placed) {
+    assert.equal(row.bidi, 'isolate');
+    assert.equal(row.after, true);
+  }
+  assert.deepEqual(errors, []);
+});

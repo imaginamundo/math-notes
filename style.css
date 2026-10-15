@@ -494,6 +494,9 @@ textarea {
   border-bottom-right-radius: 4px;
 }
 .ghost-result {
+  /* An isolated run: its neutral arrow and digits must not join a right-to-left line before it
+     (Hebrew, Arabic), or the text drifts away from the textarea's. */
+  unicode-bidi: isolate;
   margin-left: 1.5em;
   color: var(--color-ghost);
   /* A subtle chip separates results/errors from the user's input. */

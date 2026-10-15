@@ -42,6 +42,31 @@ function initEditorScroll(editableNode) {
   });
 
   let charWidth = 0;
+  // The rendered width of a line (or the start of one). Printable ASCII is one cell per
+  // character, but a tab, a CJK or emoji glyph and a combining mark are not, and the textarea
+  // has to be as wide as the text the view really draws. Such text is measured once, in a hidden
+  // element with the editor's font and tab size, and remembered by its text.
+  let widthCache = new Map();
+  let widthProbe = null;
+  const PLAIN = /^[\x20-\x7e]*$/;
+
+  function textWidth(text) {
+    if (!charWidth) measureCharWidth();
+    if (PLAIN.test(text)) return text.length * charWidth;
+    const known = widthCache.get(text);
+    if (known !== undefined) return known;
+    if (!widthProbe) {
+      const cs = getComputedStyle(editableNode);
+      widthProbe = document.createElement('span');
+      widthProbe.style.cssText = `position: absolute; visibility: hidden; white-space: pre; font: ${cs.font}; tab-size: ${cs.tabSize}; pointer-events: none;`;
+      document.body.appendChild(widthProbe);
+    }
+    widthProbe.textContent = text;
+    const width = widthProbe.getBoundingClientRect().width;
+    if (widthCache.size > 2000) widthCache.clear();
+    widthCache.set(text, width);
+    return width;
+  }
   let cachedGutterInset = null;
   let metricsCache = null;
   let extentCache = null;
@@ -106,12 +131,14 @@ function initEditorScroll(editableNode) {
     if (!extentCache || extentCache.value !== value) {
       const lines = sheetLines(value);
       let longest = 0;
-      for (const line of lines) if (line.length > longest) longest = line.length;
+      for (const line of lines) {
+        const width = textWidth(line);
+        if (width > longest) longest = width;
+      }
       extentCache = { value, longest, count: lines.length };
     }
-    if (!charWidth) measureCharWidth();
     return {
-      width: m.padLeft + m.padRight + extentCache.longest * charWidth,
+      width: m.padLeft + m.padRight + extentCache.longest,
       height: m.padTop + m.padBottom + extentCache.count * m.lineHeight,
     };
   }
@@ -157,7 +184,7 @@ function initEditorScroll(editableNode) {
     const lineStart = startOfLine(value, pos);
     if (!charWidth) measureCharWidth();
     const m = metrics();
-    const x = m.padLeft + (pos - lineStart) * charWidth;
+    const x = m.padLeft + textWidth(value.slice(lineStart, pos));
     const y = m.padTop + lineIndex * m.lineHeight;
     const margin = 24;
     // The line-number gutter is a fixed, opaque overlay on the left (it mirrors
@@ -262,7 +289,7 @@ function initEditorScroll(editableNode) {
     if (!charWidth) measureCharWidth();
     const m = metrics();
     return {
-      left: m.padLeft + (pos - startOfLine(value, pos)) * charWidth,
+      left: m.padLeft + textWidth(value.slice(startOfLine(value, pos), pos)),
       top: m.padTop + indexOfLineAt(value, pos) * m.lineHeight,
       lineHeight: m.lineHeight,
       charWidth,
@@ -278,6 +305,9 @@ function initEditorScroll(editableNode) {
     // Re-measure the glyphs and recompute the row metrics to match.
     refreshMetrics() {
       charWidth = 0;
+      widthCache = new Map();
+      if (widthProbe) widthProbe.remove();
+      widthProbe = null;
       cachedGutterInset = null;
       metricsCache = null;
       extentCache = null;

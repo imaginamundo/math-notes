@@ -1,5 +1,5 @@
 {
-  "version": 133,
+  "version": 134,
   "files": {
     "index.html": "68a0005b66a25de10ee8046327240d5d45f641a989e6fb26852891f4384360d4",
     "js/core/aggregate.js": "9a0f23e09eb4e11fe2870a1f325b9a3e20e7fbced26cee8d4a1b2d84aea4ece6",
@@ -87,7 +87,7 @@
     "js/ui/autocomplete.js": "ada147d52d6d9645eb221139e63da949c0bc6fd90364df54e9b70b60a9db1585",
     "js/ui/cosmetic.js": "4f607735940499235a40069ed15b2e5bc5eca5b121e8c0a7df665462e53c45e2",
     "js/ui/docsLink.js": "dc51e2f9fb326d8f94878058a1b8b8a11df2a307218000c639d3f5ef8f7e0300",
-    "js/ui/editor.js": "5394a620f405091c71225cd4bc133e402f2c7d549a8852f04c0929fdd4f1f5b7",
+    "js/ui/editor.js": "0f2ec614b4e332307e3c75d5192e446b3298c4ab22f4e8bd6ce221c9a8fec32c",
     "js/ui/editorInput.js": "4d7fa36d82660566b2dd1b2aa523f1a6c15d2b7147c1a2ebf706511e179347ca",
     "js/ui/examples.js": "081e408def7b07b75b3fbeead07b376c760f405d74d220893d1ee64e375da28a",
     "js/ui/find.js": "e751ea0c99a9a9af32fe0f38d704896cf92ac4cdf4310d7960a97ae952bbdb4d",
@@ -118,7 +118,7 @@
     "js/util/storage.js": "b2d149129745093034c0ba0209bf33ef207f032cd56b400ae78d459cbfe7cf2e",
     "js/util/text.js": "ab3d82227ec72f93ca55ca2f88c3497ad82646f1de3a904519807fb33a9a97de",
     "js/worker.js": "71d1f9fc62c8bf5355151719bd7326b6e212e04e77732b4ca843f125c5922d3f",
-    "style.css": "610959239d33c587bfb7a5814d62cf2f9a41c507f4eba8bd55076c8fba55f0a3",
+    "style.css": "8d9f19ad5df7675ee0d19ef4eef26a6f6b4c8d60a9cbd2fe0e4da7d653915a31",
     "manifest.json": "8b14555234a5e39e8bc834c3215263bfa1a50598daa96ab3b1dfdfa2e766fc58",
     "favicon.ico": "913b06334fa28b39b9c18e643b208f7457b2409142225afea4656b2b7245f300",
     "docs/404.html": "e2e27b04556710babdffecca684709a8aaa6563190a1e6545ffa30e5363d5e7b",
