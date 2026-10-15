@@ -297,7 +297,11 @@ function initAutocomplete(editableNode, editorScroll) {
     if (typeof editorScroll.caretPosition !== 'function') return;
     const caret = editorScroll.caretPosition();
     if (!caret) return;
-    popup.style.left = `${caret.left}px`;
+    // Keep the popup inside the visible width: with the editor scrolled sideways, the caret can
+    // sit at the very edge and the popup would show only a sliver.
+    const viewLeft = scroller.scrollLeft;
+    const room = scroller.clientWidth - popup.offsetWidth - 8;
+    popup.style.left = `${Math.max(viewLeft + 4, Math.min(caret.left, viewLeft + room))}px`;
     const below = caret.top + caret.lineHeight;
     popup.style.top = `${below}px`;
     const viewTop = scroller.scrollTop;

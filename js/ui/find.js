@@ -151,7 +151,7 @@ function initFind(editableNode, viewNode) {
     const caret = match.start + replacement.length;
     replaceAnchor = caret;
     replaceStart = match.start;
-    setEditorValue(editableNode, value, { start: caret, end: caret });
+    setEditorValue(editableNode, value, { start: caret, end: caret }, { separateStep: true });
     scrollToActive();
     replaceInput.focus();
   }
@@ -168,7 +168,7 @@ function initFind(editableNode, viewNode) {
     }
     out += value.slice(last);
     const caret = out.length;
-    setEditorValue(editableNode, out, { start: caret, end: caret });
+    setEditorValue(editableNode, out, { start: caret, end: caret }, { separateStep: true });
     scrollToActive();
     replaceInput.focus();
   }

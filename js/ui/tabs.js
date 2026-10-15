@@ -204,14 +204,17 @@ function initTabs(editableNode, onUpdate) {
 
   editableNode.value = lastValue;
 
-  editableNode.addEventListener('input', () => {
+  editableNode.addEventListener('input', (event) => {
     if (resetting) return;
     const value = editableNode.value;
     if (value === lastValue) return;
     dirty = true;
+    // Typing before it is committed as its own step, so this edit is not folded into it.
+    if (event.separateStep) flushDraft();
     history.record(state.activeId, lastValue, value);
     lastValue = value;
     burst.schedule();
+    if (event.separateStep) flushDraft();
     state = setContent(state, state.activeId, value);
     writer.schedule();
     scheduleSnapshot();

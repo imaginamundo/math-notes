@@ -44,7 +44,7 @@ function initShortcuts(editableNode, requestResults, switchTab) {
     } else if (shift && key === 'backspace') {
       event.preventDefault();
       if (!editableNode.value || window.confirm(t('shortcuts.clearConfirm'))) {
-        setEditorValue(editableNode, '');
+        setEditorValue(editableNode, '', null, { separateStep: true });
       }
     }
   });

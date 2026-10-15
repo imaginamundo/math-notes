@@ -294,6 +294,8 @@ Sheet language (Wave 9): `js/eval/unitWords.js` rewrites area and volume words (
 
 More sheet language (Wave 9): a singular `day`/`week` left by arithmetic is drawn as a duration (`1 day + 2 hours` is `1 day 2 hours`, `1 day + 2 days` is `3 days`), `fromunix` reads an 11 to 13 digit timestamp as milliseconds and refuses a date out of range, and a clock time followed by a time-zone name says zones are not supported.
 
+Editor details (Wave 9): the caret's row is kept clear of the bottom edge by its bottom, not its top; a gutter number does not take focus and the caret keeps its place (shifted only when it is on or after the toggled line); the gutter follows a caret that script sets after a tab switch; the textarea is as wide as its row, so a click beside overflowing results still lands in the editor; the autocomplete popup is kept inside the visible width; and Replace, Replace All and Clear sheet are each their own undo step (`separateStep` on `setEditorValue`).
+
 Evaluation scheduling (Wave 9): the client runs one evaluation at a time; an edit that arrives meanwhile
 sets a flag and a single follow-up evaluates the newest text, so a slow sheet never queues one evaluation per
 keystroke. The worker posts `ready` (with `PROTOCOL_VERSION`) once its bundle has loaded; an evaluation is timed

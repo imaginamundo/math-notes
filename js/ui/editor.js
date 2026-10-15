@@ -171,7 +171,10 @@ function initEditorScroll(editableNode) {
     if (x < nextLeft + leftInset) nextLeft = Math.max(0, x - leftInset);
     else if (x > nextLeft + viewWidth - margin) nextLeft = x - viewWidth + margin;
     if (y < nextTop + margin) nextTop = Math.max(0, y - margin);
-    else if (y > nextTop + viewHeight - margin) nextTop = y - viewHeight + margin;
+    // The row's bottom, not its top, has to clear the margin, or the row is half hidden.
+    else if (y + m.lineHeight > nextTop + viewHeight - margin) {
+      nextTop = y + m.lineHeight - viewHeight + margin;
+    }
     // Writing the offset back when it already holds that value is free, so the
     // common case (the caret is already in view) touches no layout at all.
     if (nextLeft !== scrollerScrollLeft) {

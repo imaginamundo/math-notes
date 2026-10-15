@@ -2542,3 +2542,55 @@ test('UIE-09: a new tab is scrolled into view in a crowded tab bar', async () =>
   assert.equal(visible, true);
   assert.deepEqual(errors, []);
 });
+
+test('UIE-16: pressing a gutter number keeps focus and the caret in the editor', async () => {
+  await newPage();
+  await setContent('a = 1\nb = 2\nc = a + b');
+  await wait(300);
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.focus();
+    ed.setSelectionRange(12, 12);
+  });
+  await page.click('.line-numbers span[data-line="0"]');
+  await wait(100);
+  const state = await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    return { focused: document.activeElement === ed, start: ed.selectionStart, value: ed.value };
+  });
+  assert.equal(state.focused, true);
+  assert.equal(state.value.startsWith('# a = 1'), true);
+  assert.equal(state.start, 14, 'the caret keeps its place, shifted by the inserted "# "');
+  assert.deepEqual(errors, []);
+});
+
+test('UIE-24: a Replace All is its own undo step', async () => {
+  await newPage();
+  await setContent('apple + apple');
+  await wait(300);
+  await page.evaluate(() => {
+    const ed = document.getElementById('content-editable');
+    ed.focus();
+    ed.setSelectionRange(13, 13);
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'f', metaKey: true, bubbles: true, cancelable: true })
+    );
+    const find = document.querySelector('.find-input');
+    find.value = 'apple';
+    find.dispatchEvent(new Event('input', { bubbles: true }));
+    document.querySelector('.replace-input').value = 'pear';
+  });
+  await page.evaluate(() => document.querySelector('.replace-all').click());
+  await wait(100);
+  assert.equal(await value(), 'pear + pear');
+  await page.evaluate(() => {
+    document.querySelector('.find-close, .find-bar .close')?.click();
+    document.getElementById('content-editable').focus();
+  });
+  await page.keyboard.down('Meta');
+  await page.keyboard.press('z');
+  await page.keyboard.up('Meta');
+  await wait(150);
+  assert.equal(await value(), 'apple + apple');
+  assert.deepEqual(errors, []);
+});

@@ -428,6 +428,9 @@ html.i18n-pending .layout {
   outline: none;
   resize: none;
   overflow: hidden;
+  /* As wide as its row even when only the results overflow, so a click beside the text
+     (where the scrolled-into-view results sit) still lands in the editor. */
+  min-width: 100%;
 }
 .content-editable::placeholder {
   /* Hidden until the app has restored the active sheet (js/index.js adds
