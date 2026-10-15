@@ -27,6 +27,10 @@ const KEYWORDS = [
   ['nearest', 'round to a multiple'],
   ['workdays', 'Monday to Friday'],
   ['weekday', 'day of the week (weekday on March 9)'],
+  ['christmas', 'a date, 25 December'],
+  ['halloween', 'a date, 31 October'],
+  ['unit', 'define your own unit: unit box = 12'],
+  ['timespan', 'show a duration as parts (5.5 min as timespan)'],
 ];
 
 const FUNCTIONS = [
@@ -105,7 +109,26 @@ function units() {
   }
   for (const code of currencyCodes()) names.add(code);
   for (const symbol of Object.keys(CURRENCY_SYMBOLS)) names.add(symbol);
-  for (const unit of ['px', 'em', 'point']) names.add(unit);
+  // Units outside the cooking and measuring families that the reference documents.
+  const others = [
+    ...['degC', 'degF', 'K', 'kelvin', 'J', 'W', 'watt', 'hp', 'Pa', 'psi', 'atm', 'bar', 'torr'],
+    ...[
+      'acre',
+      'hectare',
+      'sqft',
+      'sqin',
+      'sqm',
+      'cuft',
+      'Hz',
+      'hertz',
+      'N',
+      'newton',
+      'V',
+      'volt',
+    ],
+    ...['ohm', 'A', 'amp', 'mol', 'rad', 'deg', 'kn', 'knot', 'nmi'],
+  ];
+  for (const unit of [...others, 'px', 'em', 'point']) names.add(unit);
   return [...names].sort((a, b) => a.localeCompare(b));
 }
 

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Page not found · Math Notes</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="theme-color" content="#282c34">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('math-notes-theme');
+        if (t) document.documentElement.dataset.theme = t;
+        var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);
+        if (s >= 50 && s <= 200) {
+          document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="/docs/docs.js"></script>
+</head>
+<body>
+  <main class="doc-main" id="content" style="max-width: 40rem; margin: 4rem auto; padding: 0 1rem">
+    <h1>Page not found</h1>
+    <p>There is nothing at this address. Try the documentation or the app:</p>
+    <ul>
+      <li><a href="/docs/">Documentation (en)</a></li>
+      <li><a href="/docs/pt/">Documentação (pt)</a></li>
+      <li><a href="/docs/es/">Documentación (es)</a></li>
+      <li><a href="/">Math Notes</a></li>
+    </ul>
+  </main>
+</body>
+</html>

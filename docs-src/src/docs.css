@@ -6,7 +6,12 @@ html {
      `1rem` base) and the app's own text-size preference, so every rem-based
      size follows both instead of only the inheriting body text. */
   font-size: calc(1rem * var(--app-font-scale, 1));
-  scroll-padding-top: 5rem;
+}
+/* Anchor jumps clear the sticky header through the target's own margin. A scroll-padding on the
+   page made the browser treat the header's own controls as covered and scroll the page on
+   every keystroke or focus in them. */
+[id] {
+  scroll-margin-top: 5rem;
 }
 
 /* Respect the reader's motion preference: anchor jumps and scroll-spy animate

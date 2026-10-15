@@ -1021,3 +1021,11 @@ test('SHEET-18: fromunix reads milliseconds and refuses an impossible date', () 
   assert.match(String(value('fromunix(1733823083)')), /2024/);
   assert.match(String(value('fromunix(1733823083000000)')), /outside the range/);
 });
+
+test('UIE-18: a name in any script is a variable', () => {
+  for (const name of ['цена', '価格', '가격', 'מחיר', 'سعر', 'người', 'café']) {
+    const rows = evaluateLines([`${name} = 5`, `${name} * 2`]).results;
+    assert.equal(rows[1].value, 10, name);
+  }
+  assert.equal(evaluateLines(['日本 円 = 3', '日本 円 + 1']).results[1].value, 4);
+});

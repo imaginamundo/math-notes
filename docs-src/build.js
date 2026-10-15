@@ -457,6 +457,35 @@ for (const lang of LANGS_AVAILABLE) {
   }
 }
 
+// GitHub Pages serves /404.html for any address that does not exist. Every link is absolute,
+// since the page is shown at whatever path was mistyped.
+function notFoundHtml() {
+  const links = LANGS_AVAILABLE.map(
+    (lang) => `<li><a href="${docPath(lang, '')}">${escapeHtml(UI[lang].docs)} (${lang})</a></li>`
+  ).join('\n      ');
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Page not found · Math Notes</title>
+  ${assets()}
+</head>
+<body>
+  <main class="doc-main" id="content" style="max-width: 40rem; margin: 4rem auto; padding: 0 1rem">
+    <h1>Page not found</h1>
+    <p>There is nothing at this address. Try the documentation or the app:</p>
+    <ul>
+      ${links}
+      <li><a href="/">Math Notes</a></li>
+    </ul>
+  </main>
+</body>
+</html>
+`;
+}
+write(`${DIST}404.html`, notFoundHtml());
+
 copyFileSync(`${SRC}docs.css`, `${DIST}docs.css`);
 copyFileSync(`${SRC}docs.js`, `${DIST}docs.js`);
 

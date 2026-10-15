@@ -208,6 +208,12 @@ function snapResidue(result, expression) {
 
 function createEngine({ rates } = {}) {
   const math = create(all);
+  // mathjs reads only Latin and Greek letters as part of a name, so `цена = 5` and `価格 = 100`
+  // were syntax errors although labels, tags and unit names already accept any script. A letter
+  // or combining mark of any language is a name character here too.
+  const latinOrGreek = math.parse.isAlpha;
+  math.parse.isAlpha = (c, cPrev, cNext) =>
+    latinOrGreek(c, cPrev, cNext) || /^[\p{L}\p{M}]$/u.test(c);
   initAliases(math);
   initCssUnits(math);
   initUnits(math);

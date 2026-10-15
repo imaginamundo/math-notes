@@ -198,16 +198,36 @@ function wireScrollSpy() {
   };
 
   // A section is "current" once its top reaches just below the sticky header.
-  // Account for `scroll-padding-top`, which is what anchor jumps align to.
   const header = document.querySelector('.doc-header');
   const headerOffset = () => {
     const sticky = header ? header.getBoundingClientRect().height : 72;
-    const padding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
-    return Math.max(sticky, padding) + 16;
+    // Anchor jumps align a heading to its `scroll-margin-top`, so that is where "current" starts.
+    const margin = targets.length
+      ? parseFloat(getComputedStyle(targets[0].section).scrollMarginTop) || 0
+      : 0;
+    return Math.max(sticky, margin) + 16;
   };
+
+  // The entry the reader chose (a click, or the URL's hash). A section near the end of a page
+  // cannot reach the top, so by position alone the last entry would win; the chosen one holds
+  // until the reader scrolls away from where the jump left the page.
+  let pinned = null;
+  let pinnedAt = 0;
+  const pin = (link) => {
+    pinned = link;
+    requestAnimationFrame(() => {
+      pinnedAt = window.scrollY;
+    });
+  };
+  for (const { link } of targets) link.addEventListener('click', () => pin(link));
+  if (location.hash) {
+    const match = targets.find((entry) => entry.link.hash === location.hash);
+    if (match) pin(match.link);
+  }
 
   const update = () => {
     const offset = headerOffset();
+    if (pinned && Math.abs(window.scrollY - pinnedAt) > 60) pinned = null;
     let current = targets[0].link;
     for (const { link, section } of targets) {
       if (section.getBoundingClientRect().top <= offset) current = link;
@@ -215,7 +235,10 @@ function wireScrollSpy() {
     }
     const atBottom =
       window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
-    if (atBottom) current = targets[targets.length - 1].link;
+    const scrollable = document.documentElement.scrollHeight > window.innerHeight + 2;
+    if (pinned) current = pinned;
+    else if (!scrollable) current = targets[0].link;
+    else if (atBottom) current = targets[targets.length - 1].link;
     setActive(current);
   };
 

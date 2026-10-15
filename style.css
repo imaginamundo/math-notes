@@ -880,6 +880,10 @@ button:hover {
   color: var(--color-operator);
   outline: none;
 }
+.reference.resolved .find-match {
+  /* The raw `line(n)` text stays hidden under the value drawn over it, even while found. */
+  color: transparent;
+}
 .find-match {
   background: rgba(255, 213, 79, 0.8);
   color: #14161a;

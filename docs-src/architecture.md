@@ -296,6 +296,8 @@ More sheet language (Wave 9): a singular `day`/`week` left by arithmetic is draw
 
 Editor details (Wave 9): the caret's row is kept clear of the bottom edge by its bottom, not its top; a gutter number does not take focus and the caret keeps its place (shifted only when it is on or after the toggled line); the gutter follows a caret that script sets after a tab switch; the textarea is as wide as its row, so a click beside overflowing results still lands in the editor; the autocomplete popup is kept inside the visible width; and Replace, Replace All and Clear sheet are each their own undo step (`separateStep` on `setEditorValue`).
 
+Docs site and vocabulary (Wave 9): anchor jumps clear the sticky header through the target's `scroll-margin-top` (a page-level scroll-padding made the browser scroll on every focus or keystroke in the header), the scroll spy keeps the entry the reader chose or the hash names and highlights the first entry on a page that cannot scroll, a `404.html` in the site's style is published, and an uncached docs page offline gets the cached docs index or a plain offline note instead of the app shell. Find marks no longer fragment text nodes, names in any script work as variables (`math.parse.isAlpha` accepts `\p{L}\p{M}`), and autocomplete offers the documented units, `christmas`, `halloween`, `unit` and `timespan`.
+
 Evaluation scheduling (Wave 9): the client runs one evaluation at a time; an edit that arrives meanwhile
 sets a flag and a single follow-up evaluates the newest text, so a slow sheet never queues one evaluation per
 keystroke. The worker posts `ready` (with `PROTOCOL_VERSION`) once its bundle has loaded; an evaluation is timed

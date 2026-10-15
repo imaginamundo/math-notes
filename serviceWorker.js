@@ -1,6 +1,6 @@
 // Served from the site root so its scope is `/` and it can cache the app shell
 // and the documentation (a worker under /js/ could only control /js/).
-const cacheName = 'math-notes-v128';
+const cacheName = 'math-notes-v130';
 const APP_SHELL = './index.html';
 const urlsToCache = [
   './',
@@ -173,12 +173,28 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() =>
+        .catch(() => {
+          if (request.mode !== 'navigate') return Response.error();
+          // A documentation page that was never opened cannot be shown offline. The app shell
+          // is the wrong page for a /docs/ address (an unstyled dead calculator), so offer the
+          // documentation index when it is cached, and say plainly that the page needs a network.
+          if (new URL(request.url).pathname.startsWith('/docs/')) {
+            return caches
+              .match('/docs/')
+              .then(
+                (index) =>
+                  index ||
+                  new Response(
+                    '<!doctype html><meta charset="utf-8"><title>Offline</title>' +
+                      '<p>This page has not been saved for offline use. ' +
+                      '<a href="/">Open Math Notes</a></p>',
+                    { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+                  )
+              );
+          }
           // A navigation offline must show the app shell, not the browser error.
-          request.mode === 'navigate'
-            ? caches.match(APP_SHELL).then((shell) => shell || Response.error())
-            : Response.error()
-        );
+          return caches.match(APP_SHELL).then((shell) => shell || Response.error());
+        });
     })
   );
 });
