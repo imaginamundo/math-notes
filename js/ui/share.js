@@ -4,7 +4,7 @@ import {
   parseShareHash,
   normalizeSheetName,
 } from '../share/shareLink.js';
-import { copyText } from '../util/clipboard.js';
+import { copyPendingText } from '../util/clipboard.js';
 import { t } from '../i18n/index.js';
 import { SHARE_COPY } from '../util/events.js';
 
@@ -62,12 +62,15 @@ function initShare(tabsApi) {
   async function share() {
     const sheet = tabsApi.getActiveSheet();
     const base = `${window.location.origin}${window.location.pathname}`;
-    let built;
-    try {
-      built = await buildShareUrl(base, sheet);
-    } catch {
-      built = null;
-    }
+    // The copy starts now, inside the click, with the link still being built (WebKit allows a
+    // clipboard write only shortly after the gesture).
+    const building = buildShareUrl(base, sheet).catch(() => null);
+    const text = building.then((result) => {
+      if (!result || !result.url) throw new Error('no link');
+      return result.url;
+    });
+    const copying = copyPendingText(text);
+    const built = await building;
     if (built && built.tooLarge) {
       showStatus(t('share.tooLarge'));
       return;
@@ -79,7 +82,7 @@ function initShare(tabsApi) {
     // Exposed so the browser test can read the built URL without needing
     // clipboard permissions in headless Chrome.
     buttonNode.dataset.url = built.url;
-    if (await copyText(built.url)) {
+    if (await copying) {
       // An earlier failed copy left its link in the address bar; it is stale now.
       if (ownToken() && parseShareHash(window.location.hash)) {
         try {

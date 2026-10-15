@@ -348,3 +348,15 @@ test('SEC-02: a short error after a long one does not bring the long text back',
   assert.equal(ghost.textContent, 'short problem');
   renderer.updateActiveLine(-1); // nothing left to announce
 });
+
+test('UIE-15: an emoji stays in one text node instead of lone surrogates', () => {
+  const node = format.line('"🍕" 👨‍👩‍👧 + 1');
+  const texts = node.children
+    .filter((child) => child.nodeType === 3 || child.textContent !== undefined)
+    .map((child) => child.textContent ?? child.data);
+  for (const text of texts) {
+    assert.doesNotMatch(text, /^[\uD800-\uDBFF]$|^[\uDC00-\uDFFF]$/, 'no lone surrogate node');
+  }
+  assert.ok(texts.includes('🍕'));
+  assert.ok(texts.includes('👨‍👩‍👧'));
+});

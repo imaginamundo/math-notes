@@ -7,6 +7,40 @@ function initEditorScroll(editableNode) {
   const scroller = editableNode.closest('.editor-scroll');
   if (!scroller) return {};
 
+  // WebKit resets a textarea's selection and the scroll offset when focus arrives by Tab or
+  // Shift+Tab (and the next Tab would then indent line 1). Remember them when the editor
+  // loses focus and put them back when it gets focus from the keyboard; a click or tap sets
+  // its own caret and is left alone.
+  let leaving = null;
+  let pointerDown = false;
+  document.addEventListener('pointerdown', () => (pointerDown = true), true);
+  document.addEventListener('pointerup', () => setTimeout(() => (pointerDown = false)), true);
+  editableNode.addEventListener('blur', () => {
+    leaving = {
+      value: editableNode.value,
+      start: editableNode.selectionStart,
+      end: editableNode.selectionEnd,
+      top: scroller.scrollTop,
+      left: scroller.scrollLeft,
+    };
+  });
+  editableNode.addEventListener('focus', () => {
+    const saved = leaving;
+    leaving = null;
+    if (!saved || pointerDown || saved.value !== editableNode.value) return;
+    // The WebKit symptom is a selection reset to the very start; anything else was set on
+    // purpose (a found match, a restored tab) and stays.
+    if (editableNode.selectionStart !== 0 || editableNode.selectionEnd !== 0) return;
+    if (saved.start === 0 && saved.end === 0) return;
+    try {
+      editableNode.setSelectionRange(saved.start, saved.end);
+    } catch {
+      // an unusable selection is ignored
+    }
+    scroller.scrollTop = saved.top;
+    scroller.scrollLeft = saved.left;
+  });
+
   let charWidth = 0;
   let cachedGutterInset = null;
   let metricsCache = null;
