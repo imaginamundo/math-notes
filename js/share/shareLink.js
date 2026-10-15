@@ -45,10 +45,15 @@ const LONG_URL_LENGTH = 8000;
  * @param {{ name: string, content: string }} sheet
  * @returns {Promise<string|null>}
  */
+const TOO_LARGE = Symbol('too large');
+
 async function encodeSheet(sheet) {
   try {
     const json = JSON.stringify({ n: String(sheet.name ?? ''), c: String(sheet.content ?? '') });
     const bytes = new TextEncoder().encode(json);
+    // The importer refuses more than this, so a link for such a sheet would only fail
+    // for whoever opens it.
+    if (bytes.length > MAX_DECODED_BYTES) return TOO_LARGE;
     if (!SUPPORTS_COMPRESSION) return `${VERSION_PLAIN}.${toBase64Url(bytes)}`;
     return `${VERSION_COMPRESSED}.${toBase64Url(await deflate(bytes))}`;
   } catch {
@@ -102,13 +107,27 @@ async function decodeSheet(token) {
  * Build the full shareable URL for a sheet.
  * @param {string} base  Origin + pathname, without hash or query.
  * @param {{ name: string, content: string }} sheet
- * @returns {Promise<{ url: string, long: boolean }|null>}
+ * @returns {Promise<{ url: string, long: boolean }|{ tooLarge: true }|null>}
  */
 async function buildShareUrl(base, sheet) {
   const token = await encodeSheet(sheet);
+  if (token === TOO_LARGE) return { tooLarge: true };
   if (token === null) return null;
   const url = `${base}#${HASH_KEY}=${token}`;
   return { url, long: url.length > LONG_URL_LENGTH };
+}
+
+// A name from a link follows the rename rules: whitespace collapsed, invisible characters
+// dropped, at most 30 characters, and blank means "use the default".
+const NAME_LIMIT = 30;
+
+function normalizeSheetName(name) {
+  return String(name ?? '')
+    .replace(/[\p{Cf}\p{Cc}]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, NAME_LIMIT)
+    .trim();
 }
 
 /**
@@ -124,5 +143,5 @@ function parseShareHash(hash) {
   return token || null;
 }
 
-export { encodeSheet, decodeSheet, buildShareUrl, parseShareHash };
+export { encodeSheet, decodeSheet, buildShareUrl, parseShareHash, normalizeSheetName, TOO_LARGE };
 export { HASH_KEY, MAX_DECODED_BYTES, LONG_URL_LENGTH };

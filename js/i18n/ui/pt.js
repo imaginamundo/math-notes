@@ -45,6 +45,8 @@ export default {
 
   'share.buildFailed': 'Não foi possível criar um link para esta planilha',
   'share.copiedLong': 'Link copiado — é longo, alguns apps podem cortá-lo',
+  'share.tooLarge':
+    'Esta folha é demasiado grande para partilhar como ligação; exporte-a como ficheiro',
   'share.copied': 'Link copiado',
   'share.copyFailed': 'Não foi possível copiar — o link está na barra de endereços',
   'share.unreadable': 'Não foi possível ler esse link',
@@ -54,6 +56,7 @@ export default {
 
   'io.importConfirm': 'A importação substituirá o conteúdo da aba atual. Continuar?',
   'io.importTooLarge': 'Esse ficheiro é demasiado grande para importar',
+  'io.importNotText': 'Esse ficheiro não é texto, por isso não foi importado',
 
   'tabs.list': 'Planilhas',
   'tabs.rename': 'Clique duas vezes para renomear',

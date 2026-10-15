@@ -1,4 +1,9 @@
-import { buildShareUrl, decodeSheet, parseShareHash } from '../share/shareLink.js';
+import {
+  buildShareUrl,
+  decodeSheet,
+  parseShareHash,
+  normalizeSheetName,
+} from '../share/shareLink.js';
 import { copyText } from '../util/clipboard.js';
 import { t } from '../i18n/index.js';
 import { SHARE_COPY } from '../util/events.js';
@@ -18,6 +23,27 @@ const STATUS_TIMEOUT = 6000;
  *
  * @param {{ openSheet: Function, getActiveSheet: Function }} tabsApi
  */
+// The token of the link this window last put in the address bar by hand (a failed copy).
+// A reload must not offer it back as an import, and a later copy that works clears it.
+const OWN_TOKEN_KEY = 'math-notes-own-share';
+
+function ownToken() {
+  try {
+    return window.sessionStorage.getItem(OWN_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function rememberOwnToken(token) {
+  try {
+    if (token) window.sessionStorage.setItem(OWN_TOKEN_KEY, token);
+    else window.sessionStorage.removeItem(OWN_TOKEN_KEY);
+  } catch {
+    // sessionStorage unavailable; the fragment is still stripped on import
+  }
+}
+
 function initShare(tabsApi) {
   const buttonNode = document.getElementById('share-button');
   const statusNode = document.getElementById('share-status');
@@ -42,6 +68,10 @@ function initShare(tabsApi) {
     } catch {
       built = null;
     }
+    if (built && built.tooLarge) {
+      showStatus(t('share.tooLarge'));
+      return;
+    }
     if (!built) {
       showStatus(t('share.buildFailed'));
       return;
@@ -50,6 +80,15 @@ function initShare(tabsApi) {
     // clipboard permissions in headless Chrome.
     buttonNode.dataset.url = built.url;
     if (await copyText(built.url)) {
+      // An earlier failed copy left its link in the address bar; it is stale now.
+      if (ownToken() && parseShareHash(window.location.hash)) {
+        try {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        } catch {
+          // history unavailable
+        }
+      }
+      rememberOwnToken(null);
       showStatus(built.long ? t('share.copiedLong') : t('share.copied'));
       return;
     }
@@ -57,6 +96,7 @@ function initShare(tabsApi) {
     // by hand. replaceState puts it there without firing a hashchange —
     // importing our own token would prompt to open the sheet already on screen.
     showStatus(t('share.copyFailed'));
+    rememberOwnToken(parseShareHash(built.url.slice(built.url.indexOf('#'))));
     try {
       window.history.replaceState(
         null,
@@ -75,6 +115,15 @@ function initShare(tabsApi) {
   async function importFromHash() {
     const token = parseShareHash(window.location.hash);
     if (!token) return;
+    // Our own link, left in the address bar by a failed copy: nothing to import.
+    if (token === ownToken()) {
+      try {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      } catch {
+        // history unavailable
+      }
+      return;
+    }
 
     const sheet = await decodeSheet(token);
     // Strip the fragment either way: a refresh must not re-import a duplicate,
@@ -89,7 +138,7 @@ function initShare(tabsApi) {
       showStatus(t('share.unreadable'));
       return;
     }
-    const name = sheet.name || t('share.defaultName');
+    const name = normalizeSheetName(sheet.name) || t('share.defaultName');
     if (!window.confirm(t('share.openConfirm', { name }))) return;
     tabsApi.openSheet({ name, content: sheet.content });
     showStatus(t('share.opened', { name }));

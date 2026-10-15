@@ -145,3 +145,26 @@ test('parseShareHash ignores hashes that carry no share token', () => {
     assert.equal(parseShareHash(hash), null, `hash: ${JSON.stringify(hash)}`);
   }
 });
+
+test('a sheet over the importer cap is reported as too large, not as a working link', async () => {
+  const { buildShareUrl, decodeSheet, parseShareHash, MAX_DECODED_BYTES } =
+    await import('../js/share/shareLink.js');
+  // Newlines cost 2 bytes each once JSON-encoded, so 90,000 lines are over the cap.
+  const big = { name: 'big', content: 'a\n'.repeat(90_000) };
+  assert.deepEqual(await buildShareUrl('https://x.test/', big), { tooLarge: true });
+  const ok = { name: 'ok', content: 'a'.repeat(1000) };
+  const built = await buildShareUrl('https://x.test/', ok);
+  assert.ok(built.url);
+  const token = parseShareHash(built.url.slice(built.url.indexOf('#')));
+  assert.equal((await decodeSheet(token)).content, ok.content);
+  assert.ok(MAX_DECODED_BYTES > 0);
+});
+
+test('a name from a link follows the rename rules', async () => {
+  const { normalizeSheetName } = await import('../js/share/shareLink.js');
+  assert.equal(normalizeSheetName('  rent \n budget '), 'rent budget');
+  assert.equal(normalizeSheetName('x'.repeat(3000)).length, 30);
+  assert.equal(normalizeSheetName('   '), '');
+  assert.equal(normalizeSheetName('​​'), '');
+  assert.equal(normalizeSheetName(undefined), '');
+});

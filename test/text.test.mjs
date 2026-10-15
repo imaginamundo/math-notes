@@ -42,3 +42,17 @@ test('changeCaret lands at the end of the changed region', () => {
   // No change.
   assert.equal(changeCaret('abc', 'abc'), 3);
 });
+
+test('looksLikeText refuses binary and mis-decoded files', async () => {
+  const { looksLikeText } = await import('../js/util/text.js');
+  assert.equal(looksLikeText('1 + 1\npreço = 5'), true);
+  assert.equal(looksLikeText('a\0b'), false);
+  assert.equal(looksLikeText('�'.repeat(50) + 'abc'), false);
+  assert.equal(looksLikeText('a'.repeat(100) + '�'), true);
+});
+
+test('localDateStamp is the local calendar day', async () => {
+  const { localDateStamp } = await import('../js/util/text.js');
+  assert.equal(localDateStamp(new Date(2026, 9, 13, 23, 57)), '2026-10-13');
+  assert.equal(localDateStamp(new Date(2026, 0, 5, 0, 1)), '2026-01-05');
+});

@@ -2,7 +2,6 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { ratchet } from './helpers/ratchet.mjs';
 
 // Text drawn on the editor background must reach WCAG AA (4.5:1) in every
 // theme: the syntax colours, and the dimmed inline results (a translucent

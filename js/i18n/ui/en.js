@@ -45,6 +45,7 @@ export default {
 
   'share.buildFailed': "Couldn't build a link for this sheet",
   'share.copiedLong': "Link copied — it's long, some apps may cut it",
+  'share.tooLarge': 'This sheet is too large to share as a link; export it as a file instead',
   'share.copied': 'Link copied',
   'share.copyFailed': "Couldn't copy — the link is in the address bar",
   'share.unreadable': "That share link couldn't be read",
@@ -54,6 +55,7 @@ export default {
 
   'io.importConfirm': "Importing will replace the current tab's content. Continue?",
   'io.importTooLarge': 'That file is too large to import',
+  'io.importNotText': 'That file is not text, so it was not imported',
 
   'tabs.list': 'Worksheets',
   'tabs.rename': 'Double-click to rename',

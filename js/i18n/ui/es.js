@@ -44,6 +44,8 @@ export default {
 
   'share.buildFailed': 'No se pudo crear un enlace para esta hoja',
   'share.copiedLong': 'Enlace copiado — es largo, algunas apps pueden cortarlo',
+  'share.tooLarge':
+    'Esta hoja es demasiado grande para compartirla como enlace; expórtala como archivo',
   'share.copied': 'Enlace copiado',
   'share.copyFailed': 'No se pudo copiar — el enlace está en la barra de direcciones',
   'share.unreadable': 'No se pudo leer ese enlace',
@@ -53,6 +55,7 @@ export default {
 
   'io.importConfirm': 'La importación reemplazará el contenido de la pestaña actual. ¿Continuar?',
   'io.importTooLarge': 'Ese archivo es demasiado grande para importarlo',
+  'io.importNotText': 'Ese archivo no es texto, así que no se importó',
 
   'tabs.list': 'Hojas',
   'tabs.rename': 'Doble clic para renombrar',

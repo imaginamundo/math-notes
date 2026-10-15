@@ -50,4 +50,18 @@ function changeCaret(current, next) {
   return next.length - suffix;
 }
 
-export { indexOfLineAt, startOfLine, sheetLines, changeCaret };
+// Whether decoded file content is text a person wrote: no NUL (binary data and UTF-16
+// read as UTF-8 are full of them) and not mostly replacement characters.
+function looksLikeText(text) {
+  if (text.includes('\0')) return false;
+  const replaced = (text.match(/\uFFFD/g) || []).length;
+  return replaced === 0 || replaced / text.length < 0.02;
+}
+
+// `YYYY-MM-DD` of the local calendar day, the day the sheet's `today` shows.
+function localDateStamp(date = new Date()) {
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+export { indexOfLineAt, startOfLine, sheetLines, changeCaret, looksLikeText, localDateStamp };
