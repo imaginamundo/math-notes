@@ -245,6 +245,13 @@ loads and an override of the base would leave the copy at its old size. Cooking 
 household values (spooned and levelled, as in USDA portion weights). `unit:` names offered by
 autocomplete are held to the engine by the vocabulary ratchet.
 
+Currency: the code set is `CURRENCY_CODES` in `currencySymbols.js` (BGN is not in it: the rate
+feed dropped it with the euro), and autocomplete offers every code in it. A symbol is
+written as its code wherever it can stand, including after `to`, `in` and `as`. A code or
+symbol followed by digits and then more letters (`cad3d`, `RM2x`, `top10RM`) is a name, not
+money; `usd2024` alone still is. `coulomb` is the unit (mathjs's constant of that name is
+shadowed).
+
 Tags in calculations: trailing `#tags` label a line only when the code before them is a
 finished expression (`isCompleteCode` in `parseLine.js`); after an operator, `=`, `(` or a
 word operator (`5 + #food`, `x = #food`) the tag is an operand and the line is not

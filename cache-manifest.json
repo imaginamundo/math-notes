@@ -1,5 +1,5 @@
 {
-  "version": 100,
+  "version": 101,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "8ab30c03ce83a52ec3048a552d376b54d3b502247119c24db874b0251d059156",
@@ -50,10 +50,10 @@
     "js/eval/rates.js": "b7729f8174fd26eb1c4bd25c71406ede9af01918c1bce9afdcb23475a55109f0",
     "js/eval/rounding.js": "63df0aa2ff315762c9794c30914bc3419a7baa78d4a11af767479ea17d4b1b09",
     "js/eval/scales.js": "6c82daf165a7ca07314372da2ec6e42ebe10f89be12e19d64275473f3aebca7d",
-    "js/eval/symbols.js": "dac018c9ec8832b73b2506a0445d4293d0f33682399a42aeab8da12d44ff802a",
+    "js/eval/symbols.js": "2bd1cc43f91512bdd109e6f4f9e6b09dfe669d8fe699ee29017950caa883e199",
     "js/eval/timespan.js": "07bacb5669d01024ccfa3d8e45280fbe41edd21566c5aa145e6438c7eee22417",
     "js/eval/unitRuns.js": "270cd389d4e32f9bd35709692dc5ab02c084117a8f88d4ad87acb2883b123e7f",
-    "js/eval/units.js": "9f8bc84d5fd7ee1b8c977bb50160fcf456761be9412854e11206ee8e1ba1b0e7",
+    "js/eval/units.js": "dae15f6ffb5d33c8a0621646c8b3803fee8452226fcf6fe78713bbcf977f36b7",
     "js/eval/userUnits.js": "0f9a6980d3a01eee868c904db7e47ac25c133dfba1aa3520a595369a80cf5ca7",
     "js/eval/wordOperators.js": "d7b4640a40e62af4970d937abbdcaf18eb47c40db172febadccfe5dea6e08d6c",
     "js/evalClient.js": "dd7360d3012984dd9e67509f95d0850b5b8f50cf079c89241d44b10b1641d9ff",

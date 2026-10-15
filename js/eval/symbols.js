@@ -4,8 +4,16 @@ import { BEFORE_WORD, AFTER_WORD, WORD } from '../core/identifiers.js';
 // The boundaries keep a symbol from matching inside a word (`2 leite` must not
 // read `lei`), while still allowing no space (`R$5`, `350usd`). A digit before
 // the symbol is fine, so only letters/digits/underscore are rejected.
-const SYMBOL_AFTER_NUMBER = new RegExp(`(\\d[\\d.]*)\\s*(${SYMBOL_SOURCE})(?![${WORD}_])`, 'gu');
-const SYMBOL_BEFORE_NUMBER = new RegExp(`(?<![${WORD}_])(${SYMBOL_SOURCE})\\s*(\\d[\\d.]*)`, 'gu');
+const SYMBOL_AFTER_NUMBER = new RegExp(
+  `(?<![${WORD}_])(\\d[\\d.]*)\\s*(${SYMBOL_SOURCE})(?![${WORD}_])`,
+  'gu'
+);
+// The amount after a symbol or code ends the token: `RM2x` and `cad3d` are names, not money.
+const AMOUNT_END = '(?![\\d.\\p{L}\\p{M}_])';
+const SYMBOL_BEFORE_NUMBER = new RegExp(
+  `(?<![${WORD}_])(${SYMBOL_SOURCE})\\s*(\\d[\\d.]*)${AMOUNT_END}`,
+  'gu'
+);
 
 // Currency codes only become units in currency contexts (amounts and `to`/`in`
 // conversions), so bare codes used as identifiers keep their case, e.g.
@@ -20,7 +28,7 @@ const SYMBOL_AFTER_CONVERSION = new RegExp(
 );
 const CODE = '[A-Za-z]{3}';
 const CODE_AFTER_NUMBER = new RegExp(`${BEFORE_WORD}(\\d[\\d.]*)\\s*(${CODE})${AFTER_WORD}`, 'gu');
-const CODE_BEFORE_NUMBER = new RegExp(`${BEFORE_WORD}(${CODE})\\s*(\\d[\\d.]*)`, 'gu');
+const CODE_BEFORE_NUMBER = new RegExp(`${BEFORE_WORD}(${CODE})\\s*(\\d[\\d.]*)${AMOUNT_END}`, 'gu');
 const CODE_BEFORE_TO = new RegExp(`${BEFORE_WORD}(${CODE})(\\s+)to\\b`, 'giu');
 const CODE_AFTER_TO = new RegExp(`\\bto(\\s+)(${CODE})${AFTER_WORD}`, 'giu');
 const CODE_AFTER_IN = new RegExp(`\\bin(\\s+)(${CODE})${AFTER_WORD}`, 'giu');

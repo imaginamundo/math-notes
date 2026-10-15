@@ -15,6 +15,10 @@ function initUnits(math) {
   // is two cups (mathjs has 115 g).
   math.createUnit('stick', { definition: '4 oz', aliases: ['sticks'] }, { override: true });
 
+  // mathjs also has a (deprecated) constant called `coulomb`, Coulomb's constant, which
+  // wins over the unit of the same name. The unit is what the reference lists.
+  math.import({ coulomb: math.unit(1, 'C') }, { override: true });
+
   // Units the app lists and mathjs lacks. Each is created only when it is missing,
   // so a later mathjs that ships one is not overridden.
   const missing = {

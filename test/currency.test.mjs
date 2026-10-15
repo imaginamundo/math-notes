@@ -181,3 +181,42 @@ test('BGN is not a currency', async () => {
   const row = createEngine({ rates: FIXTURE_RATES }).evaluateLines(['1 BGN to EUR']).results[0];
   assert.equal(row.type, 'error');
 });
+
+test('a name that is a code or symbol, digits and more letters is a name', async () => {
+  const { createEngine } = await import('../js/core/calculate.js');
+  const { FIXTURE_RATES } = await import('./helpers/rates.mjs');
+  const last = (lines) =>
+    createEngine({ rates: FIXTURE_RATES }).evaluateLines(lines).results.at(-1);
+  for (const name of [
+    'cad3d',
+    'eur1x',
+    'gbp1st',
+    'usd2024a',
+    'RM2x',
+    'Ft3a',
+    'top10RM',
+    'top10usd',
+  ]) {
+    const row = last([`${name} = 7`, `${name} * 2`]);
+    assert.equal(row.type, 'value', name);
+    assert.equal(row.value, 14, name);
+  }
+  // Code plus digits alone still reads as money.
+  assert.match(String(last(['usd2024']).value.formatUnits?.() ?? last(['usd2024']).value), /USD/);
+});
+
+test('coulomb is the unit, not the constant', async () => {
+  const { evaluateLines } = await import('../js/core/calculate.js');
+  const row = (line) => evaluateLines([line]).results[0];
+  assert.equal(row('2 coulomb to C').type, 'value');
+  assert.equal(row('2 coulomb to C').value.toNumeric('C'), 2);
+  assert.equal(row('2 coulomb + 1 C').value.toNumeric('C'), 3);
+});
+
+test('cp follows the measurement system like cup', async () => {
+  const { createEngine } = await import('../js/core/calculate.js');
+  const engine = createEngine();
+  engine.registerMeasurementSystem('imperial');
+  const [cup, cp] = engine.evaluateLines(['1 cup to ml', '1 cp to ml']).results;
+  assert.equal(cup.value.toNumeric('ml'), cp.value.toNumeric('ml'));
+});
