@@ -7,6 +7,9 @@
   --color-primary-dim: rgba(0, 0, 0, 0.6);
   --color-surface: #2f343d;
   --color-text: #abb2bf;
+  /* Comments, gutter numbers and placeholders: a solid colour that clears 4.5:1 on every
+     surface they sit on, instead of an opacity that does not. */
+  --color-dim: #999fac;
   --color-text-strong: #c0c7d1;
   --color-text-muted: #98a0ac;
 
@@ -69,6 +72,9 @@ html[data-theme='dracula'] {
   --color-primary: #282a36;
   --color-surface: #2f3141;
   --color-text: #f8f8f2;
+  /* Comments, gutter numbers and placeholders: a solid colour that clears 4.5:1 on every
+     surface they sit on, instead of an opacity that does not. */
+  --color-dim: #9c9d9f;
   --color-text-strong: #e3e3e6;
   --color-text-muted: #9aa0b8;
   --color-footer: #1e1f29;
@@ -95,6 +101,9 @@ html[data-theme='solarized-dark'] {
   --color-primary: #002b36;
   --color-surface: #073642;
   --color-text: #93a1a1;
+  /* Comments, gutter numbers and placeholders: a solid colour that clears 4.5:1 on every
+     surface they sit on, instead of an opacity that does not. */
+  --color-dim: #8f9d9e;
   --color-text-strong: #a4b1b4;
   --color-text-muted: #8fa1a8;
   --color-footer: #001f27;
@@ -121,6 +130,9 @@ html[data-theme='monokai'] {
   --color-primary: #272822;
   --color-surface: #2d2d26;
   --color-text: #f8f8f2;
+  /* Comments, gutter numbers and placeholders: a solid colour that clears 4.5:1 on every
+     surface they sit on, instead of an opacity that does not. */
+  --color-dim: #9a9a94;
   --color-text-strong: #e6e6df;
   --color-text-muted: #9a958a;
   --color-footer: #1d1e19;
@@ -149,6 +161,9 @@ html[data-theme='light'] {
   --color-primary-dim: rgba(0, 0, 0, 0.25);
   --color-surface: #eef0f4;
   --color-text: #383a42;
+  /* Comments, gutter numbers and placeholders: a solid colour that clears 4.5:1 on every
+     surface they sit on, instead of an opacity that does not. */
+  --color-dim: #6a6b71;
   --color-text-strong: #202124;
   --color-text-muted: #6f7681;
   --color-footer: #e3e5ea;
@@ -418,12 +433,12 @@ html.i18n-pending .layout {
   color: transparent;
 }
 .content-editable.ready::placeholder {
-  color: var(--color-text);
-  opacity: 0.55;
+  color: var(--color-dim);
+  opacity: 1;
 }
 input::placeholder {
-  color: var(--color-text);
-  opacity: 0.55;
+  color: var(--color-dim);
+  opacity: 1;
 }
 /* Keep the text caret visible on the dark surfaces (iOS defaults it to black). */
 input,
@@ -505,7 +520,7 @@ textarea {
   pointer-events: none;
 }
 .line-numbers span {
-  opacity: 0.55;
+  color: var(--color-dim);
   /* The gutter itself stays pointer-events: none so padding areas still pass
      clicks through to the editor; only the number cells are interactive and
      toggle the line's comment state. */
@@ -517,7 +532,7 @@ textarea {
   background: var(--surface-chip-hover);
 }
 .line-numbers span.active {
-  opacity: 1;
+  color: var(--color-text);
 }
 .total-row {
   display: flex;
@@ -570,7 +585,7 @@ textarea {
   color: var(--color-operator);
 }
 .comment {
-  opacity: 0.5;
+  color: var(--color-dim);
 }
 .tag {
   color: var(--color-tag-text);

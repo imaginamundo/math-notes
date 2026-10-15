@@ -109,26 +109,27 @@ test('results and errors reach AA on the chip they are drawn on, in every theme'
   assert.deepEqual(failures, []);
 });
 
-// Text the stylesheet dims with `opacity` (comments, gutter numbers, placeholder)
-// is measured as its colour at that opacity over the surface behind it
-// (REVIEW.md UIE-19). Several themes are not there yet, so this is a ratchet.
-const DIMMED = [
-  { label: 'comment', token: '--color-text', opacity: 0.5, surface: '--color-primary' },
-  { label: 'gutter number', token: '--color-text', opacity: 0.55, surface: '--color-surface' },
-  { label: 'placeholder', token: '--color-text', opacity: 0.55, surface: '--color-primary' },
-];
-
-test('dimmed text keeps AA contrast (ratchet: UIE-19)', () => {
-  const failing = [];
+// Comments, gutter numbers and placeholders use the solid `--color-dim` token, measured on every
+// surface they sit on: the editor, the gutter, and a group row (REVIEW.md UIE-19).
+test('dimmed text keeps AA contrast in every theme', () => {
+  const failures = [];
   for (const name of Object.keys(themes())) {
     const vars = themeVars(name);
-    for (const { label, token, opacity, surface } of DIMMED) {
-      const [r, g, b] = parseColor(vars[token]);
-      const ratio = contrast([r, g, b, opacity], parseColor(vars[surface]));
-      if (ratio < AA) failing.push(`${name} ${label}`);
+    const dim = parseColor(vars['--color-dim']);
+    const primary = parseColor(vars['--color-primary']);
+    const group = parseColor(vars['--color-group-bg']);
+    const inGroup = [0, 1, 2].map((i) => group[i] * group[3] + primary[i] * (1 - group[3]));
+    const surfaces = {
+      editor: primary,
+      gutter: parseColor(vars['--color-surface']),
+      group: inGroup,
+    };
+    for (const [where, surface] of Object.entries(surfaces)) {
+      const ratio = contrast(dim, surface);
+      if (ratio < AA) failures.push(`${name} dim text on the ${where}: ${ratio.toFixed(2)}:1`);
     }
   }
-  ratchet('contrast-dimmed', failing);
+  assert.deepEqual(failures, []);
 });
 
 test('the editor selection is translucent, so the text under it stays readable', async () => {

@@ -1,5 +1,5 @@
 {
-  "version": 108,
+  "version": 109,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "9a0f23e09eb4e11fe2870a1f325b9a3e20e7fbced26cee8d4a1b2d84aea4ece6",
@@ -115,6 +115,6 @@
     "js/util/storage.js": "b2d149129745093034c0ba0209bf33ef207f032cd56b400ae78d459cbfe7cf2e",
     "js/util/text.js": "b5a945f08ce595855b42b2da43292dec11c2cfc194a2ba6a47ecb8d9330af4e8",
     "js/worker.js": "10330fbc6f630e1045ac57fdc8c13b504189480161812ee00a22ce1dd5752710",
-    "style.css": "3821f0e4177bee59849c0ffb515f2384f97b6fca42622d500112bab0fc8c9221"
+    "style.css": "13209af687336ac884c3542ca754c4513fc40760286e444700f43dc74b2343b8"
   }
 }
