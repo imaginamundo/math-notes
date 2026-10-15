@@ -25,9 +25,16 @@ function save(data) {
   storage.set(STORAGE_KEY, JSON.stringify({ ...data, fetchedAt: Date.now() }));
 }
 
-function isFresh(data) {
-  if (!data || !data.fetchedAt) return false;
-  return new Date(data.fetchedAt).toDateString() === new Date().toDateString();
+// A table is current for a little under the refresh interval, so the hourly re-check always
+// asks again. It used to count as fresh for the whole local day of the fetch, which kept
+// the previous business day's table until midnight for anyone who loaded the app before the
+// day's rates were published.
+const FRESH_FOR = REFRESH_INTERVAL - 5 * 60 * 1000;
+
+function isFresh(data, now = Date.now()) {
+  if (!data || !Number.isFinite(data.fetchedAt)) return false;
+  const age = now - data.fetchedAt;
+  return age >= 0 && age < FRESH_FOR;
 }
 
 function notify(name, detail) {
@@ -74,4 +81,4 @@ function startRateRefresh() {
   }, REFRESH_INTERVAL);
 }
 
-export { STORAGE_KEY, loadCached, fetchRates, startRateRefresh };
+export { STORAGE_KEY, loadCached, fetchRates, startRateRefresh, isFresh };

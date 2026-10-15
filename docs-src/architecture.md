@@ -608,7 +608,9 @@ fallback path) and strings (worker path).
 Currency rates are fetched on the main thread and cached in localStorage by
 `js/storage/currencyRates.js`, which has no mathjs dependency. The composition
 root (`js/index.js`) starts the fetch (`fetchRates`, then `startRateRefresh`,
-which re-checks hourly; a fetch times out after 10 s and falls back to the cached
+which re-checks hourly; a cached table counts as current for just under an hour,
+so a table fetched before the day's rates were published is replaced on the next load
+or hourly check; a fetch times out after 10 s and falls back to the cached
 rates, reported as `source: 'stale'`) and, on each `CURRENCY_UPDATED`, calls
 `evalClient.syncRates`. That posts a `{ type: 'setting', name: 'rates', value }`
 message and, when the main-thread fallback is in use, calls
