@@ -120,6 +120,8 @@ time to 100 km at 50 km/h
 5 km in 25 min
 ```
 
+Dos unidades del mismo tipo unidas con `per`, `a` o `an` siguen siendo una tasa: `8 hours a day` es `8 hours/day`, `8 hours per day for a week` son 56 horas, y `work * 22 days` después de `work = 8 hours a day` son 176 horas. Una `/` simple es una razón (`3 hours / day` es 0,125).
+
 ## Unidades personalizadas
 
 Define tu propia unidad con `unit <nombre> = <cantidad>`. Después se comporta como una nativa: funciona el plural, convierte a las unidades desde las que se definió y se combina con ellas. Cambia la definición y todos los usos la siguen. El plural de la última palabra se genera de las formas inglesas habituales (`box`/`boxes`, `bus`/`buses`, `leaf`/`leaves`, `potato`/`potatoes`) y `ão` pasa a `ões` o `ães`; para cualquier otro plural, usa el singular.

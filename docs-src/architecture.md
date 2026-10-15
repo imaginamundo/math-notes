@@ -302,6 +302,8 @@ Docs CSP and hints (Wave 9): every docs page carries a Content-Security-Policy m
 
 Wide glyphs and right-to-left text (Wave 9): the editor sizes the textarea, scrolls to the caret and places the autocomplete popup from the rendered width of text, not from a character count: printable ASCII is one cell per character, and any other line (tabs, CJK, emoji, combining marks) is measured once in a hidden element with the editor's font and tab size and remembered by its text. A result chip is a `unicode-bidi: isolate` run, so its arrow and digits cannot join a Hebrew or Arabic line before it and pull that text away from the textarea's.
 
+Same-kind rates and `over` (Wave 9): in the phrases `X per|a|an Y [for N Z]` where `X` and `Y` measure the same thing (hours and days, metres and kilometres), `__rateUnit` and `__rateFor` build the compound unit (`8 hours/day`) that mathjs's own division would cancel to a number; `/` stays a ratio. `over` is a word for `/`, and a function name in capitals says which lowercase one is meant.
+
 Evaluation scheduling (Wave 9): the client runs one evaluation at a time; an edit that arrives meanwhile
 sets a flag and a single follow-up evaluates the newest text, so a slow sheet never queues one evaluation per
 keystroke. The worker posts `ready` (with `PROTOCOL_VERSION`) once its bundle has loaded; an evaluation is timed

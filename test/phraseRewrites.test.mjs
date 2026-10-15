@@ -239,3 +239,19 @@ test('SHEET-15: a currency code decides the currency after a symbol', () => {
   assert.equal(show(['x = $30 CAD', 'x + 1 CAD']), one('31 CAD'));
   assert.equal(one('$30 in CAD'), one('30 USD in CAD'));
 });
+
+test('SHEET-10: over divides, and a capitalised function name says which one is meant', () => {
+  assert.equal(one('10 over 2'), '5');
+  assert.equal(one('10 divided by 2'), '5');
+  assert.match(one('5 XOR 3'), /did you mean "xor"\?/);
+});
+
+test('SHEET-11: a rate between two units of one kind stays a rate', () => {
+  assert.equal(one('8 hours a day'), '8 hours/day');
+  assert.equal(one('3 hours per day'), '3 hours/day');
+  assert.equal(one('8 hours per day for a week'), '2 days 8 hours', '56 hours');
+  assert.equal(show(['work = 8 hours a day', 'work * 22 days']), '1 week 8 hours', '176 hours');
+  assert.equal(one('3 hours a day for 2 weeks'), '1 day 18 hours', '42 hours');
+  assert.equal(one('3 hours / day'), '0.125', 'an explicit slash is still a ratio');
+  assert.equal(one('24 km a day for a year'), '8,766 km');
+});

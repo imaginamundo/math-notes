@@ -1,4 +1,4 @@
-import { trailingDimension } from '../core/measures.js';
+import { trailingDimension, unitDimension } from '../core/measures.js';
 import { simplifyLocal } from '../core/unitSimplify.js';
 
 // Rate phrasing on top of mathjs's compound units. mathjs already multiplies,
@@ -21,9 +21,31 @@ const FOR = /\s+for\s+(a|an|\d+(?:\.\d+)?)\s+([A-Za-zµ][A-Za-zµ0-9]*)\b/gi;
 // `3 A h`), and never before a conversion word (`10 a to m`).
 const PER = /\s+([Pp][Ee][Rr]|a|an)\s+(?!(?:to|as|in)\b)([A-Za-zµ][A-Za-zµ0-9]*)\b/g;
 
+// `8 hours a day`, `3 hours per day`, `8 hours a day for a week`: both units measure the same
+// thing, so dividing would cancel to a bare number (0.333). In these phrases the user is naming a
+// rate, so it is kept as one (`8 hours/day`); an explicit `/` is still a ratio.
+const SAME_KIND_RATE = /^(.*\S)\s+(?:[Pp][Ee][Rr]|a|an)\s+([A-Za-zµ][A-Za-zµ0-9]*)$/;
+const SAME_KIND_RATE_FOR =
+  /^(.*\S)\s+(?:[Pp][Ee][Rr]|a|an)\s+([A-Za-zµ][A-Za-zµ0-9]*)\s+for\s+(a|an|\d+(?:\.\d+)?)\s+([A-Za-zµ][A-Za-zµ0-9]*)$/;
+
+function sameKind(quantity, unit) {
+  const dimension = trailingDimension(quantity);
+  return dimension !== null && dimension === unitDimension(unit);
+}
+
 function preprocessRates(expression, context) {
   const names = context && context.names;
   let expr = expression.trim();
+
+  const rateFor = SAME_KIND_RATE_FOR.exec(expr);
+  if (rateFor && sameKind(rateFor[1], rateFor[2]) && sameKind(rateFor[1], rateFor[4])) {
+    const amount = rateFor[3] === 'a' || rateFor[3] === 'an' ? 1 : rateFor[3];
+    return `__rateFor((${rateFor[1]}), "${rateFor[2]}", ${amount}, "${rateFor[4]}")`;
+  }
+  const sameRate = SAME_KIND_RATE.exec(expr);
+  if (sameRate && sameKind(sameRate[1], sameRate[2])) {
+    return `__rateUnit((${sameRate[1]}), "${sameRate[2]}")`;
+  }
 
   const timeTo = TIME_TO.exec(expr);
   if (timeTo) return `(${timeTo[1]}) / (${timeTo[2]})`;
@@ -100,6 +122,19 @@ function initRates(math) {
     {
       __rate: (left, right) => rate(math, left, right),
       __pace: (distance, time) => pace(math, distance, time),
+      // `8 hours a day`: the quantity per one of the unit, kept as a compound unit.
+      __rateUnit: (quantity, per) => {
+        const written = quantity.formatUnits();
+        const amount = quantity.toNumber(written);
+        return math.unit(`${amount} ${written}/${per}`);
+      },
+      // `8 hours a day for a week`: that rate over an amount of the denominator's kind.
+      __rateFor: (quantity, per, amount, span) => {
+        const written = quantity.formatUnits();
+        const perDay = quantity.toNumber(written);
+        const count = math.unit(Number(amount), span).toNumber(per);
+        return math.unit(perDay * count, written);
+      },
     },
     { override: true }
   );

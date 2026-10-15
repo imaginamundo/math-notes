@@ -120,6 +120,8 @@ time to 100 km at 50 km/h
 5 km in 25 min
 ```
 
+Two units of the same kind named with `per`, `a` or `an` stay a rate: `8 hours a day` is `8 hours/day`, `8 hours per day for a week` is 56 hours, and `work * 22 days` after `work = 8 hours a day` is 176 hours. A plain `/` is a ratio (`3 hours / day` is 0.125).
+
 ## Custom units
 
 Define your own unit with `unit <name> = <amount>`. It then behaves like a built-in one: the plural works, it converts to the units it was defined from, and it merges with them. Change the definition and every use follows. The plural of the last word is generated in the usual English ways (`box`/`boxes`, `bus`/`buses`, `leaf`/`leaves`, `potato`/`potatoes`) and `ão` becomes `ões` or `ães`; for any other plural, use the singular.

@@ -108,6 +108,12 @@ function undefinedName(math, symbol, code, scope) {
   const original = unmangleName(symbol);
   if (original) return `"${original}" is not defined`;
 
+  // A function written in capitals (`XOR`, `SQRT`): names are case-sensitive, say which one is meant.
+  const lower = symbol.toLowerCase();
+  if (symbol !== lower && !(symbol in scope) && typeof math[lower] === 'function') {
+    return `"${symbol}" is not defined; did you mean "${lower}"?`;
+  }
+
   // A currency code with no rate behind it: the exchange rates have not arrived (offline, or
   // still loading), which is not the same as a name nobody defined.
   if (isCurrencyCode(symbol) && !(symbol in scope)) {

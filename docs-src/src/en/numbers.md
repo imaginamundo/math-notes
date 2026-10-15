@@ -49,6 +49,10 @@ Calculations can use words instead of symbols:
 10 divided by 2
 ```
 
+```calc returns 5
+10 over 2
+```
+
 ```calc returns 12
 3 mul 4
 ```
