@@ -193,3 +193,15 @@ test('the generated Examples modules carry rendered sections', async () => {
   assert.match(examples.sections[0].id, /^examples-/);
   assert.match(examples.sections[0].html, /class="example-chip"/);
 });
+
+test('every docs page carries a CSP whose digest matches its inline script', async () => {
+  const { createHash } = await import('node:crypto');
+  const { readFileSync, readdirSync } = await import('node:fs');
+  const html = readFileSync(new URL('../docs/units/index.html', import.meta.url), 'utf8');
+  const meta = /Content-Security-Policy" content="([^"]+)"/.exec(html);
+  assert.ok(meta, 'the docs page has a CSP');
+  const script = /<script>([\s\S]*?)<\/script>/.exec(html)[1];
+  const digest = createHash('sha256').update(script).digest('base64');
+  assert.ok(meta[1].includes(`'sha256-${digest}'`), 'the CSP names the inline script digest');
+  assert.ok(readdirSync(new URL('../docs/', import.meta.url)).includes('404.html'));
+});

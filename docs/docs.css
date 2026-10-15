@@ -654,3 +654,9 @@ body {
     max-height: 12rem;
   }
 }
+
+.doc-not-found {
+  max-width: 40rem;
+  margin: 4rem auto;
+  padding: 0 1rem;
+}

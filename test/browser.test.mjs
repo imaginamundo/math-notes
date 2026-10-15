@@ -2190,6 +2190,8 @@ test('the service worker is registered from the site root so it controls the app
 
 test('the documentation headings anchor and the sidebar tracks scrolling', async () => {
   await newPage();
+  // These tests inject a style tag, which the docs CSP rightly blocks.
+  await page.setBypassCSP(true);
   await page.goto(`http://localhost:${server.address().port}/docs/getting-started/`, {
     waitUntil: 'load',
   });
@@ -2240,6 +2242,8 @@ test('the documentation search filters the generated index', async () => {
 
 test('the desktop sidebar stays put while the content scrolls', async () => {
   await newPage();
+  // These tests inject a style tag, which the docs CSP rightly blocks.
+  await page.setBypassCSP(true);
   await page.setViewport({ width: 1200, height: 800 });
   await page.goto(`http://localhost:${server.address().port}/docs/units/`, { waitUntil: 'load' });
   await waitFor(() => page.$('.doc-sidebar'));
@@ -2334,6 +2338,8 @@ test('the mobile header stays compact and the drawer closes after navigating', a
 
 test('the mobile drawer overlays the page and closes on Esc, backdrop and links', async () => {
   await newPage();
+  // These tests inject a style tag, which the docs CSP rightly blocks.
+  await page.setBypassCSP(true);
   await page.setViewport({ width: 390, height: 844, isMobile: true });
   await page.goto(`http://localhost:${server.address().port}/docs/units/`, { waitUntil: 'load' });
   await waitFor(() => page.$('.doc-menu-toggle'));

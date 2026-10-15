@@ -2,6 +2,7 @@
 // `npm run build:docs`. The generated files under the
 // top-level docs/ are committed and published at /docs, like the mathjs bundle.
 import { copyFileSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { marked } from 'marked';
 
@@ -306,24 +307,36 @@ function alternateLinks(slug) {
   return links.join('\n  ');
 }
 
+// The inline bootstrap applies the saved theme and text size before the page paints. Its text is
+// hashed into the page's Content-Security-Policy, so it is built from one string.
+const BOOTSTRAP_LINES = [
+  '  (function () {',
+  '    try {',
+  "      var t = localStorage.getItem('math-notes-theme');",
+  '      if (t) document.documentElement.dataset.theme = t;',
+  "      var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);",
+  '      if (s >= 50 && s <= 200) {',
+  "        document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());",
+  '      }',
+  '    } catch (e) {}',
+  '  })();',
+];
+const BOOTSTRAP_BODY = ['', ...BOOTSTRAP_LINES, ''].join('\n  ');
+const BOOTSTRAP_HASH = createHash('sha256').update(BOOTSTRAP_BODY).digest('base64');
+// The same policy as the app's, without the rate API (the docs fetch only their own files).
+const CSP =
+  `default-src 'self'; base-uri 'self'; object-src 'none'; ` +
+  `script-src 'self' 'sha256-${BOOTSTRAP_HASH}'; style-src 'self'; img-src 'self'; ` +
+  `font-src 'self'; connect-src 'self'; manifest-src 'self'; frame-src 'none'; form-action 'none'`;
+
 function assets() {
   return [
+    `<meta http-equiv="Content-Security-Policy" content="${CSP}">`,
     '<link rel="stylesheet" href="/style.css">',
     '<link rel="stylesheet" href="/docs/docs.css">',
     '<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">',
     '<meta name="theme-color" content="#282c34">',
-    '<script>',
-    '  (function () {',
-    '    try {',
-    "      var t = localStorage.getItem('math-notes-theme');",
-    '      if (t) document.documentElement.dataset.theme = t;',
-    "      var s = parseInt(localStorage.getItem('math-notes-font-scale'), 10);",
-    '      if (s >= 50 && s <= 200) {',
-    "        document.documentElement.style.setProperty('--app-font-scale', (s / 100).toString());",
-    '      }',
-    '    } catch (e) {}',
-    '  })();',
-    '</script>',
+    `<script>${BOOTSTRAP_BODY}</script>`,
     '<script type="module" src="/docs/docs.js"></script>',
   ].join('\n  ');
 }
@@ -472,7 +485,7 @@ function notFoundHtml() {
   ${assets()}
 </head>
 <body>
-  <main class="doc-main" id="content" style="max-width: 40rem; margin: 4rem auto; padding: 0 1rem">
+  <main class="doc-main doc-not-found" id="content">
     <h1>Page not found</h1>
     <p>There is nothing at this address. Try the documentation or the app:</p>
     <ul>
