@@ -134,6 +134,17 @@ function initThemePicker(node) {
     }
   }
 
+  // The inline startup script restores only data-theme, so the browser chrome (theme-color
+  // meta) is brought in step here on every load, not only after a click.
+  syncThemeColor(currentTheme());
+  // Another window changed the theme: follow it.
+  window.addEventListener('storage', (event) => {
+    if (event.key !== STORAGE_KEY || !THEMES.some((entry) => entry.id === event.newValue)) return;
+    document.documentElement.dataset.theme = event.newValue;
+    syncThemeColor(event.newValue);
+    render();
+  });
+
   render();
   renderLabels();
   return { render, renderLabels };

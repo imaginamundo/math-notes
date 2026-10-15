@@ -4,7 +4,7 @@ O Math Notes entende datas de calendário, horários e durações. As datas pode
 
 ## Escrevendo datas
 
-Uma data pode ser escrita como `10 June`, `June 10, 2023`, `2019-04-01` ou `12/02/1988`. Datas sem ano resolvem para a ocorrência mais próxima, e uma data pode ser guardada em uma variável:
+Uma data pode ser escrita como `10 June`, `June 10, 2023`, `2019-04-01` ou `12/02/1988`. Uma data só com números é lida com o dia primeiro (`12/02/1988` é 12 de fevereiro; `02/13/2024` não é uma data), por isso escreva `2019-04-01` quando não puder haver dúvida. Datas sem ano resolvem para a ocorrência mais próxima, e uma data pode ser guardada em uma variável:
 
 ```calc 18 March 2025
 start = March 4, 2025

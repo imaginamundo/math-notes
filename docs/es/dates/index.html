@@ -61,7 +61,7 @@
 <h1>Fechas &amp; tiempo</h1>
 <p>Math Notes entiende fechas de calendario, horas y duraciones. Las fechas se pueden escribir de varias formas, guardar en variables y combinar con unidades de tiempo.</p>
 <h2 id="escribir-fechas">Escribir fechas<a class="doc-anchor" href="#escribir-fechas" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
-<p>Una fecha se puede escribir como <code>10 June</code>, <code>June 10, 2023</code>, <code>2019-04-01</code> o <code>12/02/1988</code>. Las fechas sin año se resuelven a su ocurrencia más cercana, y una fecha se puede guardar en una variable:</p>
+<p>Una fecha se puede escribir como <code>10 June</code>, <code>June 10, 2023</code>, <code>2019-04-01</code> o <code>12/02/1988</code>. Una fecha solo con números se lee con el día primero (<code>12/02/1988</code> es el 12 de febrero; <code>02/13/2024</code> no es una fecha), así que escribe <code>2019-04-01</code> cuando no deba haber duda. Las fechas sin año se resuelven a su ocurrencia más cercana, y una fecha se puede guardar en una variable:</p>
 <figure class="doc-example" data-expr="start = March 4, 2025
 start + 2 weeks"><pre class="doc-code"><code data-calc>start = March 4, 2025
 start + 2 weeks</code></pre><figcaption class="doc-example-result">18 March 2025</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><p>Las palabras de fecha incondicionales <code>today</code>, <code>now</code>, <code>yesterday</code>, <code>tomorrow</code>, <code>christmas</code> y <code>halloween</code> están siempre disponibles.</p>

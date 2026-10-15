@@ -61,7 +61,7 @@
 <h1>Dates &amp; time</h1>
 <p>Math Notes understands calendar dates, clock times and durations. Dates can be written in several styles, stored in variables, and combined with time units.</p>
 <h2 id="writing-dates">Writing dates<a class="doc-anchor" href="#writing-dates" aria-label="Link to this section" title="Link to this section">#</a></h2>
-<p>A date can be written as <code>10 June</code>, <code>June 10, 2023</code>, <code>2019-04-01</code> or <code>12/02/1988</code>. Yearless dates resolve to their nearest occurrence, and a date can be saved in a variable:</p>
+<p>A date can be written as <code>10 June</code>, <code>June 10, 2023</code>, <code>2019-04-01</code> or <code>12/02/1988</code>. A date with numbers only is read day first (<code>12/02/1988</code> is 12 February; <code>02/13/2024</code> is not a date), so write <code>2019-04-01</code> when it must not be ambiguous. Yearless dates resolve to their nearest occurrence, and a date can be saved in a variable:</p>
 <figure class="doc-example" data-expr="start = March 4, 2025
 start + 2 weeks"><pre class="doc-code"><code data-calc>start = March 4, 2025
 start + 2 weeks</code></pre><figcaption class="doc-example-result">18 March 2025</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copied">Copy</button><button type="button" class="doc-action doc-action-primary" data-action="open">Open in Math Notes</button></div></figure><p>The unconditional date words <code>today</code>, <code>now</code>, <code>yesterday</code>, <code>tomorrow</code>, <code>christmas</code> and <code>halloween</code> are always available.</p>

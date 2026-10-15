@@ -47,15 +47,18 @@ function wireExample(figure) {
 
   if (copy) {
     copy.addEventListener('click', () => {
-      try {
-        copyText(expr);
-        copy.textContent = copy.dataset.copied || label;
-        setTimeout(() => {
-          copy.textContent = label;
-        }, 1500);
-      } catch {
-        // clipboard unavailable; leave the label alone
-      }
+      // "Copied" only when something was copied; the clipboard can be blocked outright.
+      Promise.resolve(copyText(expr))
+        .then((copied) => {
+          if (!copied) return;
+          copy.textContent = copy.dataset.copied || label;
+          setTimeout(() => {
+            copy.textContent = label;
+          }, 1500);
+        })
+        .catch(() => {
+          // clipboard unavailable; leave the label alone
+        });
     });
   }
 
@@ -391,8 +394,9 @@ function wireSearch() {
       move(-1);
     } else if (event.key === 'Enter' && active >= 0) {
       event.preventDefault();
+      // A real click: it navigates, and the drawer and the results close as they do for a tap.
       const link = results.querySelectorAll('.doc-search-result')[active];
-      if (link) window.location.assign(link.href);
+      if (link) link.click();
     } else if (event.key === 'Escape') {
       // The first Escape closes the results; a second one is left for the mobile drawer.
       event.stopPropagation();
@@ -402,6 +406,10 @@ function wireSearch() {
   });
   document.addEventListener('click', (event) => {
     if (!box.contains(event.target)) clear();
+  });
+  // Choosing a result (here or on the page the link lands on) closes the list.
+  results.addEventListener('click', (event) => {
+    if (event.target.closest('a')) setTimeout(clear);
   });
   // Tabbing away closes the popup as well, so Esc is never needed to dismiss it.
   // A press with the mouse or a finger is left to the click handler above: closing the list
@@ -414,6 +422,33 @@ function wireSearch() {
     if (event.relatedTarget && !box.contains(event.relatedTarget)) clear();
   });
 }
+
+// The theme and text size follow the app, across windows and at load (the head script sets
+// the theme and size once; the browser chrome colour and later changes are handled here).
+const THEME_COLORS = {
+  'one-dark': '#282c34',
+  dracula: '#282a36',
+  'solarized-dark': '#002b36',
+  monokai: '#272822',
+  light: '#ffffff',
+};
+function syncThemeColor() {
+  const meta = document.querySelector('meta[name="theme-color"]');
+  const color = THEME_COLORS[document.documentElement.dataset.theme || 'one-dark'];
+  if (meta && color) meta.setAttribute('content', color);
+}
+syncThemeColor();
+window.addEventListener('storage', (event) => {
+  if (event.key === 'math-notes-theme' && event.newValue in THEME_COLORS) {
+    document.documentElement.dataset.theme = event.newValue;
+    syncThemeColor();
+  } else if (event.key === 'math-notes-font-scale') {
+    const scale = parseInt(event.newValue, 10);
+    if (scale >= 50 && scale <= 200) {
+      document.documentElement.style.setProperty('--app-font-scale', String(scale / 100));
+    }
+  }
+});
 
 for (const figure of document.querySelectorAll('.doc-example')) wireExample(figure);
 wireMenu();

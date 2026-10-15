@@ -53,6 +53,16 @@ function initFontControls(onChange = () => {}) {
 
   const saved = parseInt(storage.get(FONT_KEY), 10);
   if (!Number.isNaN(saved)) setScale(saved);
+
+  // Another window changed the text size: follow it (without writing it back).
+  window.addEventListener('storage', (event) => {
+    const next = parseInt(event.newValue, 10);
+    if (event.key !== FONT_KEY || Number.isNaN(next)) return;
+    current = clampScale(next);
+    document.documentElement.style.setProperty('--app-font-scale', String(current / 100));
+    onChange();
+    window.dispatchEvent(new Event(FONT_SIZE_CHANGED));
+  });
 }
 
 export default initFontControls;

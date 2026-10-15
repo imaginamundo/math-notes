@@ -2517,3 +2517,13 @@ test('DOC-09: the mobile drawer is a modal and keeps Tab inside', async () => {
   assert.equal(await page.$eval('.doc-main', (n) => n.inert), false);
   assert.deepEqual(errors, []);
 });
+
+test('UID-11: the theme-color meta follows the saved theme after a load', async () => {
+  await newPage();
+  await page.evaluate(() => localStorage.setItem('math-notes-theme', 'light'));
+  await page.reload({ waitUntil: 'load' });
+  await waitFor(() => page.$('#content-editable.ready'));
+  const meta = await page.$eval('meta[name="theme-color"]', (node) => node.getAttribute('content'));
+  assert.equal(meta, '#ffffff');
+  assert.deepEqual(errors, []);
+});

@@ -4,7 +4,7 @@ Math Notes entiende fechas de calendario, horas y duraciones. Las fechas se pued
 
 ## Escribir fechas
 
-Una fecha se puede escribir como `10 June`, `June 10, 2023`, `2019-04-01` o `12/02/1988`. Las fechas sin año se resuelven a su ocurrencia más cercana, y una fecha se puede guardar en una variable:
+Una fecha se puede escribir como `10 June`, `June 10, 2023`, `2019-04-01` o `12/02/1988`. Una fecha solo con números se lee con el día primero (`12/02/1988` es el 12 de febrero; `02/13/2024` no es una fecha), así que escribe `2019-04-01` cuando no deba haber duda. Las fechas sin año se resuelven a su ocurrencia más cercana, y una fecha se puede guardar en una variable:
 
 ```calc 18 March 2025
 start = March 4, 2025

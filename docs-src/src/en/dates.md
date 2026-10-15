@@ -4,7 +4,7 @@ Math Notes understands calendar dates, clock times and durations. Dates can be w
 
 ## Writing dates
 
-A date can be written as `10 June`, `June 10, 2023`, `2019-04-01` or `12/02/1988`. Yearless dates resolve to their nearest occurrence, and a date can be saved in a variable:
+A date can be written as `10 June`, `June 10, 2023`, `2019-04-01` or `12/02/1988`. A date with numbers only is read day first (`12/02/1988` is 12 February; `02/13/2024` is not a date), so write `2019-04-01` when it must not be ambiguous. Yearless dates resolve to their nearest occurrence, and a date can be saved in a variable:
 
 ```calc 18 March 2025
 start = March 4, 2025
