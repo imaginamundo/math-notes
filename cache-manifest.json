@@ -1,5 +1,5 @@
 {
-  "version": 101,
+  "version": 102,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "8ab30c03ce83a52ec3048a552d376b54d3b502247119c24db874b0251d059156",
@@ -32,7 +32,7 @@
     "js/core/unitMix.js": "e7b1a3a98cb06004d5f4b58bc0a99ffa7f416a2de456c0d4ab4cfad6ec862331",
     "js/core/unitNames.js": "5f43e9eee2a9c2797013af47181ba8913c7f6b68a0a2f529f0fac5e062e689a2",
     "js/core/unitSimplify.js": "a5b6e235090089c86d953f6b69a1c3580c33b25fe432876cc6325ffecf9421a3",
-    "js/core/userUnits.js": "42d38f541d531a9e86fb5adf176991f7b6a79b04d00bef5940ebc7026c95ff52",
+    "js/core/userUnits.js": "59572268534fcf6383944c7ea6bfa8ada09e65cfd60d0fc369d6518476746525",
     "js/core/vocabulary.js": "88685410b7dedb2c6109db584e25bd7c7e63d086ef64fadf44dfe593f56f5e6d",
     "js/eval/aliases.js": "8446e43855628b6e8a6f0cce2b4b621c4a95b1c797e4968416e0e6156065af6d",
     "js/eval/calendar.js": "2c988ddde7606d4f96f754c31eec7217a3a1e19fa47e7f01381add9e1be40a2e",

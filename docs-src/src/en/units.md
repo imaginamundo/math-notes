@@ -120,7 +120,7 @@ time to 100 km at 50 km/h
 
 ## Custom units
 
-Define your own unit with `unit <name> = <amount>`. It then behaves like a built-in one: the plural works, it converts to the units it was defined from, and it merges with them. Change the definition and every use follows.
+Define your own unit with `unit <name> = <amount>`. It then behaves like a built-in one: the plural works, it converts to the units it was defined from, and it merges with them. Change the definition and every use follows. The plural of the last word is generated in the usual English ways (`box`/`boxes`, `bus`/`buses`, `leaf`/`leaves`, `potato`/`potatoes`) and `ão` becomes `ões` or `ães`; for any other plural, use the singular.
 
 ```calc 2 widgets
 unit widget = 3.5 kg

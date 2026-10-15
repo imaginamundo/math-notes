@@ -120,7 +120,7 @@ time to 100 km at 50 km/h
 
 ## Unidades personalizadas
 
-Defina a sua própria unidade com `unit <nome> = <quantidade>`. Depois ela comporta-se como uma unidade nativa: o plural funciona, converte para as unidades a partir das quais foi definida e combina com elas. Altere a definição e todos os usos acompanham.
+Defina a sua própria unidade com `unit <nome> = <quantidade>`. Depois ela comporta-se como uma unidade nativa: o plural funciona, converte para as unidades a partir das quais foi definida e combina com elas. Altere a definição e todos os usos acompanham. O plural da última palavra é gerado das formas inglesas habituais (`box`/`boxes`, `bus`/`buses`, `leaf`/`leaves`, `potato`/`potatoes`) e `ão` vira `ões` ou `ães`; para qualquer outro plural, use o singular.
 
 ```calc 2 widgets
 unit widget = 3.5 kg

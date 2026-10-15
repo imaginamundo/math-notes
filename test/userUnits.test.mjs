@@ -219,3 +219,16 @@ test('a name the date grammar owns is not a unit name', () => {
     );
   }
 });
+
+test('a custom unit accepts the common plurals of its name', () => {
+  const run = (lines) => engine().evaluateLines(lines).results.at(-1);
+  assert.equal(run(['unit bus = 50 kg', '2 buses']).type, 'value');
+  assert.equal(run(['unit glass = 250 ml', '2 glasses']).type, 'value');
+  assert.equal(run(['unit class = 3 kg', '2 classes']).type, 'value');
+  assert.equal(run(['unit potato = 2 kg', '2 potatoes']).type, 'value');
+  assert.equal(run(['unit potato = 2 kg', '2 potatos']).type, 'value');
+  assert.equal(run(['unit leaf = 2 g', '2 leaves']).type, 'value');
+  assert.equal(run(['unit pão = 2 EUR', '3 pães']).type, 'value');
+  assert.equal(run(['unit pão = 2 EUR', '3 pãos']).type, 'value');
+  assert.equal(run(['unit box = 3 kg', '2 boxes']).type, 'value');
+});
