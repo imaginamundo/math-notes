@@ -284,6 +284,8 @@ window's changes to the tab list and to other tabs are adopted, and this window'
 text changed. The docs search is an ARIA combobox (options, active descendant, a live result count, closes when focus
 leaves it), and the mobile drawer is a modal: dialog semantics, the page behind it inert and Tab wrapping inside it.
 
+Rate and worker notes (Wave 9): a worker that errors is started again once; a second error moves evaluation to the main thread for the session, and a failed fallback import is retried under a new URL (the browser remembers a failed import by URL). Assigning to `end` says it is a reserved word, and a row's old error text is cleared when a shorter message replaces it.
+
 Tags in calculations: trailing `#tags` label a line only when the code before them is a
 finished expression (`isCompleteCode` in `parseLine.js`); after an operator, `=`, `(` or a
 word operator (`5 + #food`, `x = #food`) the tag is an operand and the line is not

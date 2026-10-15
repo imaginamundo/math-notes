@@ -106,7 +106,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
     // If the worker crashes or its script fails to load, reject everything in
     // flight and fall back to the main-thread evaluator so the app degrades
     // gracefully instead of stalling on a 10s timeout per request.
-    created.addEventListener('error', dropWorker);
+    created.addEventListener('error', () => onWorkerError(created));
     // Seed the worker with the stored settings; the worker defaults to the same
     // values, so only a non-default choice needs sending.
     const seed = (name, value) => created.postMessage({ type: MSG.setting, name, value });
@@ -132,6 +132,17 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
     return worker;
   }
 
+  // A first failure may be one dropped download or one crash, so the worker is started
+  // again once; a second failure means it cannot run here, and the main thread takes over
+  // for the rest of the session.
+  let workerFailures = 0;
+  function onWorkerError(failed) {
+    if (failed !== worker) return;
+    workerFailures++;
+    if (workerFailures < 2) restartWorker('The evaluation worker failed');
+    else dropWorker();
+  }
+
   // The worker could not load, or it crashed: use the main-thread evaluator for
   // the rest of the session.
   function dropWorker() {
@@ -149,14 +160,14 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
   // update starts a fresh worker, but do not give up on the worker for the whole
   // session. A single slow sheet must not move every later keystroke onto the
   // main thread.
-  function restartWorker() {
+  function restartWorker(reason = 'The evaluation worker timed out') {
     if (!worker) return;
     const failed = worker;
     worker = null;
     failed.terminate();
     for (const [id, callback] of pending) {
       pending.delete(id);
-      callback({ type: MSG.error, message: 'The evaluation worker timed out' });
+      callback({ type: MSG.error, message: reason });
     }
     lastSentLines = null;
   }
@@ -180,6 +191,14 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
     });
   }
 
+  // A failed dynamic import is remembered by the browser for that exact URL, so a later
+  // attempt (after the network is back) asks for a different one.
+  let importAttempts = 0;
+  function importCalculate() {
+    const attempt = importAttempts++;
+    return import(attempt === 0 ? './core/calculate.js' : `./core/calculate.js?retry=${attempt}`);
+  }
+
   // Evaluate on the main thread when there is no worker or it failed. The raw
   // values this resolves with are formatted by `patchResults`, which accepts
   // both the worker's pre-formatted strings and these numbers/units. This path
@@ -188,7 +207,7 @@ export function createEvalClient(editableNode, onTextRender, onRender, onBusy, o
   function fallbackEvaluate(lines) {
     const load = fallbackModule
       ? Promise.resolve(fallbackModule)
-      : import('./core/calculate.js').then((mod) => {
+      : importCalculate().then((mod) => {
           fallbackModule = mod;
           // The engine takes rates as input; the composition root owns the
           // cache, so seed the freshly loaded module with what this window was

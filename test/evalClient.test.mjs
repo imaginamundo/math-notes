@@ -6,10 +6,11 @@ import assert from 'node:assert/strict';
 // instead of relying on browser e2e only.
 class WorkerStub {
   static latest = null;
+  static defaultAutoReply = true;
   constructor() {
     this.listeners = {};
     this.sent = [];
-    this.autoReply = true;
+    this.autoReply = WorkerStub.defaultAutoReply;
     WorkerStub.latest = this;
   }
   addEventListener(type, fn) {
@@ -172,21 +173,28 @@ test('a crashed or unloadable worker is the only main-thread fallback', () => {
   assert.equal(recoveryFor({ workerUnavailable: true, retried: true }), 'fallback');
 });
 
-test('a crashed worker falls back to the main thread for the in-flight request', async () => {
+test('a crashed worker is started again once, then the main thread takes over', async () => {
   const { client, renders, busy } = setup();
   await client.update(); // creates the worker
   renders.length = 0;
-  busy.length = 0;
-  const worker = WorkerStub.latest;
-  worker.autoReply = false;
+  const first = WorkerStub.latest;
+  first.autoReply = false;
   const pending = client.update();
-  worker.crash();
+  first.crash();
   await pending;
-  assert.equal(renders.length, 1, 'the in-flight request still renders via the fallback');
-  assert.equal(renders[0].data.total, 2, 'main-thread engine evaluated 1 + 1');
+  assert.notEqual(WorkerStub.latest, first, 'one crash restarts the worker');
+  assert.equal(renders.length, 1, 'the in-flight request is evaluated by the new worker');
 
+  const second = WorkerStub.latest;
+  second.autoReply = false;
+  const pendingAgain = client.update();
+  second.crash();
+  await pendingAgain;
+  assert.equal(renders[renders.length - 1].data.total, 2, 'main-thread engine evaluated 1 + 1');
+
+  const before = renders.length;
   await client.update();
-  assert.equal(renders.length, 2, 'later updates keep using the fallback');
+  assert.equal(renders.length, before + 1, 'later updates keep using the fallback');
   assert.equal(busy[busy.length - 1], false, 'busy flag cleared after the crash');
 });
 
@@ -355,7 +363,12 @@ test('CORE-05: the main-thread fallback gets the settings it was sent before it 
   worker.autoReply = false;
   node.value = '1 cup to ml';
   const pending = client.update();
+  // The first crash restarts the worker; a second one gives up on it.
+  WorkerStub.defaultAutoReply = false;
   worker.crash();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  WorkerStub.latest.crash();
+  WorkerStub.defaultAutoReply = true;
   await pending;
   const value = renders.at(-1).data.results[0].value;
   const ml = value.toNumber('ml');
