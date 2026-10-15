@@ -1,5 +1,5 @@
 {
-  "version": 104,
+  "version": 105,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "9a0f23e09eb4e11fe2870a1f325b9a3e20e7fbced26cee8d4a1b2d84aea4ece6",
@@ -11,7 +11,7 @@
     "js/core/currencySymbols.js": "ca238ab2569a1b16062d9ece9094c5857867c1d302b9aa81e42f43ce848b7d74",
     "js/core/decimalPrecision.js": "1395bb81ccc7b8f7df3b586ddc77d4cbfd56702529e3ceb680936f396e87e235",
     "js/core/engineLock.js": "e4c805db76fe794b66c47f5cb03941a16136eb00ffb298ff2b4d2165899143f5",
-    "js/core/errorCatalogue.js": "bdffe91bae9d9cbcf865ceb5ef8a8c52ae79510f562365d049101417c15d96d0",
+    "js/core/errorCatalogue.js": "11e443b3afbc7f18c0cb003185a6a53db169f07a7a8b0614679d42eb45dc4358",
     "js/core/friendlyErrors.js": "43a3a45fb85e130ec64c963e023098d00fbaaf6abd5a29a5c017ac41251c6a1a",
     "js/core/history.js": "aaab3aac633d2b94ae7d7bd9aeb2cc8b023c1321103cbc7637b5033573ad1c6d",
     "js/core/identifiers.js": "80fc01d21f40a407affc56e109104e10af98e90d3a02aa18720e45dd9dc006ad",

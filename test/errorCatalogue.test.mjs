@@ -105,3 +105,9 @@ test('the same problem reads the same wherever it is reported', () => {
     'Cannot combine "USD", "EUR" and "BRL" — convert them first'
   );
 });
+
+test('quoted text next to a value says how to write a comment', () => {
+  for (const line of ['$275 "deposit"', '10 "dinner"']) {
+    assert.match(message(line), /start a comment with #/, line);
+  }
+});

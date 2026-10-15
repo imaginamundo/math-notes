@@ -140,6 +140,10 @@ const RULES = [
   [/^End of matrix \] expected/, () => 'A list is missing its closing "]"'],
   [/^Unexpected end of expression/, () => 'The line ends before the calculation is finished'],
   [/^Value expected/, () => 'A value is missing here'],
+  [
+    /^Unexpected operator ["']/,
+    () => 'Quoted text next to a value is not a comment here; start a comment with #',
+  ],
   [/^Unexpected operator (.+?)(?: \(char \d+\))?$/, (m) => `Unexpected "${m[1]}"`],
   [/^Unexpected part "(.*)"/, (m) => `Unexpected "${m[1]}"`],
   [/^Syntax error in part "(.*?)"/, (m) => `"${m[1]}" is not understood here`],
