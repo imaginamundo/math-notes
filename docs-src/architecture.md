@@ -286,6 +286,8 @@ leaves it), and the mobile drawer is a modal: dialog semantics, the page behind 
 
 Safari/WebKit (Wave 9, untested here: no WebKit available): the editor remembers its selection and scroll when it loses focus and restores them when focus returns by keyboard with the selection reset to the start (WebKit resets a textarea on Tab and the next Tab then indented line 1). The highlighter splits unmatched text by grapheme cluster, so an emoji is one text node and not lone surrogates (drawn as boxes). Share starts its clipboard write inside the click with the link still being built (`ClipboardItem` holding a promise), because WebKit allows a write only shortly after the gesture. Theme and text size follow changes made in another window, and the theme-colour meta follows the saved theme on every load.
 
+Language and rates (Wave 9): the clear-sheet confirm, the fallback tab names and the share default name come from `t()` in every language, the next tab number counts `Tab`, `Aba` and `Hoja` names and a restore never lowers it, and Go to line reads full-width digits and stays put on input that is not a number. A currency code with no rate behind it says the exchange rates are not available yet (not "undefined symbol"), the notice stays up until rates arrive, and a damaged cached rate table is dropped and fetched again.
+
 Evaluation scheduling (Wave 9): the client runs one evaluation at a time; an edit that arrives meanwhile
 sets a flag and a single follow-up evaluates the newest text, so a slow sheet never queues one evaluation per
 keystroke. The worker posts `ready` (with `PROTOCOL_VERSION`) once its bundle has loaded; an evaluation is timed

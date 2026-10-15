@@ -85,7 +85,8 @@ function moveTab(prev, id, toIndex) {
 function deriveNextTabNumber(tabs) {
   let next = tabs.length + 1;
   for (const tab of tabs) {
-    const match = /^Tab (\d+)$/.exec(tab.name);
+    // Every language's default name (`Tab 2`, `Aba 2`, `Hoja 2`) counts, not only English.
+    const match = /^(?:Tab|Aba|Hoja) (\d+)$/.exec(tab.name);
     if (match) next = Math.max(next, parseInt(match[1], 10) + 1);
   }
   return next;

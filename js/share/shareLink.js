@@ -91,7 +91,8 @@ async function decodeSheet(token) {
     if (!parsed || typeof parsed !== 'object') return null;
     if (typeof parsed.c !== 'string') return null;
     return {
-      name: typeof parsed.n === 'string' ? parsed.n : 'Shared sheet',
+      // An absent name is empty; the caller supplies the localized default.
+      name: typeof parsed.n === 'string' ? parsed.n : '',
       // A sheet composed on Windows arrives with CRLF. The editor stores LF, so
       // passing it through unchanged would make the restored text differ from
       // what the textarea holds and turn the first keystroke into a bogus undo

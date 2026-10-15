@@ -2,6 +2,7 @@ import preprocess from './preprocess.js';
 import { unmangleName } from './multiWordVariables.js';
 import { IDENTIFIER_SRC, WORD } from './identifiers.js';
 import { describe, scrub } from './errorCatalogue.js';
+import { isCurrencyCode } from './currencySymbols.js';
 
 // The identifier after `to`/`in`/`as` when it names a scope variable rather
 // than a Unit, so a conversion error can point at the shadowing variable.
@@ -106,6 +107,12 @@ function isKnownWord(math, word, scope) {
 function undefinedName(math, symbol, code, scope) {
   const original = unmangleName(symbol);
   if (original) return `"${original}" is not defined`;
+
+  // A currency code with no rate behind it: the exchange rates have not arrived (offline, or
+  // still loading), which is not the same as a name nobody defined.
+  if (isCurrencyCode(symbol) && !(symbol in scope)) {
+    return `Exchange rates are not available yet, so "${symbol.toUpperCase()}" cannot be used`;
+  }
 
   let expression = code;
   try {

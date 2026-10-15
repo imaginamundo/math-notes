@@ -359,7 +359,11 @@ function initTabs(editableNode, onUpdate) {
           activeId: targetId,
         };
     state = setActiveTab(state, targetId);
-    state = { ...state, nextTabNumber: deriveNextTabNumber(state.tabs) };
+    // A restore never lowers the counter: it could hand out a name already in use.
+    state = {
+      ...state,
+      nextTabNumber: Math.max(state.nextTabNumber || 0, deriveNextTabNumber(state.tabs)),
+    };
     history.reset(targetId);
     const restored = getActiveTab();
     present(restored.content, { caret: restored.caret });

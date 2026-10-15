@@ -42,15 +42,29 @@ function initGoToLine(editableNode) {
     return line;
   }
 
+  // A line number as typed, including full-width and other script digits (a CJK IME commits
+  // `１２`), or NaN when the input is not one.
+  function typedLine() {
+    return parseInt(inputNode.value.normalize('NFKC'), 10);
+  }
+
   function refresh() {
     const total = totalLines();
-    const value = parseInt(inputNode.value, 10);
-    countNode.textContent = total ? `${Number.isFinite(value) ? value : '–'}/${total}` : '';
+    const value = typedLine();
+    // Shown as the line it will go to, so 0, -5 and 999 read 1/35, 1/35 and 35/35.
+    const shown = Number.isFinite(value) ? Math.min(total, Math.max(1, value)) : '–';
+    countNode.textContent = total ? `${shown}/${total}` : '';
   }
 
   function jump() {
     const total = totalLines();
-    const target = Math.min(total, Math.max(1, parseInt(inputNode.value, 10) || 1));
+    const value = typedLine();
+    // Not a number: stay where the caret is rather than throw it to line 1.
+    if (!Number.isFinite(value)) {
+      close();
+      return;
+    }
+    const target = Math.min(total, Math.max(1, value));
     editableNode.focus();
     editableNode.setSelectionRange(lineStart(target - 1), lineStart(target - 1));
     close();

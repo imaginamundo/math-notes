@@ -33,6 +33,7 @@ const UI = {
     anchor: 'Link to this section',
     search: 'Search the documentation',
     searchEmpty: 'No results',
+    skip: 'Skip to content',
   },
   pt: {
     htmlLang: 'pt',
@@ -52,6 +53,7 @@ const UI = {
     anchor: 'Link para esta secção',
     search: 'Pesquisar na documentação',
     searchEmpty: 'Sem resultados',
+    skip: 'Saltar para o conteúdo',
   },
   es: {
     htmlLang: 'es',
@@ -71,6 +73,7 @@ const UI = {
     anchor: 'Enlace a esta sección',
     search: 'Buscar en la documentación',
     searchEmpty: 'Sin resultados',
+    skip: 'Saltar al contenido',
   },
 };
 
@@ -347,7 +350,7 @@ function pageHtml(lang, slug, page) {
   ${assets()}
 </head>
 <body>
-  <a class="doc-skip" href="#content">Skip to content</a>
+  <a class="doc-skip" href="#content">${escapeHtml(ui.skip)}</a>
   <header class="doc-header">
     <a class="doc-brand" href="${docPath(lang, '')}">
       <span class="doc-brand-name">Math Notes</span>

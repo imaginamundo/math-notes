@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import { ungroupDisplay } from '../core/numberGrouping.js';
 import formatResult from '../render/formatResult.js';
 import { getDecimalPrecision } from '../core/decimalPrecision.js';
@@ -42,7 +43,7 @@ function initShortcuts(editableNode, requestResults, switchTab) {
       document.getElementById('import-button').click();
     } else if (shift && key === 'backspace') {
       event.preventDefault();
-      if (!editableNode.value || window.confirm('Clear the active sheet?')) {
+      if (!editableNode.value || window.confirm(t('shortcuts.clearConfirm'))) {
         setEditorValue(editableNode, '');
       }
     }

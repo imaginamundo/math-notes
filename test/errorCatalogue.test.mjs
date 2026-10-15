@@ -111,3 +111,12 @@ test('quoted text next to a value says how to write a comment', () => {
     assert.match(message(line), /start a comment with #/, line);
   }
 });
+
+test('a currency line with no rates says the rates are missing', async () => {
+  const none = createEngine();
+  const rows = none.evaluateLines(['100 USD to EUR', '$50', '100 USD in EUR']).results;
+  for (const row of rows) {
+    assert.equal(row.type, 'error');
+    assert.match(String(row.value), /Exchange rates are not available yet/);
+  }
+});

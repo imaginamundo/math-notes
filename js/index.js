@@ -144,6 +144,7 @@ function showRateStatus(key) {
 }
 
 window.addEventListener(CURRENCY_UPDATED, (event) => {
+  release('rates');
   evalClient.syncRates(event.detail && event.detail.data);
   evalClient.update();
   const source = event.detail && event.detail.source;
@@ -158,7 +159,9 @@ window.addEventListener(CURRENCY_UPDATED, (event) => {
 
 window.addEventListener(CURRENCY_ERROR, () => {
   evalClient.update();
-  showRateStatus('status.ratesUnavailable');
+  // Currency lines cannot be worked out until rates arrive, so the notice stays up till then
+  // (unless a more urgent held notice is showing).
+  if (!held) hold('rates', t('status.ratesUnavailable'));
 });
 
 // A failed localStorage write (usually the quota is full) must not be silent.

@@ -62,6 +62,7 @@ export default {
   'tabs.close': 'Cerrar pestaña',
   'tabs.new': 'Nueva pestaña',
   'tabs.defaultName': 'Hoja {n}',
+  'shortcuts.clearConfirm': '¿Vaciar la hoja activa?',
   'tabs.closeConfirm': '¿Cerrar "{name}"? Su contenido se perderá.',
   'tabs.templates': 'Hojas iniciales',
   'template.budget': 'Presupuesto',

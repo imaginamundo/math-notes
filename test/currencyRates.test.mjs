@@ -10,3 +10,24 @@ test('SEC-03: a cached table is fresh for under an hour, not for the whole day',
   assert.equal(isFresh({}, now), false);
   assert.equal(isFresh(null, now), false);
 });
+
+test('a damaged cached table is dropped, so it is fetched again', async () => {
+  globalThis.localStorage = {
+    store: { 'math-notes-currency-rates': JSON.stringify({ base: 'EUR', rates: { USD: 'x' } }) },
+    getItem(key) {
+      return this.store[key] ?? null;
+    },
+    setItem(key, value) {
+      this.store[key] = String(value);
+    },
+    removeItem(key) {
+      delete this.store[key];
+    },
+  };
+  try {
+    const { loadCached } = await import('../js/storage/currencyRates.js');
+    assert.equal(loadCached(), null);
+  } finally {
+    delete globalThis.localStorage;
+  }
+});

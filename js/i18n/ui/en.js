@@ -62,6 +62,7 @@ export default {
   'tabs.close': 'Close tab',
   'tabs.new': 'New tab',
   'tabs.defaultName': 'Tab {n}',
+  'shortcuts.clearConfirm': 'Clear the active sheet?',
   'tabs.closeConfirm': 'Close "{name}"? Its content will be lost.',
   'tabs.templates': 'Starter sheets',
   'template.budget': 'Budget',

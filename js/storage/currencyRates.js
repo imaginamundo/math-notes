@@ -12,10 +12,20 @@ const FETCH_TIMEOUT = 10000;
 // Re-check for a fresh day's rates while a window stays open (the API is daily).
 const REFRESH_INTERVAL = 60 * 60 * 1000;
 
+// A table the engine can use: a base code and rates that are all positive finite numbers.
+// Anything else (a damaged cache) is dropped and fetched again.
+function validTable(table) {
+  if (!table || typeof table !== 'object' || !table.base || typeof table.rates !== 'object') {
+    return false;
+  }
+  const rates = Object.values(table.rates || {});
+  return rates.length > 0 && rates.every((rate) => Number.isFinite(rate) && rate > 0);
+}
+
 function loadCached() {
   try {
     const parsed = JSON.parse(storage.get(STORAGE_KEY) || 'null');
-    return parsed && parsed.base && parsed.rates ? parsed : null;
+    return validTable(parsed) ? parsed : null;
   } catch {
     return null;
   }

@@ -63,6 +63,7 @@ export default {
   'tabs.close': 'Fechar aba',
   'tabs.new': 'Nova aba',
   'tabs.defaultName': 'Aba {n}',
+  'shortcuts.clearConfirm': 'Limpar a folha ativa?',
   'tabs.closeConfirm': 'Fechar "{name}"? O conteúdo será perdido.',
   'tabs.templates': 'Folhas iniciais',
   'template.budget': 'Orçamento',

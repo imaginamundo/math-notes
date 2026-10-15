@@ -1,4 +1,5 @@
 import storage from '../util/storage.js';
+import { t } from '../i18n/index.js';
 import debounce from '../util/debounce.js';
 import { generateId, normalizeCaret, deriveNextTabNumber } from '../core/tabsState.js';
 
@@ -41,7 +42,9 @@ function normalizeTabs(entries) {
     tabs.push({
       id,
       name:
-        typeof entry.name === 'string' && entry.name.trim() ? entry.name : `Tab ${tabs.length + 1}`,
+        typeof entry.name === 'string' && entry.name.trim()
+          ? entry.name
+          : t('tabs.defaultName', { n: tabs.length + 1 }),
       content,
       caret: normalizeCaret(entry.caret, content.length),
     });
@@ -95,7 +98,7 @@ function loadTabsState() {
 
   const content = storage.get(LEGACY_KEY) || '';
   storage.remove(LEGACY_KEY);
-  const tab = { id: generateId(), name: 'Tab 1', content, caret: null };
+  const tab = { id: generateId(), name: t('tabs.defaultName', { n: 1 }), content, caret: null };
   return { state: { tabs: [tab], activeId: tab.id, nextTabNumber: 2 }, failed, savedAt: null };
 }
 
