@@ -57,3 +57,15 @@ test('the vocabulary has no duplicate names', () => {
     seen.add(key);
   }
 });
+
+test('UIE-26: every hint has a Portuguese and a Spanish translation', async () => {
+  const { HINTS } = await import('../js/i18n/hints.js');
+  // Numbers such as `3.14159…` and `2π` read the same in every language.
+  const hints = new Set(
+    VOCABULARY.filter((entry) => /[a-z]{3}/i.test(entry.detail ?? '')).map((entry) => entry.detail)
+  );
+  for (const language of ['pt', 'es']) {
+    const missing = [...hints].filter((hint) => !HINTS[language][hint]);
+    assert.deepEqual(missing, [], `untranslated hints in ${language}`);
+  }
+});

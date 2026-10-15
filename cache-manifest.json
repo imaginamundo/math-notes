@@ -1,5 +1,5 @@
 {
-  "version": 132,
+  "version": 133,
   "files": {
     "index.html": "68a0005b66a25de10ee8046327240d5d45f641a989e6fb26852891f4384360d4",
     "js/core/aggregate.js": "9a0f23e09eb4e11fe2870a1f325b9a3e20e7fbced26cee8d4a1b2d84aea4ece6",
@@ -64,6 +64,7 @@
     "js/i18n/examples/en.js": "839b67d0c41af01fc42e15512603114866b40fb1a65af893660e8f04d72289f6",
     "js/i18n/examples/es.js": "00ee3798bfb1920ab40e61407a725a9efcb0065fb13429402198f8f05a14dee5",
     "js/i18n/examples/pt.js": "68f9a1e0abf98086a4342ea2afdb0d295833338051c3b15179b06f8ba5fa1b8e",
+    "js/i18n/hints.js": "97efb8b0132697ec8105cd3f2ed6a1bc4545fa9cf1fd80a10703e81c43375021",
     "js/i18n/index.js": "baeead0e624fb70c2c88a3941837209aa66b198f08d84fd08bfd8b894f7cb9c6",
     "js/i18n/ui/en.js": "84db084edf02c462731b4b3cc6ac8e678d46157c69e6fd0fee553a3afc97de98",
     "js/i18n/ui/es.js": "d859df2d9c2fe5e5947033765e691486448b48a79d180d1ca0799279d54276e5",
@@ -83,7 +84,7 @@
     "js/storage/evalGuard.js": "6479cb5b18d9167b1f6aa2c6dd643ef5b111607133d4d458b4f4f54536d02618",
     "js/storage/snapshots.js": "70d8e0d9b18cc36c857f0eec35d4c753464ca7abd0331dc91a700f5fb2d8593b",
     "js/storage/tabsStore.js": "6d0187bcf07fab80c6213e9fb7c5847392b47bf36462252b74d95dc9ad68004e",
-    "js/ui/autocomplete.js": "f25e7b9024afd93b2354c5115beb041f7fe4f5051c50a97426139fb1d950befd",
+    "js/ui/autocomplete.js": "ada147d52d6d9645eb221139e63da949c0bc6fd90364df54e9b70b60a9db1585",
     "js/ui/cosmetic.js": "4f607735940499235a40069ed15b2e5bc5eca5b121e8c0a7df665462e53c45e2",
     "js/ui/docsLink.js": "dc51e2f9fb326d8f94878058a1b8b8a11df2a307218000c639d3f5ef8f7e0300",
     "js/ui/editor.js": "5394a620f405091c71225cd4bc133e402f2c7d549a8852f04c0929fdd4f1f5b7",

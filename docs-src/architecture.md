@@ -298,6 +298,8 @@ Editor details (Wave 9): the caret's row is kept clear of the bottom edge by its
 
 Docs site and vocabulary (Wave 9): anchor jumps clear the sticky header through the target's `scroll-margin-top` (a page-level scroll-padding made the browser scroll on every focus or keystroke in the header), the scroll spy keeps the entry the reader chose or the hash names and highlights the first entry on a page that cannot scroll, a `404.html` in the site's style is published, and an uncached docs page offline gets the cached docs index or a plain offline note instead of the app shell. Find marks no longer fragment text nodes, names in any script work as variables (`math.parse.isAlpha` accepts `\p{L}\p{M}`), and autocomplete offers the documented units, `christmas`, `halloween`, `unit` and `timespan`.
 
+Docs CSP and hints (Wave 9): every docs page carries a Content-Security-Policy meta whose script digest is computed from the inline bootstrap at build time (a test checks it); a Recover row names its snapshot by relative age, clock time (with the date unless it is today) and the first line of its content, so rows from the same minute can be told apart; the autocomplete hints are shown in the interface language (`js/i18n/hints.js`, keyed by the English hint, with a test that every hint is translated).
+
 Evaluation scheduling (Wave 9): the client runs one evaluation at a time; an edit that arrives meanwhile
 sets a flag and a single follow-up evaluates the newest text, so a slow sheet never queues one evaluation per
 keystroke. The worker posts `ready` (with `PROTOCOL_VERSION`) once its bundle has loaded; an evaluation is timed

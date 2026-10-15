@@ -8,7 +8,8 @@ import {
 import { VOCABULARY } from '../core/vocabulary.js';
 import { setEditorValue } from './editorInput.js';
 import { sheetLines } from '../util/text.js';
-import { t } from '../i18n/index.js';
+import { t, getLocale } from '../i18n/index.js';
+import { translateHint } from '../i18n/hints.js';
 import { LANGUAGE_UPDATED } from '../util/events.js';
 
 // A caret-anchored suggestion popup. It opens while a word is being typed (at
@@ -227,7 +228,8 @@ function initAutocomplete(editableNode, editorScroll) {
       if (entry.detail) {
         const span = detail || option.appendChild(document.createElement('span'));
         span.className = 'autocomplete-detail';
-        if (span.textContent !== entry.detail) span.textContent = entry.detail;
+        const hint = translateHint(entry.detail, getLocale());
+        if (span.textContent !== hint) span.textContent = hint;
       } else if (detail) {
         detail.remove();
       }
