@@ -81,7 +81,6 @@ const SYMBOL_SOURCE = SYMBOLS.map((symbol) => symbol.replace(/[.*+?^${}()|[\]\\]
 // registered, so the recognizer is the same for every engine instance.
 const CURRENCY_CODES = new Set([
   'AUD',
-  'BGN',
   'BRL',
   'CAD',
   'CHF',
@@ -113,8 +112,13 @@ const CURRENCY_CODES = new Set([
   'ZAR',
 ]);
 
+// The codes in alphabetical order, for autocomplete.
+function currencyCodes() {
+  return [...CURRENCY_CODES].sort();
+}
+
 function isCurrencyCode(code) {
   return CURRENCY_CODES.has(String(code).toUpperCase());
 }
 
-export { BASE, CURRENCY_SYMBOLS, CURRENCY_DISPLAY, SYMBOL_SOURCE, isCurrencyCode };
+export { BASE, CURRENCY_SYMBOLS, CURRENCY_DISPLAY, SYMBOL_SOURCE, isCurrencyCode, currencyCodes };

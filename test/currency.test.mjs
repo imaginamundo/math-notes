@@ -156,3 +156,28 @@ test('currency conversion evaluates through the registered units', () => {
   );
   closeTo(math.evaluate('1 EUR in USD').toNumeric('USD'), 1.1596, 'EUR to USD');
 });
+
+test('a currency symbol is a conversion target like its code', async () => {
+  const { createEngine } = await import('../js/core/calculate.js');
+  const { FIXTURE_RATES } = await import('./helpers/rates.mjs');
+  const engine = createEngine({ rates: FIXTURE_RATES });
+  const code = (symbolLine, codeLine) => {
+    const [a, b] = engine.evaluateLines([symbolLine, codeLine]).results;
+    assert.equal(a.type, 'value', `${symbolLine}: ${a.value}`);
+    assert.equal(String(a.value), String(b.value), symbolLine);
+  };
+  code('$5 to €', '$5 to EUR');
+  code('5 EUR to $', '5 EUR to USD');
+  code('5 EUR to R$', '5 EUR to BRL');
+  code('5 EUR in £', '5 EUR in GBP');
+  code('5 USD as €', '5 USD as EUR');
+  code('€3/kWh to US$/kWh', '€3/kWh to USD/kWh');
+  code('100 USD/hour to €/hour', '100 USD/hour to EUR/hour');
+});
+
+test('BGN is not a currency', async () => {
+  const { createEngine } = await import('../js/core/calculate.js');
+  const { FIXTURE_RATES } = await import('./helpers/rates.mjs');
+  const row = createEngine({ rates: FIXTURE_RATES }).evaluateLines(['1 BGN to EUR']).results[0];
+  assert.equal(row.type, 'error');
+});

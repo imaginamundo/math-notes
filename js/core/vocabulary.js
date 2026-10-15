@@ -1,5 +1,5 @@
 import { DIMENSIONS } from './measures.js';
-import { CURRENCY_DISPLAY, CURRENCY_SYMBOLS } from './currencySymbols.js';
+import { currencyCodes, CURRENCY_SYMBOLS } from './currencySymbols.js';
 
 // Names the autocomplete offers beyond the user's own variables. Pure data:
 // each entry is `{ text, kind, detail? }`, where `kind` orders the suggestions
@@ -101,7 +101,7 @@ function units() {
   for (const dimension of Object.values(DIMENSIONS)) {
     for (const unit of dimension) names.add(unit);
   }
-  for (const code of Object.keys(CURRENCY_DISPLAY)) names.add(code);
+  for (const code of currencyCodes()) names.add(code);
   for (const symbol of Object.keys(CURRENCY_SYMBOLS)) names.add(symbol);
   for (const unit of ['px', 'em', 'point']) names.add(unit);
   return [...names].sort((a, b) => a.localeCompare(b));

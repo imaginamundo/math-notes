@@ -1,5 +1,5 @@
 {
-  "version": 99,
+  "version": 100,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "8ab30c03ce83a52ec3048a552d376b54d3b502247119c24db874b0251d059156",
@@ -8,7 +8,7 @@
     "js/core/boundedExpression.js": "11d1a0a1414b3f8098892b7f755e34c543dd762bb72cea516f49463d253d71e1",
     "js/core/calculate.js": "b39a93598df61dd097b6ff88b3bca1286bcde9c47710e5cd15c88b618aef0e7b",
     "js/core/clockFormat.js": "f0a6e7670e4e6231cdf1a8676601b3bae22d8df02f25ede666155632ad518ddb",
-    "js/core/currencySymbols.js": "9ccd8acf86ef1ef95143985b58b68a34e005fb45d78641c9d8f3d7956cab1326",
+    "js/core/currencySymbols.js": "ca238ab2569a1b16062d9ece9094c5857867c1d302b9aa81e42f43ce848b7d74",
     "js/core/decimalPrecision.js": "1395bb81ccc7b8f7df3b586ddc77d4cbfd56702529e3ceb680936f396e87e235",
     "js/core/engineLock.js": "e4c805db76fe794b66c47f5cb03941a16136eb00ffb298ff2b4d2165899143f5",
     "js/core/friendlyErrors.js": "f8cea980e0d0986c5826eb1ad86043be1152120be46529691f97f99938474339",
@@ -33,7 +33,7 @@
     "js/core/unitNames.js": "5f43e9eee2a9c2797013af47181ba8913c7f6b68a0a2f529f0fac5e062e689a2",
     "js/core/unitSimplify.js": "a5b6e235090089c86d953f6b69a1c3580c33b25fe432876cc6325ffecf9421a3",
     "js/core/userUnits.js": "42d38f541d531a9e86fb5adf176991f7b6a79b04d00bef5940ebc7026c95ff52",
-    "js/core/vocabulary.js": "92c3aa0873f5a3e808f4a28ce619d6d40599176ea140eeaa88aab89089a26569",
+    "js/core/vocabulary.js": "88685410b7dedb2c6109db584e25bd7c7e63d086ef64fadf44dfe593f56f5e6d",
     "js/eval/aliases.js": "8446e43855628b6e8a6f0cce2b4b621c4a95b1c797e4968416e0e6156065af6d",
     "js/eval/calendar.js": "2c988ddde7606d4f96f754c31eec7217a3a1e19fa47e7f01381add9e1be40a2e",
     "js/eval/calendarArithmetic.js": "7b99598137878b5b7abfaf014f4ccf3dd37990f98221a53396fcca7707f689a7",
@@ -50,7 +50,7 @@
     "js/eval/rates.js": "b7729f8174fd26eb1c4bd25c71406ede9af01918c1bce9afdcb23475a55109f0",
     "js/eval/rounding.js": "63df0aa2ff315762c9794c30914bc3419a7baa78d4a11af767479ea17d4b1b09",
     "js/eval/scales.js": "6c82daf165a7ca07314372da2ec6e42ebe10f89be12e19d64275473f3aebca7d",
-    "js/eval/symbols.js": "e6b5592fda6e5102330b9c5f2d714731f8ad118c01b5491b9c21e6bc92158924",
+    "js/eval/symbols.js": "dac018c9ec8832b73b2506a0445d4293d0f33682399a42aeab8da12d44ff802a",
     "js/eval/timespan.js": "07bacb5669d01024ccfa3d8e45280fbe41edd21566c5aa145e6438c7eee22417",
     "js/eval/unitRuns.js": "270cd389d4e32f9bd35709692dc5ab02c084117a8f88d4ad87acb2883b123e7f",
     "js/eval/units.js": "9f8bc84d5fd7ee1b8c977bb50160fcf456761be9412854e11206ee8e1ba1b0e7",

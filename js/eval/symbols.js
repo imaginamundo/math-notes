@@ -12,6 +12,12 @@ const SYMBOL_BEFORE_NUMBER = new RegExp(`(?<![${WORD}_])(${SYMBOL_SOURCE})\\s*(\
 // `usd = 5` stays a variable assignment instead of `USD = 5`. The shared
 // boundaries keep a name like `top10usd` intact while `10USD` and `USD 10`
 // still rewrite.
+// A symbol as the target of a conversion (`$5 to €`, `5 EUR in R$`, `€/hour`): the symbol is
+// written as its code, like the symbol beside an amount is.
+const SYMBOL_AFTER_CONVERSION = new RegExp(
+  `\\b(to|in|as)(\\s+)(${SYMBOL_SOURCE})(?![${WORD}_])`,
+  'gu'
+);
 const CODE = '[A-Za-z]{3}';
 const CODE_AFTER_NUMBER = new RegExp(`${BEFORE_WORD}(\\d[\\d.]*)\\s*(${CODE})${AFTER_WORD}`, 'gu');
 const CODE_BEFORE_NUMBER = new RegExp(`${BEFORE_WORD}(${CODE})\\s*(\\d[\\d.]*)`, 'gu');
@@ -33,6 +39,10 @@ function preprocessSymbols(expression, context) {
       .replace(
         SYMBOL_BEFORE_NUMBER,
         (match, symbol, number) => `${number} ${CURRENCY_SYMBOLS[symbol]}`
+      )
+      .replace(
+        SYMBOL_AFTER_CONVERSION,
+        (match, word, space, symbol) => `${word}${space}${CURRENCY_SYMBOLS[symbol]}`
       ),
     names
   );

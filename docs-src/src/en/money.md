@@ -34,6 +34,6 @@ A currency can be divided by another unit to make a rate (`USD/hour`, `USD/km`, 
 
 ## Supported codes
 
-`AUD`, `BGN`, `BRL`, `CAD`, `CHF`, `CNY`, `CZK`, `DKK`, `EUR`, `GBP`, `HKD`, `HUF`, `IDR`, `ILS`, `INR`, `ISK`, `JPY`, `KRW`, `MXN`, `MYR`, `NOK`, `NZD`, `PHP`, `PLN`, `RON`, `SEK`, `SGD`, `THB`, `TRY`, `USD`, `ZAR`.
+`AUD`, `BRL`, `CAD`, `CHF`, `CNY`, `CZK`, `DKK`, `EUR`, `GBP`, `HKD`, `HUF`, `IDR`, `ILS`, `INR`, `ISK`, `JPY`, `KRW`, `MXN`, `MYR`, `NOK`, `NZD`, `PHP`, `PLN`, `RON`, `SEK`, `SGD`, `THB`, `TRY`, `USD`, `ZAR`.
 
-For the currency symbols the app recognises, type a symbol such as `$`, `€`, `£` or `R$` and let the app suggest the matching code.
+A currency symbol such as `$`, `€`, `£` or `R$` works wherever a code does, including as the target of a conversion (`$5 to €`, `5 EUR in R$`). Autocomplete completes a code from its first letters.
