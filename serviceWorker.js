@@ -1,6 +1,6 @@
 // Served from the site root so its scope is `/` and it can cache the app shell
 // and the documentation (a worker under /js/ could only control /js/).
-const cacheName = 'math-notes-v112';
+const cacheName = 'math-notes-v113';
 const APP_SHELL = './index.html';
 const urlsToCache = [
   './',
@@ -128,7 +128,10 @@ self.addEventListener('install', (event) => {
     caches.open(cacheName).then((cache) =>
       Promise.all(
         urlsToCache.map((url) =>
-          cache.add(url).catch((error) => {
+          // `reload` goes to the network: the browser's HTTP cache may still hold the previous
+          // release's file (max-age), and the new cache would then serve it until the next
+          // release.
+          cache.add(new Request(url, { cache: 'reload' })).catch((error) => {
             throw new Error(`Precache failed for ${url}: ${error && error.message}`);
           })
         )

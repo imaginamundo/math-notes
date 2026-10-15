@@ -24,7 +24,8 @@ no build step and is installable as a PWA.
   from the Markdown in `docs-src/src/`.
 - `npm run build:sw-manifest` — recompute `cache-manifest.json` and bump the
   service-worker cache version. Run it after changing any precached file
-  (`js/`, `index.html`, `style.css`); `npm test` fails if you forget.
+  (`js/`, `index.html`, `style.css`) or a runtime-cached one (`docs/`, `manifest.json`,
+  icons); `npm test` fails if you forget.
 
 Always run `npm run lint`, `npm run format:check`, and `npm test` before
 committing. Make one focused change per commit.

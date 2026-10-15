@@ -8,7 +8,7 @@
 //
 //   npm run build:sw-manifest    recompute hashes, bump the version if needed
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join, normalize } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -27,9 +27,27 @@ function cachedFiles(source = readFileSync(join(root, WORKER_FILE), 'utf8')) {
   ].sort();
 }
 
+// Files the worker caches at run time (first use, cache-first) rather than at install: the
+// documentation, the manifest and the icons. They are not in `urlsToCache`, but a change to
+// one of them has to bump the cache too, or returning visitors keep the old copy until the
+// next app release.
+function watchedFiles() {
+  const found = ['manifest.json', 'favicon.ico'];
+  const walk = (dir) => {
+    for (const entry of readdirSync(join(root, dir)).sort()) {
+      const rel = `${dir}/${entry}`;
+      if (statSync(join(root, rel)).isDirectory()) walk(rel);
+      else found.push(rel);
+    }
+  };
+  walk('docs');
+  walk('images/icons');
+  return found;
+}
+
 // { path: sha256 } for every precached file. './' and './index.html' collapse
 // onto one entry, since they are the same document.
-function hashCachedFiles(files = cachedFiles()) {
+function hashCachedFiles(files = [...cachedFiles(), ...watchedFiles()]) {
   const hashes = {};
   for (const rel of files) {
     hashes[rel] = createHash('sha256')
@@ -100,5 +118,6 @@ export {
   nextVersion,
   readManifest,
   readWorkerVersion,
+  watchedFiles,
   withCacheName,
 };

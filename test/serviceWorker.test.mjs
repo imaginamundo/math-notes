@@ -135,3 +135,20 @@ test('the precache list is read from the worker source, deduplicated and sorted'
   // './' is the same document as index.html, so it is not an entry of its own.
   assert.deepEqual(precachedUrls(source), ['a.js', 'b.js']);
 });
+
+test('files the worker caches at run time are watched, so a docs-only change bumps the cache', async () => {
+  const { watchedFiles } = await import('../scripts/sw-manifest.mjs');
+  const watched = watchedFiles();
+  assert.ok(watched.includes('manifest.json'));
+  assert.ok(watched.some((file) => file.startsWith('docs/') && file.endsWith('.html')));
+  assert.ok(watched.some((file) => file.startsWith('images/icons/')));
+  assert.deepEqual(
+    Object.keys(readManifest().files).sort(),
+    [...precachedUrls(), ...watched].sort()
+  );
+});
+
+test('the install bypasses the HTTP cache for every file', () => {
+  const source = readFileSync(join(root, 'serviceWorker.js'), 'utf8');
+  assert.match(source, /new Request\(url, \{ cache: 'reload' \}\)/);
+});

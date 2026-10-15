@@ -955,9 +955,13 @@ only. It precaches the shell and every module (except the build-only
 cache and serves same-origin GETs cache-first, with no revalidation: a version's
 modules are immutable until the next install, so a session never mixes versions.
 There is no `skipWaiting`, so a new version waits until every tab is closed. The
-Examples content is cached too, so the modal works on a first offline visit. Each asset is added
-to the cache independently, so one transient failure cannot abort the whole
-install. Both the app
+Examples content is cached too, so the modal works on a first offline visit. The install fails
+if any asset fails (a half-cached version could mix new and old modules; the browser retries
+on the next visit), and each asset is fetched with `cache: 'reload'`, so a release installed
+within the HTTP cache's `max-age` of the last visit still caches its own files, not the
+previous release's. The documentation, the manifest and the icons are cached at run time, and
+`scripts/sw-manifest.mjs` hashes them too (`watchedFiles`), so a docs-only change bumps the
+cache and reaches returning visitors. Both the app
 (`js/registerServiceWorker.js`) and the docs (`docs-src/src/docs.js`) register
 it; `test/browser.test.mjs` asserts the registration scope is the whole origin.
 
