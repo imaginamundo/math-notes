@@ -142,18 +142,20 @@ const listFor = (lines) => suggestionsFrom(lines.map(suggestionFacts));
 const textsOf = (list, kind) => list.filter((entry) => entry.kind === kind).map((e) => e.text);
 
 test('suggestionFacts reads one line: its variable, unit definition and tags', () => {
-  assert.deepEqual(suggestionFacts('x = 1'), { variable: 'x', unit: null, tags: [] });
+  assert.deepEqual(suggestionFacts('x = 1'), { variable: 'x', fn: null, unit: null, tags: [] });
   assert.deepEqual(suggestionFacts('monthly rent = 1500'), {
     variable: 'monthly rent',
+    fn: null,
     unit: null,
     tags: [],
   });
   assert.deepEqual(suggestionFacts('20 #food #urgent'), {
     variable: null,
+    fn: null,
     unit: null,
     tags: ['food', 'urgent'],
   });
-  assert.deepEqual(suggestionFacts('Price: 2'), { variable: null, unit: null, tags: [] });
+  assert.deepEqual(suggestionFacts('Price: 2'), { variable: null, fn: null, unit: null, tags: [] });
 });
 
 test('a unit definition names a unit, not a variable', () => {
@@ -227,8 +229,9 @@ test('the vocabulary is well formed and unique', () => {
   for (const entry of VOCABULARY) {
     assert.equal(typeof entry.text, 'string');
     assert.ok(['keyword', 'function', 'constant', 'unit'].includes(entry.kind));
-    assert.ok(!seen.has(entry.text), `duplicate ${entry.text}`);
-    seen.add(entry.text);
+    const key = `${entry.kind === 'unit' ? 'unit' : 'word'}:${entry.text}`;
+    assert.ok(!seen.has(key), `duplicate ${entry.text}`);
+    seen.add(key);
   }
   const kinds = Object.fromEntries(VOCABULARY.map((entry) => [entry.text, entry.kind]));
   assert.equal(kinds.sqrt, 'function');
@@ -252,4 +255,69 @@ test('wordRangeAt spans non-ASCII words and tags', () => {
     prefix: '#aáeáãd',
     tag: true,
   });
+});
+
+test('completing a later word of a multi-word name replaces the earlier words too', () => {
+  const take = (value, name) => {
+    const range = wordRangeAt(value, value.length);
+    return applyCompletion(value, range, name).value;
+  };
+  assert.equal(take('2 * monthly re', 'monthly rent'), '2 * monthly rent');
+  assert.equal(take('100 * tax ra', 'tax rate'), '100 * tax rate');
+  assert.equal(take('3 monthly fe', 'monthly fees'), '3 monthly fees');
+  assert.equal(take('2 * m', 'monthly rent'), '2 * monthly rent');
+  assert.equal(take('2 * Monthly re', 'monthly rent'), '2 * monthly rent');
+});
+
+test('a multi-word name that is already fully typed is not offered again', () => {
+  const names = [{ text: 'monthly rent', kind: 'variable' }];
+  const offer = (value) =>
+    suggestionsFor(wordRangeAt(value, value.length).prefix, names, 8, {
+      before: value.slice(0, wordRangeAt(value, value.length).start),
+    }).map((entry) => entry.text);
+  assert.deepEqual(offer('2 * monthly re'), ['monthly rent']);
+  assert.deepEqual(offer('2 * monthly rent'), []);
+});
+
+test('a function that already has its bracket does not get another', () => {
+  const range = wordRangeAt('sqr(16)', 3);
+  assert.equal(applyCompletion('sqr(16)', range, 'sqrt', { paren: true }).value, 'sqrt(16)');
+  assert.equal(
+    applyCompletion('sqr (16)', wordRangeAt('sqr (16)', 3), 'sqrt', { paren: true }).value,
+    'sqrt (16)'
+  );
+  assert.equal(applyCompletion('sq', wordRangeAt('sq', 2), 'sqrt', { paren: true }).value, 'sqrt(');
+});
+
+test('after a number or to/in/as only units are offered, units first', () => {
+  const texts = (before, prefix) =>
+    suggestionsFor(prefix, VOCABULARY, 8, { before }).map((entry) => entry.text);
+  const kinds = (before, prefix) =>
+    suggestionsFor(prefix, VOCABULARY, 8, { before }).map((entry) => entry.kind);
+  assert.ok(!kinds('3 ', 'mi').some((kind) => kind !== 'unit'));
+  assert.ok(texts('3 ', 'mi').includes('min'));
+  assert.ok(!texts('3 ', 'we').includes('weekday'));
+  assert.ok(!kinds('2 h to ', 'mi').some((kind) => kind !== 'unit'));
+  assert.ok(!kinds('12 ', 'in').some((kind) => kind === 'constant' || kind === 'function'));
+  // Elsewhere functions and keywords still come first.
+  assert.equal(suggestionsFor('mi', VOCABULARY, 8, { before: '2 * ' })[0].kind, 'function');
+});
+
+test('the vocabulary offers only names the engine has, with accurate hints', () => {
+  const byText = new Map(VOCABULARY.map((entry) => [entry.text, entry]));
+  for (const gone of ['trunc', 'length']) assert.equal(byText.has(gone), false, gone);
+  assert.ok(byText.has('fix') && byText.has('size'));
+  assert.match(byText.get('log').detail, /natural/);
+});
+
+test('only names usable at the caret are offered', () => {
+  const facts = (lines) => lines.map(suggestionFacts);
+  const names = (lines) => suggestionsFrom(facts(lines)).map((entry) => entry.text);
+  assert.deepEqual(names(['cube(x) = x^3']), ['cube']);
+  assert.deepEqual(names(['sq = f(x) = x^2']), ['sq']);
+  assert.deepEqual(names(['total = 5', 'end = 1', 'prev = 2', 'today = 3', '__x = 1']), []);
+  assert.deepEqual(names(['n[2] = 99', 'p.x = 5', '// y = 2']), []);
+  assert.deepEqual(names(['tax rate = 5']), ['tax rate']);
+  const list = suggestionsFrom(facts(['double = f(x) = x * 2']));
+  assert.equal(list[0].kind, 'function');
 });

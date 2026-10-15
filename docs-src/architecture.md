@@ -264,6 +264,14 @@ is reported as an invalid time instead of becoming a range. A total that cannot 
 currencies) is styled as an error, like the same message on a `sum` line. The error-leak ratchet
 sweeps value kinds against operators and functions and is at zero.
 
+Autocomplete context (`js/core/autocomplete.js`): a multi-word name completes as a whole (`2 * monthly re` →
+`2 * monthly rent`, the earlier words are part of the replacement) and is not offered again once typed. After a
+number or `to`/`in`/`as` only units (and the sheet's own names) are offered, units first, so `3 mi` never becomes
+`3 min(`. A function that is already followed by `(` does not get another. Names are offered where they can be
+used: variables, functions (`name = f(x) = …`, offered with their bracket) and custom units from the lines above
+the caret, tags from anywhere; reserved words, calls, indexes and comments are never offered. The reserved-word
+check is shared with the engine (`reservedWords.js`).
+
 Tags in calculations: trailing `#tags` label a line only when the code before them is a
 finished expression (`isCompleteCode` in `parseLine.js`); after an operator, `=`, `(` or a
 word operator (`5 + #food`, `x = #food`) the tag is an operand and the line is not

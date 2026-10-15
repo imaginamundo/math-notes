@@ -50,8 +50,10 @@ test('every unit, constant and function autocomplete offers is understood by the
 
 test('the vocabulary has no duplicate names', () => {
   const seen = new Set();
-  for (const { text } of VOCABULARY) {
-    assert.ok(!seen.has(text), `duplicate ${text}`);
-    seen.add(text);
+  // A unit may share its spelling with a function or keyword (`min`, `in`).
+  for (const { text, kind } of VOCABULARY) {
+    const key = `${kind === 'unit' ? 'unit' : 'word'}:${text}`;
+    assert.ok(!seen.has(key), `duplicate ${text}`);
+    seen.add(key);
   }
 });

@@ -31,6 +31,7 @@ import { substituteAggregates } from './aggregateSubstitution.js';
 import { clockReads } from '../eval/clock.js';
 import { firstDifference } from '../util/sequence.js';
 import { mangleLines } from './multiWordVariables.js';
+import { isReservedLabel } from './reservedWords.js';
 import { unitDefinition } from './userUnits.js';
 import { createUserUnit, removeUserUnit } from '../eval/userUnits.js';
 
@@ -85,31 +86,6 @@ import { createUserUnit, removeUserUnit } from '../eval/userUnits.js';
 // Matches a standalone aggregate keyword, i.e. not a mathjs function call
 // like `sum([1, 2, 3])`. The words come from AGGREGATE_KEYWORDS.
 const AGGREGATE_WORD = new RegExp(`\\b(?:${AGGREGATE_WORD_SOURCE})\\b(?!\\s*\\()`, 'i');
-
-// Labels a line may not assign to: `prev` and the unconditional date keywords
-// (rewritten before mathjs, so a variable of that name could never be read
-// back) and the whole `__` namespace, which holds the engine's own helpers and
-// the generated names multi-word variables are mangled to. Aggregate keywords
-// (`sum`/`total`/…) are deliberately not here: assigning one makes the variable
-// shadow the keyword from then on. Checked against the raw label, before
-// mangling, so a multi-word variable (which becomes `__var_...`) is never
-// mistaken for a reserved name.
-const RESERVED_LABELS = new Set([
-  'prev',
-  'today',
-  'now',
-  'yesterday',
-  'tomorrow',
-  'christmas',
-  'halloween',
-  // `total` is the running-total aggregate and `unit` opens a unit definition.
-  'total',
-  'unit',
-]);
-
-function isReservedLabel(label) {
-  return RESERVED_LABELS.has(label.toLowerCase()) || label.startsWith('__');
-}
 
 // A group opens with a header line (`Name:` with no expression) and closes with
 // a line whose code is exactly `end`. Groups are flat: an unterminated header is

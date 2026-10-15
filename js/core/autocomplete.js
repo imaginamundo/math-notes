@@ -1,6 +1,7 @@
 import parseLine from './parseLine.js';
 import { LETTER, WORD } from './identifiers.js';
 import { unitDefinition, unitAliases } from './userUnits.js';
+import { isReservedLabel } from './reservedWords.js';
 
 // Pure completion logic: find the word under the caret, rank vocabulary
 // matches, and apply a chosen completion. No DOM, so it is unit-tested
@@ -58,29 +59,62 @@ function wordRangeAt(value, caret) {
   };
 }
 
+// Where a multi-word name (`monthly rent`) starts when the caret is on one of its later
+// words: the words of the name already typed before the caret belong to the replacement,
+// or the name would appear twice (`monthly monthly rent`). Returns an index into `value`.
+function nameStart(value, start, name) {
+  const words = name.split(/\s+/);
+  for (let count = words.length - 1; count >= 1; count--) {
+    const lead = new RegExp(
+      `(?<![${WORD}_])${words
+        .slice(0, count)
+        .map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+        .join('\\s+')}\\s+$`,
+      'iu'
+    );
+    const match = lead.exec(value.slice(0, start));
+    if (match) return match.index;
+  }
+  return start;
+}
+
+// A number or `to`/`in`/`as` before the word means a unit is being written.
+const UNIT_POSITION = /(?:\d|%|(?<![\p{L}\p{N}_])(?:to|in|as))[ \t]*$/iu;
+
 /**
  * Rank vocabulary entries that contain `prefix`, best first. Variables and
- * entries that start with the prefix come first; exact matches are dropped
- * because accepting them would change nothing.
+ * entries that start with the prefix come first; an entry that is already fully typed
+ * (including the earlier words of a multi-word name) is dropped because accepting it
+ * would change nothing. After a number or `to`/`in`/`as`, only units (and names) are
+ * offered, units first: nobody types a function there.
  * @param {string} prefix
  * @param {Array<{ text: string, kind: string }>} entries
  * @param {number} limit
+ * @param {{ before?: string }} [options] the text before the word, for context
  */
-function suggestionsFor(prefix, entries, limit = 8) {
+function suggestionsFor(prefix, entries, limit = 8, options = {}) {
+  const before = options.before ?? '';
   const isTag = prefix.startsWith('#');
+  const unitPosition = !isTag && UNIT_POSITION.test(before);
+  const order = unitPosition ? { unit: 0, variable: 1 } : KIND_ORDER;
   const lower = prefix.toLowerCase();
   const scored = [];
   for (const entry of entries) {
     // A `#` puts the popup in tag mode; otherwise only non-tag entries match.
     if ((entry.kind === 'tag') !== isTag) continue;
+    if (unitPosition && !(entry.kind in order)) continue;
     if (entry.text === prefix) continue;
     const lowerText = entry.text.toLowerCase();
     const index = lowerText.indexOf(lower);
     if (index === -1) continue;
+    if (/\s/.test(entry.text)) {
+      const typed = (before + prefix).slice(nameStart(before + prefix, before.length, entry.text));
+      if (typed.replace(/\s+/g, ' ').toLowerCase() === lowerText) continue;
+    }
     scored.push({
       entry,
       starts: lowerText.startsWith(lower) ? 0 : 1,
-      kind: KIND_ORDER[entry.kind] ?? 9,
+      kind: order[entry.kind] ?? 9,
       index,
     });
   }
@@ -105,20 +139,46 @@ function suggestionsFor(prefix, entries, limit = 8) {
  * @returns {{ value: string, caret: number }}
  */
 function applyCompletion(value, range, text, options = {}) {
-  const insert = options.paren ? `${text}(` : text;
-  const next = value.slice(0, range.start) + insert + value.slice(range.end);
-  return { value: next, caret: range.start + insert.length };
+  // A function already followed by its bracket (`sqr(16)`) does not get a second one.
+  const bracketed = /^\s*\(/.test(value.slice(range.end));
+  const insert = options.paren && !bracketed ? `${text}(` : text;
+  const start = /\s/.test(text) ? nameStart(value, range.start, text) : range.start;
+  const next = value.slice(0, start) + insert + value.slice(range.end);
+  return { value: next, caret: start + insert.length };
 }
 
 // One line's contribution to the suggestion list: the name it assigns (a unit
 // definition names a unit, so it is not offered as a variable), its unit
 // definition, and its tags. Parsed once, so a caller that keeps these per line
 // re-parses only the lines an edit actually touched.
+// A name the popup may offer: a plain identifier or several words, never a reserved
+// word, a call (`cube(x)`), an index (`n[2]`), a path or a comment.
+const NAME = new RegExp(`^[${LETTER}_][${WORD}_]*(?: [${WORD}_]+)*$`, 'u');
+const FUNCTION_HEAD = new RegExp(`^\\s*([${LETTER}_][${WORD}_]*)\\s*\\([^()]*\\)\\s*=(?!=)`, 'u');
+const CALL_LABEL = new RegExp(`^([${LETTER}_][${WORD}_]*)\\s*\\([^()]*\\)$`, 'u');
+
+function usableName(label) {
+  return NAME.test(label) && !isReservedLabel(label) && label.toLowerCase() !== 'end';
+}
+
 function suggestionFacts(line) {
   const parsed = typeof line === 'string' ? parseLine(line) : line;
   const unit = unitDefinition(parsed);
+  let variable = null;
+  let fn = null;
+  if (!unit && parsed.isAssignment && parsed.label) {
+    const call = CALL_LABEL.exec(parsed.label);
+    if (call && usableName(call[1]))
+      fn = call[1]; // `f(x) = …`
+    else if (usableName(parsed.label)) {
+      if (FUNCTION_HEAD.test(parsed.rhs || ''))
+        fn = parsed.label; // `sq = f(x) = …`
+      else variable = parsed.label;
+    }
+  }
   return {
-    variable: !unit && parsed.isAssignment && parsed.label ? parsed.label : null,
+    variable,
+    fn,
     unit: unit ? { name: unit.name, aliases: unitAliases(unit.name) } : null,
     tags: parsed.tags,
   };
@@ -130,10 +190,12 @@ function suggestionFacts(line) {
 // append.
 function suggestionsFrom(facts) {
   const variables = new Set();
+  const functions = new Set();
   const units = new Map();
   const tags = new Set();
   for (const fact of facts) {
     if (fact.variable) variables.add(fact.variable);
+    if (fact.fn) functions.add(fact.fn);
     if (fact.unit) {
       const key = fact.unit.name.toLowerCase();
       if (!units.has(key)) units.set(key, fact.unit);
@@ -142,6 +204,7 @@ function suggestionsFrom(facts) {
   }
   return [
     ...[...variables].map((text) => ({ text, kind: 'variable' })),
+    ...[...functions].map((text) => ({ text, kind: 'function', detail: 'your function' })),
     ...[...units.values()].flatMap(({ name, aliases }) =>
       [name, ...aliases].map((text) => ({ text, kind: 'unit', detail: 'custom unit' }))
     ),

@@ -14,11 +14,11 @@ const KEYWORDS = [
   ['avg', 'mean of the block above'],
   ['end', 'close a group'],
   ['today', 'current date'],
-  ['now', 'current date and time'],
+  ['now', 'current time'],
   ['yesterday', "today's date minus a day"],
   ['tomorrow', "today's date plus a day"],
   ['per', 'rate division'],
-  ['at', 'rate multiplication'],
+  ['at', 'rate: distance at speed, or amount at price'],
   ['for', 'multiply by a duration'],
   ['in', 'convert to a unit'],
   ['to', 'convert to a unit'],
@@ -26,7 +26,7 @@ const KEYWORDS = [
   ['rounded', 'round the result'],
   ['nearest', 'round to a multiple'],
   ['workdays', 'Monday to Friday'],
-  ['weekday', 'day of the week'],
+  ['weekday', 'day of the week (weekday on March 9)'],
 ];
 
 const FUNCTIONS = [
@@ -37,16 +37,16 @@ const FUNCTIONS = [
   ['round', 'round to nearest'],
   ['ceil', 'round up'],
   ['floor', 'round down'],
-  ['trunc', 'drop the fraction'],
+  ['fix', 'drop the fraction'],
   ['sign', 'sign of a number'],
   ['min', 'smallest value'],
   ['max', 'largest value'],
   ['sum', 'add a list'],
   ['mean', 'average of a list'],
   ['median', 'middle of a list'],
-  ['count', 'number of items'],
+  ['count', 'number of items in a list'],
   ['exp', 'e raised to the power'],
-  ['log', 'logarithm base 10'],
+  ['log', 'natural logarithm (log(x, base) for another base)'],
   ['log10', 'logarithm base 10'],
   ['log2', 'logarithm base 2'],
   ['ln', 'natural logarithm'],
@@ -65,7 +65,7 @@ const FUNCTIONS = [
   ['random', 'random number'],
   ['concat', 'join lists'],
   ['sort', 'order a list'],
-  ['length', 'size of a list'],
+  ['size', 'size of a list'],
   ['line', "reference an earlier line's value"],
   ['fromunix', 'date from a unix timestamp'],
   ['unix', 'unix timestamp now'],
@@ -84,9 +84,11 @@ function entries() {
   const list = [];
   const seen = new Set();
   const push = (text, kind, detail) => {
-    // The app's keywords win over a same-named maths function (`sum`).
-    if (seen.has(text)) return;
-    seen.add(text);
+    // The app's keywords win over a same-named maths function (`sum`). A unit may share
+    // its spelling with one (`min`, `in`): after a number only the unit is offered.
+    const key = kind === 'unit' ? `unit:${text}` : text;
+    if (seen.has(key)) return;
+    seen.add(key);
     list.push({ text, kind, detail });
   };
   for (const [text, detail] of KEYWORDS) push(text, 'keyword', detail);

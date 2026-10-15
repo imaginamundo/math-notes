@@ -80,6 +80,7 @@ function initAutocomplete(editableNode, editorScroll) {
   // that, a change that cannot add or remove a name (`=` or `#` is what
   // can) reuses the whole list.
   let cachedValue = null;
+  let cachedCaretLine = -1;
   let cachedLines = null;
   let cachedEntries = null;
   // Facts by line text: they depend on nothing but the line, so a line that
@@ -90,12 +91,23 @@ function initAutocomplete(editableNode, editorScroll) {
     return line.includes('=') || line.includes('#');
   }
 
+  // Names are offered only where they can be used: a variable, function or unit is
+  // defined by a line above the caret's, so a name assigned below is not offered.
+  // Tags are offered from anywhere, since a tag can be new on the line being typed.
   function entries() {
     const value = editableNode.value;
-    if (value === cachedValue && cachedEntries) return cachedEntries;
+    const caretLine = value.slice(0, editableNode.selectionStart).split('\n').length - 1;
+    if (value === cachedValue && caretLine === cachedCaretLine && cachedEntries) {
+      return cachedEntries;
+    }
 
     const lines = sheetLines(value);
-    if (cachedEntries && cachedLines && lines.length === cachedLines.length) {
+    if (
+      cachedEntries &&
+      cachedLines &&
+      caretLine === cachedCaretLine &&
+      lines.length === cachedLines.length
+    ) {
       let relevant = false;
       for (let i = 0; i < lines.length; i++) {
         if (lines[i] === cachedLines[i]) continue;
@@ -117,8 +129,15 @@ function initAutocomplete(editableNode, editorScroll) {
     }
     factsByLine = next;
     cachedValue = value;
+    cachedCaretLine = caretLine;
     cachedLines = lines;
-    cachedEntries = [...suggestionsFrom(next.values()), ...VOCABULARY];
+    const facts = lines.map((line) => next.get(line));
+    const above = suggestionsFrom(facts.slice(0, caretLine));
+    const known = new Set(above.map((entry) => entry.text));
+    const tagsBelow = suggestionsFrom(facts.slice(caretLine)).filter(
+      (entry) => entry.kind === 'tag' && !known.has(entry.text)
+    );
+    cachedEntries = [...above, ...tagsBelow, ...VOCABULARY];
     return cachedEntries;
   }
 
@@ -136,7 +155,9 @@ function initAutocomplete(editableNode, editorScroll) {
     // A word that already names something needs no help: offering longer words
     // for it only invites replacing it. Ctrl+Space still lists them.
     if (!force && isKnown(range.prefix, all)) return close();
-    items = suggestionsFor(range.prefix, all, MAX_ITEMS);
+    items = suggestionsFor(range.prefix, all, MAX_ITEMS, {
+      before: editableNode.value.slice(0, range.start),
+    });
     if (!items.length) return close();
     activeIndex = 0;
     chosen = Boolean(force);
