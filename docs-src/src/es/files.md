@@ -16,6 +16,8 @@ Usa las pestañas de arriba para mantener hojas separadas. Cada pestaña se guar
 
 Usa **Ajustes → Archivos** para descargar la hoja activa como archivo de texto, o cargar una desde un archivo (`.txt`, `.numi` o texto plano, hasta 1 MB). Importar **reemplaza el contenido de la hoja activa**, pidiendo confirmación si la hoja no está vacía; no abre una pestaña nueva. Las exportaciones se llaman `math-notes-AAAA-MM-DD.txt`. Las mismas acciones están en `⇧⌘E` / `Ctrl+Shift+E` (exportar) y `⇧⌘I` / `Ctrl+Shift+I` (importar).
 
+Un archivo `.numi` se lee como texto simple, así que solo pasa lo que Math Notes entiende. Los comentarios empiezan con `#` o `//`; el texto entre comillas junto a un valor es un error; `and`/`xor` no son operadores de palabra; una función se escribe con paréntesis (`sqrt(16)`, no `sqrt 16`); y un bloque `sum` termina en la primera línea en blanco.
+
 ## Enlaces para compartir
 
 El botón **Compartir** copia un enlace que lleva la hoja activa dentro. A quien lo abra se le pregunta si quiere abrir la hoja en una pestaña nueva; nunca reemplaza lo que ya tiene. El enlace va comprimido, y se te avisa si supera unos 8000 caracteres, porque algunas aplicaciones cortan los enlaces largos; un enlace que se descomprime a más de 256 KB se rechaza.

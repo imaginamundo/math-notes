@@ -10,7 +10,7 @@ Math Notes is a sheet of lines. You write one calculation per line and the answe
 2 * 3 + 1
 ```
 
-A line can be a plain number, an expression, an assignment, a comment, or a label followed by an expression. The result of the last line is also shown in the total bar at the bottom.
+A line can be a plain number, an expression, an assignment, a comment, or a label followed by an expression. The total bar at the bottom adds up every line that shows a number (by default; Settings can choose the average or the median). Assignments such as `x = 5` show no result and are left out of totals, `sum` blocks, tag totals and group subtotals.
 
 ## The screen
 

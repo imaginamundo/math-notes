@@ -96,6 +96,11 @@ const WORK_HOURS_BETWEEN = new RegExp(
 );
 
 const CLOCK_ONLY = new RegExp(`^(${CLOCK_SRC})$`, 'i');
+// A clock time and a time-zone name (`5pm ET`, `9:45 am PST in Berlin`): zones are not modelled,
+// and without this the zone is read as a unit.
+const TIME_ZONES =
+  'UTC|GMT|EST|EDT|CST|CDT|MST|MDT|PST|PDT|ET|CT|MT|PT|CET|CEST|BST|IST|JST|HKT|AEST|AEDT';
+const CLOCK_WITH_ZONE = new RegExp(`^(?:${CLOCK_SRC})\\s*(?:${TIME_ZONES})\\b`, 'i');
 const CLOCK_DURATION = new RegExp(`^(${CLOCK_SRC})(${TERMS_SRC})$`, 'i');
 // A clock pair (`to` is a forward interval, `-` the ambiguous same-day
 // difference) can sit inside a larger expression, so it is rewritten wherever
@@ -207,6 +212,8 @@ function preprocessCalendar(expression, context) {
   if ((m = DATE_AS.exec(expr))) {
     return `__dateFormat(__date(${JSON.stringify(m[1])}), ${JSON.stringify(m[2])})`;
   }
+
+  if (CLOCK_WITH_ZONE.test(expr)) return '__timeZoneUnsupported()';
 
   // Clock times (`9:45 am`, `16:00`) and their arithmetic.
   if ((m = CLOCK_DURATION.exec(expr))) {

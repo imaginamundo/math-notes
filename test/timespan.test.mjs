@@ -123,3 +123,12 @@ test('a year or month typed in comes apart into exactly that unit', () => {
   assert.equal(valueOf('18 months in years and months'), '1 year 6 months');
   assert.equal(valueOf('2 years 3 months in years and months'), '2 years 3 months');
 });
+
+test('SHEET-17: days and weeks read as durations after arithmetic', () => {
+  assert.equal(valueOf('1 day + 2 hours'), '1 day 2 hours');
+  assert.equal(valueOf('2 hours + 1 day'), '1 day 2 hours');
+  assert.equal(valueOf('1 day + 2 days'), '3 days');
+  assert.equal(valueOf('1.5 days'), '1.5 days');
+  assert.equal(valueOf('10 days'), '10 days');
+  assert.equal(valueOf('2 weeks'), '2 weeks');
+});

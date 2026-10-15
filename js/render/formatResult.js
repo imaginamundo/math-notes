@@ -115,6 +115,12 @@ function formatScientific(n, precision) {
   return Number(text) === n ? shown : `${shown}…`;
 }
 
+// Days and weeks as typed (`10 days`, `1 month in days`) keep their unit. A singular `day` or
+// `week` is what arithmetic leaves (`1 day + 2 days`, `1 day + 2 hours`): those read as durations.
+function isMixedDays(rawUnits) {
+  return rawUnits === 'day' || rawUnits === 'week';
+}
+
 const DURATION_UNITS = new Set([
   'min',
   'mins',
@@ -200,7 +206,7 @@ const UNIT_FORMAT_RULES = [
     test: ({ unit, info, rawUnits, compound }) =>
       Boolean(info) &&
       unit.keepUnit !== true &&
-      (unit.timespan === true || DURATION_UNITS.has(rawUnits) || compound),
+      (unit.timespan === true || DURATION_UNITS.has(rawUnits) || compound || isMixedDays(rawUnits)),
     format: ({ unit, info, precision }) =>
       formatTimespan(info.seconds, unit.displayParts, (value) => formatNumber(value, precision)),
   },

@@ -16,6 +16,8 @@ Use as abas no topo para manter planilhas separadas. Cada aba é salva automatic
 
 Use **Configurações → Arquivos** para baixar a planilha ativa como um arquivo de texto, ou carregar uma de um arquivo (`.txt`, `.numi` ou texto simples, até 1 MB). Importar **substitui o conteúdo da planilha ativa**, pedindo confirmação se a planilha não estiver vazia; não abre uma nova aba. As exportações se chamam `math-notes-AAAA-MM-DD.txt`. As mesmas ações estão em `⇧⌘E` / `Ctrl+Shift+E` (exportar) e `⇧⌘I` / `Ctrl+Shift+I` (importar).
 
+Um ficheiro `.numi` é lido como texto simples, por isso só passa o que o Math Notes entende. Comentários começam com `#` ou `//`; texto entre aspas ao lado de um valor é um erro; `and`/`xor` não são operadores de palavra; uma função é escrita com parênteses (`sqrt(16)`, não `sqrt 16`); e um bloco `sum` termina na primeira linha em branco.
+
 ## Links de compartilhamento
 
 O botão **Compartilhar** copia um link que carrega a planilha ativa dentro dele. Quem abrir é perguntado se quer abrir a planilha em uma nova aba; ele nunca substitui o que a pessoa já tem. O link é comprimido, e você é avisado se ele passar de cerca de 8000 caracteres, porque alguns apps cortam links longos; um link que descompacta para mais de 256 KB é recusado.

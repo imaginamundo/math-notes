@@ -10,7 +10,7 @@ O Math Notes é uma planilha de linhas. Você escreve um cálculo por linha e a 
 2 * 3 + 1
 ```
 
-Uma linha pode ser um número simples, uma expressão, uma atribuição, um comentário, ou um rótulo seguido de uma expressão. O resultado da última linha também aparece na barra de total, na parte de baixo.
+Uma linha pode ser um número simples, uma expressão, uma atribuição, um comentário, ou um rótulo seguido de uma expressão. A barra de total, na parte inferior, soma todas as linhas que mostram um número (por padrão; as Configurações permitem escolher a média ou a mediana). Atribuições como `x = 5` não mostram resultado e ficam de fora dos totais, dos blocos `sum`, dos totais de tags e dos subtotais de grupos.
 
 ## A tela
 

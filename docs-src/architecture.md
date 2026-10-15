@@ -292,6 +292,8 @@ Line syntax (Wave 9): `//` starts a comment like `#` (outside quotes), a `;` bet
 
 Sheet language (Wave 9): `js/eval/unitWords.js` rewrites area and volume words (`sq cm`, `square inches`, `m squared`, `sqm`, `cbm`, `²`/`³`) and base conversions (`in hex|bin|oct|decimal|sci`); a symbol followed by a code (`$30 CAD`) takes the code; `start:stop` with `start` a variable above is a range, not a label; a resolved `line(n)` is parenthesised so a unit or digit after it is a separate factor; the bit operators are exact for whole numbers (arbitrary-size integers, refusing a result a number cannot hold). A user function still receives the whole list (the documented, pinned behaviour); `map` and the dot operators work element by element.
 
+More sheet language (Wave 9): a singular `day`/`week` left by arithmetic is drawn as a duration (`1 day + 2 hours` is `1 day 2 hours`, `1 day + 2 days` is `3 days`), `fromunix` reads an 11 to 13 digit timestamp as milliseconds and refuses a date out of range, and a clock time followed by a time-zone name says zones are not supported.
+
 Evaluation scheduling (Wave 9): the client runs one evaluation at a time; an edit that arrives meanwhile
 sets a flag and a single follow-up evaluates the newest text, so a slow sheet never queues one evaluation per
 keystroke. The worker posts `ready` (with `PROTOCOL_VERSION`) once its bundle has loaded; an evaluation is timed

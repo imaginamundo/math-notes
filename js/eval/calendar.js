@@ -51,6 +51,9 @@ function initCalendar(math) {
       __date: (text) => requireDate(text),
       __dateAdd: (value, duration, sign) => dateAdd(math, value, duration, sign),
       __clock: (text) => requireClock(text),
+      __timeZoneUnsupported: () => {
+        throw new Error('Time zones are not supported; a clock time is in your own time zone');
+      },
       __clockAdd: (text, duration, sign) => clockAdd(text, duration, sign),
       __clockInterval: (a, b, forward) => clockInterval(a, b, Number(forward) > 0, math),
       __dateInterval: (a, b, mode) => {

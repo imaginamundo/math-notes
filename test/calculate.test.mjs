@@ -1014,3 +1014,10 @@ test('SHEET-09: bit operators are exact beyond 32 bits', () => {
   assert.equal(value('1 << 4'), 16);
   assert.match(String(value('1 << 80')), /too large/);
 });
+
+test('SHEET-18: fromunix reads milliseconds and refuses an impossible date', () => {
+  const value = (line) => evaluateLines([line]).results[0].value;
+  assert.equal(value('fromunix(1733823083)'), value('fromunix(1733823083000)'));
+  assert.match(String(value('fromunix(1733823083)')), /2024/);
+  assert.match(String(value('fromunix(1733823083000000)')), /outside the range/);
+});

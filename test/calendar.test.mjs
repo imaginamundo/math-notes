@@ -288,3 +288,10 @@ test('clock intervals are wall-clock minutes', () => {
   assert.equal(valueOf('4pm - 3am'), '13 hours');
   assert.equal(valueOf('7:30am to 8:45pm'), '13 hours 15 minutes');
 });
+
+test('SHEET-19: a time zone after a clock time says zones are not supported', () => {
+  for (const line of ['5pm ET', '9:45 am PST', '17:00 UTC', '2:30 pm HKT in Berlin']) {
+    assert.match(valueOf(line), /Time zones are not supported/, line);
+  }
+  assert.equal(valueOf('5pm'), valueOf('5 pm'.replace(' ', '')));
+});

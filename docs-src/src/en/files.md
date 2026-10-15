@@ -16,6 +16,8 @@ Use the tabs at the top to keep separate worksheets. Every tab is saved automati
 
 Use **Settings → Files** to download the active sheet as a text file, or load one from a file (`.txt`, `.numi` or plain text, up to 1 MB). Importing **replaces the content of the active sheet**, after asking for confirmation if the sheet is not empty; it does not open a new tab. Exports are named `math-notes-YYYY-MM-DD.txt`. The same actions are on `⇧⌘E` / `Ctrl+Shift+E` (export) and `⇧⌘I` / `Ctrl+Shift+I` (import).
 
+A `.numi` file is read as plain text, so only what Math Notes understands carries over. Comments start with `#` or `//`; quoted text next to a value is an error; `and`/`xor` are not word operators; a function is written with parentheses (`sqrt(16)`, not `sqrt 16`); and a `sum` block ends at the first blank line.
+
 ## Share links
 
 The **Share** button copies a link that carries the active sheet inside it. Anyone who opens it is asked whether to open the sheet in a new tab; it never replaces what they already have. The link is compressed, and you are warned if it grows past about 8,000 characters, since some apps cut long links; a link that unpacks to more than 256 KB is refused.
