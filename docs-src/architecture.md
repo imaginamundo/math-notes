@@ -272,6 +272,18 @@ used: variables, functions (`name = f(x) = …`, offered with their bracket) and
 the caret, tags from anywhere; reserved words, calls, indexes and comments are never offered. The reserved-word
 check is shared with the engine (`reservedWords.js`).
 
+Editor and docs behaviour (Wave 8): find wraps to the first remaining match after a replace at the end of the sheet,
+and closing the bar selects the active match so the next keystroke edits it. Enter and Esc belong to an IME while it
+composes (rename, Go to line, find and replace ignore them then). Comments, gutter numbers and placeholders use the
+solid `--color-dim` token, chosen per theme to reach 4.5:1 on the editor, the gutter and a group row, and the
+editor's text selection is translucent so the glyphs under it stay readable. A share link is refused up front when
+the sheet is over the importer's 256 KiB cap, names from links follow the rename rules, a link left in the address
+bar by a failed copy is not offered back on reload, an import that is not text is refused, and the export file name
+uses the local date. With two windows open each keeps its own active tab, caret and undo history; the other
+window's changes to the tab list and to other tabs are adopted, and this window's own tab is replaced only when its
+text changed. The docs search is an ARIA combobox (options, active descendant, a live result count, closes when focus
+leaves it), and the mobile drawer is a modal: dialog semantics, the page behind it inert and Tab wrapping inside it.
+
 Tags in calculations: trailing `#tags` label a line only when the code before them is a
 finished expression (`isCompleteCode` in `parseLine.js`); after an operator, `=`, `(` or a
 word operator (`5 + #food`, `x = #food`) the tag is an operand and the line is not

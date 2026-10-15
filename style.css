@@ -165,7 +165,7 @@ html[data-theme='light'] {
      surface they sit on, instead of an opacity that does not. */
   --color-dim: #6a6b71;
   --color-text-strong: #202124;
-  --color-text-muted: #6f7681;
+  --color-text-muted: #5a616b;
   --color-footer: #e3e5ea;
   --color-variable: #c23b2f;
   --color-number: #986801;
@@ -174,7 +174,7 @@ html[data-theme='light'] {
   --color-title: #696e79;
   --color-tag-bg: #a626a4;
   --color-tag-text: #ffffff;
-  --color-link: #4078f2;
+  --color-link: #2a5fd0;
   --color-link-visited: #a626a4;
   --color-ghost: rgba(0, 0, 0, 0.6);
   --color-ghost-error: #b02626;

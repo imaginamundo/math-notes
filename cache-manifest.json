@@ -1,5 +1,5 @@
 {
-  "version": 110,
+  "version": 111,
   "files": {
     "index.html": "7e59602ed6ee129e8e61afc1b3cadc3a9f29db8413ab48bf977c7685c79f5ba4",
     "js/core/aggregate.js": "9a0f23e09eb4e11fe2870a1f325b9a3e20e7fbced26cee8d4a1b2d84aea4ece6",
@@ -101,7 +101,7 @@
     "js/ui/shortcuts.js": "a1482c7d56b1b8283455e19080245f986bf0d69b87d5e24c6af4211c65c2659a",
     "js/ui/starterPrompt.js": "ef3b5561abfef800bea76f1c1aec58feddbaf41332a573f97f8bf57bcb94b080",
     "js/ui/tabTemplates.js": "56145a79ebc0c9542e9cb4c591129fe035627b01cb1790b75671d1d749d966d0",
-    "js/ui/tabs.js": "b675d2e101898ef4ac31a5fdf04e574a7f647b4de8036e64ec411ea8527da35d",
+    "js/ui/tabs.js": "024c303f15f3e4b647dcc60017f43ccc2e8609808ce55d88fa0fcc42098d01c6",
     "js/ui/tabsHistory.js": "8cc423a29c2f11e6e2ce03643bfc89b85b7fe83f5f3b336c740baaa9f34dd066",
     "js/ui/tabsView.js": "e79e485e9c58ca691e228638d1f8def955cbb3aec218dd705f91a770f71ae8fb",
     "js/ui/totalModeControl.js": "05aa533bb1d0c2bb708f7855cb7a700dc03565a7f79061604717ad59d1164404",
@@ -115,6 +115,6 @@
     "js/util/storage.js": "b2d149129745093034c0ba0209bf33ef207f032cd56b400ae78d459cbfe7cf2e",
     "js/util/text.js": "c443bcf84ae8fe3e3d97299d1e795f9e339284d91b780310a0d17dd4320cafa2",
     "js/worker.js": "10330fbc6f630e1045ac57fdc8c13b504189480161812ee00a22ce1dd5752710",
-    "style.css": "13209af687336ac884c3542ca754c4513fc40760286e444700f43dc74b2343b8"
+    "style.css": "889b5d9923419e52c4f6b6e20ab6e3f93106e7a20b9bf94f4dd7316e157972e1"
   }
 }

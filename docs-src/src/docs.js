@@ -102,8 +102,20 @@ function wireMenu() {
       (node) => node.offsetParent !== null
     );
 
+  const main = document.querySelector('.doc-main');
   const setOpen = (open) => {
     sidebar.classList.toggle('is-open', open);
+    // An open drawer is a modal: the page behind it cannot be reached, and it says so.
+    if (main) main.inert = open;
+    if (open) {
+      sidebar.setAttribute('role', 'dialog');
+      sidebar.setAttribute('aria-modal', 'true');
+      sidebar.setAttribute('aria-label', toggle.getAttribute('aria-label') || 'Menu');
+    } else {
+      sidebar.removeAttribute('role');
+      sidebar.removeAttribute('aria-modal');
+      sidebar.removeAttribute('aria-label');
+    }
     if (backdrop) backdrop.classList.toggle('is-open', open);
     // Lock the page so it cannot scroll behind the drawer.
     root.classList.toggle('doc-menu-open', open);
@@ -134,9 +146,23 @@ function wireMenu() {
   });
 
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && sidebar.classList.contains('is-open')) {
+    if (!sidebar.classList.contains('is-open')) return;
+    if (event.key === 'Escape') {
       event.preventDefault();
       setOpen(false);
+    } else if (event.key === 'Tab') {
+      // Focus stays inside the drawer: Tab wraps from its last control to its first.
+      const list = focusables();
+      if (!list.length) return;
+      const first = list[0];
+      const last = list[list.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
   });
 
@@ -219,6 +245,20 @@ function wireSearch() {
   if (!input || !results) return;
   const emptyMessage = box.dataset.empty || 'No results';
 
+  // ARIA 1.2 combobox: the input owns the listbox and points at the highlighted option; a
+  // polite live region says how many results there are, since the highlight alone is not
+  // announced.
+  results.id ||= 'doc-search-results';
+  input.setAttribute('role', 'combobox');
+  input.setAttribute('aria-expanded', 'false');
+  input.setAttribute('aria-controls', results.id);
+  input.setAttribute('aria-autocomplete', 'list');
+  const status = document.createElement('span');
+  status.className = 'sr-only doc-search-status';
+  status.setAttribute('role', 'status');
+  status.setAttribute('aria-live', 'polite');
+  box.appendChild(status);
+
   let loading = null;
   let index = [];
   let items = [];
@@ -243,7 +283,11 @@ function wireSearch() {
           }));
           return index;
         })
-        .catch(() => []);
+        // A failed fetch is not remembered: the next query tries again.
+        .catch(() => {
+          loading = null;
+          return [];
+        });
     }
     return loading;
   }
@@ -253,6 +297,9 @@ function wireSearch() {
     results.textContent = '';
     items = [];
     active = -1;
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+    status.textContent = '';
   }
 
   function render() {
@@ -263,12 +310,20 @@ function wireSearch() {
       item.textContent = emptyMessage;
       results.appendChild(item);
       results.hidden = false;
+      input.setAttribute('aria-expanded', 'false');
+      input.removeAttribute('aria-activedescendant');
+      status.textContent = emptyMessage;
       return;
     }
     items.forEach((entry, position) => {
       const item = document.createElement('li');
+      item.setAttribute('role', 'option');
+      item.id = `${results.id}-${position}`;
+      item.setAttribute('aria-selected', String(position === active));
       const link = document.createElement('a');
       link.className = 'doc-search-result';
+      // The input drives the list with the arrow keys; a result is not a separate Tab stop.
+      link.tabIndex = -1;
       link.href = entry.anchor ? `${entry.url}#${entry.anchor}` : entry.url;
       const title = document.createElement('span');
       title.className = 'doc-search-title';
@@ -282,14 +337,19 @@ function wireSearch() {
       results.appendChild(item);
     });
     results.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    if (active >= 0) input.setAttribute('aria-activedescendant', `${results.id}-${active}`);
+    status.textContent = `${items.length} ${items.length === 1 ? 'result' : 'results'}`;
   }
 
   function move(step) {
     if (!items.length) return;
     active = (active + step + items.length) % items.length;
-    [...results.querySelectorAll('.doc-search-result')].forEach((link, position) =>
-      link.classList.toggle('is-active', position === active)
-    );
+    [...results.querySelectorAll('.doc-search-result')].forEach((link, position) => {
+      link.classList.toggle('is-active', position === active);
+      link.parentElement.setAttribute('aria-selected', String(position === active));
+    });
+    input.setAttribute('aria-activedescendant', `${results.id}-${active}`);
     const current = results.querySelector('.doc-search-result.is-active');
     if (current) current.scrollIntoView({ block: 'nearest' });
   }
@@ -334,12 +394,24 @@ function wireSearch() {
       const link = results.querySelectorAll('.doc-search-result')[active];
       if (link) window.location.assign(link.href);
     } else if (event.key === 'Escape') {
+      // The first Escape closes the results; a second one is left for the mobile drawer.
+      event.stopPropagation();
       input.value = '';
       clear();
     }
   });
   document.addEventListener('click', (event) => {
     if (!box.contains(event.target)) clear();
+  });
+  // Tabbing away closes the popup as well, so Esc is never needed to dismiss it.
+  // A press with the mouse or a finger is left to the click handler above: closing the list
+  // on mousedown would shift the page under the pointer and the click would miss.
+  let pointerDown = false;
+  document.addEventListener('pointerdown', () => (pointerDown = true), true);
+  document.addEventListener('pointerup', () => setTimeout(() => (pointerDown = false)), true);
+  box.addEventListener('focusout', (event) => {
+    if (pointerDown) return;
+    if (event.relatedTarget && !box.contains(event.relatedTarget)) clear();
   });
 }
 

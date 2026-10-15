@@ -430,7 +430,21 @@ function initTabs(editableNode, onUpdate) {
     const { state: incoming } = loadTabsState();
     if (!incoming || !incoming.tabs.length) return;
     if (JSON.stringify(incoming) === JSON.stringify(state)) return;
-    state = incoming;
+    // Each window keeps its own active tab, caret and undo history. The other window's
+    // changes to the tab list and to other tabs are taken; this window's own tab is
+    // replaced only when the other window changed its text.
+    const mineId = state.activeId;
+    const mine = state.tabs.find((tab) => tab.id === mineId);
+    const next = incoming.tabs.some((tab) => tab.id === mineId)
+      ? { ...incoming, activeId: mineId }
+      : incoming;
+    const theirs = next.tabs.find((tab) => tab.id === next.activeId);
+    if (mine && theirs && next.activeId === mineId && theirs.content === editableNode.value) {
+      state = setCaret(next, mineId, mine.caret);
+      view.render();
+      return;
+    }
+    state = next;
     history.clear();
     const active = getActiveTab();
     present(active.content, { focus: false, caret: active.caret });

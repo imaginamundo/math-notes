@@ -453,7 +453,7 @@ body {
   padding: 0 0.25em;
 }
 .doc-example .comment {
-  color: var(--color-text-muted);
+  color: var(--color-dim);
 }
 .doc-example .line {
   white-space: pre;

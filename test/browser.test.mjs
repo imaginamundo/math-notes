@@ -2317,6 +2317,8 @@ test('the mobile header stays compact and the drawer closes after navigating', a
   await waitFor(() => page.$('.doc-sidebar.is-open'));
   await page.type('.doc-search-input', 'aggregate keywords');
   await waitFor(() => page.$('.doc-search-result'));
+  // The drawer slides in; a link is only there to click once it has settled.
+  await wait(500);
 
   await page.click('.doc-nav-sub a');
   await waitFor(async () =>
@@ -2453,5 +2455,65 @@ test('the main-thread engine renders when the evaluation worker cannot load', as
     /42/,
     'the sheet still evaluates without the worker'
   );
+  assert.deepEqual(errors, []);
+});
+
+test('DOC-10: docs search is a combobox with options and a live count', async () => {
+  await newPage();
+  await page.setViewport({ width: 1280, height: 800 });
+  await page.goto(`http://localhost:${server.address().port}/docs/units/`, { waitUntil: 'load' });
+  await waitFor(() => page.$('.doc-search-input'));
+  assert.equal(await page.$eval('.doc-search-input', (n) => n.getAttribute('role')), 'combobox');
+  await page.type('.doc-search-input', 'aggregate');
+  await waitFor(() => page.$('.doc-search-result'));
+  const state = await page.evaluate(() => {
+    const input = document.querySelector('.doc-search-input');
+    const first = document.querySelector('.doc-search-results li');
+    return {
+      expanded: input.getAttribute('aria-expanded'),
+      controls:
+        input.getAttribute('aria-controls') === document.querySelector('.doc-search-results').id,
+      active: input.getAttribute('aria-activedescendant') === first.id,
+      role: first.getAttribute('role'),
+      selected: first.getAttribute('aria-selected'),
+      live: document.querySelector('.doc-search-status').textContent,
+    };
+  });
+  assert.deepEqual(
+    { ...state, live: /result/.test(state.live) },
+    { expanded: 'true', controls: true, active: true, role: 'option', selected: 'true', live: true }
+  );
+  // Tabbing out of the box closes the popup.
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await wait(100);
+  assert.equal(await page.$eval('.doc-search-results', (n) => n.hidden), true);
+  assert.deepEqual(errors, []);
+});
+
+test('DOC-09: the mobile drawer is a modal and keeps Tab inside', async () => {
+  await newPage();
+  await page.setViewport({ width: 390, height: 844, isMobile: true });
+  await page.goto(`http://localhost:${server.address().port}/docs/units/`, { waitUntil: 'load' });
+  await waitFor(() => page.$('.doc-menu-toggle'));
+  await page.click('.doc-menu-toggle');
+  await waitFor(() => page.$('.doc-sidebar.is-open'));
+  const modal = await page.evaluate(() => {
+    const sidebar = document.getElementById('doc-sidebar');
+    return [
+      sidebar.getAttribute('role'),
+      sidebar.getAttribute('aria-modal'),
+      document.querySelector('.doc-main').inert,
+    ];
+  });
+  assert.deepEqual(modal, ['dialog', 'true', true]);
+  for (let i = 0; i < 80; i++) await page.keyboard.press('Tab');
+  const inside = await page.evaluate(() =>
+    document.getElementById('doc-sidebar').contains(document.activeElement)
+  );
+  assert.equal(inside, true, 'focus never leaves the open drawer');
+  await page.keyboard.press('Escape');
+  await wait(100);
+  assert.equal(await page.$eval('.doc-main', (n) => n.inert), false);
   assert.deepEqual(errors, []);
 });
