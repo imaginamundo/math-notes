@@ -1052,3 +1052,11 @@ test('PERF-01: a long run of digits evaluates quickly', () => {
   assert.ok(Date.now() - start < 1000, 'a 4000-digit line must not stall the worker');
   assert.equal(results[1].value, 10);
 });
+
+test('PCT-02: `as %` without the article is a percentage, not attoseconds', () => {
+  const value = (line) => evaluateLines([line]).results[0].value;
+  assert.equal(value('10 as % of 50'), 20);
+  assert.equal(value('10 as a % of 50'), 20);
+  assert.ok(Math.abs(value('60 as % on 50') - 20) < 1e-9);
+  assert.ok(Math.abs(value('40 as % off 50') - 20) < 1e-9);
+});

@@ -10,12 +10,15 @@ const signed = (sign, pct) => `${sign ? '-' : ''}${pct}`;
 function preprocessPercent(expression) {
   let expr = expression;
 
-  // B as a % of|on|off A -> one value relative to another
-  expr = expr.replace(/(.+)\s+as\s+a\s+%\s+(of|on|off)\s+(.+)/i, (match, value, word, base) => {
-    if (word === 'of') return `((${value}) / (${base})) * 100`;
-    if (word === 'on') return `((${value}) / (${base}) - 1) * 100`;
-    return `(1 - (${value}) / (${base})) * 100`;
-  });
+  // B as a % of|on|off A (the `a` is optional) -> one value relative to another
+  expr = expr.replace(
+    /(.+)\s+as\s+(?:a\s+)?%\s+(of|on|off)\s+(.+)/i,
+    (match, value, word, base) => {
+      if (word === 'of') return `((${value}) / (${base})) * 100`;
+      if (word === 'on') return `((${value}) / (${base}) - 1) * 100`;
+      return `(1 - (${value}) / (${base})) * 100`;
+    }
+  );
 
   return wrapPercentChains(applyPhrases(expr));
 }
