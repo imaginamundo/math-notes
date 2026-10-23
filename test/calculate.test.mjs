@@ -1037,3 +1037,11 @@ test('ENG-01: a real difference between large numbers is not snapped to zero', (
   assert.equal(value('1000000000000 - 999999999999.5'), 0.5);
   assert.equal(value('0.1 + 0.2 - 0.3'), 0);
 });
+
+test('HEX-01: hex literals made only of letters are numbers', () => {
+  const value = (line) => evaluateLines([line]).results[0].value;
+  assert.equal(value('0xff'), 255);
+  assert.equal(value('0xFF + 1'), 256);
+  assert.equal(value('0xab'), 171);
+  assert.equal(value('0x1f'), 31);
+});

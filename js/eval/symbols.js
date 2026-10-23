@@ -73,7 +73,7 @@ function uppercaseCurrencyCodes(expression, names) {
   return (
     expression
       .replace(CODE_AFTER_NUMBER, (match, number, code) =>
-        defined(code) ? match : `${number} ${uppercaseCode(code)}`
+        defined(code) || isHexPrefix(number, code) ? match : `${number} ${uppercaseCode(code)}`
       )
       // A currency code before its amount is flipped so the amount leads
       // (`BRL 360 / 30 days` -> `360 BRL / 30 days`), which mathjs reads as the
@@ -95,6 +95,11 @@ function uppercaseCurrencyCodes(expression, names) {
 }
 
 // Unknown identifiers keep their case, so `usd = 5` stays a variable.
+// `0xff` is a hex literal, not `0` followed by a three-letter name.
+function isHexPrefix(number, code) {
+  return number === '0' && /^x/i.test(code);
+}
+
 function uppercaseCode(token) {
   const upper = token.toUpperCase();
   return isCurrencyCode(upper) ? upper : token;
