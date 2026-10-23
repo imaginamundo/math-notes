@@ -21,8 +21,10 @@ function preprocessPercent(expression) {
 }
 
 // `A% of|on|off B` and `A% of|on|off what is B`: the percentage is a number or a name.
+// The lookbehind keeps a match from starting inside a number or name, and the number is
+// unambiguous (`\d+(\.\d+)?`), so a long run of digits is scanned once, not once per digit.
 const HEAD = new RegExp(
-  `${SIGN}(\\d*\\.?\\d+|[A-Za-z_]\\w*)\\s*%\\s+(of|on|off)\\s+(?:(what)\\s+is\\s+)?`,
+  `${SIGN}(?<![\\w.])(\\d+(?:\\.\\d+)?|\\.\\d+|[A-Za-z_]\\w*)\\s*%\\s+(of|on|off)\\s+(?:(what)\\s+is\\s+)?`,
   'gi'
 );
 const PHRASE_START = new RegExp(

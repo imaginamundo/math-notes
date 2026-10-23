@@ -1045,3 +1045,10 @@ test('HEX-01: hex literals made only of letters are numbers', () => {
   assert.equal(value('0xab'), 171);
   assert.equal(value('0x1f'), 31);
 });
+
+test('PERF-01: a long run of digits evaluates quickly', () => {
+  const start = Date.now();
+  const { results } = evaluateLines(['1'.repeat(4000), '5% of 200']);
+  assert.ok(Date.now() - start < 1000, 'a 4000-digit line must not stall the worker');
+  assert.equal(results[1].value, 10);
+});
