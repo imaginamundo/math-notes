@@ -273,12 +273,17 @@ function combine(summary, mode, empty) {
   return mode === 'average' ? sum / numericCount : sum;
 }
 
+// Float residue from a few additions is a few ULPs of the largest term (about 1e-16 of
+// it each), so a result under this fraction is noise. It must stay far below real
+// differences: `34000000000000 - 33999999999990` is 10, 3e-13 of its largest term.
+const RESIDUE = 1e-14;
+
 // A sum whose terms cancel is exactly 0, not the float residue left behind (0.1 +
-// 0.2 - 0.3 is 5.6e-17): anything below 1e-12 of the largest term is noise (NUM-03).
+// 0.2 - 0.3 is 5.6e-17): anything below RESIDUE of the largest term is noise (NUM-03).
 function snapToZero(sum, terms) {
   if (sum === 0 || !Number.isFinite(sum)) return sum;
   const largest = terms.reduce((max, term) => Math.max(max, Math.abs(term)), 0);
-  return largest > 0 && Math.abs(sum) < 1e-12 * largest ? 0 : sum;
+  return largest > 0 && Math.abs(sum) < RESIDUE * largest ? 0 : sum;
 }
 
 function median(values) {
@@ -295,4 +300,4 @@ function computeTotal(results, mode = 'sum') {
   return combine(scan(results), mode, null);
 }
 
-export { AGGREGATE_KEYWORDS, AGGREGATE_WORD_SOURCE, aggregateAbove, computeTotal, median };
+export { AGGREGATE_KEYWORDS, AGGREGATE_WORD_SOURCE, RESIDUE, aggregateAbove, computeTotal, median };

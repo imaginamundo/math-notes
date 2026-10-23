@@ -1029,3 +1029,11 @@ test('UIE-18: a name in any script is a variable', () => {
   }
   assert.equal(evaluateLines(['日本 円 = 3', '日本 円 + 1']).results[1].value, 4);
 });
+
+test('ENG-01: a real difference between large numbers is not snapped to zero', () => {
+  const value = (line) => evaluateLines([line]).results[0].value;
+  assert.equal(value('34000000000000 - 33999999999990'), 10);
+  assert.equal(value('1e15 - 1e15 + 100'), 100);
+  assert.equal(value('1000000000000 - 999999999999.5'), 0.5);
+  assert.equal(value('0.1 + 0.2 - 0.3'), 0);
+});

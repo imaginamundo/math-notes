@@ -17,6 +17,7 @@ import preprocess from './preprocess.js';
 import {
   AGGREGATE_KEYWORDS,
   AGGREGATE_WORD_SOURCE,
+  RESIDUE,
   aggregateAbove,
   computeTotal,
 } from './aggregate.js';
@@ -203,7 +204,7 @@ function snapResidue(result, expression) {
     largest = Math.max(largest, magnitude);
     count++;
   }
-  return count >= 2 && largest > 0 && Math.abs(result) < 1e-12 * largest ? 0 : result;
+  return count >= 2 && largest > 0 && Math.abs(result) < RESIDUE * largest ? 0 : result;
 }
 
 function createEngine({ rates } = {}) {
