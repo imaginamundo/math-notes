@@ -16,6 +16,7 @@
   <meta property="og:description" content="O Math Notes é uma planilha de linhas. Você escreve um cálculo por linha e a resposta aparece à direita, como uma dica esmaecida. Não há botão = nem grade de células: a planilha recalcula enquanto você digita.">
   <meta property="og:url" content="https://math.dio.dev/docs/pt/getting-started/">
   <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'sha256-qt5Sq6nXEJFONoK1APTZtNhM6Zw73H+Iu+2z7ihX7TU='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; frame-src 'none'; form-action 'none'">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/docs/docs.css">
   <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -35,7 +36,7 @@
   <script type="module" src="/docs/docs.js"></script>
 </head>
 <body>
-  <a class="doc-skip" href="#content">Skip to content</a>
+  <a class="doc-skip" href="#content">Saltar para o conteúdo</a>
   <header class="doc-header">
     <a class="doc-brand" href="/docs/pt/">
       <span class="doc-brand-name">Math Notes</span>
@@ -60,7 +61,7 @@
       <article class="doc-content">
 <h1>Primeiros passos</h1>
 <p>O Math Notes é uma planilha de linhas. Você escreve um cálculo por linha e a resposta aparece à direita, como uma dica esmaecida. Não há botão <strong>=</strong> nem grade de células: a planilha recalcula enquanto você digita.</p>
-<figure class="doc-example" data-expr="1 + 1"><pre class="doc-code"><code data-calc>1 + 1</code></pre><figcaption class="doc-example-result">retorna 2</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="2 * 3 + 1"><pre class="doc-code"><code data-calc>2 * 3 + 1</code></pre><figcaption class="doc-example-result">retorna 7</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Uma linha pode ser um número simples, uma expressão, uma atribuição, um comentário, ou um rótulo seguido de uma expressão. O resultado da última linha também aparece na barra de total, na parte de baixo.</p>
+<figure class="doc-example" data-expr="1 + 1"><pre class="doc-code"><code data-calc>1 + 1</code></pre><figcaption class="doc-example-result">retorna 2</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="2 * 3 + 1"><pre class="doc-code"><code data-calc>2 * 3 + 1</code></pre><figcaption class="doc-example-result">retorna 7</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Uma linha pode ser um número simples, uma expressão, uma atribuição, um comentário, ou um rótulo seguido de uma expressão. A barra de total, na parte inferior, soma todas as linhas que mostram um número (por padrão; as Configurações permitem escolher a média ou a mediana). Atribuições como <code>x = 5</code> não mostram resultado e ficam de fora dos totais, dos blocos <code>sum</code>, dos totais de tags e dos subtotais de grupos.</p>
 <h2 id="a-tela">A tela<a class="doc-anchor" href="#a-tela" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
 <ul>
 <li>O <strong>editor</strong> é a área de texto grande. Sua camada fantasma mostra resultados, tags e erros no lugar.</li>
@@ -83,7 +84,7 @@
 <li><strong>Tamanho do texto</strong> — <strong>−</strong> / <strong>+</strong> no rodapé mudam o editor entre 50% e 200% do tamanho padrão do navegador; <strong>Redefinir tamanho</strong> volta a 100%.</li>
 </ul>
 <h2 id="autocompletar">Autocompletar<a class="doc-anchor" href="#autocompletar" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
-<p>Enquanto você digita, um pop-up sugere as variáveis da planilha e as <code>#tags</code>, além das funções, palavras-chave, constantes e unidades internas. Pressione <code>Ctrl+Space</code> para abri-lo quando quiser. <strong>↑</strong>/<strong>↓</strong> escolhem, <strong>Enter</strong>/<strong>Tab</strong> inserem, <strong>Esc</strong> fecha.</p>
+<p>Enquanto você digita, um pop-up sugere as variáveis da planilha e as <code>#tags</code>, além das funções, palavras-chave, constantes e unidades internas. Pressione <code>Ctrl+Space</code> para abri-lo quando quiser. <strong>Tab</strong> insere a sugestão destacada; <strong>↑</strong>/<strong>↓</strong> escolhem outra, e então <strong>Enter</strong> também a insere (como quando você abriu o pop-up com <code>Ctrl+Space</code>). Caso contrário <strong>Enter</strong> só começa uma nova linha, então terminar uma palavra como <code>grams</code> nunca a troca por <code>kilograms</code>. Uma palavra que já é um nome completo não abre o pop-up sozinha. <strong>Esc</strong> fecha.</p>
 <h2 id="primeira-visita">Primeira visita<a class="doc-anchor" href="#primeira-visita" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
 <p>A primeira visita abre com uma planilha de <strong>Boas-vindas</strong> em vez de uma página vazia — variáveis, rótulos, <code>sum</code>, tags, durações com unidades, porcentagens e datas. Use os botões <strong>Manter conteúdo</strong> / <strong>Limpar conteúdo</strong> para dispensá-la ou esvaziar a planilha.</p>
 <h2 id="sem-conexao">Sem conexão<a class="doc-anchor" href="#sem-conexao" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>

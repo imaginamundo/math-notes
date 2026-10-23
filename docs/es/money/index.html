@@ -16,6 +16,7 @@
   <meta property="og:description" content="Convierte entre monedas usando códigos ISO de 3 letras o símbolos. Las tasas vienen del Banco Central Europeo vía Frankfurter y se guardan en caché local para que las conversiones sigan funcionando sin conexión. Mientras una ventana sigue abierta, las tasas se vuelven a consultar cada hora; si una consulta falla o tarda más de 10 segundos, se usan las tasas en caché y un aviso breve lo indica.">
   <meta property="og:url" content="https://math.dio.dev/docs/es/money/">
   <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'sha256-qt5Sq6nXEJFONoK1APTZtNhM6Zw73H+Iu+2z7ihX7TU='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; frame-src 'none'; form-action 'none'">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/docs/docs.css">
   <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -35,7 +36,7 @@
   <script type="module" src="/docs/docs.js"></script>
 </head>
 <body>
-  <a class="doc-skip" href="#content">Skip to content</a>
+  <a class="doc-skip" href="#content">Saltar al contenido</a>
   <header class="doc-header">
     <a class="doc-brand" href="/docs/es/">
       <span class="doc-brand-name">Math Notes</span>
@@ -65,8 +66,9 @@
 <p>Los resultados usan el símbolo de la moneda cuando lo tienen (<code>350usd</code> pasa a <code>US$ 350</code>); las monedas sin símbolo conservan su código ISO. Una tasa se lee como una frase: <code>100 USD/hour</code> pasa a <code>US$ 100 per hour</code>.</p>
 <figure class="doc-example" data-expr="100 USD/hour"><pre class="doc-code"><code data-calc>100 USD/hour</code></pre><figcaption class="doc-example-result">US$ 100 per hour</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><h2 id="el-dinero-solo-forma-razones">El dinero solo forma razones<a class="doc-anchor" href="#el-dinero-solo-forma-razones" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <p>Una moneda se puede dividir por otra unidad para formar una tasa (<code>USD/hour</code>, <code>USD/km</code>, <code>USD/kg</code>), pero no se puede multiplicar por una unidad no relacionada. <code>BRL hour</code> se informa como error, no como una unidad combinada extraña — usa una tasa.</p>
+<p>Un símbolo y un código juntos (<code>$30 CAD</code>, <code>€5 EUR</code>) significan la moneda del código.</p>
 <h2 id="codigos-admitidos">Códigos admitidos<a class="doc-anchor" href="#codigos-admitidos" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
-<p><code>AUD</code>, <code>BGN</code>, <code>BRL</code>, <code>CAD</code>, <code>CHF</code>, <code>CNY</code>, <code>CZK</code>, <code>DKK</code>, <code>EUR</code>, <code>GBP</code>, <code>HKD</code>, <code>HUF</code>, <code>IDR</code>, <code>ILS</code>, <code>INR</code>, <code>ISK</code>, <code>JPY</code>, <code>KRW</code>, <code>MXN</code>, <code>MYR</code>, <code>NOK</code>, <code>NZD</code>, <code>PHP</code>, <code>PLN</code>, <code>RON</code>, <code>SEK</code>, <code>SGD</code>, <code>THB</code>, <code>TRY</code>, <code>USD</code>, <code>ZAR</code>.</p>
+<p><code>AUD</code>, <code>BRL</code>, <code>CAD</code>, <code>CHF</code>, <code>CNY</code>, <code>CZK</code>, <code>DKK</code>, <code>EUR</code>, <code>GBP</code>, <code>HKD</code>, <code>HUF</code>, <code>IDR</code>, <code>ILS</code>, <code>INR</code>, <code>ISK</code>, <code>JPY</code>, <code>KRW</code>, <code>MXN</code>, <code>MYR</code>, <code>NOK</code>, <code>NZD</code>, <code>PHP</code>, <code>PLN</code>, <code>RON</code>, <code>SEK</code>, <code>SGD</code>, <code>THB</code>, <code>TRY</code>, <code>USD</code>, <code>ZAR</code>.</p>
 <p>Para los símbolos de moneda que reconoce la app, escribe un símbolo como <code>$</code>, <code>€</code>, <code>£</code> o <code>R$</code> y deja que la app sugiera el código correspondiente.</p>
       </article>
       <footer class="doc-footer">

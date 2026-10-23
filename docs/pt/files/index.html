@@ -16,6 +16,7 @@
   <meta property="og:description" content="O Math Notes guarda seu trabalho no seu dispositivo. Não há conta nem servidor: as planilhas são salvas no navegador, copiadas em um armazenamento local versionado, e compartilhadas apenas quando você escolhe.">
   <meta property="og:url" content="https://math.dio.dev/docs/pt/files/">
   <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'sha256-qt5Sq6nXEJFONoK1APTZtNhM6Zw73H+Iu+2z7ihX7TU='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; frame-src 'none'; form-action 'none'">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/docs/docs.css">
   <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -35,7 +36,7 @@
   <script type="module" src="/docs/docs.js"></script>
 </head>
 <body>
-  <a class="doc-skip" href="#content">Skip to content</a>
+  <a class="doc-skip" href="#content">Saltar para o conteúdo</a>
   <header class="doc-header">
     <a class="doc-brand" href="/docs/pt/">
       <span class="doc-brand-name">Math Notes</span>
@@ -71,12 +72,14 @@
 </ul>
 <h2 id="exportar-e-importar">Exportar e importar<a class="doc-anchor" href="#exportar-e-importar" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
 <p>Use <strong>Configurações → Arquivos</strong> para baixar a planilha ativa como um arquivo de texto, ou carregar uma de um arquivo (<code>.txt</code>, <code>.numi</code> ou texto simples, até 1 MB). Importar <strong>substitui o conteúdo da planilha ativa</strong>, pedindo confirmação se a planilha não estiver vazia; não abre uma nova aba. As exportações se chamam <code>math-notes-AAAA-MM-DD.txt</code>. As mesmas ações estão em <code>⇧⌘E</code> / <code>Ctrl+Shift+E</code> (exportar) e <code>⇧⌘I</code> / <code>Ctrl+Shift+I</code> (importar).</p>
+<p>Um ficheiro <code>.numi</code> é lido como texto simples, por isso só passa o que o Math Notes entende. Comentários começam com <code>#</code> ou <code>//</code>; texto entre aspas ao lado de um valor é um erro; <code>and</code>/<code>xor</code> não são operadores de palavra; uma função é escrita com parênteses (<code>sqrt(16)</code>, não <code>sqrt 16</code>); e um bloco <code>sum</code> termina na primeira linha em branco.</p>
 <h2 id="links-de-compartilhamento">Links de compartilhamento<a class="doc-anchor" href="#links-de-compartilhamento" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
 <p>O botão <strong>Compartilhar</strong> copia um link que carrega a planilha ativa dentro dele. Quem abrir é perguntado se quer abrir a planilha em uma nova aba; ele nunca substitui o que a pessoa já tem. O link é comprimido, e você é avisado se ele passar de cerca de 8000 caracteres, porque alguns apps cortam links longos; um link que descompacta para mais de 256 KB é recusado.</p>
 <p>Nada é enviado. A planilha viaja no fragmento <code>#</code> do link, que os navegadores nunca enviam a um servidor — ele não aparece em logs de acesso nem é encaminhado em um cabeçalho <code>Referer</code>.</p>
 <h2 id="copias-automaticas">Cópias automáticas<a class="doc-anchor" href="#copias-automaticas" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
-<p>As edições de cada aba são copiadas para o IndexedDB como snapshots versionados. Abra <strong>Configurações → Recuperar</strong> para ver todos os snapshots, agrupados por aba, e restaurar qualquer um deles, ou use <strong>Restaurar tudo do backup mais recente</strong> para trazer todas as abas de volta. Cada aba guarda os seus 10 snapshots mais recentes, salvos alguns segundos depois que você para de digitar. Fechar uma aba também remove os seus snapshots. Os snapshots são armazenados comprimidos para ocupar pouco espaço.</p>
-<p>Se o localStorage estiver indisponível ou corrompido, as planilhas são reconstruídas automaticamente a partir dos backups, e um valor corrompido é copiado à parte em vez de ser perdido.</p>
+<p>As edições de cada aba são copiadas para o IndexedDB como snapshots versionados. Abra <strong>Configurações → Recuperar</strong> para ver todos os snapshots, agrupados por aba, e restaurar qualquer um deles, ou use <strong>Restaurar tudo do backup mais recente</strong> para trazer todas as abas de volta. Ele devolve o snapshot mais recente de cada aba e deixa em paz as abas sem snapshot, a ordem delas e a aba ativa. As planilhas que o app preenche para você (um modelo, uma planilha compartilhada, Boas-vindas) são copiadas assim que abrem. Cada aba guarda os seus 10 snapshots mais recentes, salvos alguns segundos depois que você para de digitar. Fechar uma aba também remove os seus snapshots. Os snapshots são armazenados comprimidos para ocupar pouco espaço.</p>
+<p>Se o app parar enquanto calcula uma planilha, os resultados dela ficam em pausa quando a página recarrega (um aviso informa isso), então uma única linha problemática não deixa você de fora. Edite a planilha para calculá-la de novo, ou feche a aba.</p>
+<p>Se o salvamento falhar (o armazenamento do navegador está cheio ou bloqueado) um aviso permanece até voltar a funcionar. Depois de recarregar, o app restaura o que for mais recente dos backups automáticos e avisa. Se o localStorage estiver indisponível ou corrompido, as planilhas são reconstruídas automaticamente a partir dos backups, e um valor corrompido é copiado à parte em vez de ser perdido.</p>
 <h2 id="redefinir">Redefinir<a class="doc-anchor" href="#redefinir" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
 <p><strong>Configurações → Redefinir → Redefinir dados</strong> limpa o tema, as abas e todos os dados salvos, voltando aos padrões, e então abre uma nova folha <strong>Boas-vindas</strong> e reinicia o contador de abas. Exporte o que quiser manter antes.</p>
 <h2 id="privacidade">Privacidade<a class="doc-anchor" href="#privacidade" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>

@@ -15,11 +15,16 @@
 // the trickiest DOM logic can be reasoned about and tested on its own.
 
 function clearMarks(root) {
+  const parents = new Set();
   root.querySelectorAll('.find-match').forEach((mark) => {
     // Unwrap rather than replace: what comes out is the original text node, so
     // its token keeps the markup the highlighter gave it.
+    if (mark.parentNode) parents.add(mark.parentNode);
     mark.replaceWith(...mark.childNodes);
   });
+  // Splitting a node to mark part of it leaves the pieces behind; joined again, the next
+  // match wraps one run of text and not one box per letter.
+  for (const parent of parents) if (typeof parent.normalize === 'function') parent.normalize();
 }
 
 function applyMarks(root, matches, activeIndex) {

@@ -10,9 +10,11 @@
 
 import { BEFORE_WORD, AFTER_WORD, WORD } from '../core/identifiers.js';
 
+// The year and month are mathjs's (365.25 and 30.4375 days), because those built the
+// value being taken apart: `1 year` has to come out as exactly 1 year.
 const UNIT_SECONDS = {
-  year: 365.2425 * 86400,
-  month: 30.436875 * 86400,
+  year: 365.25 * 86400,
+  month: 30.4375 * 86400,
   week: 7 * 86400,
   day: 86400,
   hour: 3600,
@@ -98,16 +100,42 @@ const WHOLE_RUN = new RegExp(`^\\s*${RUN_SOURCE}\\s*$`, 'i');
 // A number followed by `min` is minutes, but not inside a name (`top5min`) or
 // before the mathjs min() function (`min(2, 3)`).
 const MINUTE = new RegExp(`${BEFORE_WORD}(\\d+(?:\\.\\d+)?)\\s*min(?![${WORD}_.(])`, 'giu');
+const SECOND = new RegExp(`${BEFORE_WORD}(\\d+(?:\\.\\d+)?)\\s*secs?(?![${WORD}_.(])`, 'giu');
+// `min` and `sec` are also mathjs functions, so they only mean the unit where a unit
+// goes: after a number (above), as a conversion target (`to min`, `as sec`), and in
+// a compound unit (`km/min`, `m * min`). `min(2, 3)` and a name that merely starts
+// with them are left alone.
+const TARGET_UNIT = new RegExp(`\\b(to|in|as)\\s+(min|secs?)(?![${WORD}_.(])`, 'giu');
+const COMPOUND_UNIT = new RegExp(`([/*^]\\s*)(min|secs?)(?![${WORD}_.(])`, 'giu');
+
+// `5 minutes`, or `__unit(5, "minutes")` when the sheet has a variable of that name,
+// which would otherwise capture the unit the app wrote for the user (`minutes = 10`,
+// then `5.5 min`). `__unit` builds the unit directly and no variable can shadow it.
+function timeTerm(amount, unit, names) {
+  return names && names.has(unit) ? `__unit(${amount}, "${unit}")` : `${amount} ${unit}`;
+}
+
+function timeSymbolName(symbol) {
+  return symbol.toLowerCase() === 'min' ? 'minutes' : 'seconds';
+}
+
+function normalizeTimeSymbols(expression, names) {
+  return expression
+    .replace(MINUTE, (match, amount) => timeTerm(amount, 'minutes', names))
+    .replace(SECOND, (match, amount) => timeTerm(amount, 'seconds', names))
+    .replace(TARGET_UNIT, (match, word, symbol) => `${word} ${timeSymbolName(symbol)}`)
+    .replace(COMPOUND_UNIT, (match, operator, symbol) => `${operator}${timeSymbolName(symbol)}`);
+}
 
 // `3h 5m 10s` -> `3 hours + 5 minutes + 10 seconds`.
-function joinTimeComponents(expression) {
+function joinTimeComponents(expression, names) {
   const run = new RegExp(RUN_SOURCE, 'gi');
   return expression.replace(run, (match) => {
     const component = new RegExp(`(\\d+(?:\\.\\d+)?)\\s*(${UNIT_ALT})(?![A-Za-z])`, 'gi');
     const parts = [];
     let m;
     while ((m = component.exec(match)) !== null) {
-      parts.push(`${m[1]} ${COMPONENT_UNIT[m[2].toLowerCase()]}`);
+      parts.push(timeTerm(m[1], COMPONENT_UNIT[m[2].toLowerCase()], names));
     }
     // Parenthesised so the whole run is one operand: without this
     // `3h 5m 10s * 2` multiplies only the last component.
@@ -115,19 +143,20 @@ function joinTimeComponents(expression) {
   });
 }
 
-function preprocessTimespan(expression) {
+function preprocessTimespan(expression, context) {
+  const names = context && context.names;
   // `as` converts like `to`/`in` (`... as minutes`), except `as timespan`
   // (handled below) and `as a %` (percentage, already consumed).
   const converted = expression.replace(/\s+as\s+(?!timespan\b|a\s+%)/gi, ' to ');
   // mathjs reads `min` as the min() function; a number before it is a minute.
-  const normalized = converted.replace(MINUTE, '$1 minutes');
+  const normalized = normalizeTimeSymbols(converted, names);
 
   // A line that is nothing but time components displays as a timespan.
   if (WHOLE_RUN.test(normalized)) {
-    return `__timespan(${joinTimeComponents(normalized)})`;
+    return `__timespan(${joinTimeComponents(normalized, names)})`;
   }
 
-  const joined = joinTimeComponents(normalized);
+  const joined = joinTimeComponents(normalized, names);
 
   const asTimespan = /^(.*\S)\s+as\s+timespan$/i.exec(joined);
   if (asTimespan) return `__timespan(${asTimespan[1]})`;
@@ -172,19 +201,22 @@ function timespanParts(value, second, unitA, unitB) {
   const seconds = unit.value;
   const sizeA = UNIT_SECONDS[unitA];
   const sizeB = UNIT_SECONDS[unitB];
-  const countA = Math.floor(seconds / sizeA);
-  const remainder = seconds - countA * sizeA;
+  // The sign belongs to the whole span (`-1 hour 30 min`), so split on the size.
+  const sign = seconds < 0 ? -1 : 1;
+  const size = Math.abs(seconds);
+  const countA = Math.floor(size / sizeA);
+  const remainder = size - countA * sizeA;
   unit.timespan = true;
   unit.displayParts = [
-    { unit: unitA, value: countA },
-    { unit: unitB, value: remainder / sizeB },
+    { unit: unitA, value: sign * countA },
+    { unit: unitB, value: sign * (remainder / sizeB) },
   ];
   return unit;
 }
 
 function decompose(seconds) {
   const parts = [];
-  let rest = Math.round(seconds);
+  let rest = Math.abs(Math.round(seconds));
   for (const unit of DECOMPOSE_ORDER) {
     const size = UNIT_SECONDS[unit];
     const count = Math.floor(rest / size);
@@ -206,7 +238,12 @@ function unitLabel(unit, value, abbreviate) {
 // Renders a timespan unit's seconds as components. `formatNumber` is injected
 // so this stays pure and shares formatResult's number formatting.
 function formatTimespan(seconds, parts, formatNumber) {
-  const components = parts && parts.length ? parts : decompose(seconds);
+  const given = parts && parts.length ? parts : null;
+  // The sign is written once, in front: `-1 hour 30 min`.
+  const negative = given ? given.some(({ value }) => value < 0) : seconds < 0;
+  const components = given
+    ? given.map(({ unit, value }) => ({ unit, value: Math.abs(value) }))
+    : decompose(seconds);
   // `5 min 30 s` abbreviates small units; `4 hours 32 minutes 24 seconds` and
   // `10 weeks 2 days` spell them out. Double time units always abbreviate
   // minutes/seconds (`235 hours 12 min`).
@@ -214,11 +251,12 @@ function formatTimespan(seconds, parts, formatNumber) {
     parts && parts.length
       ? (unit) => unit === 'minute' || unit === 'second'
       : () => components[0].unit === 'minute' || components[0].unit === 'second';
-  return components
+  const text = components
     .map(
       ({ unit, value }) => `${formatNumber(value)} ${unitLabel(unit, value, abbreviateSmall(unit))}`
     )
     .join(' ');
+  return negative && components.some(({ value }) => value !== 0) ? `-${text}` : text;
 }
 
 function initTimespan(math) {
@@ -229,6 +267,8 @@ function initTimespan(math) {
       __timespanParts: (value, unitA, unitB) => timespanParts(value, second, unitA, unitB),
       // Marks an explicit conversion so formatResult keeps the requested unit
       // instead of drawing the duration as a timespan.
+      // A unit by name; the rewrites use it where a variable could shadow the name.
+      __unit: (amount, name) => math.unit(Number(amount), name),
       __keepUnit: (value) => {
         if (value && value.isUnit === true) value.keepUnit = true;
         return value;

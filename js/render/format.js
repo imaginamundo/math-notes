@@ -14,6 +14,21 @@ const RULES = {
 
 const TAG_TOKEN = new RegExp(`^#(${TAG_NAME_SRC})`, 'u');
 
+// The first user-perceived character of `text` (an emoji with its joiners and modifiers is one).
+// Splitting by UTF-16 unit would cut an emoji into lone surrogates, which WebKit draws as boxes
+// and lays out wider or narrower than the textarea.
+const SEGMENTER =
+  typeof Intl !== 'undefined' && Intl.Segmenter
+    ? new Intl.Segmenter(undefined, { granularity: 'grapheme' })
+    : null;
+
+function firstCluster(text) {
+  if (SEGMENTER) {
+    for (const { segment } of SEGMENTER.segment(text)) return segment;
+  }
+  return String.fromCodePoint(text.codePointAt(0));
+}
+
 function createWrapper(type, text) {
   const wrapper = document.createElement('span');
   wrapper.classList.add(type);
@@ -68,8 +83,9 @@ function appendTags(wrapper, tail) {
       rest = rest.slice(whitespace[0].length);
       continue;
     }
-    wrapper.appendChild(document.createTextNode(rest[0]));
-    rest = rest.slice(1);
+    const cluster = firstCluster(rest);
+    wrapper.appendChild(document.createTextNode(cluster));
+    rest = rest.slice(cluster.length);
   }
 }
 
@@ -126,8 +142,9 @@ function appendCode(wrapper, code, patterns = []) {
       rest = rest.slice(token.length);
       continue;
     }
-    wrapper.appendChild(document.createTextNode(rest[0]));
-    rest = rest.slice(1);
+    const cluster = firstCluster(rest);
+    wrapper.appendChild(document.createTextNode(cluster));
+    rest = rest.slice(cluster.length);
   }
 }
 

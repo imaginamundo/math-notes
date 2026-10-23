@@ -1,6 +1,7 @@
 // Date, clock and workday arithmetic. Everything works on the plain Date
 // primitives from calendarDate.js; mathjs only enters through the `math`
 // argument for duration Units.
+import { currentTime } from './clock.js';
 import {
   MONTHS,
   MONTH_NAMES,
@@ -8,21 +9,46 @@ import {
   atNoon,
   addDays,
   addMonths,
+  occurrenceAround,
+  shiftDays,
+  shiftMonths,
+  startOfDay,
   parseDuration,
+  parseDurationExact,
   requireClock,
   requireDate,
   markClock,
   toDate,
 } from './calendarDate.js';
 
+// Month and year lengths used for the fractional part of a count (`1.5 months`),
+// matching the timespan display.
+const MONTH_DAYS = 30.4375;
+
+// Add a duration to a date. Whole months and days move the calendar and keep the
+// time of day; the fractions and the hours, minutes and seconds are elapsed time.
+// A plain date measures sub-day time from the start of its day and so becomes a
+// clock time (`today + 12 hours` is 12:00), instead of carrying a hidden noon.
 function applyDuration(date, parts, sign) {
-  let result = new Date(date);
   const months = (parts.year || 0) * 12 + (parts.month || 0);
-  if (months) result = addMonths(result, sign * months);
-  const days = (parts.week || 0) * 7 + (parts.day || 0);
-  if (days) result = addDays(result, sign * days);
-  const seconds = (parts.hour || 0) * 3600 + (parts.minute || 0) * 60 + (parts.second || 0);
-  if (seconds) result = new Date(result.getTime() + sign * seconds * 1000);
+  const wholeMonths = Math.trunc(months);
+  const days = (parts.week || 0) * 7 + (parts.day || 0) + (months - wholeMonths) * MONTH_DAYS;
+  const wholeDays = Math.trunc(days);
+  const elapsed =
+    (days - wholeDays) * 86400 +
+    (parts.hour || 0) * 3600 +
+    (parts.minute || 0) * 60 +
+    (parts.second || 0);
+  const subDay = elapsed !== 0;
+
+  let result = date.clock || !subDay ? new Date(date) : startOfDay(date);
+  if (wholeMonths) result = shiftMonths(result, sign * wholeMonths);
+  if (wholeDays) result = shiftDays(result, sign * wholeDays);
+  if (subDay) {
+    // Wall-clock time, so `1:00 + 3 hours` is 4:00 even on the day the clocks change.
+    result.setMilliseconds(result.getMilliseconds() + sign * elapsed * 1000);
+    result.clock = true;
+  }
   return result;
 }
 
@@ -50,33 +76,23 @@ function durationUnit(math, text) {
   return total;
 }
 
-const DIFF_UNITS = [
-  ['year', (d) => addMonths(d, 12)],
-  ['month', (d) => addMonths(d, 1)],
-  ['week', (d) => addDays(d, 7)],
-  ['day', (d) => addDays(d, 1)],
-];
-
 // The calendar interval from the earlier to the later date, e.g.
-// `3 months 3 weeks 6 days`.
+// `3 months 3 weeks 6 days`. Whole months are counted from the original start, not
+// by stepping month to month, because a step from the 31st clamps to a shorter
+// month and the lost days would come back as extra days: `Jan 31 to Mar 31` is
+// 2 months, and start + interval is always the end.
 function dateDiff(a, b) {
-  let start = new Date(a);
-  let end = new Date(b);
+  let start = atNoon(a);
+  let end = atNoon(b);
   if (start > end) [start, end] = [end, start];
+  let months = (end.getFullYear() - start.getFullYear()) * 12 + end.getMonth() - start.getMonth();
+  while (months > 0 && addMonths(start, months) > end) months--;
   const parts = {};
-  for (const [unit, next] of DIFF_UNITS) {
-    let count = 0;
-    for (;;) {
-      const candidate = next(start);
-      if (candidate <= end) {
-        start = candidate;
-        count++;
-      } else {
-        break;
-      }
-    }
-    if (count) parts[unit] = count;
-  }
+  if (Math.floor(months / 12)) parts.year = Math.floor(months / 12);
+  if (months % 12) parts.month = months % 12;
+  const days = daysBetween(addMonths(start, months), end);
+  if (Math.floor(days / 7)) parts.week = Math.floor(days / 7);
+  if (days % 7) parts.day = days % 7;
   return parts;
 }
 
@@ -108,7 +124,7 @@ function daysInMonth(text) {
 
 function daysInQuarter(value) {
   const quarter = Math.min(4, Math.max(1, Math.round(Number(value))));
-  const year = new Date().getFullYear();
+  const year = currentTime().getFullYear();
   const start = new Date(year, (quarter - 1) * 3, 1);
   const end = new Date(year, quarter * 3, 1);
   return Math.round((end - start) / DAY_MS);
@@ -149,10 +165,10 @@ function addWorkdays(date, amount) {
 function workdaysInMonth(text) {
   const m = /^([a-z]+)(?:\s+(\d{4}))?$/i.exec(String(text).trim());
   if (!m || !MONTHS[m[1].toLowerCase()]) {
-    throw new Error(`"${text}" is not a month I understand`);
+    throw new Error(`"${text}" is not a valid month`);
   }
   const month = MONTHS[m[1].toLowerCase()];
-  const year = m[2] ? +m[2] : new Date().getFullYear();
+  const year = m[2] ? +m[2] : currentTime().getFullYear();
   return countWorkdays(new Date(year, month - 1, 1, 12), new Date(year, month, 1, 12));
 }
 
@@ -165,7 +181,7 @@ function workdaysInYear(year) {
 // duration so the caller can fall back.
 function workdaysInPeriod(text) {
   const s = String(text).trim();
-  const now = new Date();
+  const now = currentTime();
   if (/^this\s+month$/i.test(s)) {
     return workdaysInMonth(`${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}`);
   }
@@ -180,16 +196,16 @@ function workdaysInPeriod(text) {
 function workdaysInDuration(text) {
   const period = workdaysInPeriod(text);
   if (period !== null) return period;
-  const parts = parseDuration(text);
-  if (!Object.keys(parts).length) {
-    throw new Error(`"${text}" is not a period I understand`);
-  }
+  // Only a period or a plain run of number-and-unit pairs: `3 weeks - 1 week` or
+  // `3 weeks * 25 EUR` is not one, and used to be read as the pairs it contained.
+  const parts = parseDurationExact(text);
+  if (!parts) throw new Error(`"${text}" is not a valid period`);
   const days =
     (parts.week || 0) * 7 +
     (parts.day || 0) +
     (parts.month || 0) * 30.4375 +
     (parts.year || 0) * 365.2425;
-  const start = atNoon(new Date());
+  const start = atNoon(currentTime());
   return countWorkdays(start, addDays(start, Math.round(days)));
 }
 
@@ -210,30 +226,62 @@ function clockAdd(text, duration, sign) {
 function clockInterval(aText, bText, forward, math) {
   const a = requireClock(aText);
   const b = requireClock(bText);
-  if (forward && b <= a) {
-    b.setDate(b.getDate() + 1);
+  // Wall-clock minutes, not elapsed time: `1:00 - 4:00` is 3 hours on every day, even
+  // the one the clocks change.
+  const minutesOf = (date) => date.getHours() * 60 + date.getMinutes();
+  let span = minutesOf(b) - minutesOf(a);
+  if (forward) {
+    if (span <= 0) span += 24 * 60;
+  } else {
+    span = Math.abs(span);
   }
   // Minutes (not seconds) so that arithmetic keeps a unit formatResult draws as
   // a timespan, rather than falling back to raw seconds.
-  const unit = math.unit(Math.round(Math.abs(b - a) / 60000), 'minutes');
+  const unit = math.unit(span, 'minutes');
   unit.timespan = true;
   return unit;
 }
 
-// Resolve two dates so the second is not before the first — but only when the
-// second date's year was implicit (a `3 March to 30 May` written without years,
-// where the nearest occurrence of one date happens to fall after the other). An
-// explicit backward interval (`2020-06-01 - 2019-01-01`) keeps its real span and
-// `dateDiff` swaps the endpoints instead of dropping a whole year.
-function resolveInterval(aValue, bValue) {
-  const a = toDate(aValue);
+// Place the yearless end of an interval. A date written without a year has no year of
+// its own, so it takes one from the other end when that has one, and from the nearest
+// occurrence when neither does.
+//   `forward` (`to`, `through`, `since`, `until`): reads from the first date to the second,
+//     so a yearless first date is the latest occurrence on or before the second, and a
+//     yearless second date the earliest on or after the first (`days since March 1`,
+//     `today to Christmas`). Two yearless dates wrap forward (`Dec 1 to Feb 5`).
+//   `span` (`-`, `between`, `midpoint`): the size of the gap, the same in either order,
+//     so a yearless date is the latest occurrence on or before the dated end, and two
+//     yearless dates are the smaller gap between their month-days, wherever the year turns.
+// A backward interval with years (`2020-06-01 - 2019-01-01`) keeps its real span;
+// `dateDiff` swaps the endpoints.
+// The occurrence of a yearless date closest to another date.
+function nearestTo(date, other) {
+  const before = occurrenceAround(date, other, 'before');
+  const after = occurrenceAround(date, other, 'after');
+  return Math.abs(other - before) <= Math.abs(after - other) ? before : after;
+}
+
+function resolveInterval(aValue, bValue, mode = 'forward') {
+  let a = toDate(aValue);
   let b = toDate(bValue);
-  if (b < a && b.implicitYear === true) b = addMonths(b, 12);
+  const aYearless = a.implicitYear === true;
+  const bYearless = b.implicitYear === true;
+  if (aYearless && !bYearless) {
+    a = occurrenceAround(a, b, 'before');
+  } else if (!aYearless && bYearless) {
+    b = occurrenceAround(b, a, mode === 'forward' ? 'after' : 'before');
+  } else if (aYearless && bYearless) {
+    // Forward wraps (`Dec 1 to Feb 5`); a span takes the year of the second date that
+    // puts it closest to the first (`Mar 3 and May 30` are in one year, `Dec 25 and
+    // Jan 5` straddle two).
+    b = mode === 'forward' ? (b < a ? occurrenceAround(b, a, 'after') : b) : nearestTo(b, a);
+  }
   return { a, b };
 }
 
 export {
   WORKDAY_HOURS,
+  applyDuration,
   dateAdd,
   dateDiff,
   daysBetween,

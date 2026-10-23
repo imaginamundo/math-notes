@@ -1,9 +1,11 @@
 import { formatTimespan } from '../eval/timespan.js';
 import { formatDate, formatInterval } from '../eval/calendar.js';
-import { isCurrencyCode, CURRENCY_DISPLAY } from '../core/currencySymbols.js';
+import { CURRENCY_DISPLAY } from '../core/currencySymbols.js';
 import { DEFAULT_PRECISION } from '../core/decimalPrecision.js';
 import { DEFAULT_CLOCK_FORMAT } from '../core/clockFormat.js';
 import { readableUnit } from '../core/unitNames.js';
+import { simplifyLocal } from '../core/unitSimplify.js';
+import { numericValue, convertTo, leadingCurrency } from '../core/unitForm.js';
 import { decodeUserUnits } from '../core/userUnits.js';
 
 const formatters = new Map();
@@ -30,7 +32,6 @@ function formatValue(value, depth, precision, clockFormat) {
   // BigNumber is formatted through the same precision as a plain number.
   if (value && value.isBigNumber === true) return formatNumber(Number(value), precision);
   if (value instanceof Date) return formatDate(value, clockFormat);
-  if (value && value.type === 'calendarInterval') return formatInterval(value.parts);
   if (value && value.isUnit === true) return decodeUserUnits(formatUnit(value, precision));
   // mathjs Fraction stringifies to its decimal; show the fraction instead.
   if (value && value.type === 'Fraction' && typeof value.toFraction === 'function') {
@@ -87,18 +88,37 @@ function formatList(items, depth, precision, clockFormat) {
 }
 
 // Rounds to the chosen decimal places. When the value has more precision than
-// that, an ellipsis marks the display as truncated (the calculation itself
-// keeps full precision).
+// that, an ellipsis marks the display as truncated (the calculation itself keeps
+// full precision). A value is first cleaned of binary noise (one ulp, about the
+// 16th significant digit), so 700000.0000000001 shows as 700,000 and is not drawn
+// as exact trailing digits (CUR-02); whatever is left after that and is cut gets the
+// ellipsis, at every precision and size (NUM-12).
 function formatNumber(n, precision) {
   if (!isFinite(n)) return String(n);
   const abs = Math.abs(n);
-  if (abs !== 0 && (abs >= 1e16 || abs < 1e-7)) {
-    return n.toExponential(10).replace(/\.?0+e/, 'e');
-  }
-  const rounded = Number(n.toFixed(precision)) || 0;
+  // Below this nothing here can be a real result, only float residue (about 1e-16),
+  // so it reads like any value smaller than the precision step: 0 with more behind
+  // it, not ten digits of exponent that ignore the setting (NUM-03).
+  if (abs !== 0 && abs < 1e-12) return '0…';
+  const clean = Number(n.toPrecision(15));
+  if (abs !== 0 && (abs >= 1e16 || abs < 1e-7)) return formatScientific(clean, precision);
+  const rounded = Number(clean.toFixed(precision)) || 0;
   const text = formatterFor(precision).format(rounded);
-  const tolerance = Math.max(1e-9, abs * 1e-9);
-  return Math.abs(n - rounded) > tolerance ? `${text}…` : text;
+  return clean !== rounded ? `${text}…` : text;
+}
+
+// `1.845e+19…`: the mantissa follows the precision setting, trailing zeros go, and
+// an ellipsis marks a mantissa that was cut.
+function formatScientific(n, precision) {
+  const text = n.toExponential(precision);
+  const shown = text.replace(/\.?0+e/, 'e');
+  return Number(text) === n ? shown : `${shown}…`;
+}
+
+// Days and weeks as typed (`10 days`, `1 month in days`) keep their unit. A singular `day` or
+// `week` is what arithmetic leaves (`1 day + 2 days`, `1 day + 2 hours`): those read as durations.
+function isMixedDays(rawUnits) {
+  return rawUnits === 'day' || rawUnits === 'week';
 }
 
 const DURATION_UNITS = new Set([
@@ -147,7 +167,7 @@ function formatUnit(unit, precision) {
     // Deferred: only the rules that need it call simplify(), which can fold a
     // compound into a surprising unit.
     get simple() {
-      return (simple ??= typeof unit.simplify === 'function' ? unit.simplify() : unit);
+      return (simple ??= simplifyLocal(unit));
     },
   };
   for (const rule of UNIT_FORMAT_RULES) {
@@ -162,6 +182,23 @@ function formatUnit(unit, precision) {
 const PACE = /^min\s*\/\s*(km|mi)$/;
 const UNIT_FORMAT_RULES = [
   {
+    // The interval between two dates, written as the calendar parts it was built from.
+    test: ({ unit }) => Boolean(unit.calendarParts),
+    format: ({ unit }) => formatInterval(unit.calendarParts),
+  },
+  {
+    // `2.3 in to nearest 16th`: the exact fraction the value was rounded to, then
+    // the unit (`37/16 in`, `US$ 9/4`).
+    test: ({ unit }) => Boolean(unit.fractionParts),
+    format: ({ unit }) => {
+      const { numerator, denominator } = unit.fractionParts;
+      const amount = reducedFraction(numerator, denominator);
+      const symbol = currencyOf(unit);
+      if (symbol) return formatCurrency(symbol, amount);
+      return `${amount} ${cleanUnits(withCurrencySymbols(unit.formatUnits()))}`;
+    },
+  },
+  {
     // A pure time value renders as a timespan when it is a marked timespan, an
     // explicit minutes/hours value, or a compound that reduces to pure time (a
     // computed duration like `time to upload 3 GB at 10 MB/s` -> `(GB s) / MB`).
@@ -169,7 +206,7 @@ const UNIT_FORMAT_RULES = [
     test: ({ unit, info, rawUnits, compound }) =>
       Boolean(info) &&
       unit.keepUnit !== true &&
-      (unit.timespan === true || DURATION_UNITS.has(rawUnits) || compound),
+      (unit.timespan === true || DURATION_UNITS.has(rawUnits) || compound || isMixedDays(rawUnits)),
     format: ({ unit, info, precision }) =>
       formatTimespan(info.seconds, unit.displayParts, (value) => formatNumber(value, precision)),
   },
@@ -255,6 +292,18 @@ function isPlainRatio(unit) {
   return numerator <= 1 && denominator <= 1;
 }
 
+function gcd(a, b) {
+  return b === 0 ? Math.abs(a) : gcd(b, a % b);
+}
+
+// `37/16`, `9/4`, `-9/4`, or `5` when the denominator divides out.
+function reducedFraction(numerator, denominator) {
+  const divisor = gcd(numerator, denominator) || 1;
+  const top = numerator / divisor;
+  const bottom = denominator / divisor;
+  return bottom === 1 ? String(top) : `${top}/${bottom}`;
+}
+
 function formatAmount(value, precision) {
   return typeof value === 'number' ? formatNumber(value, precision) : String(value);
 }
@@ -264,24 +313,6 @@ function formatCurrency(symbol, value, precision) {
   return formatted.startsWith('-') ? `-${symbol} ${formatted.slice(1)}` : `${symbol} ${formatted}`;
 }
 
-function numericValue(unit) {
-  try {
-    return unit.toNumber();
-  } catch {
-    return unit.value;
-  }
-}
-
-// Express a unit in a currency, so a reduced compound keeps the currency the
-// user wrote instead of mathjs's base currency.
-function convertTo(unit, code) {
-  try {
-    return unit.toNumber(code);
-  } catch {
-    return numericValue(unit);
-  }
-}
-
 // The display symbol when the value is a single currency unit (`350 USD` ->
 // `US$ 350`), or null.
 function currencyOf(unit) {
@@ -289,18 +320,6 @@ function currencyOf(unit) {
   const [entry] = unit.units;
   if (entry.power !== 1 || (entry.prefix && entry.prefix.name)) return null;
   return CURRENCY_DISPLAY[entry.unit.name] || null;
-}
-
-// The currency code when the unit has exactly one currency factor, on top
-// (`USD`, `USD/hour`, `(h USD)/hour`), else null.
-function leadingCurrency(unit) {
-  let code = null;
-  for (const entry of unit.units) {
-    if (!isCurrencyCode(entry.unit.name)) continue;
-    if (code || entry.power !== 1 || (entry.prefix && entry.prefix.name)) return null;
-    code = entry.unit.name;
-  }
-  return code;
 }
 
 // `<currency> / <unit>` (`USD/hour`, `BRL/day`): the symbol and the singular

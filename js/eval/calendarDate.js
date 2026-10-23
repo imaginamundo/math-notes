@@ -1,3 +1,4 @@
+import { currentTime } from './clock.js';
 // Date primitives shared by the calendar modules: the month/weekday tables, the
 // duration vocabulary, and parsers for dates, clock times and `2 weeks 3 days`
 // durations. Pure (no mathjs), so formatting, arithmetic and the grammar can
@@ -130,26 +131,44 @@ function normalizeYear(year) {
   return year < 70 ? 2000 + year : 1900 + year;
 }
 
-// A date without a year uses the nearest occurrence (this year or next).
-function resolveYear(day, month, year, now) {
+// A date without a year uses the nearest occurrence: the closest of the years around
+// this one in which the day exists (so Feb 29 finds the nearest leap day).
+function resolveYear(day, month, year, clock) {
   if (year !== null) return makeDate(year, month, day);
-  const thisYear = makeDate(now.getFullYear(), month, day);
-  if (!thisYear) return null;
-  const nextYear = makeDate(now.getFullYear() + 1, month, day);
-  if (!nextYear) return thisYear;
-  const resolved = Math.abs(thisYear - now) <= Math.abs(nextYear - now) ? thisYear : nextYear;
-  // Remember that the year was implicit: only those dates may be nudged onto
-  // the other side of the later date when the interval has no year to place it.
-  resolved.implicitYear = true;
-  return resolved;
+  const now = clock();
+  let best = null;
+  for (let candidate = now.getFullYear() - 4; candidate <= now.getFullYear() + 4; candidate++) {
+    const date = makeDate(candidate, month, day);
+    if (date && (!best || Math.abs(date - now) < Math.abs(best - now))) best = date;
+  }
+  if (best) best.implicitYear = true;
+  return best;
 }
 
-function parseDate(text, now) {
+// The occurrence of a yearless date's month and day nearest an anchor date, on its
+// `side`: the latest one on or before it, or the earliest on or after it. Used when a
+// yearless date is measured against a date that has a year (`days since March 1`).
+function occurrenceAround(date, anchor, side) {
+  const limit = atNoon(anchor);
+  let best = null;
+  for (let year = anchor.getFullYear() - 5; year <= anchor.getFullYear() + 5; year++) {
+    const candidate = makeDate(year, date.getMonth() + 1, date.getDate());
+    if (!candidate) continue;
+    if (side === 'before' && candidate <= limit && (!best || candidate > best)) best = candidate;
+    if (side === 'after' && candidate >= limit && (!best || candidate < best)) best = candidate;
+  }
+  return best || date;
+}
+
+// `clock` is the time, or a function that reads it: a literal date (`2024-01-31`) never
+// asks, so a line made only of those is not clock-dependent.
+function parseDate(text, clock) {
+  const now = typeof clock === 'function' ? clock : () => clock;
   const s = String(text).trim().toLowerCase().replace(/\.$/, '');
-  if (s === 'today') return atNoon(now);
-  if (s === 'now') return markClock(new Date(now));
-  if (s === 'yesterday') return addDays(atNoon(now), -1);
-  if (s === 'tomorrow') return addDays(atNoon(now), 1);
+  if (s === 'today') return atNoon(now());
+  if (s === 'now') return markClock(new Date(now()));
+  if (s === 'yesterday') return addDays(atNoon(now()), -1);
+  if (s === 'tomorrow') return addDays(atNoon(now()), 1);
   if (NAMED_DATES[s]) {
     const [month, day] = NAMED_DATES[s];
     return resolveYear(day, month, null, now);
@@ -181,9 +200,11 @@ function parseClock(text, now) {
   const s = String(text).trim().toLowerCase().replace(/\./g, '').replace(/\s+/g, ' ');
   if (s === 'now') return markClock(new Date(now));
   let m = /^(\d{1,2}):(\d{2}) ?([ap])m$/.exec(s);
-  if (m) return markClock(clockAt(now, to24(+m[1], m[3]), +m[2]));
+  if (m && +m[1] >= 1 && +m[1] <= 12 && +m[2] <= 59) {
+    return markClock(clockAt(now, to24(+m[1], m[3]), +m[2]));
+  }
   m = /^(\d{1,2}) ?([ap])m$/.exec(s);
-  if (m) return markClock(clockAt(now, to24(+m[1], m[2]), 0));
+  if (m && +m[1] >= 1 && +m[1] <= 12) return markClock(clockAt(now, to24(+m[1], m[2]), 0));
   m = /^(\d{1,2}):(\d{2})$/.exec(s);
   if (m && +m[1] <= 23 && +m[2] <= 59) return markClock(clockAt(now, +m[1], +m[2]));
   return null;
@@ -199,8 +220,8 @@ function to24(hour, mer) {
 }
 
 function requireClock(text) {
-  const clock = parseClock(text, new Date());
-  if (!clock) throw new Error(`"${text}" is not a clock time I understand`);
+  const clock = parseClock(text, currentTime());
+  if (!clock) throw new Error(`"${text}" is not a valid time`);
   return clock;
 }
 
@@ -217,6 +238,28 @@ function addMonths(date, delta) {
   return target;
 }
 
+// Calendar steps that keep the time of day (the plain `addDays`/`addMonths` land on
+// noon, which is right for a date and wrong for `now` or `16:00`).
+function shiftDays(date, days) {
+  const out = new Date(date);
+  out.setDate(out.getDate() + days);
+  return out;
+}
+
+function shiftMonths(date, delta) {
+  const out = new Date(date);
+  const day = out.getDate();
+  out.setDate(1);
+  out.setMonth(out.getMonth() + delta);
+  const lastDay = new Date(out.getFullYear(), out.getMonth() + 1, 0).getDate();
+  out.setDate(Math.min(day, lastDay));
+  return out;
+}
+
+function startOfDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
 function parseDuration(text) {
   const parts = {};
   const re = /(\d+(?:\.\d+)?)\s*([a-z]+)/gi;
@@ -229,9 +272,24 @@ function parseDuration(text) {
   return parts;
 }
 
+// The parts of a duration, or null when the text is anything more than number and
+// unit pairs (joined by `and`, `,` or `+`): `3 weeks`, `1 year and 2 months`. The lenient
+// `parseDuration` skips what it does not understand, so `3 weeks * 25 EUR` read as 3 weeks.
+function parseDurationExact(text) {
+  const parts = {};
+  const rest = String(text).replace(/(\d+(?:\.\d+)?)\s*([a-z]+)/gi, (match, amount, word) => {
+    const unit = DURATION_UNITS[word.toLowerCase()];
+    if (!unit) return match;
+    parts[unit] = (parts[unit] || 0) + Number(amount);
+    return '';
+  });
+  const leftover = rest.replace(/\b(?:and)\b|[,+\s]/gi, '');
+  return leftover === '' && Object.keys(parts).length ? parts : null;
+}
+
 function requireDate(text) {
-  const date = parseDate(text, new Date());
-  if (!date) throw new Error(`"${text}" is not a date I understand`);
+  const date = parseDate(text, currentTime);
+  if (!date) throw new Error(`"${text}" is not a valid date`);
   return date;
 }
 
@@ -262,6 +320,11 @@ export {
   requireDate,
   addDays,
   addMonths,
+  occurrenceAround,
+  shiftDays,
+  shiftMonths,
+  startOfDay,
   parseDuration,
+  parseDurationExact,
   toDate,
 };

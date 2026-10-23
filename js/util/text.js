@@ -50,4 +50,46 @@ function changeCaret(current, next) {
   return next.length - suffix;
 }
 
-export { indexOfLineAt, startOfLine, sheetLines, changeCaret };
+// Whether decoded file content is text a person wrote: no NUL (binary data and UTF-16
+// read as UTF-8 are full of them) and not mostly replacement characters.
+function looksLikeText(text) {
+  if (text.includes('\0')) return false;
+  const replaced = (text.match(/\uFFFD/g) || []).length;
+  return replaced === 0 || replaced / text.length < 0.02;
+}
+
+// `YYYY-MM-DD` of the local calendar day, the day the sheet's `today` shows.
+function localDateStamp(date = new Date()) {
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+// When a snapshot was taken, as a clock time with seconds, plus the date unless it is today.
+// The relative age alone ("1m ago") cannot tell two snapshots apart.
+function snapshotStamp(timestamp, now = Date.now(), locale) {
+  const date = new Date(timestamp);
+  const time = new Intl.DateTimeFormat(locale, { timeStyle: 'medium' }).format(date);
+  if (new Date(now).toDateString() === date.toDateString()) return time;
+  return `${new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(date)} ${time}`;
+}
+
+// The first non-empty line of a snapshot, cut to fit a row, so a version can be recognised.
+function snapshotPreview(content, max = 40) {
+  const first = String(content ?? '')
+    .split('\n')
+    .map((line) => line.trim())
+    .find(Boolean);
+  if (!first) return '';
+  return first.length > max ? `${first.slice(0, max - 1)}…` : first;
+}
+
+export {
+  indexOfLineAt,
+  startOfLine,
+  sheetLines,
+  changeCaret,
+  looksLikeText,
+  localDateStamp,
+  snapshotStamp,
+  snapshotPreview,
+};

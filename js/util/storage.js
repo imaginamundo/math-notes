@@ -1,7 +1,7 @@
 // Uniform, guarded access to localStorage. Every module reads and writes
 // storage through this wrapper so "storage is unavailable" behaves the same
 // everywhere: reads return null, writes are no-ops, nothing throws.
-import { STORAGE_ERROR } from './events.js';
+import { STORAGE_ERROR, STORAGE_OK } from './events.js';
 
 function available() {
   try {
@@ -19,16 +19,24 @@ function get(key) {
   }
 }
 
-// Tell the UI a write failed (usually the storage quota is full) instead of
-// losing the edit silently. Guarded so a worker/test without a window is fine.
-function notifyFailure(key) {
+// True from a failed write until the next write that works, so the UI can say
+// once that storage is back instead of on every write.
+let failing = false;
+
+function dispatch(type, detail) {
   try {
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent(STORAGE_ERROR, { detail: { key } }));
-    }
+    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent(type, { detail }));
   } catch {
     // no window, or events unavailable
   }
+}
+
+// Tell the UI a write failed instead of losing the edit silently. `reason` says
+// whether the store is full or unavailable (blocked by the browser), which need
+// different advice. Guarded so a worker/test without a window is fine.
+function notifyFailure(key) {
+  failing = true;
+  dispatch(STORAGE_ERROR, { key, reason: available() ? 'full' : 'blocked' });
 }
 
 // Returns whether the write succeeded, so callers that care can react.
@@ -39,6 +47,10 @@ function set(key, value) {
       return false;
     }
     globalThis.localStorage.setItem(key, value);
+    if (failing) {
+      failing = false;
+      dispatch(STORAGE_OK, { key });
+    }
     return true;
   } catch {
     notifyFailure(key);

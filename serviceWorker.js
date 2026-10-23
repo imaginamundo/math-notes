@@ -1,6 +1,6 @@
 // Served from the site root so its scope is `/` and it can cache the app shell
 // and the documentation (a worker under /js/ could only control /js/).
-const cacheName = 'math-notes-v63';
+const cacheName = 'math-notes-v135';
 const APP_SHELL = './index.html';
 const urlsToCache = [
   './',
@@ -14,6 +14,8 @@ const urlsToCache = [
   './js/core/clockFormat.js',
   './js/core/currencySymbols.js',
   './js/core/decimalPrecision.js',
+  './js/core/engineLock.js',
+  './js/core/errorCatalogue.js',
   './js/core/friendlyErrors.js',
   './js/core/history.js',
   './js/core/identifiers.js',
@@ -23,17 +25,26 @@ const urlsToCache = [
   './js/core/measures.js',
   './js/core/multiWordVariables.js',
   './js/core/parseLine.js',
+  './js/core/numberGrouping.js',
+  './js/core/stringMask.js',
   './js/core/preprocess.js',
+  './js/core/reservedWords.js',
   './js/core/setting.js',
+  './js/core/sizeLimits.js',
   './js/core/tabsState.js',
   './js/core/tags.js',
   './js/core/totalMode.js',
+  './js/core/unitForm.js',
   './js/core/unitMix.js',
   './js/core/unitNames.js',
+  './js/core/unitSimplify.js',
   './js/core/userUnits.js',
   './js/core/vocabulary.js',
   './js/eval/aliases.js',
+  './js/eval/bitwise.js',
   './js/eval/calendar.js',
+  './js/eval/clock.js',
+  './js/eval/dateOperators.js',
   './js/eval/calendarArithmetic.js',
   './js/eval/calendarDate.js',
   './js/eval/calendarFormat.js',
@@ -48,6 +59,8 @@ const urlsToCache = [
   './js/eval/scales.js',
   './js/eval/symbols.js',
   './js/eval/timespan.js',
+  './js/eval/unitRuns.js',
+  './js/eval/unitWords.js',
   './js/eval/units.js',
   './js/eval/userUnits.js',
   './js/eval/wordOperators.js',
@@ -55,6 +68,7 @@ const urlsToCache = [
   './js/i18n/examples/en.js',
   './js/i18n/examples/es.js',
   './js/i18n/examples/pt.js',
+  './js/i18n/hints.js',
   './js/i18n/index.js',
   './js/i18n/ui/en.js',
   './js/i18n/ui/es.js',
@@ -71,6 +85,7 @@ const urlsToCache = [
   './js/render/renderTotal.js',
   './js/share/shareLink.js',
   './js/storage/currencyRates.js',
+  './js/storage/evalGuard.js',
   './js/storage/snapshots.js',
   './js/storage/tabsStore.js',
   './js/ui/autocomplete.js',
@@ -116,7 +131,10 @@ self.addEventListener('install', (event) => {
     caches.open(cacheName).then((cache) =>
       Promise.all(
         urlsToCache.map((url) =>
-          cache.add(url).catch((error) => {
+          // `reload` goes to the network: the browser's HTTP cache may still hold the previous
+          // release's file (max-age), and the new cache would then serve it until the next
+          // release.
+          cache.add(new Request(url, { cache: 'reload' })).catch((error) => {
             throw new Error(`Precache failed for ${url}: ${error && error.message}`);
           })
         )
@@ -156,12 +174,28 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() =>
+        .catch(() => {
+          if (request.mode !== 'navigate') return Response.error();
+          // A documentation page that was never opened cannot be shown offline. The app shell
+          // is the wrong page for a /docs/ address (an unstyled dead calculator), so offer the
+          // documentation index when it is cached, and say plainly that the page needs a network.
+          if (new URL(request.url).pathname.startsWith('/docs/')) {
+            return caches
+              .match('/docs/')
+              .then(
+                (index) =>
+                  index ||
+                  new Response(
+                    '<!doctype html><meta charset="utf-8"><title>Offline</title>' +
+                      '<p>This page has not been saved for offline use. ' +
+                      '<a href="/">Open Math Notes</a></p>',
+                    { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+                  )
+              );
+          }
           // A navigation offline must show the app shell, not the browser error.
-          request.mode === 'navigate'
-            ? caches.match(APP_SHELL).then((shell) => shell || Response.error())
-            : Response.error()
-        );
+          return caches.match(APP_SHELL).then((shell) => shell || Response.error());
+        });
     })
   );
 });

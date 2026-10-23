@@ -1,5 +1,5 @@
 import { saveSnapshot, latestPerTab, deleteSnapshots } from '../storage/snapshots.js';
-import { LANGUAGE_UPDATED } from '../util/events.js';
+import { LANGUAGE_UPDATED, STATUS_MESSAGE } from '../util/events.js';
 import {
   generateId,
   createTab,
@@ -11,6 +11,8 @@ import {
   normalizeCaret,
   moveTab,
   deriveNextTabNumber,
+  mergeSnapshots,
+  newerSnapshots,
 } from '../core/tabsState.js';
 import { STORAGE_KEY, LEGACY_KEY, loadTabsState, createTabsWriter } from '../storage/tabsStore.js';
 import { isTypingTarget } from '../util/dom.js';
@@ -37,7 +39,7 @@ function initTabs(editableNode, onUpdate) {
   // save must not clobber it, so the cross-window sync waits until it is saved.
   let dirty = false;
   const tabBarNode = document.getElementById('tabs-bar');
-  const { state: loadedState, failed: storageFailed } = loadTabsState();
+  const { state: loadedState, failed: storageFailed, savedAt } = loadTabsState();
   state = loadedState;
 
   const writer = createTabsWriter(
@@ -88,7 +90,10 @@ function initTabs(editableNode, onUpdate) {
     if (resetting) return;
     const tab = getActiveTab();
     if (!tab) return;
-    enqueueSnapshot(() => saveSnapshot({ id: tab.id, name: tab.name, content: tab.content }));
+    const position = state.tabs.findIndex((entry) => entry.id === tab.id);
+    enqueueSnapshot(() =>
+      saveSnapshot({ id: tab.id, name: tab.name, content: tab.content, position })
+    );
   }
 
   function scheduleSnapshot() {
@@ -199,14 +204,17 @@ function initTabs(editableNode, onUpdate) {
 
   editableNode.value = lastValue;
 
-  editableNode.addEventListener('input', () => {
+  editableNode.addEventListener('input', (event) => {
     if (resetting) return;
     const value = editableNode.value;
     if (value === lastValue) return;
     dirty = true;
+    // Typing before it is committed as its own step, so this edit is not folded into it.
+    if (event.separateStep) flushDraft();
     history.record(state.activeId, lastValue, value);
     lastValue = value;
     burst.schedule();
+    if (event.separateStep) flushDraft();
     state = setContent(state, state.activeId, value);
     writer.schedule();
     scheduleSnapshot();
@@ -277,6 +285,9 @@ function initTabs(editableNode, onUpdate) {
     state = createTab(state, name || t('share.defaultName'));
     state = setContent(state, state.activeId, content || '');
     present(content || '');
+    // The tab was filled in by the app, not typed in, so no edit will ever
+    // snapshot it; without one a restore would not know it existed (SEC-01).
+    saveActiveSnapshot();
   }
 
   function getActiveSheet() {
@@ -292,6 +303,7 @@ function initTabs(editableNode, onUpdate) {
     state = setContent(state, state.activeId, content);
     history.reset(state.activeId);
     present(content, { focus: false });
+    saveActiveSnapshot();
   }
 
   // Return to a first-run state: drop every tab, its undo history and any
@@ -350,25 +362,21 @@ function initTabs(editableNode, onUpdate) {
           activeId: targetId,
         };
     state = setActiveTab(state, targetId);
-    state = { ...state, nextTabNumber: deriveNextTabNumber(state.tabs) };
+    // A restore never lowers the counter: it could hand out a name already in use.
+    state = {
+      ...state,
+      nextTabNumber: Math.max(state.nextTabNumber || 0, deriveNextTabNumber(state.tabs)),
+    };
     history.reset(targetId);
     const restored = getActiveTab();
     present(restored.content, { caret: restored.caret });
   }
 
-  function restoreAll(snapshots) {
+  // Bring back each tab's latest snapshot without disturbing the rest: tabs with
+  // no snapshot stay, the order and the active tab are kept (see mergeSnapshots).
+  function restoreAll(snapshots, options) {
     leaveActiveTab();
-    const tabs = snapshots.map((snapshot) => ({
-      id: snapshot.tabId || generateId(),
-      name: snapshot.name,
-      content: snapshot.content,
-    }));
-    state = {
-      ...state,
-      tabs,
-      activeId: tabs.length ? tabs[0].id : state.activeId,
-      nextTabNumber: deriveNextTabNumber(tabs),
-    };
+    state = mergeSnapshots(state, snapshots, options);
     history.clear();
     const restored = getActiveTab();
     present(restored.content, { caret: restored.caret });
@@ -379,9 +387,35 @@ function initTabs(editableNode, onUpdate) {
   async function recoverFromSnapshots() {
     try {
       const snapshots = await latestPerTab();
-      if (snapshots.length) restoreAll(snapshots);
+      // The collection was unreadable, so what is open is a fresh empty tab.
+      if (snapshots.length) restoreAll(snapshots, { dropPristine: true });
     } catch {
       // storage unavailable
+    }
+  }
+
+  // A write to localStorage that failed (the quota was full, storage was blocked)
+  // leaves the saved collection behind the snapshots, which live in IndexedDB. On
+  // load, take the snapshots that hold work the collection lacks (UID-02), unless
+  // the user has already edited that tab since the page opened.
+  async function recoverNewerSnapshots(savedAt, loadedContent) {
+    if (!Number.isFinite(savedAt)) return;
+    try {
+      const newer = newerSnapshots(state, await latestPerTab(), savedAt).filter((snapshot) => {
+        const tab = state.tabs.find((entry) => entry.id === snapshot.tabId);
+        if (!tab) return true;
+        const current = tab.id === state.activeId ? editableNode.value : tab.content;
+        return current === loadedContent.get(tab.id);
+      });
+      if (!newer.length) return;
+      restoreAll(newer);
+      window.dispatchEvent(
+        new CustomEvent(STATUS_MESSAGE, {
+          detail: { text: t('status.recoveredNewer'), hold: true },
+        })
+      );
+    } catch {
+      // IndexedDB unavailable: the saved collection is all there is
     }
   }
 
@@ -403,13 +437,28 @@ function initTabs(editableNode, onUpdate) {
     const { state: incoming } = loadTabsState();
     if (!incoming || !incoming.tabs.length) return;
     if (JSON.stringify(incoming) === JSON.stringify(state)) return;
-    state = incoming;
+    // Each window keeps its own active tab, caret and undo history. The other window's
+    // changes to the tab list and to other tabs are taken; this window's own tab is
+    // replaced only when the other window changed its text.
+    const mineId = state.activeId;
+    const mine = state.tabs.find((tab) => tab.id === mineId);
+    const next = incoming.tabs.some((tab) => tab.id === mineId)
+      ? { ...incoming, activeId: mineId }
+      : incoming;
+    const theirs = next.tabs.find((tab) => tab.id === next.activeId);
+    if (mine && theirs && next.activeId === mineId && theirs.content === editableNode.value) {
+      state = setCaret(next, mineId, mine.caret);
+      view.render();
+      return;
+    }
+    state = next;
     history.clear();
     const active = getActiveTab();
     present(active.content, { focus: false, caret: active.caret });
   });
 
   if (storageFailed) recoverFromSnapshots().finally(() => writer.persist());
+  else recoverNewerSnapshots(savedAt, new Map(state.tabs.map((tab) => [tab.id, tab.content])));
 
   return { switchTab, restoreTab, restoreAll, openSheet, getActiveSheet, seedSheet, reset };
 }

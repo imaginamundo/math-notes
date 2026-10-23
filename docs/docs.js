@@ -47,15 +47,18 @@ function wireExample(figure) {
 
   if (copy) {
     copy.addEventListener('click', () => {
-      try {
-        copyText(expr);
-        copy.textContent = copy.dataset.copied || label;
-        setTimeout(() => {
-          copy.textContent = label;
-        }, 1500);
-      } catch {
-        // clipboard unavailable; leave the label alone
-      }
+      // "Copied" only when something was copied; the clipboard can be blocked outright.
+      Promise.resolve(copyText(expr))
+        .then((copied) => {
+          if (!copied) return;
+          copy.textContent = copy.dataset.copied || label;
+          setTimeout(() => {
+            copy.textContent = label;
+          }, 1500);
+        })
+        .catch(() => {
+          // clipboard unavailable; leave the label alone
+        });
     });
   }
 
@@ -102,8 +105,20 @@ function wireMenu() {
       (node) => node.offsetParent !== null
     );
 
+  const main = document.querySelector('.doc-main');
   const setOpen = (open) => {
     sidebar.classList.toggle('is-open', open);
+    // An open drawer is a modal: the page behind it cannot be reached, and it says so.
+    if (main) main.inert = open;
+    if (open) {
+      sidebar.setAttribute('role', 'dialog');
+      sidebar.setAttribute('aria-modal', 'true');
+      sidebar.setAttribute('aria-label', toggle.getAttribute('aria-label') || 'Menu');
+    } else {
+      sidebar.removeAttribute('role');
+      sidebar.removeAttribute('aria-modal');
+      sidebar.removeAttribute('aria-label');
+    }
     if (backdrop) backdrop.classList.toggle('is-open', open);
     // Lock the page so it cannot scroll behind the drawer.
     root.classList.toggle('doc-menu-open', open);
@@ -134,9 +149,23 @@ function wireMenu() {
   });
 
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && sidebar.classList.contains('is-open')) {
+    if (!sidebar.classList.contains('is-open')) return;
+    if (event.key === 'Escape') {
       event.preventDefault();
       setOpen(false);
+    } else if (event.key === 'Tab') {
+      // Focus stays inside the drawer: Tab wraps from its last control to its first.
+      const list = focusables();
+      if (!list.length) return;
+      const first = list[0];
+      const last = list[list.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
   });
 
@@ -169,16 +198,36 @@ function wireScrollSpy() {
   };
 
   // A section is "current" once its top reaches just below the sticky header.
-  // Account for `scroll-padding-top`, which is what anchor jumps align to.
   const header = document.querySelector('.doc-header');
   const headerOffset = () => {
     const sticky = header ? header.getBoundingClientRect().height : 72;
-    const padding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
-    return Math.max(sticky, padding) + 16;
+    // Anchor jumps align a heading to its `scroll-margin-top`, so that is where "current" starts.
+    const margin = targets.length
+      ? parseFloat(getComputedStyle(targets[0].section).scrollMarginTop) || 0
+      : 0;
+    return Math.max(sticky, margin) + 16;
   };
+
+  // The entry the reader chose (a click, or the URL's hash). A section near the end of a page
+  // cannot reach the top, so by position alone the last entry would win; the chosen one holds
+  // until the reader scrolls away from where the jump left the page.
+  let pinned = null;
+  let pinnedAt = 0;
+  const pin = (link) => {
+    pinned = link;
+    requestAnimationFrame(() => {
+      pinnedAt = window.scrollY;
+    });
+  };
+  for (const { link } of targets) link.addEventListener('click', () => pin(link));
+  if (location.hash) {
+    const match = targets.find((entry) => entry.link.hash === location.hash);
+    if (match) pin(match.link);
+  }
 
   const update = () => {
     const offset = headerOffset();
+    if (pinned && Math.abs(window.scrollY - pinnedAt) > 60) pinned = null;
     let current = targets[0].link;
     for (const { link, section } of targets) {
       if (section.getBoundingClientRect().top <= offset) current = link;
@@ -186,7 +235,10 @@ function wireScrollSpy() {
     }
     const atBottom =
       window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
-    if (atBottom) current = targets[targets.length - 1].link;
+    const scrollable = document.documentElement.scrollHeight > window.innerHeight + 2;
+    if (pinned) current = pinned;
+    else if (!scrollable) current = targets[0].link;
+    else if (atBottom) current = targets[targets.length - 1].link;
     setActive(current);
   };
 
@@ -219,6 +271,20 @@ function wireSearch() {
   if (!input || !results) return;
   const emptyMessage = box.dataset.empty || 'No results';
 
+  // ARIA 1.2 combobox: the input owns the listbox and points at the highlighted option; a
+  // polite live region says how many results there are, since the highlight alone is not
+  // announced.
+  results.id ||= 'doc-search-results';
+  input.setAttribute('role', 'combobox');
+  input.setAttribute('aria-expanded', 'false');
+  input.setAttribute('aria-controls', results.id);
+  input.setAttribute('aria-autocomplete', 'list');
+  const status = document.createElement('span');
+  status.className = 'sr-only doc-search-status';
+  status.setAttribute('role', 'status');
+  status.setAttribute('aria-live', 'polite');
+  box.appendChild(status);
+
   let loading = null;
   let index = [];
   let items = [];
@@ -243,7 +309,11 @@ function wireSearch() {
           }));
           return index;
         })
-        .catch(() => []);
+        // A failed fetch is not remembered: the next query tries again.
+        .catch(() => {
+          loading = null;
+          return [];
+        });
     }
     return loading;
   }
@@ -253,6 +323,9 @@ function wireSearch() {
     results.textContent = '';
     items = [];
     active = -1;
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+    status.textContent = '';
   }
 
   function render() {
@@ -263,12 +336,20 @@ function wireSearch() {
       item.textContent = emptyMessage;
       results.appendChild(item);
       results.hidden = false;
+      input.setAttribute('aria-expanded', 'false');
+      input.removeAttribute('aria-activedescendant');
+      status.textContent = emptyMessage;
       return;
     }
     items.forEach((entry, position) => {
       const item = document.createElement('li');
+      item.setAttribute('role', 'option');
+      item.id = `${results.id}-${position}`;
+      item.setAttribute('aria-selected', String(position === active));
       const link = document.createElement('a');
       link.className = 'doc-search-result';
+      // The input drives the list with the arrow keys; a result is not a separate Tab stop.
+      link.tabIndex = -1;
       link.href = entry.anchor ? `${entry.url}#${entry.anchor}` : entry.url;
       const title = document.createElement('span');
       title.className = 'doc-search-title';
@@ -282,14 +363,19 @@ function wireSearch() {
       results.appendChild(item);
     });
     results.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    if (active >= 0) input.setAttribute('aria-activedescendant', `${results.id}-${active}`);
+    status.textContent = `${items.length} ${items.length === 1 ? 'result' : 'results'}`;
   }
 
   function move(step) {
     if (!items.length) return;
     active = (active + step + items.length) % items.length;
-    [...results.querySelectorAll('.doc-search-result')].forEach((link, position) =>
-      link.classList.toggle('is-active', position === active)
-    );
+    [...results.querySelectorAll('.doc-search-result')].forEach((link, position) => {
+      link.classList.toggle('is-active', position === active);
+      link.parentElement.setAttribute('aria-selected', String(position === active));
+    });
+    input.setAttribute('aria-activedescendant', `${results.id}-${active}`);
     const current = results.querySelector('.doc-search-result.is-active');
     if (current) current.scrollIntoView({ block: 'nearest' });
   }
@@ -331,9 +417,12 @@ function wireSearch() {
       move(-1);
     } else if (event.key === 'Enter' && active >= 0) {
       event.preventDefault();
+      // A real click: it navigates, and the drawer and the results close as they do for a tap.
       const link = results.querySelectorAll('.doc-search-result')[active];
-      if (link) window.location.assign(link.href);
+      if (link) link.click();
     } else if (event.key === 'Escape') {
+      // The first Escape closes the results; a second one is left for the mobile drawer.
+      event.stopPropagation();
       input.value = '';
       clear();
     }
@@ -341,7 +430,48 @@ function wireSearch() {
   document.addEventListener('click', (event) => {
     if (!box.contains(event.target)) clear();
   });
+  // Choosing a result (here or on the page the link lands on) closes the list.
+  results.addEventListener('click', (event) => {
+    if (event.target.closest('a')) setTimeout(clear);
+  });
+  // Tabbing away closes the popup as well, so Esc is never needed to dismiss it.
+  // A press with the mouse or a finger is left to the click handler above: closing the list
+  // on mousedown would shift the page under the pointer and the click would miss.
+  let pointerDown = false;
+  document.addEventListener('pointerdown', () => (pointerDown = true), true);
+  document.addEventListener('pointerup', () => setTimeout(() => (pointerDown = false)), true);
+  box.addEventListener('focusout', (event) => {
+    if (pointerDown) return;
+    if (event.relatedTarget && !box.contains(event.relatedTarget)) clear();
+  });
 }
+
+// The theme and text size follow the app, across windows and at load (the head script sets
+// the theme and size once; the browser chrome colour and later changes are handled here).
+const THEME_COLORS = {
+  'one-dark': '#282c34',
+  dracula: '#282a36',
+  'solarized-dark': '#002b36',
+  monokai: '#272822',
+  light: '#ffffff',
+};
+function syncThemeColor() {
+  const meta = document.querySelector('meta[name="theme-color"]');
+  const color = THEME_COLORS[document.documentElement.dataset.theme || 'one-dark'];
+  if (meta && color) meta.setAttribute('content', color);
+}
+syncThemeColor();
+window.addEventListener('storage', (event) => {
+  if (event.key === 'math-notes-theme' && event.newValue in THEME_COLORS) {
+    document.documentElement.dataset.theme = event.newValue;
+    syncThemeColor();
+  } else if (event.key === 'math-notes-font-scale') {
+    const scale = parseInt(event.newValue, 10);
+    if (scale >= 50 && scale <= 200) {
+      document.documentElement.style.setProperty('--app-font-scale', String(scale / 100));
+    }
+  }
+});
 
 for (const figure of document.querySelectorAll('.doc-example')) wireExample(figure);
 wireMenu();

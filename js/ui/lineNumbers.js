@@ -29,8 +29,15 @@ function toggleLineComment(editableNode, index) {
   let lineStart = 0;
   for (let i = 0; i < index; i++) lineStart = value.indexOf('\n', lineStart) + 1;
   const caret = editableNode.selectionStart;
-  const column = Math.max(0, Math.min(caret - lineStart, line.length));
-  const nextCaret = lineStart + Math.max(0, Math.min(column + delta, nextLine.length));
+  // Before the toggled line nothing moves; inside it the caret keeps its column (shifted by the
+  // marker, never into it); after it the caret moves by what the line grew or shrank.
+  let nextCaret = caret;
+  if (caret >= lineStart + line.length + 1) {
+    nextCaret = caret + delta;
+  } else if (caret >= lineStart) {
+    const column = caret - lineStart;
+    nextCaret = lineStart + Math.max(0, Math.min(column + delta, nextLine.length));
+  }
 
   lines[index] = nextLine;
   setEditorValue(editableNode, lines.join('\n'), { start: nextCaret, end: nextCaret });
@@ -93,14 +100,22 @@ function initLineNumbers(editableNode) {
       gutter.scrollTop = scroller.scrollTop;
     });
   }
+  // Pressing a number must not take focus from the editor (the browser would drop the caret
+  // to the start of the sheet and the next keystroke would land there).
+  gutter.addEventListener('mousedown', (event) => event.preventDefault());
   gutter.addEventListener('click', (event) => {
     const target = event.target;
     if (!target || !target.dataset || target.dataset.line === undefined) return;
     toggleLineComment(editableNode, Number(target.dataset.line));
+    editableNode.focus({ preventScroll: true });
   });
   editableNode.addEventListener('input', render);
   editableNode.addEventListener('keyup', sync);
   editableNode.addEventListener('click', sync);
+  // A caret set by script (a tab switch restores it after the input event) moves the highlight too.
+  document.addEventListener('selectionchange', () => {
+    if (document.activeElement === editableNode) sync();
+  });
 
   render();
   if (scroller) gutter.scrollTop = scroller.scrollTop;

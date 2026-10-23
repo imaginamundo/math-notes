@@ -377,6 +377,14 @@ function createRowRenderer(view) {
         ghost.dataset.full = text.full;
       }
       ghost.title = text.full;
+    } else {
+      // Row nodes are reused, so what an earlier, longer error left behind must go: a stale
+      // full text would be shown again the next time the line is expanded.
+      if (ghost.dataset) {
+        delete ghost.dataset.short;
+        delete ghost.dataset.full;
+      }
+      ghost.title = '';
     }
   }
 
@@ -385,11 +393,11 @@ function createRowRenderer(view) {
     const error = result.type === 'error';
     if (!error) {
       return {
-        value: `→ ${truncate(formatResult(result.value, getDecimalPrecision(), getClockFormat()), 80)}`,
+        value: `→ ${truncate(oneLine(formatResult(result.value, getDecimalPrecision(), getClockFormat())), 80)}`,
         error: false,
       };
     }
-    const full = String(result.value);
+    const full = oneLine(String(result.value));
     return { value: truncate(full, 80), error: true, full };
   }
 
@@ -406,6 +414,12 @@ function namesMayChange(previous, next, start) {
     if (isMultiWordDefinition(previous[i]) || isMultiWordDefinition(next[i])) return true;
   }
   return false;
+}
+
+// A ghost result is one line: a line break in it (a mathjs message, a `help()` text) would start
+// a second line box and draw it over the next row.
+function oneLine(text) {
+  return String(text).replace(/\s*\n\s*/g, ' ');
 }
 
 function truncate(text, max) {

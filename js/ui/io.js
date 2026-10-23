@@ -1,4 +1,5 @@
 import { scrollEditorToEnd } from '../util/scroll.js';
+import { looksLikeText, localDateStamp } from '../util/text.js';
 import { setEditorValue } from './editorInput.js';
 import { t } from '../i18n/index.js';
 import { STATUS_MESSAGE } from '../util/events.js';
@@ -17,7 +18,7 @@ function initIo(editableNode) {
   document.body.appendChild(fileInput);
 
   exportButton.addEventListener('click', () => {
-    const date = new Date().toISOString().slice(0, 10);
+    const date = localDateStamp();
     downloadFile(`math-notes-${date}.txt`, editableNode.value);
   });
 
@@ -33,7 +34,12 @@ function initIo(editableNode) {
     }
     const reader = new FileReader();
     reader.onload = () => {
-      const imported = String(reader.result).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      const decoded = String(reader.result);
+      if (!looksLikeText(decoded)) {
+        window.dispatchEvent(new CustomEvent(STATUS_MESSAGE, { detail: t('io.importNotText') }));
+        return;
+      }
+      const imported = decoded.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
       if (editableNode.value && !window.confirm(t('io.importConfirm'))) {
         return;
       }

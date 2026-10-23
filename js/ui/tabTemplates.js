@@ -46,11 +46,11 @@ const TEMPLATES = [
       '',
       'subtotal = hours * rate',
       'tax = subtotal * taxRate',
-      'total = subtotal + tax',
+      'amountDue = subtotal + tax',
       '',
       'subtotal',
       'tax',
-      'total',
+      'amountDue',
     ],
   },
   {

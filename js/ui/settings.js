@@ -1,3 +1,4 @@
+import { snapshotStamp, snapshotPreview } from '../util/text.js';
 import initModal from './modal.js';
 import storage from '../util/storage.js';
 import { ONBOARDED_KEY } from './onboarding.js';
@@ -134,6 +135,17 @@ function initThemePicker(node) {
     }
   }
 
+  // The inline startup script restores only data-theme, so the browser chrome (theme-color
+  // meta) is brought in step here on every load, not only after a click.
+  syncThemeColor(currentTheme());
+  // Another window changed the theme: follow it.
+  window.addEventListener('storage', (event) => {
+    if (event.key !== STORAGE_KEY || !THEMES.some((entry) => entry.id === event.newValue)) return;
+    document.documentElement.dataset.theme = event.newValue;
+    syncThemeColor(event.newValue);
+    render();
+  });
+
   render();
   renderLabels();
   return { render, renderLabels };
@@ -212,14 +224,20 @@ function initSnapshotHistory(container, restoreAllButton, tabsApi) {
         row.className = 'snapshot-row';
 
         const label = document.createElement('span');
-        label.textContent = timeAgo(snapshot.timestamp);
+        const describe = () => {
+          const preview = snapshotPreview(snapshot.content);
+          const base = `${timeAgo(snapshot.timestamp)} · ${snapshotStamp(snapshot.timestamp)}`;
+          return preview ? `${base} — ${preview}` : base;
+        };
+        label.textContent = describe();
+        label.title = describe();
 
         const restore = document.createElement('button');
         restore.type = 'button';
         restore.textContent = t('settings.restore');
         restore.addEventListener('click', () => {
           const confirm = window.confirm(
-            t('settings.restoreConfirm', { name: snapshot.name, ago: timeAgo(snapshot.timestamp) })
+            t('settings.restoreConfirm', { name: snapshot.name, ago: describe() })
           );
           if (confirm) tabsApi.restoreTab(snapshot);
         });

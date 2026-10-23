@@ -1,4 +1,5 @@
 import { isCurrencyCode } from './currencySymbols.js';
+import { moneyCurrency } from './unitForm.js';
 
 const AGGREGATE_KEYWORDS = {
   sum: 'sum',
@@ -56,10 +57,23 @@ function buildUnit(group, target, amount) {
     // is worth, so express `amount` in the scale's own unit and scale its sample.
     const ratio = unitRatio(scale, target.unit);
     const unit = scale.sample.multiply(amount / ratio / sampleAmount);
-    return scale.unit === target.unit ? unit : unit.to(target.unit);
+    const built = scale.unit === target.unit ? unit : unit.to(target.unit);
+    // A sum of computed durations is still a duration, drawn as `5 min 10 s`, not
+    // `310 s`; the marker lives on the Unit object, so a rebuilt unit has to carry it.
+    if (scale.sample.timespan === true || target.sample.timespan === true) built.timespan = true;
+    return built;
   } catch {
     return null;
   }
+}
+
+// A Fraction (`to nearest 16th`) or a BigNumber is a number too, but neither is a
+// JavaScript number, so aggregates used to skip it without a word (NUM-04).
+function plainNumber(value) {
+  if (value && (value.isFraction === true || value.isBigNumber === true)) {
+    return Number(value.valueOf());
+  }
+  return value;
 }
 
 // Scan a range of results once into the plain numbers and the unit groups, so
@@ -72,7 +86,7 @@ function scan(results) {
 
   for (const result of results) {
     if (result.type !== 'value' || result.aggregate) continue;
-    const value = result.value;
+    const value = plainNumber(result.value);
 
     if (typeof value === 'number' && Number.isFinite(value)) {
       numericSum = (numericSum ?? 0) + value;
@@ -89,6 +103,16 @@ function scan(results) {
       amount = value.value;
     }
     if (typeof amount !== 'number' || !Number.isFinite(amount)) continue;
+
+    // Money counts as its currency, whatever it is called: `3 coffees` defined from
+    // US dollars is US dollars, and joins the other US dollar amounts (UNIT-06).
+    const currency = moneyCurrency(value);
+    if (currency) {
+      const inCurrency = value.to(currency);
+      const group = findGroup(groups, 'currency', currency, inCurrency);
+      addUnit(group, currency, inCurrency, inCurrency.toNumber());
+      continue;
+    }
 
     const name = unitName(value);
     const kind = unitKind(name);
@@ -189,7 +213,7 @@ function groupCount(group) {
 function currencyConflict(groups) {
   const currencies = groups.filter((group) => group.kind === 'currency');
   if (currencies.length < 2) return null;
-  const names = currencies.map((group) => group.name);
+  const names = currencies.map((group) => `"${group.name}"`);
   const last = names.pop();
   return `Cannot combine ${names.join(', ')} and ${last} — convert them first`;
 }
@@ -227,7 +251,12 @@ function combine(summary, mode, empty) {
         if (value !== null) return value;
       }
     } else {
-      const combined = groupAmount(group) + (numericSum ?? 0) * fold;
+      const terms = [...numbers.map((value) => value * fold)];
+      for (const entry of group.units.values()) {
+        const ratio = unitRatio(entry, target.unit);
+        for (const amount of entry.amounts) terms.push(amount * ratio);
+      }
+      const combined = snapToZero(groupAmount(group) + (numericSum ?? 0) * fold, terms);
       const count = groupCount(group) + numericCount;
       const amount = mode === 'average' ? (count ? combined / count : 0) : combined;
       const value = buildUnit(group, target, amount);
@@ -240,7 +269,16 @@ function combine(summary, mode, empty) {
     return median(numbers);
   }
   if (numericSum === null) return empty;
-  return mode === 'average' ? numericSum / numericCount : numericSum;
+  const sum = snapToZero(numericSum, numbers);
+  return mode === 'average' ? sum / numericCount : sum;
+}
+
+// A sum whose terms cancel is exactly 0, not the float residue left behind (0.1 +
+// 0.2 - 0.3 is 5.6e-17): anything below 1e-12 of the largest term is noise (NUM-03).
+function snapToZero(sum, terms) {
+  if (sum === 0 || !Number.isFinite(sum)) return sum;
+  const largest = terms.reduce((max, term) => Math.max(max, Math.abs(term)), 0);
+  return largest > 0 && Math.abs(sum) < 1e-12 * largest ? 0 : sum;
 }
 
 function median(values) {

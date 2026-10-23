@@ -12,10 +12,20 @@ const FETCH_TIMEOUT = 10000;
 // Re-check for a fresh day's rates while a window stays open (the API is daily).
 const REFRESH_INTERVAL = 60 * 60 * 1000;
 
+// A table the engine can use: a base code and rates that are all positive finite numbers.
+// Anything else (a damaged cache) is dropped and fetched again.
+function validTable(table) {
+  if (!table || typeof table !== 'object' || !table.base || typeof table.rates !== 'object') {
+    return false;
+  }
+  const rates = Object.values(table.rates || {});
+  return rates.length > 0 && rates.every((rate) => Number.isFinite(rate) && rate > 0);
+}
+
 function loadCached() {
   try {
     const parsed = JSON.parse(storage.get(STORAGE_KEY) || 'null');
-    return parsed && parsed.base && parsed.rates ? parsed : null;
+    return validTable(parsed) ? parsed : null;
   } catch {
     return null;
   }
@@ -25,9 +35,16 @@ function save(data) {
   storage.set(STORAGE_KEY, JSON.stringify({ ...data, fetchedAt: Date.now() }));
 }
 
-function isFresh(data) {
-  if (!data || !data.fetchedAt) return false;
-  return new Date(data.fetchedAt).toDateString() === new Date().toDateString();
+// A table is current for a little under the refresh interval, so the hourly re-check always
+// asks again. It used to count as fresh for the whole local day of the fetch, which kept
+// the previous business day's table until midnight for anyone who loaded the app before the
+// day's rates were published.
+const FRESH_FOR = REFRESH_INTERVAL - 5 * 60 * 1000;
+
+function isFresh(data, now = Date.now()) {
+  if (!data || !Number.isFinite(data.fetchedAt)) return false;
+  const age = now - data.fetchedAt;
+  return age >= 0 && age < FRESH_FOR;
 }
 
 function notify(name, detail) {
@@ -74,4 +91,4 @@ function startRateRefresh() {
   }, REFRESH_INTERVAL);
 }
 
-export { STORAGE_KEY, loadCached, fetchRates, startRateRefresh };
+export { STORAGE_KEY, loadCached, fetchRates, startRateRefresh, isFresh };

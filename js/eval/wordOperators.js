@@ -2,6 +2,7 @@ const WORD_OPERATORS = [
   [/ multiplied by /gi, ' * '],
   [/ divided by /gi, ' / '],
   [/ divide by /gi, ' / '],
+  [/ over /gi, ' / '],
   [/ times /gi, ' * '],
   [/ without /gi, ' - '],
   [/ with /gi, ' + '],

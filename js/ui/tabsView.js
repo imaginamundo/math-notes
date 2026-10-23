@@ -23,6 +23,12 @@ function createTabsView(tabBarNode, handlers) {
     state.tabs.forEach((tab) => tabBarNode.appendChild(renderTab(tab, state.activeId)));
     tabBarNode.appendChild(renderActions());
     fillMenu();
+    // Whatever made this tab active (+, a template, Ctrl+Tab, a reload), it is brought into
+    // the visible part of the bar, clear of the sticky actions at the end.
+    const activeTab = tabBarNode.querySelector('.tab.active, [aria-selected="true"]');
+    if (activeTab && typeof activeTab.scrollIntoView === 'function') {
+      activeTab.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+    }
     const panel = document.getElementById('editor-panel');
     if (panel) panel.setAttribute('aria-labelledby', state.activeId);
   }
@@ -209,10 +215,16 @@ function createTabsView(tabBarNode, handlers) {
       render();
     };
     input.addEventListener('keydown', (event) => {
+      // While an IME is composing, Enter and Esc belong to it: converting or cancelling.
+      if (event.isComposing || event.keyCode === 229) return;
+      // The key is consumed here. Otherwise its default (a line break) lands in
+      // the editor that `focusEditor` hands focus to, at its remembered caret.
       if (event.key === 'Enter') {
+        event.preventDefault();
         finish(true);
         handlers.focusEditor();
       } else if (event.key === 'Escape') {
+        event.preventDefault();
         finish(false);
       }
     });

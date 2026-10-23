@@ -34,11 +34,18 @@ export default {
   'status.ratesLive': 'tasas: en vivo',
   'status.ratesUnavailable': 'tasas de cambio no disponibles',
   'status.storageFull': 'almacenamiento lleno — puede que los cambios recientes no se guarden',
+  'status.storageBlocked':
+    'el navegador bloquea el almacenamiento — tus hojas no se guardarán; exporta lo que quieras conservar en Ajustes → Archivos',
+  'status.recoveredNewer': 'se recuperaron cambios más recientes de la copia automática',
   'status.bootFailed': 'Math Notes no pudo iniciarse — tus hojas guardadas se han conservado',
   'status.evaluationFailed': 'error de evaluación — no se pudieron actualizar los resultados',
+  'status.evaluationPaused':
+    'esta hoja detuvo la aplicación la última vez que se calculó, así que sus resultados están en pausa — edítala para calcularla de nuevo',
 
   'share.buildFailed': 'No se pudo crear un enlace para esta hoja',
   'share.copiedLong': 'Enlace copiado — es largo, algunas apps pueden cortarlo',
+  'share.tooLarge':
+    'Esta hoja es demasiado grande para compartirla como enlace; expórtala como archivo',
   'share.copied': 'Enlace copiado',
   'share.copyFailed': 'No se pudo copiar — el enlace está en la barra de direcciones',
   'share.unreadable': 'No se pudo leer ese enlace',
@@ -48,12 +55,14 @@ export default {
 
   'io.importConfirm': 'La importación reemplazará el contenido de la pestaña actual. ¿Continuar?',
   'io.importTooLarge': 'Ese archivo es demasiado grande para importarlo',
+  'io.importNotText': 'Ese archivo no es texto, así que no se importó',
 
   'tabs.list': 'Hojas',
   'tabs.rename': 'Doble clic para renombrar',
   'tabs.close': 'Cerrar pestaña',
   'tabs.new': 'Nueva pestaña',
   'tabs.defaultName': 'Hoja {n}',
+  'shortcuts.clearConfirm': '¿Vaciar la hoja activa?',
   'tabs.closeConfirm': '¿Cerrar "{name}"? Su contenido se perderá.',
   'tabs.templates': 'Hojas iniciales',
   'template.budget': 'Presupuesto',
@@ -127,7 +136,7 @@ export default {
     'Esto restablecerá el tema, las pestañas y todos los datos guardados. ¿Continuar?',
   'settings.restoreConfirm': '¿Restaurar "{name}" de {ago}? Esto reemplaza su contenido actual.',
   'settings.restoreAllConfirm':
-    '¿Reemplazar todas las pestañas por la copia más reciente de cada una? Esto descarta las pestañas actuales.',
+    '¿Restaurar cada pestaña a su copia más reciente? El texto actual de esas pestañas se reemplaza; las pestañas sin copia se quedan como están.',
 
   'time.justNow': 'ahora mismo',
   'time.minutesAgo': 'hace {n} min',

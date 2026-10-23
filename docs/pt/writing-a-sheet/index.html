@@ -16,6 +16,7 @@
   <meta property="og:description" content="Uma planilha é uma lista de linhas avaliadas de cima para baixo. Cada linha pode definir um valor, referenciar algo acima dela, ou simplesmente produzir um resultado. As variáveis vivem em um único escopo por planilha e ficam disponíveis para toda linha abaixo da definição.">
   <meta property="og:url" content="https://math.dio.dev/docs/pt/writing-a-sheet/">
   <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'sha256-qt5Sq6nXEJFONoK1APTZtNhM6Zw73H+Iu+2z7ihX7TU='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; frame-src 'none'; form-action 'none'">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/docs/docs.css">
   <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -35,7 +36,7 @@
   <script type="module" src="/docs/docs.js"></script>
 </head>
 <body>
-  <a class="doc-skip" href="#content">Skip to content</a>
+  <a class="doc-skip" href="#content">Saltar para o conteúdo</a>
   <header class="doc-header">
     <a class="doc-brand" href="/docs/pt/">
       <span class="doc-brand-name">Math Notes</span>
@@ -64,14 +65,20 @@
 <p>Tudo depois de um <code>#</code> seguido de um espaço é um comentário e é ignorado.</p>
 <figure class="doc-example" data-expr="2 + 2 # this is a note"><pre class="doc-code"><code data-calc>2 + 2 # this is a note</code></pre><figcaption class="doc-example-result">retorna 4</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Um <code>rótulo:</code> antes de uma expressão nomeia a linha sem ser avaliado. Isso ajuda a lembrar o que uma linha significa.</p>
 <figure class="doc-example" data-expr="Price: 10 + 5"><pre class="doc-code"><code data-calc>Price: 10 + 5</code></pre><figcaption class="doc-example-result">retorna 15</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Um único <code>#</code> no início da linha também funciona como comentário.</p>
+<p><code>//</code> também inicia um comentário, como nas folhas do Numi e do Soulver. Uma linha é um cálculo: um <code>;</code> entre duas instruções é um erro.</p>
 <h2 id="tags">Tags<a class="doc-anchor" href="#tags" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
 <p>Sem espaço depois do <code>#</code>, uma palavra é uma <strong>tag</strong>, não um comentário. As tags marcam linhas para que você possa somá-las em outro lugar.</p>
 <figure class="doc-example" data-expr="20 #food
 30 #food
 #food"><pre class="doc-code"><code data-calc>20 #food
 30 #food
-#food</code></pre><figcaption class="doc-example-result">a última linha retorna 50</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Uma linha que contém apenas tags mostra a soma delas, e <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> (opcionalmente <code>of</code>) faz o mesmo. As linhas marcadas são somadas onde estiverem, acima ou abaixo do pedido.</p>
-<figure class="doc-example" data-expr="20 #food
+#food</code></pre><figcaption class="doc-example-result">a última linha retorna 50</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Uma linha que contém apenas tags mostra a soma delas, e <code>sum</code>/<code>total</code>/<code>average</code>/<code>avg</code> (opcionalmente <code>of</code>) faz o mesmo. São somadas as linhas de valor marcadas <strong>acima</strong> do pedido (atribuições marcadas como <code>lunch = 12 #food</code> não contam; escreva <code>lunch: 12 #food</code>).</p>
+<p>Um operador depois de um pedido se aplica ao total dele.</p>
+<figure class="doc-example" data-expr="10 #food
+20 #food
+sum #food * 2"><pre class="doc-code"><code data-calc>10 #food
+20 #food
+sum #food * 2</code></pre><figcaption class="doc-example-result">retorna 60</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="20 #food
 30 #food
 #food * 2"><pre class="doc-code"><code data-calc>20 #food
 30 #food
@@ -92,10 +99,13 @@ people = 4
 (pizzas * pizzaPrice) / people</code></pre><figcaption class="doc-example-result">a última linha retorna 15</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Nomes de variáveis podem conter espaços. Um nome de várias palavras deve ser consistente: <code>monthly rent</code> é um nome só, não <code>monthly</code> e <code>rent</code>.</p>
 <figure class="doc-example" data-expr="monthly rent = 1500
 monthly rent * 12"><pre class="doc-code"><code data-calc>monthly rent = 1500
-monthly rent * 12</code></pre><figcaption class="doc-example-result">a última linha retorna 18,000</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Você pode guardar uma função com <code>f(x) = …</code> e chamá-la depois.</p>
+monthly rent * 12</code></pre><figcaption class="doc-example-result">a última linha retorna 18,000</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><p>Se uma atribuição falhar (<code>x = foo + 1</code>), o nome continua sendo um erro até ser atribuído de novo, então as linhas seguintes que o usam mostram <code>&quot;x&quot; has an error on line 2</code> em vez de usar em silêncio um valor antigo.</p>
+<p>Você pode guardar uma função com <code>f(x) = …</code> e chamá-la depois, diretamente ou com outro nome.</p>
 <figure class="doc-example" data-expr="double = f(x) = x * 2
 double(21)"><pre class="doc-code"><code data-calc>double = f(x) = x * 2
-double(21)</code></pre><figcaption class="doc-example-result">a última linha retorna 42</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="objetos">Objetos<a class="doc-anchor" href="#objetos" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
+double(21)</code></pre><figcaption class="doc-example-result">a última linha retorna 42</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><figure class="doc-example" data-expr="f(x) = x * 2
+f(4)"><pre class="doc-code"><code data-calc>f(x) = x * 2
+f(4)</code></pre><figcaption class="doc-example-result">a última linha retorna 8</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir no Math Notes</button></div></figure><h2 id="objetos">Objetos<a class="doc-anchor" href="#objetos" aria-label="Link para esta secção" title="Link para esta secção">#</a></h2>
 <p>Um objeto agrupa valores nomeados, e um ponto acessa um campo.</p>
 <figure class="doc-example" data-expr="invoice = {subtotal: 120, tax: 12}
 invoice.subtotal + invoice.tax"><pre class="doc-code"><code data-calc>invoice = {subtotal: 120, tax: 12}

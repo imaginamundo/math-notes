@@ -22,7 +22,8 @@ function formatClock(date, clockFormat = DEFAULT_CLOCK_FORMAT, now = new Date())
   if (day === 0) return time;
   if (day === -1) return `Yesterday at ${time}`;
   if (day === 1) return `Tomorrow at ${time}`;
-  return `${date.getDate()} ${MONTH_NAMES[date.getMonth()]} at ${time}`;
+  const year = date.getFullYear() === now.getFullYear() ? '' : ` ${date.getFullYear()}`;
+  return `${date.getDate()} ${MONTH_NAMES[date.getMonth()]}${year} at ${time}`;
 }
 
 const INTERVAL_ORDER = ['year', 'month', 'week', 'day', 'hour', 'minute', 'second'];

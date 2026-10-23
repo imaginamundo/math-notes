@@ -28,6 +28,12 @@ function parseLine(line) {
       i++;
       continue;
     }
+    // `//` starts a comment too, as in Numi and Soulver sheets (mathjs has no `//` operator).
+    if (ch === '/' && line[i + 1] === '/') {
+      if (firstSpecial === -1) firstSpecial = i;
+      comment = line.slice(i);
+      break;
+    }
     if (ch !== '#') {
       i++;
       continue;
@@ -52,7 +58,7 @@ function parseLine(line) {
 
   const rawCode = firstSpecial === -1 ? line : line.slice(0, firstSpecial);
   const tail = firstSpecial === -1 ? '' : line.slice(firstSpecial);
-  const valid = tail === '' || tagsAtEnd(tail);
+  const valid = tail === '' || (tagsAtEnd(tail) && isCompleteCode(rawCode));
 
   let code = rawCode;
   let title = '';
@@ -98,6 +104,21 @@ function parseLine(line) {
   };
 }
 
+// Trailing tags label a line only when what is before them is a finished
+// expression. After an operator, `=`, `(` or a word operator (`5 + #food`, `x = #food`,
+// `5 to #food`) the tag is an operand of the calculation, and the line is not tagged.
+// A line that is only tags, or `sum`/`average` (optionally `of`) and tags, is a request.
+const TRAILING_OPERATOR = /(?:[-+*/^=(,<>!&|~:]|(?<=\s)%)$/;
+const TRAILING_WORD_OPERATOR =
+  /\b(?:of|to|in|as|on|off|plus|minus|times|mod|and|or|with|without|per|at|for)$/i;
+const REQUEST_KEYWORD = /^(?:sum|total|average|avg)(?:\s+of)?$/i;
+
+function isCompleteCode(rawCode) {
+  const code = rawCode.trim();
+  if (code === '' || REQUEST_KEYWORD.test(code)) return true;
+  return !TRAILING_OPERATOR.test(code) && !TRAILING_WORD_OPERATOR.test(code);
+}
+
 // After the first tag, only whitespace, further tags and a trailing comment may
 // follow; any other code means the tags are used in the calculation rather than
 // labelling the line, so `valid` is false.
@@ -121,6 +142,7 @@ function tagsAtEnd(tail) {
       }
       return true; // '#' treated as a comment start
     }
+    if (ch === '/' && tail[i + 1] === '/') return true; // a `//` comment to the end
     if (sawTag) return false;
     i++;
   }

@@ -45,6 +45,9 @@ export const DIMENSIONS = {
     'carat',
     'carats',
     'cwt',
+    'ct',
+    'stick',
+    'sticks',
   ]),
   volume: new Set([
     'ml',
@@ -86,8 +89,16 @@ export const DIMENSIONS = {
     'fluiddram',
     'gill',
     'drop',
-    'barrel',
     'bbl',
+    'obl',
+    'oilbarrel',
+    'beerbarrel',
+    'gal',
+    'pt',
+    'qt',
+    'lt',
+    'gi',
+    'cp',
     'hogshead',
   ]),
   time: new Set([
@@ -205,7 +216,6 @@ export const DIMENSIONS = {
     'furlong',
     'ftm',
     'fathom',
-    'nm',
     'ly',
   ]),
 };
@@ -223,7 +233,8 @@ export function isUnit(token) {
   return unitDimension(token) !== null;
 }
 
-const TRAILING_UNIT = /([A-Za-zµ][A-Za-zµ]*)\s*$/;
+// A unit may end in a power digit (`m3`, `cm3`).
+const TRAILING_UNIT = /([A-Za-zµ][A-Za-zµ]*\d?)\s*$/;
 
 // The unit symbol at the end of a value (`300g` -> `g`, `10 cups` -> `cups`).
 export function trailingUnit(text) {
@@ -239,7 +250,8 @@ export function trailingDimension(text) {
 // Optional convenience factors. A subject missing from here still works — the
 // label is free-form and the evaluator falls back to a default density.
 export const DEFAULT_FACTORS = {
-  // Cooking — density, grams per millilitre.
+  // Cooking — density, grams per millilitre. Household values (spooned and levelled, as
+  // in USDA portion weights and the King Arthur ingredient chart), not bulk density.
   water: '1 g/ml',
   milk: '1.03 g/ml',
   buttermilk: '1.03 g/ml',
@@ -266,19 +278,19 @@ export const DEFAULT_FACTORS = {
   'corn syrup': '1.38 g/ml',
   sugar: '0.845 g/ml',
   'brown sugar': '0.93 g/ml',
-  'powdered sugar': '0.56 g/ml',
-  'coconut sugar': '0.8 g/ml',
+  'powdered sugar': '0.5 g/ml',
+  'coconut sugar': '0.65 g/ml',
   flour: '0.53 g/ml',
   'bread flour': '0.55 g/ml',
-  'whole wheat flour': '0.55 g/ml',
+  'whole wheat flour': '0.5 g/ml',
   'almond flour': '0.4 g/ml',
-  'cocoa powder': '0.52 g/ml',
-  cornstarch: '0.63 g/ml',
+  'cocoa powder': '0.36 g/ml',
+  cornstarch: '0.52 g/ml',
   'baking powder': '0.9 g/ml',
   'baking soda': '0.9 g/ml',
   salt: '1.2 g/ml',
   rice: '0.85 g/ml',
-  oats: '0.41 g/ml',
+  oats: '0.36 g/ml',
   'peanut butter': '1.08 g/ml',
   nutella: '1.24 g/ml',
   jam: '1.3 g/ml',
@@ -321,31 +333,33 @@ export const MEASUREMENT_SYSTEMS = ['metric', 'us', 'imperial'];
 export const DEFAULT_MEASUREMENT_SYSTEM = 'metric';
 
 // Volume units per measurement system, in millilitres. `cup` is included in
-// every system (imperial cup = 284.13 ml).
+// every system (imperial cup = 284.13 ml). mathjs makes its own copy of each plural and
+// short spelling when it loads, so every spelling is listed here or it would keep the
+// fixed size it started with.
 export const VOLUME_UNITS = {
   metric: {
-    teaspoon: { definition: '5 ml', aliases: ['tsp'] },
-    tablespoon: { definition: '15 ml', aliases: ['tbsp'] },
-    fluidounce: { definition: '30 ml', aliases: ['floz'] },
-    cup: { definition: '250 ml', aliases: ['cups'] },
+    teaspoon: { definition: '5 ml', aliases: ['teaspoons', 'tsp'] },
+    tablespoon: { definition: '15 ml', aliases: ['tablespoons', 'tbsp'] },
+    fluidounce: { definition: '30 ml', aliases: ['fluidounces', 'floz'] },
+    cup: { definition: '250 ml', aliases: ['cups', 'cp'] },
     pint: { definition: '500 ml', aliases: ['pints', 'pt'] },
     quart: { definition: '1 l', aliases: ['quarts', 'qt'] },
     gallon: { definition: '4 l', aliases: ['gallons', 'gal'] },
   },
   us: {
-    teaspoon: { definition: '4.92892159375 ml', aliases: ['tsp'] },
-    tablespoon: { definition: '14.78676478125 ml', aliases: ['tbsp'] },
-    fluidounce: { definition: '29.5735295625 ml', aliases: ['floz'] },
-    cup: { definition: '236.5882365 ml', aliases: ['cups'] },
+    teaspoon: { definition: '4.92892159375 ml', aliases: ['teaspoons', 'tsp'] },
+    tablespoon: { definition: '14.78676478125 ml', aliases: ['tablespoons', 'tbsp'] },
+    fluidounce: { definition: '29.5735295625 ml', aliases: ['fluidounces', 'floz'] },
+    cup: { definition: '236.5882365 ml', aliases: ['cups', 'cp'] },
     pint: { definition: '473.176473 ml', aliases: ['pints', 'pt'] },
     quart: { definition: '946.352946 ml', aliases: ['quarts', 'qt'] },
     gallon: { definition: '3785.411784 ml', aliases: ['gallons', 'gal'] },
   },
   imperial: {
-    teaspoon: { definition: '5.919388020833 ml', aliases: ['tsp'] },
-    tablespoon: { definition: '17.7581640625 ml', aliases: ['tbsp'] },
-    fluidounce: { definition: '28.4130625 ml', aliases: ['floz'] },
-    cup: { definition: '284.130625 ml', aliases: ['cups'] },
+    teaspoon: { definition: '5.919388020833 ml', aliases: ['teaspoons', 'tsp'] },
+    tablespoon: { definition: '17.7581640625 ml', aliases: ['tablespoons', 'tbsp'] },
+    fluidounce: { definition: '28.4130625 ml', aliases: ['fluidounces', 'floz'] },
+    cup: { definition: '284.130625 ml', aliases: ['cups', 'cp'] },
     pint: { definition: '568.26125 ml', aliases: ['pints', 'pt'] },
     quart: { definition: '1136.5225 ml', aliases: ['quarts', 'qt'] },
     gallon: { definition: '4546.09 ml', aliases: ['gallons', 'gal'] },

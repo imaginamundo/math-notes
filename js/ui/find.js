@@ -48,6 +48,9 @@ function initFind(editableNode, viewNode) {
   // Where a replace just ended, so the re-mark picks the next match after it
   // instead of wrapping back onto a match inside the inserted text.
   let replaceAnchor = null;
+  // Where the inserted text began, so a replace at the end of the sheet wraps to the first
+  // match before it instead of stopping with none active.
+  let replaceStart = null;
 
   function open() {
     const selected = editableNode.value.slice(
@@ -64,11 +67,17 @@ function initFind(editableNode, viewNode) {
   function close() {
     if (!barNode.classList.contains('open')) return;
     barNode.classList.remove('open');
+    // The caret goes to the match last stepped to, so closing the bar leaves it selected
+    // and in view and the next keystroke edits it (as in other editors).
+    const active = matches[activeIndex];
+    const mark = viewNode.querySelector('.find-match.active');
     matches = [];
     activeIndex = -1;
+    if (mark) mark.scrollIntoView({ block: 'center', inline: 'center' });
     clearMarks(viewNode);
     updateCounter();
-    editableNode.focus();
+    if (active) editableNode.setSelectionRange(active.start, active.end);
+    editableNode.focus({ preventScroll: true });
   }
 
   // Matches only ever depend on the sheet text and the query, and phase-one
@@ -100,9 +109,12 @@ function initFind(editableNode, viewNode) {
     }
     // A replace continues from the inserted text: wrapping back would keep
     // matching a replacement that contains the query and grow it forever.
-    activeIndex = replacing
-      ? matches.findIndex((match) => match.start >= prevAnchor)
-      : nearestIndex(matches, prevAnchor);
+    if (replacing) {
+      activeIndex = matches.findIndex((match) => match.start >= prevAnchor);
+      if (activeIndex === -1) activeIndex = matches.findIndex((match) => match.end <= replaceStart);
+    } else {
+      activeIndex = nearestIndex(matches, prevAnchor);
+    }
     applyMarks(viewNode, matches, activeIndex);
     updateCounter();
     if (scrollTo) scrollToActive();
@@ -138,7 +150,8 @@ function initFind(editableNode, viewNode) {
       editableNode.value.slice(0, match.start) + replacement + editableNode.value.slice(match.end);
     const caret = match.start + replacement.length;
     replaceAnchor = caret;
-    setEditorValue(editableNode, value, { start: caret, end: caret });
+    replaceStart = match.start;
+    setEditorValue(editableNode, value, { start: caret, end: caret }, { separateStep: true });
     scrollToActive();
     replaceInput.focus();
   }
@@ -155,13 +168,15 @@ function initFind(editableNode, viewNode) {
     }
     out += value.slice(last);
     const caret = out.length;
-    setEditorValue(editableNode, out, { start: caret, end: caret });
+    setEditorValue(editableNode, out, { start: caret, end: caret }, { separateStep: true });
     scrollToActive();
     replaceInput.focus();
   }
 
   function updateCounter() {
-    countNode.textContent = matches.length ? `${activeIndex + 1}/${matches.length}` : '';
+    countNode.textContent = matches.length
+      ? `${activeIndex === -1 ? '–' : activeIndex + 1}/${matches.length}`
+      : '';
   }
 
   function scrollToActive() {
@@ -172,6 +187,8 @@ function initFind(editableNode, viewNode) {
 
   findInput.addEventListener('input', () => refresh(false));
   findInput.addEventListener('keydown', (event) => {
+    // While an IME is composing, Enter and Esc belong to it.
+    if (event.isComposing || event.keyCode === 229) return;
     if (event.key === 'Enter') {
       event.preventDefault();
       if (event.shiftKey) prev();
@@ -182,6 +199,7 @@ function initFind(editableNode, viewNode) {
     }
   });
   replaceInput.addEventListener('keydown', (event) => {
+    if (event.isComposing || event.keyCode === 229) return;
     if (event.key === 'Enter') {
       event.preventDefault();
       replaceCurrent();
@@ -210,6 +228,7 @@ function initFind(editableNode, viewNode) {
 
   document.addEventListener('keydown', (event) => {
     if (document.querySelector('dialog[open]')) return;
+    if (event.isComposing || event.keyCode === 229) return;
     if (event.key === 'Escape' && barNode.classList.contains('open')) {
       event.preventDefault();
       close();

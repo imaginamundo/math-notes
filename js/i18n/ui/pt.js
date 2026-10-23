@@ -34,12 +34,19 @@ export default {
   'status.ratesLive': 'cotações: ao vivo',
   'status.ratesUnavailable': 'cotações indisponíveis',
   'status.storageFull': 'armazenamento cheio — as alterações recentes podem não ser guardadas',
+  'status.storageBlocked':
+    'o navegador bloqueou o armazenamento — suas planilhas não serão salvas; exporte o que quiser manter em Configurações → Arquivos',
+  'status.recoveredNewer': 'alterações mais recentes recuperadas do backup automático',
   'status.bootFailed':
     'O Math Notes não conseguiu iniciar — as suas planilhas guardadas ficaram intactas',
   'status.evaluationFailed': 'falha na avaliação — não foi possível atualizar os resultados',
+  'status.evaluationPaused':
+    'esta planilha parou o app da última vez que foi calculada, então os resultados estão em pausa — edite-a para calcular de novo',
 
   'share.buildFailed': 'Não foi possível criar um link para esta planilha',
   'share.copiedLong': 'Link copiado — é longo, alguns apps podem cortá-lo',
+  'share.tooLarge':
+    'Esta folha é demasiado grande para partilhar como ligação; exporte-a como ficheiro',
   'share.copied': 'Link copiado',
   'share.copyFailed': 'Não foi possível copiar — o link está na barra de endereços',
   'share.unreadable': 'Não foi possível ler esse link',
@@ -49,12 +56,14 @@ export default {
 
   'io.importConfirm': 'A importação substituirá o conteúdo da aba atual. Continuar?',
   'io.importTooLarge': 'Esse ficheiro é demasiado grande para importar',
+  'io.importNotText': 'Esse ficheiro não é texto, por isso não foi importado',
 
   'tabs.list': 'Planilhas',
   'tabs.rename': 'Clique duas vezes para renomear',
   'tabs.close': 'Fechar aba',
   'tabs.new': 'Nova aba',
   'tabs.defaultName': 'Aba {n}',
+  'shortcuts.clearConfirm': 'Limpar a folha ativa?',
   'tabs.closeConfirm': 'Fechar "{name}"? O conteúdo será perdido.',
   'tabs.templates': 'Folhas iniciais',
   'template.budget': 'Orçamento',
@@ -124,7 +133,7 @@ export default {
   'settings.resetConfirm': 'Isso redefinirá o tema, as abas e todos os dados salvos. Continuar?',
   'settings.restoreConfirm': 'Restaurar "{name}" de {ago}? Isso substitui o conteúdo atual.',
   'settings.restoreAllConfirm':
-    'Substituir todas as abas pelo snapshot mais recente de cada uma? Isso descarta as abas atuais.',
+    'Restaurar cada aba para o snapshot mais recente? O texto atual dessas abas é substituído; abas sem snapshot ficam como estão.',
 
   'time.justNow': 'agora mesmo',
   'time.minutesAgo': 'há {n} min',

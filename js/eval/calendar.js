@@ -16,7 +16,7 @@
 // concerns live apart: parsing and primitives in calendarDate.js, formatting in
 // calendarFormat.js, arithmetic in calendarArithmetic.js, and the phrase grammar
 // in calendarGrammar.js.
-import { parseDate, requireDate, requireClock, atNoon, WEEKDAYS } from './calendarDate.js';
+import { parseDate, requireDate, requireClock, atNoon, addDays, WEEKDAYS } from './calendarDate.js';
 import { formatDate, formatInterval, formatDatePattern } from './calendarFormat.js';
 import {
   WORKDAY_HOURS,
@@ -36,8 +36,10 @@ import {
   resolveInterval,
 } from './calendarArithmetic.js';
 import { preprocessCalendar } from './calendarGrammar.js';
+import { initDateOperators, intervalUnit } from './dateOperators.js';
 
 function initCalendar(math) {
+  initDateOperators(math);
   // A workday is eight hours, so `55h in workdays` converts.
   try {
     math.createUnit('workday', { definition: '8 h', aliases: ['workdays'] }, { override: true });
@@ -49,17 +51,20 @@ function initCalendar(math) {
       __date: (text) => requireDate(text),
       __dateAdd: (value, duration, sign) => dateAdd(math, value, duration, sign),
       __clock: (text) => requireClock(text),
+      __timeZoneUnsupported: () => {
+        throw new Error('Time zones are not supported; a clock time is in your own time zone');
+      },
       __clockAdd: (text, duration, sign) => clockAdd(text, duration, sign),
       __clockInterval: (a, b, forward) => clockInterval(a, b, Number(forward) > 0, math),
-      __dateInterval: (a, b) => {
-        const { a: from, b: to } = resolveInterval(a, b);
-        return { type: 'calendarInterval', parts: dateDiff(from, to) };
+      __dateInterval: (a, b, mode) => {
+        const { a: from, b: to } = resolveInterval(a, b, mode);
+        return intervalUnit(math, from, to);
       },
       __dateFormat: (date, pattern) => formatDatePattern(date, pattern),
-      __daysBetweenText: (a, b, extra, absolute) => {
+      __daysBetweenText: (a, b, extra, absolute, mode) => {
         // `days between`/`through ... in days` describe a span, so an explicit
         // backward pair reports its magnitude; `days since`/`until` stay signed.
-        const { a: from, b: to } = resolveInterval(a, b);
+        const { a: from, b: to } = resolveInterval(a, b, mode);
         const span = daysBetween(from, to);
         return math.unit((absolute ? Math.abs(span) : span) + (Number(extra) || 0), 'days');
       },
@@ -69,8 +74,11 @@ function initCalendar(math) {
       __dayOfYear: (date) => dayOfYear(date),
       __weekNumber: (date) => isoWeek(date),
       __midpointText: (a, b) => {
-        const { a: from, b: to } = resolveInterval(a, b);
-        return new Date((atNoon(from).getTime() + atNoon(to).getTime()) / 2);
+        const { a: from, b: to } = resolveInterval(a, b, 'span');
+        // Whole days at noon, the later one for an odd span, so the date is the same in
+        // every time zone (a DST change inside the span cannot move it).
+        const [early, late] = from <= to ? [from, to] : [to, from];
+        return addDays(atNoon(early), Math.ceil(daysBetween(early, late) / 2));
       },
       __workdaysInDuration: (text) => workdaysInDuration(text),
       __workdaysBetween: (a, b) => {
@@ -81,7 +89,7 @@ function initCalendar(math) {
       __weekday: (date) => WEEKDAYS[date.getDay()],
       __workHoursInMonth: (text) => workHoursInMonth(text),
       __workHoursBetween: (a, b) => {
-        const { a: from, b: to } = resolveInterval(a, b);
+        const { a: from, b: to } = resolveInterval(a, b, 'span');
         return countWorkdays(from, to) * WORKDAY_HOURS;
       },
     },

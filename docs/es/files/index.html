@@ -16,6 +16,7 @@
   <meta property="og:description" content="Math Notes guarda tu trabajo en tu dispositivo. No hay cuenta ni servidor: las hojas se guardan en tu navegador, se copian en un almacén local versionado, y solo se comparten cuando tú lo eliges.">
   <meta property="og:url" content="https://math.dio.dev/docs/es/files/">
   <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'sha256-qt5Sq6nXEJFONoK1APTZtNhM6Zw73H+Iu+2z7ihX7TU='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; frame-src 'none'; form-action 'none'">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/docs/docs.css">
   <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -35,7 +36,7 @@
   <script type="module" src="/docs/docs.js"></script>
 </head>
 <body>
-  <a class="doc-skip" href="#content">Skip to content</a>
+  <a class="doc-skip" href="#content">Saltar al contenido</a>
   <header class="doc-header">
     <a class="doc-brand" href="/docs/es/">
       <span class="doc-brand-name">Math Notes</span>
@@ -71,12 +72,14 @@
 </ul>
 <h2 id="exportar-e-importar">Exportar e importar<a class="doc-anchor" href="#exportar-e-importar" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <p>Usa <strong>Ajustes → Archivos</strong> para descargar la hoja activa como archivo de texto, o cargar una desde un archivo (<code>.txt</code>, <code>.numi</code> o texto plano, hasta 1 MB). Importar <strong>reemplaza el contenido de la hoja activa</strong>, pidiendo confirmación si la hoja no está vacía; no abre una pestaña nueva. Las exportaciones se llaman <code>math-notes-AAAA-MM-DD.txt</code>. Las mismas acciones están en <code>⇧⌘E</code> / <code>Ctrl+Shift+E</code> (exportar) y <code>⇧⌘I</code> / <code>Ctrl+Shift+I</code> (importar).</p>
+<p>Un archivo <code>.numi</code> se lee como texto simple, así que solo pasa lo que Math Notes entiende. Los comentarios empiezan con <code>#</code> o <code>//</code>; el texto entre comillas junto a un valor es un error; <code>and</code>/<code>xor</code> no son operadores de palabra; una función se escribe con paréntesis (<code>sqrt(16)</code>, no <code>sqrt 16</code>); y un bloque <code>sum</code> termina en la primera línea en blanco.</p>
 <h2 id="enlaces-para-compartir">Enlaces para compartir<a class="doc-anchor" href="#enlaces-para-compartir" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <p>El botón <strong>Compartir</strong> copia un enlace que lleva la hoja activa dentro. A quien lo abra se le pregunta si quiere abrir la hoja en una pestaña nueva; nunca reemplaza lo que ya tiene. El enlace va comprimido, y se te avisa si supera unos 8000 caracteres, porque algunas aplicaciones cortan los enlaces largos; un enlace que se descomprime a más de 256 KB se rechaza.</p>
 <p>No se sube nada. La hoja viaja en el fragmento <code>#</code> del enlace, que los navegadores nunca envían a un servidor — no aparece en registros de acceso ni se reenvía en una cabecera <code>Referer</code>.</p>
 <h2 id="copias-automaticas">Copias automáticas<a class="doc-anchor" href="#copias-automaticas" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
-<p>Las ediciones de cada pestaña se copian a IndexedDB como snapshots versionados. Abre <strong>Ajustes → Recuperar</strong> para ver todos los snapshots, agrupados por pestaña, y restaurar cualquiera de ellos, o usa <strong>Restaurar todo desde la última copia</strong> para recuperar todas las pestañas. Cada pestaña conserva sus 10 snapshots más recientes, guardados un par de segundos después de que dejas de escribir. Cerrar una pestaña también elimina sus snapshots. Los snapshots se guardan comprimidos para ocupar poco.</p>
-<p>Si localStorage no está disponible o está corrupto, las hojas se reconstruyen automáticamente desde las copias de seguridad, y un valor corrupto se copia aparte en vez de perderse.</p>
+<p>Las ediciones de cada pestaña se copian a IndexedDB como snapshots versionados. Abre <strong>Ajustes → Recuperar</strong> para ver todos los snapshots, agrupados por pestaña, y restaurar cualquiera de ellos, o usa <strong>Restaurar todo desde la última copia</strong> para recuperar todas las pestañas. Devuelve la copia más reciente de cada pestaña y deja en paz las pestañas sin copia, su orden y la pestaña activa. Las hojas que la aplicación rellena por ti (una plantilla, una hoja compartida, Bienvenida) se copian en cuanto se abren. Cada pestaña conserva sus 10 snapshots más recientes, guardados un par de segundos después de que dejas de escribir. Cerrar una pestaña también elimina sus snapshots. Los snapshots se guardan comprimidos para ocupar poco.</p>
+<p>Si la aplicación se detiene mientras calcula una hoja, los resultados de esa hoja quedan en pausa al recargar la página (un aviso lo indica), así que una sola línea problemática no te deja fuera. Edita la hoja para calcularla de nuevo, o cierra la pestaña.</p>
+<p>Si el guardado falla (el almacenamiento del navegador está lleno o bloqueado) un aviso permanece hasta que vuelva a funcionar. Tras recargar, la aplicación restaura lo más reciente de las copias automáticas y lo indica. Si localStorage no está disponible o está corrupto, las hojas se reconstruyen automáticamente desde las copias de seguridad, y un valor corrupto se copia aparte en vez de perderse.</p>
 <h2 id="restablecer">Restablecer<a class="doc-anchor" href="#restablecer" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <p><strong>Ajustes → Restablecer → Restablecer datos</strong> borra el tema, las pestañas y todos los datos guardados, volviendo a los valores predeterminados, y después abre una hoja de <strong>Bienvenida</strong> nueva y reinicia el contador de pestañas. Exporta antes lo que quieras conservar.</p>
 <h2 id="privacidad">Privacidad<a class="doc-anchor" href="#privacidad" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>

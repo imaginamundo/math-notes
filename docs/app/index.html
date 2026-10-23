@@ -16,6 +16,7 @@
   <meta property="og:description" content="Math Notes is a progressive web app: it installs like a native app, works offline, and respects your system preferences.">
   <meta property="og:url" content="https://math.dio.dev/docs/app/">
   <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'sha256-qt5Sq6nXEJFONoK1APTZtNhM6Zw73H+Iu+2z7ihX7TU='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; frame-src 'none'; form-action 'none'">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/docs/docs.css">
   <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -66,7 +67,7 @@
 <p>A service worker keeps the app available offline. After the first visit, the app shell and its code are served from the cache; a new version is installed in the background and takes over on a later visit, once every tab has closed, so an open page never mixes versions.</p>
 <p>Currency rates are cached too, so conversions keep working offline using the most recent rates the app has seen.</p>
 <h2 id="keyboard-shortcuts">Keyboard shortcuts<a class="doc-anchor" href="#keyboard-shortcuts" aria-label="Link to this section" title="Link to this section">#</a></h2>
-<p>Every action has a shortcut; the full list is in <a href="/docs/reference/">Reference</a>. The most common ones:</p>
+<p>The common actions have a shortcut; the full list is in <a href="/docs/reference/">Reference</a>. The most common ones:</p>
 <div class="doc-table">
 <table>
 <thead>

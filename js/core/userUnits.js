@@ -31,20 +31,27 @@ function isUnitDefinition(line) {
   return unitDefinition(line) !== null;
 }
 
-// Best-effort plural of the last word: `box` -> `boxes`, `city` -> `cities`,
-// `widget` -> `widgets`. A word already ending in `s` has no separate plural.
-function pluralize(word) {
-  if (/s$/i.test(word)) return null;
-  if (/[^aeiou]y$/i.test(word)) return `${word.slice(0, -1)}ies`;
-  if (/(?:x|z|ch|sh)$/i.test(word)) return `${word}es`;
-  return `${word}s`;
+// The plurals worth accepting for the last word: `box` -> `boxes`, `city` -> `cities`,
+// `bus` -> `buses`, `widget` -> `widgets`. Where more than one spelling is common
+// (`potatos`/`potatoes`, `leafs`/`leaves`, `pãos`/`pães`) every one is an alias, since
+// an alias nobody writes costs nothing and a missing one is an error.
+function pluralForms(word) {
+  const forms = [];
+  if (/[^aeiou]y$/i.test(word)) forms.push(`${word.slice(0, -1)}ies`);
+  else if (/(?:x|z|ch|sh|s)$/i.test(word)) forms.push(`${word}es`);
+  else forms.push(`${word}s`);
+  if (/[^aeiou]o$/i.test(word)) forms.push(`${word}es`);
+  if (/fe?$/i.test(word)) forms.push(`${word.replace(/fe?$/i, '')}ves`);
+  if (/ão$/i.test(word)) forms.push(`${word.slice(0, -2)}ões`, `${word.slice(0, -2)}ães`);
+  return forms;
 }
 
 function unitAliases(name) {
   const words = name.split(' ');
-  const plural = pluralize(words[words.length - 1]);
-  if (!plural) return [];
-  return [[...words.slice(0, -1), plural].join(' ')];
+  const last = words[words.length - 1];
+  return [...new Set(pluralForms(last))]
+    .filter((form) => form !== last)
+    .map((form) => [...words.slice(0, -1), form].join(' '));
 }
 
 function utf8Hex(text) {

@@ -4,6 +4,7 @@ import initCurrency, { registerRates } from '../eval/currency.js';
 import initAliases from '../eval/aliases.js';
 import initCssUnits from '../eval/cssUnits.js';
 import initUnits from '../eval/units.js';
+import initBitwise from '../eval/bitwise.js';
 import initDatetime from '../eval/datetime.js';
 import initRounding from '../eval/rounding.js';
 import initMeasures, { applyMeasurementSystem } from '../eval/measures.js';
@@ -23,10 +24,15 @@ import { unitMixError } from './unitMix.js';
 import { tagAggregate, tagAggregateMode, tagError, substituteTags } from './tags.js';
 import { resolveLineRefs } from './lineRefs.js';
 import { assertBoundedExpression } from './boundedExpression.js';
+import { lockDown } from './engineLock.js';
+import { normalizeUnit } from './unitForm.js';
+import { limitSizes } from './sizeLimits.js';
 import { friendlyError } from './friendlyErrors.js';
 import { substituteAggregates } from './aggregateSubstitution.js';
+import { clockReads } from '../eval/clock.js';
 import { firstDifference } from '../util/sequence.js';
 import { mangleLines } from './multiWordVariables.js';
+import { isReservedLabel } from './reservedWords.js';
 import { unitDefinition } from './userUnits.js';
 import { createUserUnit, removeUserUnit } from '../eval/userUnits.js';
 
@@ -82,29 +88,39 @@ import { createUserUnit, removeUserUnit } from '../eval/userUnits.js';
 // like `sum([1, 2, 3])`. The words come from AGGREGATE_KEYWORDS.
 const AGGREGATE_WORD = new RegExp(`\\b(?:${AGGREGATE_WORD_SOURCE})\\b(?!\\s*\\()`, 'i');
 
-// Labels a line may not assign to: `prev` and the unconditional date keywords
-// (rewritten before mathjs, so a variable of that name could never be read
-// back) and the whole `__` namespace, which holds the engine's own helpers and
-// the generated names multi-word variables are mangled to. Aggregate keywords
-// (`sum`/`total`/…) are deliberately not here: assigning one makes the variable
-// shadow the keyword from then on. Checked against the raw label, before
-// mangling, so a multi-word variable (which becomes `__var_...`) is never
-// mistaken for a reserved name.
-const RESERVED_LABELS = new Set([
-  'prev',
-  'today',
-  'now',
-  'yesterday',
-  'tomorrow',
-  'christmas',
-  'halloween',
-  // `total` is the running-total aggregate and `unit` opens a unit definition.
-  'total',
-  'unit',
-]);
+// A `;` outside quotes and brackets (inside `[1, 2; 3, 4]` it separates matrix rows).
+function hasStatementSeparator(code) {
+  let depth = 0;
+  let quote = '';
+  for (let i = 0; i < code.length; i++) {
+    const ch = code[i];
+    if (quote) {
+      if (ch === '\\') i++;
+      else if (ch === quote) quote = '';
+    } else if (ch === '"' || ch === "'") quote = ch;
+    else if (ch === '[' || ch === '(' || ch === '{') depth++;
+    else if (ch === ']' || ch === ')' || ch === '}') depth--;
+    else if (ch === ';' && depth <= 0) return true;
+  }
+  return false;
+}
 
-function isReservedLabel(label) {
-  return RESERVED_LABELS.has(label.toLowerCase()) || label.startsWith('__');
+// `start:stop` reads as a label (`Rent: 1200`) to the line parser, which knows no variables. When
+// the word before the colon is a variable defined above, the colon is a range (`start:2:stop`).
+function rangeNotLabel(parsed, names) {
+  if (parsed.titleIndex === -1 || !parsed.code.trim()) return parsed;
+  if (!/^[\p{L}_][\p{L}\p{N}_]*$/u.test(parsed.title) || !names.has(parsed.title)) return parsed;
+  const code = parsed.rawCode.trim();
+  return {
+    ...parsed,
+    code,
+    title: '',
+    titleIndex: -1,
+    equalsIndex: -1,
+    label: '',
+    rhs: '',
+    isAssignment: false,
+  };
 }
 
 // A group opens with a header line (`Name:` with no expression) and closes with
@@ -138,11 +154,70 @@ function findGroups(lines) {
  * an argument — the engine never reads storage or subscribes to events.
  * @param {{ rates?: { base: string, rates: Record<string, number> } }} [options]
  */
+// A variable is bound by defining the property, which also replaces a failure
+// marker (below) that a plain assignment could not overwrite.
+function bindVariable(variables, label, value) {
+  Object.defineProperty(variables, label, {
+    value,
+    writable: true,
+    enumerable: true,
+    configurable: true,
+  });
+}
+
+// Bind a name whose assignment failed. Reading it raises the error instead of
+// quietly finding an older value, or a unit or constant of the same name, which
+// the line that failed was meant to replace (REVIEW.md AGG-03). Assigning to it
+// again, from any scope that inherits it, defines the new value on that scope.
+function bindFailure(variables, label, line) {
+  Object.defineProperty(variables, label, {
+    get() {
+      throw new Error(`"${label}" has an error on line ${line}`);
+    },
+    set(value) {
+      bindVariable(this, label, value);
+    },
+    enumerable: true,
+    configurable: true,
+  });
+}
+
+const PLAIN_LABEL = /^[A-Za-z_]\w*$/;
+
+// A number result that is vanishingly small next to the numbers written in the
+// expression is float residue (`0.1 + 0.2 - 0.3`), not an answer: it is 0. A value
+// that is small on its own (`1e-8`) is compared with itself, so it stays.
+function snapResidue(result, expression) {
+  if (typeof result !== 'number' || result === 0 || !Number.isFinite(result)) return result;
+  // Cancellation needs an addition or subtraction between numbers; `x * 1` with a
+  // tiny `x` is a tiny answer, not residue.
+  if (!/[\w)\]]\s*[+-]\s*[\w(.[]/.test(expression)) return result;
+  let largest = 0;
+  let count = 0;
+  // Only numbers standing on their own: not the digits inside a name (`x2`,
+  // `__line_1`, or the hex of an encoded unit name such as `unit6d6f6e74`).
+  for (const literal of expression.match(/(?<![\w.])(?:\d+\.?\d*(?:e[+-]?\d+)?|\.\d+)(?!\w)/gi) ||
+    []) {
+    const magnitude = Math.abs(Number(literal));
+    if (!Number.isFinite(magnitude)) continue;
+    largest = Math.max(largest, magnitude);
+    count++;
+  }
+  return count >= 2 && largest > 0 && Math.abs(result) < 1e-12 * largest ? 0 : result;
+}
+
 function createEngine({ rates } = {}) {
   const math = create(all);
+  // mathjs reads only Latin and Greek letters as part of a name, so `цена = 5` and `価格 = 100`
+  // were syntax errors although labels, tags and unit names already accept any script. A letter
+  // or combining mark of any language is a name character here too.
+  const latinOrGreek = math.parse.isAlpha;
+  math.parse.isAlpha = (c, cPrev, cNext) =>
+    latinOrGreek(c, cPrev, cNext) || /^[\p{L}\p{M}]$/u.test(c);
   initAliases(math);
   initCssUnits(math);
   initUnits(math);
+  initBitwise(math);
   initDatetime(math);
   initRounding(math);
   initMeasures(math, readMeasurementSystem());
@@ -150,6 +225,26 @@ function createEngine({ rates } = {}) {
   initTimespan(math);
   initCalendar(math);
   initCurrency(math, rates);
+  // mathjs decides when a function body is compiled whether a free symbol names a
+  // unit, so a function defined above a `unit` line never saw that unit. A symbol
+  // that is neither a variable nor a unit when the body was compiled ends up in
+  // `onUndefinedSymbol` when the function is called, which is the moment to look
+  // again (AGG-04).
+  const { SymbolNode, Unit } = math;
+  const undefinedSymbol = SymbolNode.onUndefinedSymbol;
+  SymbolNode.onUndefinedSymbol = (name) =>
+    Unit.isValuelessUnit(name) ? new Unit(null, name) : undefinedSymbol(name);
+  // `simplify()` picks the unit to show a compound result in from the unit system.
+  // mathjs's default, `auto`, remembers the last unit of each dimension it parsed
+  // anywhere (other lines, deleted lines, other tabs, startup), so the same line
+  // read `gallon` or `BTU` depending on what else was in the sheet (UNIT-02). A
+  // fixed system makes the unit depend only on the line.
+  math.Unit.setUnitSystem('si');
+  // The size-taking constructors refuse to allocate past the list cap (PRE-01).
+  limitSizes(math);
+  // From here a sheet cannot reach `config`, `createUnit` or the functions that
+  // evaluate text; the engine keeps the real ones through `trusted` (PRE-02).
+  const trusted = lockDown(math);
 
   const cache = {
     lines: [],
@@ -165,6 +260,13 @@ function createEngine({ rates } = {}) {
   // Which aggregate the total bar shows. Only affects the total, not the
   // per-line cache, so it is read fresh on each evaluation.
   let totalMode = readTotalMode();
+
+  // The sheet's variables. There is one object for the engine's whole life and it
+  // is cleared and refilled whenever the context is rebuilt: a user function keeps
+  // the scope it was defined in, so a fresh object per run would leave every
+  // function defined above the first changed line reading variables from a run
+  // that no longer exists (stale, deleted or later-assigned values; AGG-01).
+  const engineVariables = {};
 
   // The user-defined units of the current sheet, in definition order, so they
   // can be deleted and rebuilt when the definitions change.
@@ -193,11 +295,25 @@ function createEngine({ rates } = {}) {
     let result;
 
     try {
+      // `a = 1; b = 2` is a mathjs block: it would run both statements, store a list and
+      // define `b` behind the sheet's back. A line is one calculation.
+      if (hasStatementSeparator(code)) {
+        throw new Error('A line is one calculation; ";" does not separate two');
+      }
       const expression = preprocess(code, scope && { names: names || ownNames(scope) });
-      assertBoundedExpression(math, expression, scope);
-      result = math.evaluate(expression, scope);
+      assertBoundedExpression(trusted, expression, scope);
+      result = trusted.evaluate(expression, scope);
       const mixError = unitMixError(result);
       if (mixError) throw new Error(mixError);
+      // Store a compound that cancels to one unit as that unit (MIX-01).
+      result = normalizeUnit(result);
+      // A bare unit (`USD`, `km`, `hour`) has no amount, so it showed as 0 and
+      // counted as 0 in totals, though `USD * 5` and `USD to EUR` read it as 1. Make
+      // the value agree with what it computes with (CUR-07).
+      if (isUnitValue(result) && result.value === null) {
+        result = math.unit(1, result.formatUnits());
+      }
+      result = snapResidue(result, expression);
       // The assignment statement already returns the rhs value; reuse it rather
       // than evaluating the rhs a second time, which could disagree for impure
       // expressions (e.g. `x = unix()`).
@@ -222,7 +338,7 @@ function createEngine({ rates } = {}) {
   // Remove every user-defined unit so the sheet's definitions can be rebuilt
   // from scratch (editing or deleting a definition must not leave a stale unit).
   function resetUserUnits() {
-    for (let i = userUnits.length - 1; i >= 0; i--) removeUserUnit(math, userUnits[i]);
+    for (let i = userUnits.length - 1; i >= 0; i--) removeUserUnit(trusted, userUnits[i]);
     userUnits = [];
   }
 
@@ -230,7 +346,7 @@ function createEngine({ rates } = {}) {
   // before the first changed line (no re-evaluation needed).
   function rebuildUserUnit(name, value) {
     try {
-      userUnits.push(createUserUnit(math, name, value, { valueIsUnit: isUnitValue(value) }));
+      userUnits.push(createUserUnit(trusted, name, value, { valueIsUnit: isUnitValue(value) }));
     } catch {
       // The use sites will report the missing unit.
     }
@@ -253,7 +369,7 @@ function createEngine({ rates } = {}) {
       return { error: 'A unit definition must be a number or a unit' };
     }
     try {
-      userUnits.push(createUserUnit(math, name, value, { valueIsUnit: isUnitValue(value) }));
+      userUnits.push(createUserUnit(trusted, name, value, { valueIsUnit: isUnitValue(value) }));
     } catch (error) {
       return { error: error.message };
     }
@@ -278,7 +394,8 @@ function createEngine({ rates } = {}) {
   // results (no mathjs evaluation): the variables in scope, the running `prev`,
   // and the last blank line that starts an aggregate block.
   function replayContext(lines, inputLines, results, groups, startLine) {
-    const variables = {};
+    const variables = engineVariables;
+    for (const key of Object.keys(variables)) delete variables[key];
     let previousResult;
     let lastBlankIndex = -1;
     // A group header's cached value is the group subtotal, but the main loop
@@ -298,15 +415,20 @@ function createEngine({ rates } = {}) {
         continue;
       }
 
-      const parsed = parseLine(line);
-      if (parsed.isAssignment) {
-        const stored = results[i];
-        const assigned = stored
-          ? stored.assigned !== undefined
-            ? stored.assigned
-            : stored.value
-          : undefined;
-        if (assigned !== undefined) variables[parsed.label] = assigned;
+      // A variable comes back only from a row that really assigned it, under the
+      // label that row recorded. Reading the line text instead restored the error
+      // text of a failed assignment as the variable's value, and lost assignments
+      // whose line was rewritten before evaluation (`x = #a + #b`; SHEET-01).
+      const assignment = results[i];
+      if (assignment && assignment.type === 'error' && assignment.failedLabel) {
+        bindFailure(variables, assignment.failedLabel, i + 1);
+      } else if (
+        assignment &&
+        assignment.type === 'assignment' &&
+        assignment.label &&
+        assignment.assigned !== undefined
+      ) {
+        bindVariable(variables, assignment.label, assignment.assigned);
       }
       const endGroup = groups.byEnd.get(i);
       const result = results[i];
@@ -402,8 +524,7 @@ function createEngine({ rates } = {}) {
     const blockStart = group ? group.start + 1 : ctx.lastBlankIndex + 1;
     const bare = ctx.parsed.code.trim();
     // A variable named like an aggregate keyword shadows it (`total = 5`).
-    const keyword =
-      ctx.variables[bare] === undefined ? AGGREGATE_KEYWORDS[bare.toLowerCase()] : undefined;
+    const keyword = !(bare in ctx.variables) ? AGGREGATE_KEYWORDS[bare.toLowerCase()] : undefined;
     if (!keyword) return false;
     const value = aggregateAbove(ctx.results, blockStart, ctx.i, keyword);
     if (typeof value === 'string') {
@@ -412,6 +533,31 @@ function createEngine({ rates } = {}) {
     }
     ctx.results[ctx.i] = { type: 'value', value, aggregate: true };
     if (value !== undefined) ctx.previousResult = value;
+    return true;
+  }
+
+  // The variable an indexed or property assignment changes: `n` in `n[2] = 99`,
+  // `p` in `p.x = 5`. Not a function definition (`f(x) = …`).
+  const ELEMENT_TARGET = /^([A-Za-z_]\w*)\s*[[.]/;
+  // The name a plain function definition gives: `f` in `f(x) = x * 2`.
+  const FUNCTION_TARGET = /^([A-Za-z_]\w*)\s*\(/;
+
+  // Record an error row. When the line was an assignment to a plain name, that name
+  // is bound to the failure (and remembered on the row, so a rebuild binds it
+  // again) instead of keeping an older value (AGG-03).
+  function failLine(ctx, parsed, message) {
+    const label =
+      parsed.isAssignment && PLAIN_LABEL.test(parsed.label || '') ? parsed.label : undefined;
+    ctx.results[ctx.i] = {
+      type: 'error',
+      value: message,
+      tags: ctx.tags.length ? ctx.tags : undefined,
+      failedLabel: label,
+    };
+    if (label) {
+      bindFailure(ctx.variables, label, ctx.i + 1);
+      ctx.names.add(label);
+    }
     return true;
   }
 
@@ -434,41 +580,60 @@ function createEngine({ rates } = {}) {
       const blockAvg = aggregateAbove(ctx.results, blockStart, ctx.i, 'average');
       const conflict =
         typeof blockSum === 'string' ? blockSum : typeof blockAvg === 'string' ? blockAvg : null;
-      if (conflict) {
-        ctx.results[ctx.i] = {
-          type: 'error',
-          value: conflict,
-          tags: ctx.tags.length ? ctx.tags : undefined,
-        };
-        return true;
-      }
+      if (conflict) return failLine(ctx, ctx.parsed, conflict);
       const substituted = substituteAggregates(ctx.parsed, blockSum, blockAvg, ctx.variables);
       parsedLine = substituted.parsed;
       aggregateValues = substituted.values;
     }
 
     const resolved = resolveLineRefs(parsedLine, ctx.results, ctx.i);
-    if (resolved.error) {
-      ctx.results[ctx.i] = {
-        type: 'error',
-        value: resolved.error,
-        tags: ctx.tags.length ? ctx.tags : undefined,
-      };
-      return true;
-    }
+    if (resolved.error) return failLine(ctx, parsedLine, resolved.error);
     parsedLine = resolved.parsed;
     Object.assign(scope, resolved.values);
     if (aggregateValues) Object.assign(scope, aggregateValues);
 
-    const { type, result, variable } = evaluateLine(parsedLine, scope, namesIn(ctx, scope));
+    // mathjs changes a list or object in place when an element is assigned, and
+    // that object is also held by the rows above, by every variable that was set
+    // from it and by `prev`. So the assignment works on a private copy of its
+    // base, and the base's new value is recorded as the variable (SHEET-03).
+    const elementBase = parsedLine.isAssignment
+      ? (ELEMENT_TARGET.exec(parsedLine.label || '') || [])[1]
+      : undefined;
+    if (elementBase && Object.hasOwn(ctx.variables, elementBase)) {
+      scope[elementBase] = math.clone(ctx.variables[elementBase]);
+    }
+
+    const evaluated = evaluateLine(parsedLine, scope, namesIn(ctx, scope));
+    const { type, result } = evaluated;
+    if (type === 'error') return failLine(ctx, parsedLine, result);
+    let { variable } = evaluated;
+    if (elementBase && type === 'assignment' && Object.hasOwn(scope, elementBase)) {
+      variable = { label: elementBase, value: scope[elementBase] };
+    }
+    // `f(x) = x * 2` defines `f` in this line's own scope, which is dropped after
+    // the line, and the label `f(x)` is no name an expression can reach. Keep the
+    // function under its name, so later lines (and a built-in it shadows) see it
+    // (SHEET-04). The `alias = f(x) = …` form already stores the alias.
+    const functionName = parsedLine.isAssignment
+      ? (FUNCTION_TARGET.exec(parsedLine.label || '') || [])[1]
+      : undefined;
+    if (
+      functionName &&
+      type === 'assignment' &&
+      Object.hasOwn(scope, functionName) &&
+      typeof scope[functionName] === 'function'
+    ) {
+      variable = { label: functionName, value: scope[functionName] };
+    }
     if (variable) {
-      ctx.variables[variable.label] = variable.value;
+      bindVariable(ctx.variables, variable.label, variable.value);
       ctx.names.add(variable.label);
     }
     ctx.results[ctx.i] = {
       type,
       value: result,
       assigned: variable ? variable.value : undefined,
+      label: variable ? variable.label : undefined,
       tags: ctx.tags.length ? ctx.tags : undefined,
     };
     if (feedsPrev(ctx.results[ctx.i])) ctx.previousResult = result;
@@ -501,7 +666,11 @@ function createEngine({ rates } = {}) {
       cache.groups = findGroups([]);
       cache.revision = environmentRevision;
     }
-    const changed = firstDifference(cache.lines, lines);
+    // A line that read the clock is as stale as a changed one: evaluate again from
+    // the first of them, even when no text changed.
+    const volatile = cache.results.findIndex((result) => result && result.volatile);
+    let changed = firstDifference(cache.lines, lines);
+    if (volatile !== -1 && (changed === -1 || volatile < changed)) changed = volatile;
     if (changed === -1) {
       return {
         results: cache.results,
@@ -550,13 +719,15 @@ function createEngine({ rates } = {}) {
       context.i = i;
       context.line = lines[i];
       if (context.line.trim() === '' && !groups.groupOfLine.has(i)) context.lastBlankIndex = i;
-      context.parsed = parseLine(context.line);
-      context.original = parseLine(inputLines[i]);
+      context.parsed = rangeNotLabel(parseLine(context.line), context.names);
+      context.original = rangeNotLabel(parseLine(inputLines[i]), context.names);
       context.tags = context.parsed.tags;
       context.tagScope = null;
+      const readsBefore = clockReads();
       for (const handle of LINE_HANDLERS) {
         if (handle(context)) break;
       }
+      if (results[i] && clockReads() !== readsBefore) results[i].volatile = true;
     }
 
     cache.lines = lines;
@@ -578,15 +749,24 @@ function createEngine({ rates } = {}) {
     return { results, total: computeTotal(results, totalMode), startLine };
   }
 
+  // The table last registered, as text. The same table arrives twice on every
+  // load (the startup seed, then the cached rates event), and each registration
+  // invalidates the whole per-line cache, so an identical table is ignored
+  // (CORE-10).
+  let registeredRates = rates ? JSON.stringify(rates) : null;
+
   function registerCurrencyRates(data) {
-    registerRates(math, data);
+    const key = JSON.stringify(data ?? null);
+    if (key === registeredRates) return;
+    registeredRates = key;
+    registerRates(trusted, data);
     environmentRevision++;
   }
 
   // Re-register the volume units for a measurement system and invalidate the
   // cache, so switching metric/us/imperial recomputes every line.
   function registerMeasurementSystem(system) {
-    applyMeasurementSystem(math, system);
+    applyMeasurementSystem(trusted, system);
     environmentRevision++;
   }
 

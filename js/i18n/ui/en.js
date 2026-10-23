@@ -35,11 +35,17 @@ export default {
   'status.ratesLive': 'rates: live',
   'status.ratesUnavailable': 'exchange rates unavailable',
   'status.storageFull': 'storage is full — recent changes may not be saved',
+  'status.storageBlocked':
+    'browser storage is blocked — your sheets will not be saved; export what you want to keep from Settings → Files',
+  'status.recoveredNewer': 'recovered newer changes from the automatic backup',
   'status.bootFailed': 'Math Notes could not start — your saved sheets were left untouched',
   'status.evaluationFailed': 'evaluation failed — results could not be updated',
+  'status.evaluationPaused':
+    'this sheet stopped the app the last time it was calculated, so its results are paused — edit it to calculate again',
 
   'share.buildFailed': "Couldn't build a link for this sheet",
   'share.copiedLong': "Link copied — it's long, some apps may cut it",
+  'share.tooLarge': 'This sheet is too large to share as a link; export it as a file instead',
   'share.copied': 'Link copied',
   'share.copyFailed': "Couldn't copy — the link is in the address bar",
   'share.unreadable': "That share link couldn't be read",
@@ -49,12 +55,14 @@ export default {
 
   'io.importConfirm': "Importing will replace the current tab's content. Continue?",
   'io.importTooLarge': 'That file is too large to import',
+  'io.importNotText': 'That file is not text, so it was not imported',
 
   'tabs.list': 'Worksheets',
   'tabs.rename': 'Double-click to rename',
   'tabs.close': 'Close tab',
   'tabs.new': 'New tab',
   'tabs.defaultName': 'Tab {n}',
+  'shortcuts.clearConfirm': 'Clear the active sheet?',
   'tabs.closeConfirm': 'Close "{name}"? Its content will be lost.',
   'tabs.templates': 'Starter sheets',
   'template.budget': 'Budget',
@@ -122,7 +130,7 @@ export default {
   'settings.resetConfirm': 'This will reset the theme, tabs and all stored data. Continue?',
   'settings.restoreConfirm': 'Restore "{name}" from {ago}? This replaces its current content.',
   'settings.restoreAllConfirm':
-    'Replace all tabs with the latest snapshot of each? This discards the current tabs.',
+    'Restore every tab to its latest snapshot? Your current text in those tabs is replaced; tabs without a snapshot stay as they are.',
 
   'time.justNow': 'just now',
   'time.minutesAgo': '{n}m ago',

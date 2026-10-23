@@ -6,6 +6,7 @@
  * @property {string} content  Plain text, or a base64url deflate token when `compressed`.
  * @property {boolean} [compressed]
  * @property {number} timestamp
+ * @property {number} [position]  The tab's index in the bar when it was saved, so a rebuild can restore the order.
  */
 
 import { compressText, decompressText } from '../util/compress.js';
@@ -57,7 +58,7 @@ function sortNewest(snapshots) {
 
 /**
  * Save a snapshot of a tab, then trim that tab's history to SNAPSHOT_LIMIT.
- * @param {{ id: string, name: string, content: string }} tab
+ * @param {{ id: string, name: string, content: string, position?: number }} tab
  * @returns {Promise<void>}
  */
 async function saveSnapshot(tab) {
@@ -73,6 +74,7 @@ async function saveSnapshot(tab) {
       content: compressed === null ? tab.content : compressed,
       compressed: compressed !== null,
       timestamp: Date.now(),
+      ...(Number.isInteger(tab.position) && tab.position >= 0 ? { position: tab.position } : {}),
     });
     tx.oncomplete = resolve;
     tx.onerror = () => reject(tx.error);

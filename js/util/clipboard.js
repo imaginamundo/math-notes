@@ -23,6 +23,31 @@ function copyText(text) {
 }
 
 /**
+ * Copy text that is still being produced (a share link is compressed first). WebKit only lets a
+ * clipboard write happen within a short window after the click, and an `await` before the write
+ * can use it up, so where `ClipboardItem` exists the write is started at once with the pending
+ * text, and the browser waits for it. Elsewhere it waits, then copies as usual.
+ * @param {Promise<string>} textPromise
+ * @returns {Promise<boolean>} whether the text was copied
+ */
+async function copyPendingText(textPromise) {
+  if (navigator.clipboard && window.isSecureContext && typeof ClipboardItem !== 'undefined') {
+    try {
+      const blob = textPromise.then((text) => new Blob([text], { type: 'text/plain' }));
+      await navigator.clipboard.write([new ClipboardItem({ 'text/plain': blob })]);
+      return true;
+    } catch {
+      // fall through to the ordinary path
+    }
+  }
+  try {
+    return await copyText(await textPromise);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Copy via a hidden textarea. Used when the Clipboard API is missing or the
  * page is not a secure context (plain http, some embeds).
  * @param {string} text
@@ -46,5 +71,5 @@ function fallbackCopy(text) {
   }
 }
 
-export { copyText, fallbackCopy };
+export { copyText, copyPendingText, fallbackCopy };
 export default copyText;

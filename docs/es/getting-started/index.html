@@ -16,6 +16,7 @@
   <meta property="og:description" content="Math Notes es una hoja de líneas. Escribes un cálculo por línea y la respuesta aparece a la derecha, como una pista atenuada. No hay botón = ni cuadrícula de celdas: la hoja se recalcula mientras escribes.">
   <meta property="og:url" content="https://math.dio.dev/docs/es/getting-started/">
   <meta property="og:image" content="https://math.dio.dev/images/icons/icon-192.png">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'sha256-qt5Sq6nXEJFONoK1APTZtNhM6Zw73H+Iu+2z7ihX7TU='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; frame-src 'none'; form-action 'none'">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/docs/docs.css">
   <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -35,7 +36,7 @@
   <script type="module" src="/docs/docs.js"></script>
 </head>
 <body>
-  <a class="doc-skip" href="#content">Skip to content</a>
+  <a class="doc-skip" href="#content">Saltar al contenido</a>
   <header class="doc-header">
     <a class="doc-brand" href="/docs/es/">
       <span class="doc-brand-name">Math Notes</span>
@@ -60,7 +61,7 @@
       <article class="doc-content">
 <h1>Primeros pasos</h1>
 <p>Math Notes es una hoja de líneas. Escribes un cálculo por línea y la respuesta aparece a la derecha, como una pista atenuada. No hay botón <strong>=</strong> ni cuadrícula de celdas: la hoja se recalcula mientras escribes.</p>
-<figure class="doc-example" data-expr="1 + 1"><pre class="doc-code"><code data-calc>1 + 1</code></pre><figcaption class="doc-example-result">devuelve 2</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="2 * 3 + 1"><pre class="doc-code"><code data-calc>2 * 3 + 1</code></pre><figcaption class="doc-example-result">devuelve 7</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><p>Una línea puede ser un número simple, una expresión, una asignación, un comentario, o una etiqueta seguida de una expresión. El resultado de la última línea también aparece en la barra de total, abajo.</p>
+<figure class="doc-example" data-expr="1 + 1"><pre class="doc-code"><code data-calc>1 + 1</code></pre><figcaption class="doc-example-result">devuelve 2</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><figure class="doc-example" data-expr="2 * 3 + 1"><pre class="doc-code"><code data-calc>2 * 3 + 1</code></pre><figcaption class="doc-example-result">devuelve 7</figcaption><div class="doc-example-actions"><button type="button" class="doc-action" data-action="copy" data-copied="Copiado">Copiar</button><button type="button" class="doc-action doc-action-primary" data-action="open">Abrir en Math Notes</button></div></figure><p>Una línea puede ser un número simple, una expresión, una asignación, un comentario, o una etiqueta seguida de una expresión. La barra de total, en la parte inferior, suma todas las líneas que muestran un número (por defecto; los Ajustes permiten elegir la media o la mediana). Las asignaciones como <code>x = 5</code> no muestran resultado y quedan fuera de los totales, los bloques <code>sum</code>, los totales de etiquetas y los subtotales de grupos.</p>
 <h2 id="la-pantalla">La pantalla<a class="doc-anchor" href="#la-pantalla" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <ul>
 <li>El <strong>editor</strong> es el área de texto grande. Su capa fantasma muestra resultados, tags y errores en su sitio.</li>
@@ -83,7 +84,7 @@
 <li><strong>Tamaño del texto</strong> — <strong>−</strong> / <strong>+</strong> del pie cambian el editor entre el 50% y el 200% del tamaño predeterminado del navegador; <strong>Restablecer tamaño</strong> vuelve al 100%.</li>
 </ul>
 <h2 id="autocompletado">Autocompletado<a class="doc-anchor" href="#autocompletado" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
-<p>Mientras escribes, un cuadro de sugerencias propone las variables de la hoja y las <code>#tags</code>, además de las funciones, palabras clave, constantes y unidades integradas. Pulsa <code>Ctrl+Space</code> para abrirlo cuando quieras. <strong>↑</strong>/<strong>↓</strong> eligen, <strong>Enter</strong>/<strong>Tab</strong> insertan, <strong>Esc</strong> cierra.</p>
+<p>Mientras escribes, un cuadro de sugerencias propone las variables de la hoja y las <code>#tags</code>, además de las funciones, palabras clave, constantes y unidades integradas. Pulsa <code>Ctrl+Space</code> para abrirlo cuando quieras. <strong>Tab</strong> inserta la sugerencia resaltada; <strong>↑</strong>/<strong>↓</strong> eligen otra, y entonces <strong>Enter</strong> también la inserta (igual que cuando abriste el cuadro con <code>Ctrl+Space</code>). En otro caso <strong>Enter</strong> solo empieza una línea nueva, así que terminar una palabra como <code>grams</code> nunca la cambia por <code>kilograms</code>. Una palabra que ya es un nombre completo no abre el cuadro por sí sola. <strong>Esc</strong> cierra.</p>
 <h2 id="primera-visita">Primera visita<a class="doc-anchor" href="#primera-visita" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>
 <p>La primera visita abre con una hoja de <strong>Bienvenida</strong> en vez de una página vacía — variables, etiquetas, <code>sum</code>, tags, duraciones con unidades, porcentajes y fechas. Usa sus botones <strong>Conservar contenido</strong> / <strong>Borrar contenido</strong> para descartarla o vaciarla.</p>
 <h2 id="sin-conexion">Sin conexión<a class="doc-anchor" href="#sin-conexion" aria-label="Enlace a esta sección" title="Enlace a esta sección">#</a></h2>

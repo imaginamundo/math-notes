@@ -1,6 +1,7 @@
 import { isCurrencyCode } from './currencySymbols.js';
 import { readableUnit } from './unitNames.js';
 import { decodeUnitName } from './userUnits.js';
+import { simplifyLocal } from './unitSimplify.js';
 
 const LENGTH = 'LENGTH';
 
@@ -17,7 +18,7 @@ export function unitMixError(value) {
 
   let simple = value;
   try {
-    if (typeof value.simplify === 'function') simple = value.simplify();
+    simple = simplifyLocal(value);
   } catch {
     // Fall back to the raw unit.
   }
@@ -78,5 +79,5 @@ function broken(value) {
   if (labels.length > 1) {
     return `Cannot combine "${labels[0]}" and "${labels[1]}" — that unit has no meaning`;
   }
-  return `"${labels[0]}" cannot be used with that power`;
+  return `A power of "${labels[0]}" has no meaning here`;
 }

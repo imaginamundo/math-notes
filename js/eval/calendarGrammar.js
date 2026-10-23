@@ -2,6 +2,7 @@
 // clock and workday phrases into `__*` helper calls for the engine. Pure string
 // work (no mathjs), so it can be unit-tested on its own.
 import parseLine from '../core/parseLine.js';
+import { outsideStrings } from '../core/stringMask.js';
 import { IDENTIFIER_SRC } from '../core/identifiers.js';
 import { MONTHS } from './calendarDate.js';
 
@@ -33,8 +34,11 @@ const CLOCK_SRC =
 const DATE_ONLY = new RegExp(`^(${DATE_SRC})$`, 'i');
 const DATE_LITERAL = new RegExp(`^(?:${DATE_SRC})$`, 'i');
 const IDENT_ONLY = new RegExp(`^${IDENT}$`, 'u');
-const DATE_PAIR = new RegExp(`^(${DATE_SRC})\\s*(?:-|to)\\s*(${DATE_SRC})$`, 'i');
-const DATE_DURATION = new RegExp(`^(${DATE_OR_IDENT})\\s*([+-])\\s*(${DURATION_SRC})$`, 'iu');
+const DATE_PAIR = new RegExp(`^(${DATE_SRC})\\s*(-|to)\\s*(${DATE_SRC})$`, 'i');
+// One or more `+ duration` / `- duration` terms (`June 10 + 3 months + 5 days`).
+const TERMS_SRC = `(?:\\s*[+-]\\s*${DURATION_SRC})+`;
+const DATE_DURATION = new RegExp(`^(${DATE_OR_IDENT})(${TERMS_SRC})$`, 'iu');
+const TERM = new RegExp(`([+-])\\s*(${DURATION_SRC})`, 'giu');
 const DURATION_DATE = new RegExp(
   `^(${DURATION_SRC})\\s+(after|before)\\s+(${DATE_OR_IDENT})$`,
   'iu'
@@ -42,7 +46,8 @@ const DURATION_DATE = new RegExp(
 const DURATION_FROM = new RegExp(`^(${DURATION_SRC})\\s+from\\s+(now|today)$`, 'i');
 const DURATION_AGO = new RegExp(`^(${DURATION_SRC})\\s+ago$`, 'i');
 const DATE_AS = new RegExp(`^(${DATE_SRC})\\s+as\\s+(.+)$`, 'i');
-const DAYS_VERB = /^days\s+(until|till|since|between)\s+(.+)$/i;
+// An optional `in|to|as <unit>` converts the day count (`days until X in weeks`).
+const DAYS_VERB = /^days\s+(until|till|since|between)\s+(.+?)(?:\s+(?:in|to|as)\s+([A-Za-z]+))?$/i;
 const INCLUSIVE = new RegExp(
   `^(${DATE_OR_IDENT})\\s+through\\s+(${DATE_OR_IDENT})\\s+in\\s+days?$`,
   'iu'
@@ -91,33 +96,100 @@ const WORK_HOURS_BETWEEN = new RegExp(
 );
 
 const CLOCK_ONLY = new RegExp(`^(${CLOCK_SRC})$`, 'i');
-const CLOCK_DURATION = new RegExp(`^(${CLOCK_SRC})\\s*([+-])\\s*(${DURATION_SRC})$`, 'i');
+// A clock time and a time-zone name (`5pm ET`, `9:45 am PST in Berlin`): zones are not modelled,
+// and without this the zone is read as a unit.
+const TIME_ZONES =
+  'UTC|GMT|EST|EDT|CST|CDT|MST|MDT|PST|PDT|ET|CT|MT|PT|CET|CEST|BST|IST|JST|HKT|AEST|AEDT';
+const CLOCK_WITH_ZONE = new RegExp(`^(?:${CLOCK_SRC})\\s*(?:${TIME_ZONES})\\b`, 'i');
+const CLOCK_DURATION = new RegExp(`^(${CLOCK_SRC})(${TERMS_SRC})$`, 'i');
 // A clock pair (`to` is a forward interval, `-` the ambiguous same-day
 // difference) can sit inside a larger expression, so it is rewritten wherever
 // it occurs and composes with the arithmetic around it
 // (`9:00 am to 5:30 pm - 45 minutes`). `now` is a clock operand too, so the time
 // until a later clock time (`23:00 - now`) and forward intervals work.
 const CLOCK_OPERAND_SRC = `(?:${CLOCK_SRC}|now\\b)`;
+// `to` needs spaces; `-` does not (`9:00-17:00`, `9am-5pm`), as it did not for a date or a
+// duration. The operands are not part of a longer number or time.
 const CLOCK_PAIR_PHRASE = new RegExp(
-  `\\b(${CLOCK_OPERAND_SRC})\\s+(to|-)\\s+(${CLOCK_OPERAND_SRC})`,
+  `(?<![\\w:.])(${CLOCK_OPERAND_SRC})(?:\\s+(to)\\s+|\\s*(-)\\s*)(${CLOCK_OPERAND_SRC})(?![\\d:])`,
   'gi'
 );
 
 // A date argument in a rewritten expression: a date literal becomes
 // `__date("...")`, while a variable is passed straight through (it already
 // holds a Date).
+function terms(text) {
+  return [...text.matchAll(TERM)].map((t) => ({ sign: t[1] === '-' ? -1 : 1, text: t[2].trim() }));
+}
+
 function dateArg(text) {
   return DATE_LITERAL.test(text) ? `__date(${JSON.stringify(text)})` : text;
 }
 
-function preprocessCalendar(expression) {
+// `width + 30 m` is a length plus 30 metres, not a date plus 30 minutes: a name that
+// is not a date, followed by one component written with a bare letter (`d w mo y h m s`),
+// is ordinary arithmetic. `now + 4h 3m 5s` and `start + 2 days` are still dates.
+function isUnitSum(left, duration) {
+  // A date, or a literal that can never hold a quantity, keeps the date reading (and its
+  // plain message).
+  if (DATE_LITERAL.test(left) || /^(?:true|false)$/i.test(left)) return false;
+  const components = duration.match(/\d+(?:\.\d+)?\s*[a-z]+/gi) || [];
+  return components.length === 1 && /^\d+(?:\.\d+)?\s*(?:d|w|mo|y|h|m|s)$/i.test(components[0]);
+}
+
+// `today`, `now`, `tomorrow` and `yesterday` are dates wherever they stand in an
+// expression (`today - start`, `now + 3 hours + 15 minutes`), unless the sheet defines a
+// variable of that name.
+const DATE_WORD = /(?<![\w.])(today|now|tomorrow|yesterday)\b(?!\s*[(=])/gi;
+
+// A date written out inside a longer expression (`finish - March 4, 2025`) or a clock time with
+// am/pm (`wake - 5:00 am`). Only the unambiguous forms: a bare `9:00` stays a range and a
+// slashed number stays a number.
+const WRITTEN_DATE = new RegExp(
+  `(?<![\\w.])(` +
+    `(?:${MONTH_WORD})\\s+\\d{1,2}(?:st|nd|rd|th)?(?:,?\\s+\\d{4})?` +
+    `|\\d{1,2}(?:st|nd|rd|th)?\\s+(?:${MONTH_WORD})(?:,?\\s+\\d{4})?` +
+    `|\\d{4}-\\d{2}-\\d{2}|${HOLIDAY_WORD})(?![\\w])`,
+  'gi'
+);
+const MERIDIEM_CLOCK = new RegExp(
+  `(?<![\\w:.])((?:\\d{1,2}:\\d{2}|(?:0?[1-9]|1[0-2]))\\s*[ap]\\.?m\\.?)(?![\\w:])`,
+  'gi'
+);
+// A time-shaped `h:mm` that cannot be a time (`25:00`, `9:75`). Reading it as a range would
+// give a list nobody meant, so it is reported as the invalid time it is.
+const IMPOSSIBLE_CLOCK = /(?<![\w:."])(\d{1,2}:\d{2})(?![\w:]|\s*[ap]\.?m)/g;
+
+// The helper calls already written (`__clockInterval("9:00", …)`) carry their dates as
+// strings, which are left as they are.
+function dateWords(expr, context) {
+  const names = context && context.names;
+  return outsideStrings(expr, (code) =>
+    code
+      .replace(DATE_WORD, (word) =>
+        names && names.has(word.toLowerCase())
+          ? word
+          : `__date(${JSON.stringify(word.toLowerCase())})`
+      )
+      .replace(WRITTEN_DATE, (text) =>
+        names && names.has(text.toLowerCase()) ? text : `__date(${JSON.stringify(text)})`
+      )
+      .replace(MERIDIEM_CLOCK, (text) => `__clock(${JSON.stringify(text)})`)
+      .replace(IMPOSSIBLE_CLOCK, (text) => {
+        const [hour, minute] = text.split(':').map(Number);
+        return hour > 23 || minute > 59 ? `__clock(${JSON.stringify(text)})` : text;
+      })
+  );
+}
+
+function preprocessCalendar(expression, context) {
   let expr = expression.trim().replace(/\bwork\s+days?\b/gi, 'workdays');
   if (!expr) return expression;
 
   // Rewrite the right-hand side of an assignment too, so a date (or a date
   // arithmetic expression) can be stored in a variable.
   const parsed = parseLine(expr);
-  if (parsed.isAssignment) return `${parsed.label} = ${preprocessCalendar(parsed.rhs)}`;
+  if (parsed.isAssignment) return `${parsed.label} = ${preprocessCalendar(parsed.rhs, context)}`;
 
   // Rewrite a `work hours in <month>` phrase wherever it sits, so it composes
   // with the arithmetic around it (`work hours in June * 25 EUR`).
@@ -132,10 +204,8 @@ function preprocessCalendar(expression) {
   // expression combines with.
   expr = expr.replace(
     CLOCK_PAIR_PHRASE,
-    (match, a, op, b) =>
-      `__clockInterval(${JSON.stringify(a)}, ${JSON.stringify(b)}, ${
-        op.toLowerCase() === 'to' ? 1 : 0
-      })`
+    (match, a, to, minus, b) =>
+      `__clockInterval(${JSON.stringify(a)}, ${JSON.stringify(b)}, ${to ? 1 : 0})`
   );
 
   let m;
@@ -143,9 +213,16 @@ function preprocessCalendar(expression) {
     return `__dateFormat(__date(${JSON.stringify(m[1])}), ${JSON.stringify(m[2])})`;
   }
 
+  if (CLOCK_WITH_ZONE.test(expr)) return '__timeZoneUnsupported()';
+
   // Clock times (`9:45 am`, `16:00`) and their arithmetic.
   if ((m = CLOCK_DURATION.exec(expr))) {
-    return `__clockAdd(${JSON.stringify(m[1])}, ${JSON.stringify(m[3])}, ${m[2] === '-' ? -1 : 1})`;
+    const [first, ...rest] = terms(m[2]);
+    const head = `__clockAdd(${JSON.stringify(m[1])}, ${JSON.stringify(first.text)}, ${first.sign})`;
+    return rest.reduce(
+      (inner, t) => `__dateAdd(${inner}, ${JSON.stringify(t.text)}, ${t.sign})`,
+      head
+    );
   }
   if ((m = CLOCK_ONLY.exec(expr))) return `__clock(${JSON.stringify(m[1])})`;
 
@@ -178,20 +255,23 @@ function preprocessCalendar(expression) {
   if ((m = DAYS_VERB.exec(expr))) {
     const verb = m[1].toLowerCase();
     const pair = DATE_AND_DATE.exec(m[2]);
+    const convert = (call) => (m[3] ? `((${call}) to ${m[3]})` : call);
     if (verb === 'between' && pair) {
-      return `__daysBetweenText(${dateArg(pair[1])}, ${dateArg(pair[2])}, 0, 1)`;
+      return convert(`__daysBetweenText(${dateArg(pair[1])}, ${dateArg(pair[2])}, 0, 1, "span")`);
     }
     const single = DATE_ONLY.exec(m[2]) || (IDENT_ONLY.test(m[2]) ? [null, m[2]] : null);
     if (single && verb !== 'between') {
       const arg = dateArg(single[1]);
-      return verb === 'since'
-        ? `__daysBetweenText(${arg}, "today")`
-        : `__daysBetweenText("today", ${arg})`;
+      return convert(
+        verb === 'since'
+          ? `__daysBetweenText(${arg}, "today")`
+          : `__daysBetweenText("today", ${arg})`
+      );
     }
   }
 
   if ((m = INCLUSIVE.exec(expr))) {
-    return `__daysBetweenText(${dateArg(m[1])}, ${dateArg(m[2])}, 1, 1)`;
+    return `__daysBetweenText(${dateArg(m[1])}, ${dateArg(m[2])}, 1, 1, "forward")`;
   }
 
   if ((m = MIDPOINT.exec(expr))) {
@@ -199,11 +279,19 @@ function preprocessCalendar(expression) {
   }
 
   if ((m = DATE_PAIR.exec(expr))) {
-    return `__dateInterval(${JSON.stringify(m[1])}, ${JSON.stringify(m[2])})`;
+    // `-` is the size of the gap; `to` reads forward from the first date.
+    const mode = m[2] === '-' ? 'span' : 'forward';
+    return `__dateInterval(${JSON.stringify(m[1])}, ${JSON.stringify(m[3])}, "${mode}")`;
   }
 
   if ((m = DATE_DURATION.exec(expr))) {
-    return `__dateAdd(${dateArg(m[1])}, ${JSON.stringify(m[3])}, ${m[2] === '-' ? -1 : 1})`;
+    const list = terms(m[2]);
+    if (!(list.length === 1 && isUnitSum(m[1], list[0].text))) {
+      return list.reduce(
+        (inner, t) => `__dateAdd(${inner}, ${JSON.stringify(t.text)}, ${t.sign})`,
+        dateArg(m[1])
+      );
+    }
   }
 
   if ((m = DURATION_DATE.exec(expr))) {
@@ -228,7 +316,7 @@ function preprocessCalendar(expression) {
   if (WEEK_OF_YEAR.test(expr)) return `__weekNumber(__date("today"))`;
   if ((m = DATE_ONLY.exec(expr))) return `__date(${JSON.stringify(m[1])})`;
 
-  return expr;
+  return dateWords(expr, context);
 }
 
 export { preprocessCalendar };

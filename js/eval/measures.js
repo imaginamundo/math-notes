@@ -15,10 +15,13 @@ import { LETTER, WORD } from '../core/identifiers.js';
 // algebra via the `__measure` helper below.
 
 const CONVERSION = /^(.*\S)\s+(?:in|to)\s+(\S.*)$/i;
-const TRAILING_UNIT = /([A-Za-zµ][A-Za-zµ]*)\s*$/;
+const TRAILING_UNIT = /([A-Za-zµ][A-Za-zµ]*\d?)\s*$/;
 const HAS_LETTER = /[A-Za-zµ]/;
 
 function preprocessMeasures(expression) {
+  // `days until Christmas in weeks` is a calendar phrase with a conversion on the end,
+  // not `<value> <subject> in <unit>`; the calendar grammar converts the day count.
+  if (/^\s*days\s+(?:until|till|since|between)\b/i.test(expression)) return expression;
   // mathjs reads `fl oz` as femtolitre × ounce; normalise it to the real unit.
   const normalized = expression.replace(/\bfl\.?\s*oz\.?(?=\s|$)/gi, 'floz');
   const match = CONVERSION.exec(normalized);

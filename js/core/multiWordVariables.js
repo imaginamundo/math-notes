@@ -7,6 +7,7 @@
 // import.
 
 import { IDENTIFIER_SRC, LETTER, WORD } from './identifiers.js';
+import { outsideStrings } from './stringMask.js';
 import { isUnitDefinition, collectUnitDefinitions, registeredName } from './userUnits.js';
 
 // An assignment whose name contains whitespace. A leading `Label:` prefix (the
@@ -122,9 +123,8 @@ function mangleLines(lines) {
     const hash = line.indexOf('#');
     const code = hash === -1 ? line : line.slice(0, hash);
     const comment = hash === -1 ? '' : line.slice(hash);
-    const out = code.replace(
-      pattern,
-      (match) => replacements.get(match.replace(/\s+/g, ' ')) || match
+    const out = outsideStrings(code, (text) =>
+      text.replace(pattern, (match) => replacements.get(match.replace(/\s+/g, ' ')) || match)
     );
     return out + comment;
   });
