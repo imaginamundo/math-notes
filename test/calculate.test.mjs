@@ -1060,3 +1060,40 @@ test('PCT-02: `as %` without the article is a percentage, not attoseconds', () =
   assert.ok(Math.abs(value('60 as % on 50') - 20) < 1e-9);
   assert.ok(Math.abs(value('40 as % off 50') - 20) < 1e-9);
 });
+
+test('PCT-01: a name assigned a percentage keeps acting as one', () => {
+  const sheet = [
+    'price = 1200',
+    'tax = 8.25%',
+    'price + tax',
+    'tax of price',
+    'tax = 10',
+    'price + tax',
+  ];
+  const values = evaluateLines(sheet).results.map((row) => row.value);
+  assert.equal(values[2], 1299);
+  assert.equal(values[3], 99);
+  assert.equal(values[5], 1210);
+  assert.equal(evaluateLines(['r = 10%', 'q = r', '50 + q']).results[2].value, 55);
+});
+
+test('PCT-01: incremental evaluation agrees with a fresh one for a stored percentage', () => {
+  const engine = createEngine();
+  const before = ['price = 100', 'tax = 20%', 'price + tax', 'price - tax'];
+  engine.evaluateLines(before);
+  const after = ['price = 100', 'tax = 20%', 'price + tax', 'price - tax', 'tax of price'];
+  const incremental = engine.evaluateLines(after).results.map((row) => row.value);
+  const fresh = createEngine()
+    .evaluateLines(after)
+    .results.map((row) => row.value);
+  assert.deepEqual(incremental, fresh);
+  assert.deepEqual(incremental.slice(2), [120, 80, 20]);
+  const edited = ['price = 100', 'tax = 5', 'price + tax', 'price - tax', 'tax of price'];
+  const changed = engine.evaluateLines(edited).results.map((row) => row.value);
+  assert.deepEqual(
+    changed,
+    createEngine()
+      .evaluateLines(edited)
+      .results.map((row) => row.value)
+  );
+});

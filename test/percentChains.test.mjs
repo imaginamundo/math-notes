@@ -34,7 +34,7 @@ test('a percentage in a variable or a product chains too', () => {
   assert.equal(show(['x = 10', 'x% + 5']), '5.1');
   assert.equal(show(['bill = 100', 'bill * 10% + 5']), '15');
   assert.equal(show(['price = 50 + 10% + 1', 'price']), '56');
-  assert.equal(show(['tax = 10%', '50 + tax + 1']), '51.1', 'a variable holds 0.1');
+  assert.equal(show(['tax = 10%', '50 + tax + 1']), '56', 'a stored percentage chains like 10%');
 });
 
 test('percentage chains work with units and currencies', () => {

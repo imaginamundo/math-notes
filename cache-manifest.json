@@ -1,12 +1,12 @@
 {
-  "version": 139,
+  "version": 140,
   "files": {
     "index.html": "68a0005b66a25de10ee8046327240d5d45f641a989e6fb26852891f4384360d4",
     "js/core/aggregate.js": "01df4eae71c78beb5e387e706f03f5d47a93891bee6d41571d092bbe0d264235",
     "js/core/aggregateSubstitution.js": "89c1e045edf7b9f5540ec9017e1946d38fb7bfb56a2a7fc1ebd34ea7eeb8b645",
     "js/core/autocomplete.js": "99d6ce2a9bb899107aeaa3d80109f419cb29fb22192cf531ca1b54e607308621",
     "js/core/boundedExpression.js": "11d1a0a1414b3f8098892b7f755e34c543dd762bb72cea516f49463d253d71e1",
-    "js/core/calculate.js": "65ef48b3c2ed295d373f79a66cede6b60ada44146713e7a7bbc7d8e328c068e2",
+    "js/core/calculate.js": "1d18f96c5ee420a4b4d1230b7ed8fdfc6db1e85f4d9ae11ed8eaa5f0219022d4",
     "js/core/clockFormat.js": "f0a6e7670e4e6231cdf1a8676601b3bae22d8df02f25ede666155632ad518ddb",
     "js/core/currencySymbols.js": "ca238ab2569a1b16062d9ece9094c5857867c1d302b9aa81e42f43ce848b7d74",
     "js/core/decimalPrecision.js": "1395bb81ccc7b8f7df3b586ddc77d4cbfd56702529e3ceb680936f396e87e235",
@@ -49,7 +49,7 @@
     "js/eval/dateOperators.js": "ddde7b85c505e047b5dfcab4404355b30a90fc30b1f030447fa7bd8997fed771",
     "js/eval/datetime.js": "def442f80d66faae5e58ed4877545ed222b4bba03db07064ec8681cf51f198f1",
     "js/eval/measures.js": "c6071cc5f6a00f0ceb26442dd24c2f692e782deba5f17d32b2996986859fb5ab",
-    "js/eval/percentage.js": "64189d152135474ff8925b1588d7a8efedab19f25a4a28fb7802bcd167ff4722",
+    "js/eval/percentage.js": "83df5cbe08c96ad32bf9b4b78fa2be1bce21d0d8f727b1b3afe3387d27d37e5c",
     "js/eval/rates.js": "42e6e3b27760454c4ccca0951010e6f22407b5ddb9ca1e60d8282192cd469326",
     "js/eval/rounding.js": "63df0aa2ff315762c9794c30914bc3419a7baa78d4a11af767479ea17d4b1b09",
     "js/eval/scales.js": "6c82daf165a7ca07314372da2ec6e42ebe10f89be12e19d64275473f3aebca7d",

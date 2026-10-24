@@ -14,6 +14,7 @@ import initCalendar from '../eval/calendar.js';
 import { readMeasurementSystem } from './measurementSystem.js';
 import { readTotalMode } from './totalMode.js';
 import preprocess from './preprocess.js';
+import { percentOf } from '../eval/percentage.js';
 import {
   AGGREGATE_KEYWORDS,
   AGGREGATE_WORD_SOURCE,
@@ -288,7 +289,7 @@ function createEngine({ rates } = {}) {
     return { has: (name) => ctx.names.has(name) || Object.hasOwn(scope, name) };
   }
 
-  function evaluateLine(line, scope, names) {
+  function evaluateLine(line, scope, names, percents) {
     const parsed = typeof line === 'string' ? parseLine(line) : line;
     const { code, label, isAssignment } = parsed;
     let type = isAssignment ? 'assignment' : 'value';
@@ -301,7 +302,7 @@ function createEngine({ rates } = {}) {
       if (hasStatementSeparator(code)) {
         throw new Error('A line is one calculation; ";" does not separate two');
       }
-      const expression = preprocess(code, scope && { names: names || ownNames(scope) });
+      const expression = preprocess(code, scope && { names: names || ownNames(scope), percents });
       assertBoundedExpression(trusted, expression, scope);
       result = trusted.evaluate(expression, scope);
       const mixError = unitMixError(result);
@@ -397,6 +398,7 @@ function createEngine({ rates } = {}) {
   function replayContext(lines, inputLines, results, groups, startLine) {
     const variables = engineVariables;
     for (const key of Object.keys(variables)) delete variables[key];
+    const percents = new Map();
     let previousResult;
     let lastBlankIndex = -1;
     // A group header's cached value is the group subtotal, but the main loop
@@ -423,6 +425,7 @@ function createEngine({ rates } = {}) {
       const assignment = results[i];
       if (assignment && assignment.type === 'error' && assignment.failedLabel) {
         bindFailure(variables, assignment.failedLabel, i + 1);
+        percents.delete(assignment.failedLabel);
       } else if (
         assignment &&
         assignment.type === 'assignment' &&
@@ -430,6 +433,8 @@ function createEngine({ rates } = {}) {
         assignment.assigned !== undefined
       ) {
         bindVariable(variables, assignment.label, assignment.assigned);
+        if (assignment.percent) percents.set(assignment.label, assignment.percent);
+        else percents.delete(assignment.label);
       }
       const endGroup = groups.byEnd.get(i);
       const result = results[i];
@@ -442,7 +447,7 @@ function createEngine({ rates } = {}) {
       }
     }
 
-    return { variables, previousResult, lastBlankIndex };
+    return { variables, percents, previousResult, lastBlankIndex };
   }
 
   // The per-line cases, in order. A handler returns true when it has produced
@@ -558,6 +563,7 @@ function createEngine({ rates } = {}) {
     if (label) {
       bindFailure(ctx.variables, label, ctx.i + 1);
       ctx.names.add(label);
+      ctx.percents.delete(label);
     }
     return true;
   }
@@ -604,7 +610,7 @@ function createEngine({ rates } = {}) {
       scope[elementBase] = math.clone(ctx.variables[elementBase]);
     }
 
-    const evaluated = evaluateLine(parsedLine, scope, namesIn(ctx, scope));
+    const evaluated = evaluateLine(parsedLine, scope, namesIn(ctx, scope), ctx.percents);
     const { type, result } = evaluated;
     if (type === 'error') return failLine(ctx, parsedLine, result);
     let { variable } = evaluated;
@@ -630,11 +636,22 @@ function createEngine({ rates } = {}) {
       bindVariable(ctx.variables, variable.label, variable.value);
       ctx.names.add(variable.label);
     }
+    // Only a plain `name = 8.25%` stores a percentage; any other assignment to the name
+    // (or an element/function target) ends it.
+    const percent =
+      variable && variable.label === parsedLine.label
+        ? percentOf(parsedLine.rhs, ctx.percents)
+        : undefined;
+    if (variable) {
+      if (percent) ctx.percents.set(variable.label, percent);
+      else ctx.percents.delete(variable.label);
+    }
     ctx.results[ctx.i] = {
       type,
       value: result,
       assigned: variable ? variable.value : undefined,
       label: variable ? variable.label : undefined,
+      percent,
       tags: ctx.tags.length ? ctx.tags : undefined,
     };
     if (feedsPrev(ctx.results[ctx.i])) ctx.previousResult = result;
@@ -703,6 +720,7 @@ function createEngine({ rates } = {}) {
       results,
       groups,
       variables: replayed.variables,
+      percents: replayed.percents,
       // The names the preprocessors may ask about, grown as the loop assigns.
       // Built once per run rather than from the scope for every line.
       names: new Set(Object.keys(replayed.variables)),
