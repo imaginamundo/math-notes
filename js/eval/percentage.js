@@ -7,22 +7,54 @@ const SIGN = '(?:(?<![\\w.)%]\\s*)([-−])\\s*)?';
 
 const signed = (sign, pct) => `${sign ? '-' : ''}${pct}`;
 
-function preprocessPercent(expression) {
-  let expr = expression;
+// A name assigned a bare percentage (`tax = 8.25%`) keeps acting as one: its uses are
+// rewritten to the percentage as written (`price + tax` is `price + 8.25%`), because the
+// stored value is the plain number 0.0825 and `price + 0.0825` adds a hundredth.
+const PERCENT_VALUE = /^\s*(\d*\.?\d+)\s*%\s*$/;
+const NAME_VALUE = /^\s*([\p{L}_][\p{L}\p{N}_]*)\s*$/u;
 
-  // B as a % of|on|off A -> one value relative to another
-  expr = expr.replace(/(.+)\s+as\s+a\s+%\s+(of|on|off)\s+(.+)/i, (match, value, word, base) => {
-    if (word === 'of') return `((${value}) / (${base})) * 100`;
-    if (word === 'on') return `((${value}) / (${base}) - 1) * 100`;
-    return `(1 - (${value}) / (${base})) * 100`;
-  });
+// The percentage text an assignment's right-hand side stores, or undefined when the
+// value is not a percentage: a literal, or a name that is one.
+function percentOf(rhs, percents) {
+  const literal = PERCENT_VALUE.exec(rhs || '');
+  if (literal) return `${literal[1]}%`;
+  const name = NAME_VALUE.exec(rhs || '');
+  return name && percents ? percents.get(name[1]) : undefined;
+}
+
+function substitutePercentNames(expression, percents) {
+  const names = [...percents.keys()].map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const use = new RegExp(
+    `(?<![\\p{L}\\p{N}_.])(${names.join('|')})(?![\\p{L}\\p{N}_(]|\\s*=(?!=))`,
+    'gu'
+  );
+  return expression.replace(use, (match, name) => percents.get(name));
+}
+
+function preprocessPercent(expression, context) {
+  let expr = expression;
+  if (context && context.percents && context.percents.size) {
+    expr = substitutePercentNames(expr, context.percents);
+  }
+
+  // B as a % of|on|off A (the `a` is optional) -> one value relative to another
+  expr = expr.replace(
+    /(.+)\s+as\s+(?:a\s+)?%\s+(of|on|off)\s+(.+)/i,
+    (match, value, word, base) => {
+      if (word === 'of') return `((${value}) / (${base})) * 100`;
+      if (word === 'on') return `((${value}) / (${base}) - 1) * 100`;
+      return `(1 - (${value}) / (${base})) * 100`;
+    }
+  );
 
   return wrapPercentChains(applyPhrases(expr));
 }
 
 // `A% of|on|off B` and `A% of|on|off what is B`: the percentage is a number or a name.
+// The lookbehind keeps a match from starting inside a number or name, and the number is
+// unambiguous (`\d+(\.\d+)?`), so a long run of digits is scanned once, not once per digit.
 const HEAD = new RegExp(
-  `${SIGN}(\\d*\\.?\\d+|[A-Za-z_]\\w*)\\s*%\\s+(of|on|off)\\s+(?:(what)\\s+is\\s+)?`,
+  `${SIGN}(?<![\\w.])(\\d+(?:\\.\\d+)?|\\.\\d+|[A-Za-z_]\\w*)\\s*%\\s+(of|on|off)\\s+(?:(what)\\s+is\\s+)?`,
   'gi'
 );
 const PHRASE_START = new RegExp(
@@ -164,4 +196,4 @@ function wrapPercentChains(expression) {
   }
 }
 
-export { preprocessPercent };
+export { percentOf, preprocessPercent };
